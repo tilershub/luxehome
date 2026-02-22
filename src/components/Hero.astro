@@ -1,0 +1,256 @@
+---
+---
+
+<section class="hero" id="home">
+  <div class="hero-left">
+    <div class="eyebrow">Premium Tiling · Sri Lanka</div>
+    <h1>Crafted<br /><em>Tile</em><br />Excellence</h1>
+    <p class="hero-desc">
+      From floor to finish — precision installation, premium materials, and
+      artisan craftsmanship on every surface across Sri Lanka.
+    </p>
+    <div class="hero-btns">
+      <a
+        href="https://wa.me/94774503744?text=Hello%2C%20I%20would%20like%20a%20free%20quote."
+        class="btn-primary"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z" />
+        </svg>
+        WhatsApp Quote
+      </a>
+      <a href="#services" class="btn-ghost">View Services →</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Projects Done</div>
+      </div>
+      <div>
+        <div class="stat-num">5★</div>
+        <div class="stat-label">Client Rating</div>
+      </div>
+      <div>
+        <div class="stat-num">4×2</div>
+        <div class="stat-label">Max Tile Size</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="mosaic" id="mosaic"></div>
+    <div class="hero-badge">
+      <div class="badge-label">Floor Tiling from</div>
+      <div class="badge-value">Rs. 350</div>
+      <div class="badge-sub">per sq.ft · up to 4×2</div>
+    </div>
+  </div>
+</section>
+
+<!-- Generate mosaic tiles dynamically -->
+<script>
+  const mosaic = document.getElementById('mosaic');
+  for (let i = 0; i < 48; i++) {
+    const tile = document.createElement('div');
+    tile.className = 'tc';
+    tile.style.setProperty('--i', String(i));
+    mosaic.appendChild(tile);
+  }
+</script>
+
+<style>
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 4.5rem;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5rem 3rem 5rem 4rem;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .68rem;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 1.4rem;
+    opacity: 0;
+    animation: fadeUp .8s .2s forwards;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 1px;
+    background: var(--clay);
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.6rem, 4.5vw, 5rem);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -.025em;
+    color: var(--charcoal);
+    margin-bottom: 1.3rem;
+    opacity: 0;
+    animation: fadeUp .9s .35s forwards;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--clay);
+  }
+
+  .hero-desc {
+    font-size: .97rem;
+    font-weight: 300;
+    line-height: 1.82;
+    color: var(--warm-gray);
+    max-width: 44ch;
+    margin-bottom: 2.6rem;
+    opacity: 0;
+    animation: fadeUp .9s .55s forwards;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp .9s .75s forwards;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 3.2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--stone);
+    opacity: 0;
+    animation: fadeUp .9s .95s forwards;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: .68rem;
+    font-weight: 400;
+    color: var(--warm-gray);
+    margin-top: .3rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  /* ── Right panel: mosaic ── */
+
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+    background: var(--charcoal);
+  }
+
+  .mosaic {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 3px;
+    padding: 3px;
+    opacity: 0;
+    animation: fadeIn 1.2s .5s forwards;
+  }
+
+  /* Mosaic tiles are injected by JS, so use :global() to bypass scoping */
+  :global(.tc) {
+    background: #2a2420;
+    animation: tR 1.5s calc(.05s * var(--i)) backwards;
+  }
+
+  :global(.tc:nth-child(3n))  { background: #24201c; }
+  :global(.tc:nth-child(5n))  { background: #2f2620; }
+  :global(.tc:nth-child(7n))  { background: #382e26; }
+  :global(.tc:nth-child(11n)) { background: #3d342c; }
+
+  /* ── Hero badge ── */
+
+  .hero-badge {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 2.5rem;
+    background: var(--clay);
+    color: var(--cream);
+    padding: 1.3rem 1.8rem;
+    border-radius: 3px;
+    z-index: 5;
+    opacity: 0;
+    animation: fadeUp .9s 1.2s forwards;
+  }
+
+  .badge-label {
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    opacity: .8;
+    margin-bottom: .3rem;
+  }
+
+  .badge-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .badge-sub {
+    font-size: .68rem;
+    opacity: .75;
+    margin-top: .2rem;
+  }
+
+  /* ── Responsive ── */
+
+  @media (max-width: 1100px) {
+    .hero-left {
+      padding: 5rem 2rem 4rem 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-right {
+      height: 50vw;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+    }
+
+    .hero-stats {
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+  }
+</style>

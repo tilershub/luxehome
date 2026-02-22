@@ -1,0 +1,176 @@
+---
+---
+
+<footer>
+  <div class="footer-top">
+
+    <!-- Brand column -->
+    <div class="col-brand">
+      <a href="#" class="logo" style="font-size: 1.25rem;">TILERS<span>HUB</span></a>
+      <p>
+        Premium tiling and bathroom renovation specialists across Sri Lanka.
+        Craft, quality, and clean finishes — every time.
+      </p>
+    </div>
+
+    <!-- Services links -->
+    <div class="col-links">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#services">Floor Tiling</a></li>
+        <li><a href="#services">Staircase Tiling</a></li>
+        <li><a href="#services">Kitchen Pantry</a></li>
+        <li><a href="#bathroom">Bathroom Renovation</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact links -->
+    <div class="col-links">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="https://wa.me/94774503744">WhatsApp</a></li>
+        <li><a href="tel:+94774503744">0774 503 744</a></li>
+        <li><a href="mailto:tilershub@gmail.com">tilershub@gmail.com</a></li>
+        <li><a href="#home">Sri Lanka</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2025 TILERSHUB · All rights reserved</span>
+    <span>Crafted with ♦ in Sri Lanka</span>
+  </div>
+</footer>
+
+<!-- Floating WhatsApp button -->
+<a
+  href="https://wa.me/94774503744?text=Hello%20TILERSHUB%2C%20I%20would%20like%20a%20quote."
+  class="wa-float"
+  title="Chat on WhatsApp"
+>
+  <svg viewBox="0 0 24 24">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
+  </svg>
+</a>
+
+<style>
+  footer {
+    background: var(--charcoal);
+    padding: 4rem 4rem 2.5rem;
+    color: rgba(245, 240, 232, .4);
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 3.5rem;
+    padding-bottom: 2.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .07);
+    margin-bottom: 2rem;
+  }
+
+  .col-brand p {
+    font-size: .8rem;
+    line-height: 1.72;
+    margin-top: .9rem;
+    max-width: 36ch;
+  }
+
+  .col-links h4 {
+    font-size: .64rem;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: rgba(245, 240, 232, .7);
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+
+  .col-links ul {
+    list-style: none;
+  }
+
+  .col-links li {
+    margin-bottom: .5rem;
+  }
+
+  .col-links a {
+    text-decoration: none;
+    color: rgba(245, 240, 232, .36);
+    font-size: .8rem;
+    transition: color .2s;
+  }
+
+  .col-links a:hover {
+    color: var(--clay);
+  }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: .74rem;
+  }
+
+  /* ── Floating WhatsApp button ── */
+
+  .wa-float {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    width: 3.3rem;
+    height: 3.3rem;
+    background: #25d366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, .4);
+    transition: transform .2s, box-shadow .2s;
+    text-decoration: none;
+  }
+
+  .wa-float:hover {
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 8px 28px rgba(37, 211, 102, .5);
+  }
+
+  .wa-float svg {
+    width: 1.65rem;
+    height: 1.65rem;
+    fill: white;
+  }
+
+  /* ── Responsive ── */
+
+  @media (max-width: 1100px) {
+    footer {
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+
+    .footer-top {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    footer {
+      padding: 4rem 1.5rem;
+    }
+
+    .footer-top {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .footer-bottom {
+      flex-direction: column;
+      gap: .8rem;
+      text-align: center;
+    }
+  }
+</style>
