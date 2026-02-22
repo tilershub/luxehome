@@ -1,0 +1,133 @@
+---
+---
+
+<section id="cta">
+  <div>
+    <h2>Ready to Transform<br />Your Space?</h2>
+    <p class="cta-sub">WhatsApp us for a free site visit and no-obligation estimate.</p>
+  </div>
+  <div class="cta-btns">
+    <a
+      href="https://wa.me/94774503744?text=Hello%20TILERSHUB%2C%20I%20would%20like%20a%20free%20quote."
+      class="btn-light"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z" />
+      </svg>
+      WhatsApp Us Now
+    </a>
+    <a href="tel:+94774503744" class="btn-outline">📞 0774 503 744</a>
+  </div>
+</section>
+
+<style>
+  section {
+    background: var(--clay);
+    padding: 5rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative background text */
+  section::before {
+    content: 'TH';
+    position: absolute;
+    right: -2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 16rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, .055);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  h2 {
+    color: var(--cream);
+    font-size: clamp(1.6rem, 3vw, 2.5rem);
+    margin-bottom: .45rem;
+  }
+
+  .cta-sub {
+    color: rgba(245, 240, 232, .7);
+    font-size: .88rem;
+    font-weight: 300;
+  }
+
+  .cta-btns {
+    display: flex;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  .btn-light {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    background: var(--cream);
+    color: var(--terracotta);
+    text-decoration: none;
+    padding: .92rem 1.8rem;
+    border-radius: 2px;
+    font-size: .86rem;
+    font-weight: 500;
+    transition: background .2s, transform .2s;
+  }
+
+  .btn-light:hover {
+    background: #fff;
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    background: transparent;
+    color: var(--cream);
+    text-decoration: none;
+    padding: .92rem 1.8rem;
+    border-radius: 2px;
+    border: 1.5px solid rgba(245, 240, 232, .38);
+    font-size: .86rem;
+    font-weight: 400;
+    transition: border-color .2s;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--cream);
+  }
+
+  /* ── Responsive ── */
+
+  @media (max-width: 1100px) {
+    section {
+      flex-direction: column;
+      align-items: flex-start;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 4rem 1.5rem;
+    }
+
+    .cta-btns {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .btn-light,
+    .btn-outline {
+      justify-content: center;
+    }
+  }
+</style>

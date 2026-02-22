@@ -1,0 +1,162 @@
+---
+---
+
+<section id="materials">
+
+  <!-- Left: animated tile palette visual -->
+  <div class="mat-visual reveal">
+    <div class="tile-palette">
+      <div class="ts"></div><div class="ts"></div><div class="ts"></div><div class="ts"></div>
+      <div class="ts"></div><div class="ts"></div><div class="ts"></div><div class="ts"></div>
+      <div class="ts"></div><div class="ts"></div><div class="ts"></div><div class="ts"></div>
+      <div class="ts"></div><div class="ts"></div><div class="ts"></div><div class="ts"></div>
+    </div>
+    <div class="grade-badge"><strong>5★</strong>Grade<br />Materials<br />Only</div>
+  </div>
+
+  <!-- Right: text + material list -->
+  <div>
+    <div class="stag reveal">What Goes In</div>
+    <h2 class="reveal">Only the Best<br />Materials, Always</h2>
+    <p class="sdesc reveal" style="margin-bottom: 1.8rem;">
+      We never cut corners on what goes behind the tile. Every project uses
+      industry-leading products for bonds that last decades.
+    </p>
+    <div class="mat-list reveal">
+      <div class="mat-item">River Sand — Clean washed aggregate for strong mortar beds</div>
+      <div class="mat-item">Tokyo Cement — High-strength OPC for durable base work</div>
+      <div class="mat-item">Tokyo Super Tile Adhesive — Enhanced bonding for all tile types</div>
+      <div class="mat-item">Tile Leveling System — Perfect flatness, zero lippage</div>
+      <div class="mat-item">Swisstek Grout — Stain-resistant, colour-consistent joints</div>
+    </div>
+  </div>
+
+</section>
+
+<style>
+  section {
+    background: var(--cream);
+    padding: 5.5rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  /* ── Tile palette visual ── */
+
+  .mat-visual {
+    position: relative;
+  }
+
+  .tile-palette {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .ts {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    animation: sf 3s infinite alternate;
+  }
+
+  .ts:nth-child(1)  { background: #d4c4b0; animation-delay: 0s;   }
+  .ts:nth-child(2)  { background: #c4a882; animation-delay: .2s;  }
+  .ts:nth-child(3)  { background: #b89870; animation-delay: .4s;  }
+  .ts:nth-child(4)  { background: #e8d9c0; animation-delay: .6s;  }
+  .ts:nth-child(5)  { background: #bea88e; animation-delay: .8s;  }
+  .ts:nth-child(6)  { background: #c4784a; animation-delay: 1s;   }
+  .ts:nth-child(7)  { background: #a85c34; animation-delay: 1.2s; }
+  .ts:nth-child(8)  { background: #d4c4b0; animation-delay: 1.4s; }
+  .ts:nth-child(9)  { background: #e2d2be; animation-delay: 1.6s; }
+  .ts:nth-child(10) { background: #b89870; animation-delay: 1.8s; }
+  .ts:nth-child(11) { background: #c8b498; animation-delay: 2s;   }
+  .ts:nth-child(12) { background: #a85c34; animation-delay: 2.2s; }
+  .ts:nth-child(13) { background: #d8c8a8; animation-delay: 2.4s; }
+  .ts:nth-child(14) { background: #c4784a; animation-delay: 2.6s; }
+  .ts:nth-child(15) { background: #e8d9c0; animation-delay: 2.8s; }
+  .ts:nth-child(16) { background: #b09070; animation-delay: 3s;   }
+
+  .grade-badge {
+    position: absolute;
+    top: -1.5rem;
+    right: -1.5rem;
+    background: var(--charcoal);
+    color: var(--cream);
+    width: 6.5rem;
+    height: 6.5rem;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: .6rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  .grade-badge strong {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--clay);
+  }
+
+  /* ── Material list ── */
+
+  .mat-list {
+    display: flex;
+    flex-direction: column;
+    gap: .62rem;
+    margin-top: 1.8rem;
+  }
+
+  .mat-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: .85rem 1.25rem;
+    background: var(--off-white);
+    border-radius: 3px;
+    border-left: 3px solid var(--stone);
+    font-size: .86rem;
+    color: var(--charcoal);
+    transition: border-color .2s, transform .2s;
+  }
+
+  .mat-item:hover {
+    border-color: var(--clay);
+    transform: translateX(4px);
+  }
+
+  .mat-item::before {
+    content: '◆';
+    font-size: .44rem;
+    color: var(--clay);
+  }
+
+  /* ── Responsive ── */
+
+  @media (max-width: 1100px) {
+    section {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 4rem 1.5rem;
+    }
+  }
+</style>
