@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "deploy": "astro build && wrangler versions upload",
+    "postinstall": "astro build"
   },
   "dependencies": {
     "astro": "^4.16.0"
