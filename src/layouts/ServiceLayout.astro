@@ -1,0 +1,269 @@
+---
+import Layout from './Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  eyebrow: string;
+  heroTitle: string;
+  heroSub: string;
+  badge: string;
+}
+
+const { title, description, eyebrow, heroTitle, heroSub, badge } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <Nav />
+
+  <!-- Service Hero -->
+  <header class="svc-hero">
+    <div class="svc-hero-inner">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span>→</span>
+        <a href="/#services">Services</a>
+        <span>→</span>
+        <span class="current">{eyebrow}</span>
+      </nav>
+      <div class="eyebrow">{eyebrow}</div>
+      <h1 set:html={heroTitle} />
+      <p class="hero-sub">{heroSub}</p>
+      <div class="hero-actions">
+        <a
+          href={`https://wa.me/94774503744?text=Hello%20TILERSHUB%2C%20I%20would%20like%20a%20quote%20for%20${encodeURIComponent(eyebrow)}.`}
+          class="btn-primary"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z" />
+          </svg>
+          Get a Quote
+        </a>
+        <a href="tel:+94774503744" class="btn-ghost">📞 0774 503 744</a>
+      </div>
+    </div>
+    <div class="svc-hero-badge">{badge}</div>
+  </header>
+
+  <!-- Page content from individual service pages -->
+  <slot />
+
+  <!-- CTA strip -->
+  <section class="page-cta">
+    <div>
+      <h2>Ready to Get Started?</h2>
+      <p>Contact us for a free site visit and no-obligation estimate.</p>
+    </div>
+    <div class="cta-actions">
+      <a
+        href={`https://wa.me/94774503744?text=Hello%20TILERSHUB%2C%20I%20would%20like%20a%20quote%20for%20${encodeURIComponent(eyebrow)}.`}
+        class="btn-wa"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
+        </svg>
+        WhatsApp Us
+      </a>
+      <a href="/#services" class="btn-back">← All Services</a>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* ── Service Hero ── */
+
+  .svc-hero {
+    background: var(--charcoal);
+    padding: 9rem 4rem 5.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .svc-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,.012) 60px, rgba(255,255,255,.012) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.012) 60px, rgba(255,255,255,.012) 61px);
+  }
+
+  .svc-hero-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .7rem;
+    color: rgba(245, 240, 232, .35);
+    margin-bottom: 1.2rem;
+  }
+
+  .breadcrumb a {
+    color: rgba(245, 240, 232, .35);
+    text-decoration: none;
+    transition: color .2s;
+  }
+
+  .breadcrumb a:hover { color: var(--clay); }
+  .breadcrumb .current { color: rgba(245, 240, 232, .6); }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .66rem;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: .9rem;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 1.4rem;
+    height: 1px;
+    background: var(--clay);
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.8rem);
+    font-weight: 900;
+    line-height: 1.06;
+    letter-spacing: -.025em;
+    color: var(--cream);
+    margin-bottom: 1rem;
+  }
+
+  h1 :global(em) {
+    font-style: italic;
+    color: var(--clay);
+  }
+
+  .hero-sub {
+    font-size: .95rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: rgba(245, 240, 232, .55);
+    max-width: 52ch;
+    margin-bottom: 2rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .btn-ghost {
+    color: rgba(245, 240, 232, .65);
+    text-decoration: none;
+    font-size: .86rem;
+    font-weight: 400;
+    transition: color .2s;
+  }
+
+  .btn-ghost:hover { color: var(--clay); }
+
+  .svc-hero-badge {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    background: rgba(196, 120, 74, .12);
+    border: 1px solid rgba(196, 120, 74, .3);
+    color: var(--clay);
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3vw, 3rem);
+    font-weight: 700;
+    padding: 1.5rem 2.5rem;
+    border-radius: 4px;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* ── Bottom CTA strip ── */
+
+  .page-cta {
+    background: var(--clay);
+    padding: 4.5rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .page-cta h2 {
+    color: var(--cream);
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    margin-bottom: .4rem;
+  }
+
+  .page-cta p {
+    color: rgba(245, 240, 232, .7);
+    font-size: .9rem;
+    font-weight: 300;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .btn-wa {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    background: var(--cream);
+    color: var(--terracotta);
+    text-decoration: none;
+    padding: .88rem 1.6rem;
+    border-radius: 2px;
+    font-size: .86rem;
+    font-weight: 500;
+    transition: background .2s;
+  }
+
+  .btn-wa:hover { background: #fff; }
+
+  .btn-back {
+    color: rgba(245, 240, 232, .75);
+    text-decoration: none;
+    font-size: .86rem;
+    font-weight: 400;
+    transition: color .2s;
+  }
+
+  .btn-back:hover { color: var(--cream); }
+
+  /* ── Responsive ── */
+
+  @media (max-width: 1100px) {
+    .svc-hero { padding-left: 2.5rem; padding-right: 2.5rem; flex-direction: column; align-items: flex-start; }
+    .page-cta { padding-left: 2.5rem; padding-right: 2.5rem; flex-direction: column; align-items: flex-start; }
+  }
+
+  @media (max-width: 768px) {
+    .svc-hero { padding: 7rem 1.5rem 4rem; }
+    .hero-actions { flex-direction: column; align-items: flex-start; }
+    .page-cta { padding: 3.5rem 1.5rem; }
+    .cta-actions { flex-direction: column; align-items: flex-start; }
+  }
+</style>
