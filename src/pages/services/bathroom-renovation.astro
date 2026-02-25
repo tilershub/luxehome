@@ -41,6 +41,7 @@ import Footer from '../../components/Footer.astro';
         </div>
       </div>
       <div class="hero-badges reveal">
+        <span class="hbadge">Design & Planning</span>
         <span class="hbadge">Demo</span>
         <span class="hbadge">Mason</span>
         <span class="hbadge">Plumbing</span>
@@ -70,10 +71,15 @@ import Footer from '../../components/Footer.astro';
       <div class="stag reveal">Full Scope Breakdown</div>
       <h2 class="reveal">Every Trade. One Team.</h2>
       <p class="sdesc reveal">
-        Nine trades — all managed and executed by our team under one contract.
+        Ten trades — all managed and executed by our team under one contract.
         No coordinating subcontractors, no handover gaps, no surprises.
       </p>
       <div class="scope-grid reveal">
+        <div class="scope-card featured">
+          <div class="scope-icon">📐</div>
+          <div class="scope-name">Designing &amp; Planning</div>
+          <div class="scope-desc">Every renovation starts here. We take detailed measurements, discuss your requirements and preferences, plan the layout, advise on tile sizes and fixture placement, and produce a clear scope of works before a single tool is picked up. Good planning is what keeps the project on time and on budget.</div>
+        </div>
         <div class="scope-card">
           <div class="scope-icon">🔨</div>
           <div class="scope-name">Demolition</div>
@@ -187,8 +193,8 @@ import Footer from '../../components/Footer.astro';
         <div class="step reveal">
           <div class="step-num">01</div>
           <div class="step-content">
-            <div class="step-name">Site Visit & Quote</div>
-            <div class="step-desc">We visit, measure, assess the existing bathroom, discuss your brief, and provide a detailed fixed quote — usually within 48 hours.</div>
+            <div class="step-name">Designing & Planning</div>
+            <div class="step-desc">Site visit, measurements, layout design, fixture placement planning, tile size guidance, and a detailed fixed quote — all before any work begins.</div>
           </div>
         </div>
         <div class="step reveal">
@@ -435,6 +441,33 @@ import Footer from '../../components/Footer.astro';
   .scope-card:hover {
     background: rgba(255,255,255,.85);
     border-top-color: var(--clay);
+  }
+
+  .scope-card.featured {
+    grid-column: span 3;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 1.2rem;
+    align-items: start;
+    background: rgba(196,120,74,.07);
+    border-top: 3px solid var(--clay);
+  }
+
+  .scope-card.featured .scope-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0;
+    grid-row: span 2;
+    padding-top: .1rem;
+  }
+
+  .scope-card.featured .scope-name {
+    font-size: .95rem;
+    color: var(--charcoal);
+  }
+
+  .scope-card.featured .scope-desc {
+    font-size: .78rem;
+    line-height: 1.7;
   }
 
   .scope-icon {
@@ -685,6 +718,7 @@ import Footer from '../../components/Footer.astro';
     }
 
     .scope-grid { grid-template-columns: repeat(3, 1fr); }
+    .scope-card.featured { grid-column: span 3; }
 
     .pricing-inner {
       grid-template-columns: 1fr;
@@ -708,6 +742,7 @@ import Footer from '../../components/Footer.astro';
     .page-hero { padding-top: 6rem; }
 
     .scope-grid { grid-template-columns: 1fr; }
+    .scope-card.featured { grid-column: span 1; grid-template-columns: auto 1fr; }
 
     .steps { grid-template-columns: 1fr; }
   }
