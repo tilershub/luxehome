@@ -102,6 +102,87 @@
       <a href="/services/bathroom-renovation" class="svc-link">View Details →</a>
     </div>
 
+    <!-- iPanel Ceiling -->
+    <div class="sc">
+      <svg class="si" viewBox="0 0 48 48" fill="none">
+        <rect x="4"  y="8"  width="40" height="6" rx="1" fill="#c4784a" opacity=".85"/>
+        <rect x="4"  y="18" width="18" height="4" rx="1" fill="#c4784a" opacity=".38"/>
+        <rect x="26" y="18" width="18" height="4" rx="1" fill="#c4784a" opacity=".38"/>
+        <rect x="4"  y="26" width="18" height="4" rx="1" fill="#c4784a" opacity=".22"/>
+        <rect x="26" y="26" width="18" height="4" rx="1" fill="#c4784a" opacity=".22"/>
+        <rect x="4"  y="34" width="18" height="4" rx="1" fill="#c4784a" opacity=".12"/>
+        <rect x="26" y="34" width="18" height="4" rx="1" fill="#c4784a" opacity=".12"/>
+      </svg>
+      <div class="svc-name">iPanel Ceiling</div>
+      <div class="svc-desc">
+        PVC iPanel ceiling installation — clean, moisture-resistant panels in plain
+        or decorative designs for any room.
+      </div>
+      <div class="price-row">
+        <span class="price-amt">Rs. 400</span>
+        <span class="price-unit">/ sq.ft — plain</span>
+      </div>
+      <div class="price-row">
+        <span class="price-amt">Rs. 500</span>
+        <span class="price-unit">/ sq.ft — design</span>
+      </div>
+      <span class="badge">Plain · Design</span>
+      <a href="/services/ceiling" class="svc-link">View Details →</a>
+    </div>
+
+    <!-- Glass Work (full-width card) -->
+    <div class="sc full">
+      <svg class="si" viewBox="0 0 48 48" fill="none">
+        <rect x="6"  y="6"  width="16" height="36" rx="1" stroke="#c4784a" stroke-width="2" fill="none" opacity=".7"/>
+        <rect x="26" y="6"  width="16" height="36" rx="1" stroke="#c4784a" stroke-width="2" fill="none" opacity=".4"/>
+        <line x1="14" y1="6" x2="14" y2="42" stroke="#c4784a" stroke-width="1.5" opacity=".35"/>
+        <line x1="34" y1="6" x2="34" y2="42" stroke="#c4784a" stroke-width="1.5" opacity=".2"/>
+        <circle cx="23" cy="24" r="2" fill="#c4784a" opacity=".65"/>
+      </svg>
+      <div class="svc-name">Glass Work</div>
+      <div class="svc-desc">
+        Shower cubicles and glass hand railing — precision-fitted frameless and semi-frameless
+        glass for staircases, balconies, and wet areas.
+      </div>
+      <div class="glass-prices">
+        <div class="glass-group">
+          <div class="glass-group-label">Shower Cubicles</div>
+          <div class="glass-rows">
+            <div class="glass-row">
+              <span class="glass-type">L Shape With Swing Door</span>
+              <span class="glass-amt">Rs. 97,500 onwards</span>
+            </div>
+            <div class="glass-row">
+              <span class="glass-type">Panel Type With Swing Door</span>
+              <span class="glass-amt">Rs. 76,500 onwards</span>
+            </div>
+            <div class="glass-row">
+              <span class="glass-type">Panel Type With Sliding Door</span>
+              <span class="glass-amt">Rs. 88,500 onwards</span>
+            </div>
+            <div class="glass-row">
+              <span class="glass-type">Double Sliding Doors</span>
+              <span class="glass-amt">Rs. 123,000 onwards</span>
+            </div>
+          </div>
+        </div>
+        <div class="glass-group">
+          <div class="glass-group-label">Hand Railing</div>
+          <div class="glass-rows">
+            <div class="glass-row">
+              <span class="glass-type">Staircase Hand Railing</span>
+              <span class="glass-amt">Rs. 12,500 onwards</span>
+            </div>
+            <div class="glass-row">
+              <span class="glass-type">Balcony / Terrace Hand Railing</span>
+              <span class="glass-amt">Rs. 12,500 onwards</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a href="/services/glass-work" class="svc-link">View Details →</a>
+    </div>
+
   </div>
 </section>
 
@@ -187,6 +268,60 @@
 
   .sc.wide {
     grid-column: span 2;
+  }
+
+  .sc.full {
+    grid-column: span 3;
+  }
+
+  /* ── Glass Work price layout ── */
+
+  .glass-prices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: .8rem;
+    margin-bottom: .6rem;
+  }
+
+  .glass-group-label {
+    font-size: .62rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--clay);
+    margin-bottom: .6rem;
+    font-weight: 500;
+  }
+
+  .glass-rows {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+
+  .glass-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .45rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+
+  .glass-row:last-child { border-bottom: none; }
+
+  .glass-type {
+    font-size: .76rem;
+    color: rgba(245,240,232,.5);
+    font-weight: 300;
+  }
+
+  .glass-amt {
+    font-family: 'Playfair Display', serif;
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--clay);
+    white-space: nowrap;
   }
 
   .si {
@@ -277,6 +412,14 @@
     .sc.wide {
       grid-column: span 2;
     }
+
+    .sc.full {
+      grid-column: span 2;
+    }
+
+    .glass-prices {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 768px) {
@@ -288,8 +431,13 @@
       grid-template-columns: 1fr;
     }
 
-    .sc.wide {
+    .sc.wide,
+    .sc.full {
       grid-column: span 1;
+    }
+
+    .glass-prices {
+      grid-template-columns: 1fr;
     }
   }
 </style>
