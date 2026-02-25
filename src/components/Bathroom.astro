@@ -2,75 +2,46 @@
 ---
 
 <section id="bathroom">
-  <div class="stag reveal">Full Scope Breakdown</div>
-  <h2 class="reveal" style="margin-bottom: .8rem;">
-    Complete Bathroom<br />Transformations
-  </h2>
-  <p class="sdesc reveal">
-    From stripping out the old to installing your final fittings — every trade
-    under one team. You supply tiles, bathware, and tapware. Everything else is
-    on us.
-  </p>
-
   <div class="bath-inner">
 
-    <!-- Sticky pricing card -->
-    <div class="bcard reveal">
+    <div class="bath-text">
+      <div class="stag reveal">Full-Scope Renovation</div>
+      <h2 class="reveal">Complete Bathroom<br />Transformations</h2>
+      <p class="sdesc reveal">
+        Every trade under one team — from demolition to final fittings.
+        You supply tiles, bathware, and tapware. Everything else is on us.
+      </p>
+      <div class="scope-pills reveal">
+        <span>Demo</span>
+        <span>Mason</span>
+        <span>Plumbing</span>
+        <span>Waterproofing</span>
+        <span>Electrical</span>
+        <span>Tiling</span>
+        <span>Ceiling</span>
+        <span>Fixtures</span>
+      </div>
+      <div class="bath-ctas reveal">
+        <a href="/services/bathroom-renovation" class="btn-primary">See Full Scope →</a>
+        <a
+          href="https://wa.me/94774503744?text=Hello%2C%20I%20am%20interested%20in%20a%20bathroom%20renovation%20quote."
+          class="btn-ghost"
+        >Get a Quote</a>
+      </div>
+    </div>
+
+    <div class="bath-card reveal">
       <div class="bcard-label">Starting from</div>
       <div class="bcard-price">Rs. 15,000</div>
       <div class="bcard-unit">per sq.ft · all-inclusive</div>
       <div class="bcard-note">
-        Client supplies tiles, bathware fittings, and tapware only. All labour
-        and materials for every other trade are included.
+        Client supplies tiles, bathware fittings, and tapware only.
+        All labour and materials for every other trade are included.
       </div>
       <a
         href="https://wa.me/94774503744?text=Hello%2C%20I%20am%20interested%20in%20a%20bathroom%20renovation%20quote."
         class="bcard-cta"
       >Get Bathroom Quote →</a>
-    </div>
-
-    <!-- Scope grid -->
-    <div class="scope-grid reveal">
-      <div class="scope-item">
-        <div class="scope-icon">🔨</div>
-        <div class="scope-name">Demolition</div>
-        <div class="scope-sub">Full removal of existing structure</div>
-      </div>
-      <div class="scope-item">
-        <div class="scope-icon">🧱</div>
-        <div class="scope-name">Mason Work</div>
-        <div class="scope-sub">Structural walls and floor base</div>
-      </div>
-      <div class="scope-item">
-        <div class="scope-icon">🚿</div>
-        <div class="scope-name">Plumbing</div>
-        <div class="scope-sub">Supply and drain rough-in</div>
-      </div>
-      <div class="scope-item">
-        <div class="scope-icon">💧</div>
-        <div class="scope-name">Waterproofing</div>
-        <div class="scope-sub">Full membrane application</div>
-      </div>
-      <div class="scope-item">
-        <div class="scope-icon">⚡</div>
-        <div class="scope-name">Electrical</div>
-        <div class="scope-sub">Lighting and exhaust wiring</div>
-      </div>
-      <div class="scope-item">
-        <div class="scope-icon">🔲</div>
-        <div class="scope-name">Tiling</div>
-        <div class="scope-sub">Floor, walls, all wet areas</div>
-      </div>
-      <div class="scope-item">
-        <div class="scope-icon">🏠</div>
-        <div class="scope-name">Ceiling</div>
-        <div class="scope-sub">Waterproof ceiling installation</div>
-      </div>
-      <div class="scope-item">
-        <div class="scope-icon">🚪</div>
-        <div class="scope-name">Fixtures & Shower Cubicle</div>
-        <div class="scope-sub">All supplied fittings installed</div>
-      </div>
     </div>
 
   </div>
@@ -84,19 +55,46 @@
 
   .bath-inner {
     display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: 4.5rem;
-    align-items: start;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  /* ── Scope pills ── */
+
+  .scope-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin-bottom: 2rem;
+  }
+
+  .scope-pills span {
+    font-size: .68rem;
+    font-weight: 500;
+    letter-spacing: .05em;
+    color: var(--warm-gray);
+    background: rgba(196, 120, 74, .08);
+    border: 1px solid rgba(196, 120, 74, .2);
+    padding: .28rem .75rem;
+    border-radius: 20px;
+  }
+
+  /* ── CTA row ── */
+
+  .bath-ctas {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   /* ── Pricing card ── */
 
-  .bcard {
+  .bath-card {
     background: var(--charcoal);
     padding: 2.2rem;
     border-radius: 4px;
-    position: sticky;
-    top: 7rem;
   }
 
   .bcard-label {
@@ -146,73 +144,19 @@
     transition: background .2s;
   }
 
-  .bcard-cta:hover {
-    background: var(--terracotta);
-  }
-
-  /* ── Scope grid ── */
-
-  .scope-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .85rem;
-  }
-
-  .scope-item {
-    display: flex;
-    flex-direction: column;
-    gap: .28rem;
-    padding: 1.25rem;
-    background: rgba(255, 255, 255, .5);
-    border-radius: 3px;
-    border-top: 2px solid var(--stone);
-    transition: border-color .2s;
-  }
-
-  .scope-item:hover {
-    border-color: var(--clay);
-  }
-
-  .scope-icon {
-    font-size: 1.2rem;
-    margin-bottom: .08rem;
-  }
-
-  .scope-name {
-    font-size: .82rem;
-    font-weight: 500;
-    color: var(--charcoal);
-  }
-
-  .scope-sub {
-    font-size: .72rem;
-    color: var(--warm-gray);
-  }
+  .bcard-cta:hover { background: var(--terracotta); }
 
   /* ── Responsive ── */
 
   @media (max-width: 1100px) {
-    section {
-      padding-left: 2.5rem;
-      padding-right: 2.5rem;
-    }
-
-    .bath-inner {
-      grid-template-columns: 1fr;
-    }
-
-    .bcard {
-      position: static;
-    }
+    section { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .bath-inner { grid-template-columns: 1fr; gap: 3rem; }
   }
 
   @media (max-width: 768px) {
-    section {
-      padding: 4rem 1.5rem;
-    }
-
-    .scope-grid {
-      grid-template-columns: 1fr;
-    }
+    section { padding: 4rem 1.5rem; }
+    .bath-ctas { flex-direction: column; }
+    .bath-ctas .btn-primary,
+    .bath-ctas .btn-ghost { text-align: center; justify-content: center; }
   }
 </style>
