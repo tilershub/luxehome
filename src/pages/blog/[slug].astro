@@ -1,0 +1,434 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.id.replace(/\.mdx?$/, '') },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const allPosts = (await getCollection('blog'))
+  .filter((p) => p.id !== post.id)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const canonical = new URL(`/blog/${post.id.replace(/\.mdx?$/, '')}`, Astro.site);
+const pubDateISO = post.data.pubDate.toISOString();
+const pubDateDisplay = post.data.pubDate.toLocaleDateString('en-LK', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  author: { '@type': 'Organization', name: post.data.author },
+  datePublished: pubDateISO,
+  publisher: {
+    '@type': 'Organization',
+    name: 'TILERSHUB',
+    url: 'https://tilershub.com',
+  },
+  mainEntityOfPage: canonical.href,
+});
+---
+
+<Layout title={`${post.data.title} | TILERSHUB Blog`} description={post.data.description}>
+  <script type="application/ld+json" set:html={jsonLd} slot="head" />
+
+  <Nav />
+
+  <main>
+    <header class="post-hero">
+      <div class="post-hero-inner">
+        <div class="post-breadcrumb">
+          <a href="/">Home</a>
+          <span>›</span>
+          <a href="/blog">Blog</a>
+          <span>›</span>
+          <span>{post.data.category}</span>
+        </div>
+        <div class="post-cat-tag">{post.data.category}</div>
+        <h1>{post.data.title}</h1>
+        <div class="post-byline">
+          <span class="byline-author">{post.data.author}</span>
+          <span class="byline-dot">·</span>
+          <time datetime={pubDateISO}>{pubDateDisplay}</time>
+          <span class="byline-dot">·</span>
+          <span>{post.data.readingTime}</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="post-layout">
+
+      <article class="post-body prose">
+        <Content />
+      </article>
+
+      <aside class="post-sidebar">
+        <div class="sidebar-cta">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
+          </svg>
+          <div class="cta-title">Get a free quote</div>
+          <p class="cta-text">
+            Ready to start your project? WhatsApp us for an honest estimate — no obligation.
+          </p>
+          <a
+            href="https://wa.me/94774503744?text=Hello%2C%20I%20would%20like%20a%20free%20quote."
+            class="btn-primary"
+          >
+            WhatsApp Now
+          </a>
+        </div>
+
+        {allPosts.length > 0 && (
+          <div class="sidebar-related">
+            <div class="related-label">More Articles</div>
+            <ul class="related-list">
+              {allPosts.map((p) => (
+                <li>
+                  <a href={`/blog/${p.id.replace(/\.mdx?$/, '')}`} class="related-link">
+                    <span class="related-cat">{p.data.category}</span>
+                    <span class="related-title">{p.data.title}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </aside>
+
+    </div>
+
+    <div class="back-bar">
+      <div class="back-inner">
+        <a href="/blog" class="back-link">← All articles</a>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* ── Hero ── */
+  .post-hero {
+    background: var(--charcoal);
+    padding: 7rem 2rem 4.5rem;
+  }
+
+  .post-hero-inner {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .post-breadcrumb {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    font-size: .75rem;
+    color: rgba(245, 240, 232, .5);
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .post-breadcrumb a {
+    color: rgba(245, 240, 232, .5);
+    text-decoration: none;
+  }
+
+  .post-breadcrumb a:hover {
+    color: var(--clay);
+  }
+
+  .post-cat-tag {
+    display: inline-block;
+    font-size: .75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--clay);
+    margin-bottom: 1rem;
+  }
+
+  .post-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.7rem, 3.5vw, 2.8rem);
+    font-weight: 900;
+    line-height: 1.15;
+    color: var(--cream);
+    letter-spacing: -.025em;
+    margin-bottom: 1.2rem;
+  }
+
+  .post-byline {
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+    font-size: .82rem;
+    color: rgba(245, 240, 232, .55);
+    flex-wrap: wrap;
+  }
+
+  .byline-author {
+    color: rgba(245, 240, 232, .75);
+    font-weight: 500;
+  }
+
+  .byline-dot {
+    color: rgba(245, 240, 232, .3);
+  }
+
+  /* ── Layout ── */
+  .post-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  /* ── Prose ── */
+  .prose {
+    color: var(--charcoal);
+    font-size: .95rem;
+    line-height: 1.85;
+    font-weight: 300;
+  }
+
+  .prose :global(h2) {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    font-weight: 700;
+    color: var(--charcoal);
+    margin: 2.5rem 0 .8rem;
+    letter-spacing: -.02em;
+  }
+
+  .prose :global(h3) {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin: 1.8rem 0 .6rem;
+  }
+
+  .prose :global(p) {
+    margin-bottom: 1.2rem;
+  }
+
+  .prose :global(strong) {
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .prose :global(li) {
+    margin-bottom: .45rem;
+  }
+
+  .prose :global(a) {
+    color: var(--clay);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose :global(a:hover) {
+    color: var(--terracotta);
+  }
+
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0 1.8rem;
+    font-size: .88rem;
+  }
+
+  .prose :global(th) {
+    background: var(--charcoal);
+    color: var(--cream);
+    font-weight: 500;
+    text-align: left;
+    padding: .65rem 1rem;
+  }
+
+  .prose :global(td) {
+    border-bottom: 1px solid var(--stone);
+    padding: .6rem 1rem;
+    color: var(--warm-gray);
+  }
+
+  .prose :global(tr:nth-child(even) td) {
+    background: var(--off-white);
+  }
+
+  .prose :global(hr) {
+    border: none;
+    border-top: 1px solid var(--stone);
+    margin: 2.5rem 0;
+  }
+
+  .prose :global(blockquote) {
+    border-left: 3px solid var(--clay);
+    padding-left: 1.2rem;
+    color: var(--warm-gray);
+    font-style: italic;
+    margin: 1.5rem 0;
+  }
+
+  /* ── Sidebar ── */
+  .post-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: sticky;
+    top: 5.5rem;
+  }
+
+  .sidebar-cta {
+    background: var(--charcoal);
+    padding: 1.8rem;
+    border-radius: 4px;
+    color: var(--cream);
+  }
+
+  .sidebar-cta svg {
+    color: var(--clay);
+    margin-bottom: .8rem;
+  }
+
+  .cta-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: .6rem;
+  }
+
+  .cta-text {
+    font-size: .85rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: rgba(245, 240, 232, .65);
+    margin-bottom: 1.3rem;
+  }
+
+  .sidebar-cta .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sidebar-related {
+    background: #fff;
+    border: 1px solid var(--stone);
+    border-radius: 4px;
+    padding: 1.5rem 1.6rem;
+  }
+
+  .related-label {
+    font-size: .75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--clay);
+    margin-bottom: 1rem;
+  }
+
+  .related-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+  }
+
+  .related-link {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    text-decoration: none;
+  }
+
+  .related-cat {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--warm-gray);
+  }
+
+  .related-title {
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--charcoal);
+    line-height: 1.35;
+    transition: color .15s;
+  }
+
+  .related-link:hover .related-title {
+    color: var(--clay);
+  }
+
+  /* ── Back bar ── */
+  .back-bar {
+    border-top: 1px solid var(--stone);
+    padding: 1.5rem 2rem;
+  }
+
+  .back-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .back-link {
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--warm-gray);
+    text-decoration: none;
+    transition: color .15s;
+  }
+
+  .back-link:hover {
+    color: var(--clay);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .post-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .post-sidebar {
+      position: static;
+      order: 1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .post-hero {
+      padding: 6rem 1.5rem 3.5rem;
+    }
+
+    .post-layout {
+      padding: 2.5rem 1.5rem 3rem;
+    }
+  }
+</style>
