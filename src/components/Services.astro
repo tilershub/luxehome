@@ -102,6 +102,19 @@
       <span class="svc-link">View Details →</span>
     </a>
 
+    <!-- Waterproofing -->
+    <a href="/services/waterproofing" class="sc wide">
+      <svg class="si" viewBox="0 0 48 48" fill="none">
+        <path d="M24 6 C24 6 8 20 8 30 a16 16 0 0 0 32 0 C40 20 24 6 24 6Z" stroke="#c4784a" stroke-width="2" fill="none" opacity=".7"/>
+        <path d="M24 18 C24 18 14 26 14 32 a10 10 0 0 0 20 0 C34 26 24 18 24 18Z" fill="#c4784a" opacity=".18"/>
+        <path d="M17 36 Q20 32 24 34" stroke="#c4784a" stroke-width="1.5" fill="none" opacity=".5"/>
+      </svg>
+      <div class="svc-name">Waterproofing</div>
+      <div class="svc-tag">Balcony · Terrace · Bathroom — Tokyo Super 2K membrane</div>
+      <div class="svc-price"><strong>Get a Quote</strong></div>
+      <span class="svc-link">View Details →</span>
+    </a>
+
   </div>
 </section>
 
@@ -233,15 +246,19 @@
     color: #e08c5a;
   }
 
+  .sc.wide { grid-column: span 3; }
+
   /* ── Responsive ── */
 
   @media (max-width: 1100px) {
     section { padding-left: 2.5rem; padding-right: 2.5rem; }
     .svc-grid { grid-template-columns: repeat(2, 1fr); }
+    .sc.wide { grid-column: span 2; }
   }
 
   @media (max-width: 768px) {
     section { padding: 4rem 1.5rem; }
     .svc-grid { grid-template-columns: 1fr; }
+    .sc.wide { grid-column: span 1; }
   }
 </style>
