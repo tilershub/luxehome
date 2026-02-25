@@ -1,0 +1,19 @@
+# Cloudflare Pages cache headers
+
+# Immutable hashed assets (JS, CSS, fonts) — cache 1 year
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML pages — always revalidate
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+# robots.txt and sitemap — short cache
+/robots.txt
+  Cache-Control: public, max-age=86400
+
+/sitemap-index.xml
+  Cache-Control: public, max-age=86400
+
+/sitemap-0.xml
+  Cache-Control: public, max-age=86400
