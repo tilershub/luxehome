@@ -49,6 +49,7 @@ import Footer from '../../components/Footer.astro';
         <span class="hbadge">Tiling</span>
         <span class="hbadge">Ceiling</span>
         <span class="hbadge">Fixtures</span>
+        <span class="hbadge">Vanity Cupboard</span>
       </div>
       <div class="hero-cta reveal">
         <a href="https://wa.me/94774503744?text=Hello%2C%20I%20am%20interested%20in%20a%20bathroom%20renovation%20quote." class="btn-primary">
@@ -69,7 +70,7 @@ import Footer from '../../components/Footer.astro';
       <div class="stag reveal">Full Scope Breakdown</div>
       <h2 class="reveal">Every Trade. One Team.</h2>
       <p class="sdesc reveal">
-        Eight trades — all managed and executed by our team under one contract.
+        Nine trades — all managed and executed by our team under one contract.
         No coordinating subcontractors, no handover gaps, no surprises.
       </p>
       <div class="scope-grid reveal">
@@ -81,7 +82,7 @@ import Footer from '../../components/Footer.astro';
         <div class="scope-card">
           <div class="scope-icon">🧱</div>
           <div class="scope-name">Mason Work</div>
-          <div class="scope-desc">Structural walls rebuilt or modified where required. Floor bed laid with River Sand and Tokyo Cement for a solid base.</div>
+          <div class="scope-desc">No structural changes carried out. Scope covers wall niche construction, floor concrete, floor screed preparation, vanity top construction, and wall plastering.</div>
         </div>
         <div class="scope-card">
           <div class="scope-icon">🚿</div>
@@ -112,6 +113,11 @@ import Footer from '../../components/Footer.astro';
           <div class="scope-icon">🚪</div>
           <div class="scope-name">Fixtures &amp; Shower Cubicle</div>
           <div class="scope-desc">All client-supplied fittings installed — shower cubicle, basin, WC, mirror, towel rails, and accessories fitted and commissioned.</div>
+        </div>
+        <div class="scope-card">
+          <div class="scope-icon">🪵</div>
+          <div class="scope-name">Vanity Cupboard</div>
+          <div class="scope-desc">Eco board vanity cupboard constructed and fitted. Finished with a quartz top — durable, moisture-resistant, and cleanly edged.</div>
         </div>
       </div>
     </div>
@@ -195,8 +201,8 @@ import Footer from '../../components/Footer.astro';
         <div class="step reveal">
           <div class="step-num">03</div>
           <div class="step-content">
-            <div class="step-name">Mason & Structural Work</div>
-            <div class="step-desc">Walls built or modified, floor bed laid, and any structural changes completed. Inspected and signed off before next stage.</div>
+            <div class="step-name">Mason Work</div>
+            <div class="step-desc">Wall niches formed, floor concrete and screed laid, vanity top constructed, and wall plastering completed. No structural changes — inspected before next stage.</div>
           </div>
         </div>
         <div class="step reveal">
@@ -254,7 +260,7 @@ import Footer from '../../components/Footer.astro';
         </div>
         <div class="faq reveal">
           <div class="faq-q">How long does a full bathroom renovation take?</div>
-          <div class="faq-a">A standard bathroom (30–50 sq.ft) typically takes 10–15 working days, depending on the scope and whether structural changes are required. We confirm the timeline during the site visit and keep you updated throughout.</div>
+          <div class="faq-a">A standard bathroom (30–50 sq.ft) typically takes 10–15 working days depending on scope. We confirm the timeline during the site visit and keep you updated throughout.</div>
         </div>
         <div class="faq reveal">
           <div class="faq-q">Can you advise on tile selection?</div>
@@ -412,7 +418,7 @@ import Footer from '../../components/Footer.astro';
 
   .scope-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1px;
     background: var(--stone);
     border: 1px solid var(--stone);
@@ -678,7 +684,7 @@ import Footer from '../../components/Footer.astro';
       padding-right: 2.5rem;
     }
 
-    .scope-grid { grid-template-columns: repeat(2, 1fr); }
+    .scope-grid { grid-template-columns: repeat(3, 1fr); }
 
     .pricing-inner {
       grid-template-columns: 1fr;
