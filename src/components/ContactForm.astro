@@ -174,7 +174,12 @@
       `Details: ${data.get('message')?.toString().trim() || 'Not provided'}`,
     ];
     const text = encodeURIComponent(lines.join('\n'));
-    window.open(`https://wa.me/94774503744?text=${text}`, '_blank');
+    const SERVICE_NUMBERS: Record<string, string> = {
+      'Glass Work':     '94710111506',
+      'iPanel Ceiling': '94764037403',
+    };
+    const number = SERVICE_NUMBERS[data.get('service')?.toString() ?? ''] ?? '94774503744';
+    window.open(`https://wa.me/${number}?text=${text}`, '_blank');
 
     // Show success state
     form.hidden = true;
