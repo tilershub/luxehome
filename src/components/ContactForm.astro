@@ -1,16 +1,4 @@
 ---
-/*
-  WEB3FORMS SETUP (one-time, ~5 minutes):
-  1. Go to https://web3forms.com
-  2. Enter "tilershub@gmail.com" and click "Create Access Key"
-  3. Check your Gmail inbox and click the confirmation link
-  4. Copy the Access Key (looks like: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
-  5. In this file replace "REPLACE_WITH_WEB3FORMS_ACCESS_KEY" with your key
-  6. Re-deploy to Cloudflare Pages. Test with a real submission.
-
-  Free plan: 250 submissions/month — plenty for a local business.
-  Spam protection: botcheck honeypot field is already included.
-*/
 ---
 
 <div class="form-wrap">
@@ -18,29 +6,15 @@
   <!-- Success state -->
   <div class="form-success" id="form-success" aria-live="polite" hidden>
     <div class="success-icon" aria-hidden="true">✓</div>
-    <h3>Message received!</h3>
+    <h3>WhatsApp is opening!</h3>
     <p>
-      We'll get back to you within 24 hours — usually much faster.
-      For urgent enquiries WhatsApp us on
-      <a href="https://wa.me/94774503744">0774 503 744</a>.
-    </p>
-  </div>
-
-  <!-- Error banner -->
-  <div class="form-error" id="form-error" aria-live="polite" hidden>
-    <p>
-      Something went wrong. Please try again or
-      <a href="https://wa.me/94774503744?text=Hello%20TILERSHUB%2C%20I%20would%20like%20a%20free%20quote.">WhatsApp us</a>
-      instead.
+      Your details have been pre-filled in WhatsApp — just hit Send and we'll
+      get back to you shortly.
     </p>
   </div>
 
   <form id="quote-form" novalidate>
 
-    <!-- Web3Forms hidden fields -->
-    <input type="hidden" name="access_key" value="45db83a0-2bff-4f71-a50d-9adfb11bc997" />
-    <input type="hidden" name="subject" value="New Quote Request — TILERSHUB" />
-    <input type="hidden" name="from_name" value="TILERSHUB Website" />
     <!-- Honeypot: must stay empty or submission is treated as spam -->
     <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" />
 
@@ -132,7 +106,7 @@
     </div>
 
     <button type="submit" id="btn-submit" class="btn-submit">
-      <span class="btn-text">Send Quote Request</span>
+      <span class="btn-text">Request Quote via WhatsApp</span>
       <span class="btn-loading" hidden aria-hidden="true">Sending…</span>
     </button>
 
@@ -144,7 +118,6 @@
 <script>
   const form      = document.getElementById('quote-form') as HTMLFormElement;
   const success   = document.getElementById('form-success') as HTMLElement;
-  const errBanner = document.getElementById('form-error') as HTMLElement;
   const btnSubmit = document.getElementById('btn-submit') as HTMLButtonElement;
   const btnText   = btnSubmit.querySelector('.btn-text') as HTMLElement;
   const btnLoad   = btnSubmit.querySelector('.btn-loading') as HTMLElement;
@@ -175,9 +148,8 @@
     return ok;
   }
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
-    errBanner.hidden = true;
 
     const data = new FormData(form);
 
@@ -191,32 +163,29 @@
     btnText.hidden = true;
     btnLoad.hidden = false;
 
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(Object.fromEntries(data)),
-      });
-      const json = await res.json();
+    // Build pre-filled WhatsApp message
+    const lines = [
+      'New Quote Request — TILERSHUB',
+      '',
+      `Name: ${data.get('name')?.toString().trim()}`,
+      `Phone: ${data.get('phone')?.toString().trim()}`,
+      `Service: ${data.get('service')?.toString()}`,
+      `Location: ${data.get('location')?.toString().trim()}`,
+      `Details: ${data.get('message')?.toString().trim() || 'Not provided'}`,
+    ];
+    const text = encodeURIComponent(lines.join('\n'));
+    window.open(`https://wa.me/94774503744?text=${text}`, '_blank');
 
-      if (json.success) {
-        form.hidden = true;
-        success.hidden = false;
-        // GA4 conversion event
-        if (typeof window.gtag === 'function') {
-          window.gtag('event', 'lead_form_submit', {
-            event_category: 'Lead',
-            event_label: data.get('service')?.toString() || 'Unknown',
-          });
-        }
-      } else {
-        throw new Error(json.message || 'Submission failed');
-      }
-    } catch {
-      errBanner.hidden = false;
-      btnSubmit.disabled = false;
-      btnText.hidden = false;
-      btnLoad.hidden = true;
+    // Show success state
+    form.hidden = true;
+    success.hidden = false;
+
+    // GA4 conversion event
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'lead_form_submit', {
+        event_category: 'Lead',
+        event_label: data.get('service')?.toString() || 'Unknown',
+      });
     }
   });
 </script>
