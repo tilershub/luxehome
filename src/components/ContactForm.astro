@@ -63,7 +63,8 @@
           <option value="Kitchen Pantry">Kitchen Pantry</option>
           <option value="Bathroom Renovation">Bathroom Renovation</option>
           <option value="iPanel Ceiling">iPanel Ceiling</option>
-          <option value="Glass Work">Glass Work</option>
+          <option value="Shower Cubicle">Shower Cubicle</option>
+          <option value="Hand Railing">Hand Railing</option>
           <option value="Pantry Cupboard">Pantry Cupboard</option>
           <option value="Waterproofing">Waterproofing</option>
           <option value="Other">Other / Not Sure</option>
@@ -175,7 +176,8 @@
     ];
     const text = encodeURIComponent(lines.join('\n'));
     const SERVICE_NUMBERS: Record<string, string> = {
-      'Glass Work':     '94710111506',
+      'Shower Cubicle': '94710111506',
+      'Hand Railing':   '94710111506',
       'iPanel Ceiling': '94764037403',
     };
     const number = SERVICE_NUMBERS[data.get('service')?.toString() ?? ''] ?? '94774503744';
