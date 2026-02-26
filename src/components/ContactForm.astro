@@ -1,0 +1,442 @@
+---
+/*
+  WEB3FORMS SETUP (one-time, ~5 minutes):
+  1. Go to https://web3forms.com
+  2. Enter "tilershub@gmail.com" and click "Create Access Key"
+  3. Check your Gmail inbox and click the confirmation link
+  4. Copy the Access Key (looks like: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+  5. In this file replace "REPLACE_WITH_WEB3FORMS_ACCESS_KEY" with your key
+  6. Re-deploy to Cloudflare Pages. Test with a real submission.
+
+  Free plan: 250 submissions/month — plenty for a local business.
+  Spam protection: botcheck honeypot field is already included.
+*/
+---
+
+<div class="form-wrap">
+
+  <!-- Success state -->
+  <div class="form-success" id="form-success" aria-live="polite" hidden>
+    <div class="success-icon" aria-hidden="true">✓</div>
+    <h3>Message received!</h3>
+    <p>
+      We'll get back to you within 24 hours — usually much faster.
+      For urgent enquiries WhatsApp us on
+      <a href="https://wa.me/94774503744">0774 503 744</a>.
+    </p>
+  </div>
+
+  <!-- Error banner -->
+  <div class="form-error" id="form-error" aria-live="polite" hidden>
+    <p>
+      Something went wrong. Please try again or
+      <a href="https://wa.me/94774503744?text=Hello%20TILERSHUB%2C%20I%20would%20like%20a%20free%20quote.">WhatsApp us</a>
+      instead.
+    </p>
+  </div>
+
+  <form id="quote-form" novalidate>
+
+    <!-- Web3Forms hidden fields -->
+    <input type="hidden" name="access_key" value="45db83a0-2bff-4f71-a50d-9adfb11bc997" />
+    <input type="hidden" name="subject" value="New Quote Request — TILERSHUB" />
+    <input type="hidden" name="from_name" value="TILERSHUB Website" />
+    <!-- Honeypot: must stay empty or submission is treated as spam -->
+    <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" />
+
+    <!-- Full Name -->
+    <div class="field">
+      <label for="cf-name">
+        Full Name <span class="req" aria-hidden="true">*</span>
+      </label>
+      <input
+        type="text"
+        id="cf-name"
+        name="name"
+        placeholder="e.g. Nuwan Perera"
+        required
+        autocomplete="name"
+      />
+      <span class="field-err" id="err-name" role="alert"></span>
+    </div>
+
+    <!-- Phone / WhatsApp -->
+    <div class="field">
+      <label for="cf-phone">
+        Phone / WhatsApp <span class="req" aria-hidden="true">*</span>
+      </label>
+      <input
+        type="tel"
+        id="cf-phone"
+        name="phone"
+        placeholder="e.g. 0774 503 744"
+        required
+        autocomplete="tel"
+      />
+      <span class="field-err" id="err-phone" role="alert"></span>
+    </div>
+
+    <!-- Service -->
+    <div class="field">
+      <label for="cf-service">
+        Service Interested In <span class="req" aria-hidden="true">*</span>
+      </label>
+      <div class="select-wrap">
+        <select id="cf-service" name="service" required>
+          <option value="" disabled selected>Select a service…</option>
+          <option value="Floor Tiling">Floor Tiling</option>
+          <option value="Staircase Tiling">Staircase Tiling</option>
+          <option value="Kitchen Pantry">Kitchen Pantry</option>
+          <option value="Bathroom Renovation">Bathroom Renovation</option>
+          <option value="iPanel Ceiling">iPanel Ceiling</option>
+          <option value="Glass Work">Glass Work</option>
+          <option value="Pantry Cupboard">Pantry Cupboard</option>
+          <option value="Waterproofing">Waterproofing</option>
+          <option value="Other">Other / Not Sure</option>
+        </select>
+        <svg class="select-arrow" viewBox="0 0 10 6" aria-hidden="true">
+          <path d="M0 0l5 6 5-6z"/>
+        </svg>
+      </div>
+      <span class="field-err" id="err-service" role="alert"></span>
+    </div>
+
+    <!-- Location -->
+    <div class="field">
+      <label for="cf-location">
+        Location / Area in Sri Lanka <span class="req" aria-hidden="true">*</span>
+      </label>
+      <input
+        type="text"
+        id="cf-location"
+        name="location"
+        placeholder="e.g. Colombo 7, Kandy, Galle"
+        required
+        autocomplete="address-level2"
+      />
+      <span class="field-err" id="err-location" role="alert"></span>
+    </div>
+
+    <!-- Project Details -->
+    <div class="field">
+      <label for="cf-message">
+        Project Details
+        <span class="optional">(optional)</span>
+      </label>
+      <textarea
+        id="cf-message"
+        name="message"
+        rows="4"
+        placeholder="Tell us about your space — approximate area, tile preference, timeline…"
+      ></textarea>
+    </div>
+
+    <button type="submit" id="btn-submit" class="btn-submit">
+      <span class="btn-text">Send Quote Request</span>
+      <span class="btn-loading" hidden aria-hidden="true">Sending…</span>
+    </button>
+
+    <p class="form-note">No spam — your details are only used to prepare your quote.</p>
+
+  </form>
+</div>
+
+<script>
+  const form      = document.getElementById('quote-form') as HTMLFormElement;
+  const success   = document.getElementById('form-success') as HTMLElement;
+  const errBanner = document.getElementById('form-error') as HTMLElement;
+  const btnSubmit = document.getElementById('btn-submit') as HTMLButtonElement;
+  const btnText   = btnSubmit.querySelector('.btn-text') as HTMLElement;
+  const btnLoad   = btnSubmit.querySelector('.btn-loading') as HTMLElement;
+
+  function showFieldErr(id: string, msg: string) {
+    const el = document.getElementById('err-' + id);
+    if (!el) return;
+    el.textContent = msg;
+    (el as HTMLElement).style.display = msg ? 'block' : 'none';
+  }
+
+  function validate(data: FormData): boolean {
+    let ok = true;
+    (['name', 'phone', 'service', 'location'] as const).forEach(id => showFieldErr(id, ''));
+
+    if (!data.get('name')?.toString().trim()) {
+      showFieldErr('name', 'Full name is required.'); ok = false;
+    }
+    if (!data.get('phone')?.toString().trim()) {
+      showFieldErr('phone', 'Phone number is required.'); ok = false;
+    }
+    if (!data.get('service')?.toString()) {
+      showFieldErr('service', 'Please select a service.'); ok = false;
+    }
+    if (!data.get('location')?.toString().trim()) {
+      showFieldErr('location', 'Location is required.'); ok = false;
+    }
+    return ok;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errBanner.hidden = true;
+
+    const data = new FormData(form);
+
+    // Honeypot check — bots fill this, real users don't
+    if (data.get('botcheck')) return;
+
+    if (!validate(data)) return;
+
+    // Loading state
+    btnSubmit.disabled = true;
+    btnText.hidden = true;
+    btnLoad.hidden = false;
+
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(data)),
+      });
+      const json = await res.json();
+
+      if (json.success) {
+        form.hidden = true;
+        success.hidden = false;
+        // GA4 conversion event
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'lead_form_submit', {
+            event_category: 'Lead',
+            event_label: data.get('service')?.toString() || 'Unknown',
+          });
+        }
+      } else {
+        throw new Error(json.message || 'Submission failed');
+      }
+    } catch {
+      errBanner.hidden = false;
+      btnSubmit.disabled = false;
+      btnText.hidden = false;
+      btnLoad.hidden = true;
+    }
+  });
+</script>
+
+<style>
+  .form-wrap {
+    background: #fff;
+    border: 1px solid var(--stone);
+    border-radius: 4px;
+    padding: 2.5rem;
+  }
+
+  /* ── Success ── */
+  .form-success {
+    text-align: center;
+    padding: 2.5rem 1rem;
+  }
+
+  .success-icon {
+    width: 3rem;
+    height: 3rem;
+    background: var(--clay);
+    color: var(--cream);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 auto 1.2rem;
+  }
+
+  .form-success h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--charcoal);
+    margin-bottom: .6rem;
+  }
+
+  .form-success p {
+    font-size: .88rem;
+    font-weight: 300;
+    color: var(--warm-gray);
+    line-height: 1.72;
+  }
+
+  .form-success a { color: var(--clay); }
+
+  /* ── Error banner ── */
+  .form-error {
+    background: rgba(196, 120, 74, .07);
+    border: 1px solid rgba(196, 120, 74, .28);
+    border-radius: 3px;
+    padding: .85rem 1.1rem;
+    margin-bottom: 1.2rem;
+    font-size: .85rem;
+    color: var(--warm-gray);
+    line-height: 1.55;
+  }
+
+  .form-error a { color: var(--clay); font-weight: 500; }
+
+  /* ── Fields ── */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    margin-bottom: 1.3rem;
+  }
+
+  label {
+    font-size: .78rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--charcoal);
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+  }
+
+  .req { color: var(--clay); }
+
+  .optional {
+    font-size: .75rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--warm-gray);
+  }
+
+  input[type="text"],
+  input[type="tel"],
+  textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    font-weight: 300;
+    color: var(--charcoal);
+    background: var(--off-white);
+    border: 1.5px solid var(--stone);
+    border-radius: 2px;
+    padding: .78rem 1rem;
+    width: 100%;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+  }
+
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  textarea:focus {
+    border-color: var(--clay);
+    box-shadow: 0 0 0 3px rgba(196, 120, 74, .11);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(107, 95, 84, .45);
+    font-weight: 300;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.65;
+  }
+
+  /* ── Custom select ── */
+  .select-wrap {
+    position: relative;
+  }
+
+  .select-wrap select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    font-weight: 300;
+    color: var(--charcoal);
+    background: var(--off-white);
+    border: 1.5px solid var(--stone);
+    border-radius: 2px;
+    padding: .78rem 2.5rem .78rem 1rem;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  .select-wrap select:focus {
+    border-color: var(--clay);
+    box-shadow: 0 0 0 3px rgba(196, 120, 74, .11);
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: .9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: .6rem;
+    fill: var(--warm-gray);
+    pointer-events: none;
+  }
+
+  /* ── Inline errors ── */
+  .field-err {
+    display: none;
+    font-size: .76rem;
+    color: #b94040;
+  }
+
+  /* ── Honeypot ── */
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ── Submit button ── */
+  .btn-submit {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--clay);
+    color: var(--cream);
+    border: none;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    letter-spacing: .03em;
+    padding: .96rem 1.8rem;
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+    margin-top: .4rem;
+  }
+
+  .btn-submit:hover:not(:disabled) {
+    background: #b56a3e;
+    transform: translateY(-2px);
+  }
+
+  .btn-submit:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .form-note {
+    font-size: .75rem;
+    color: var(--warm-gray);
+    text-align: center;
+    margin-top: .9rem;
+    font-weight: 300;
+  }
+
+  @media (max-width: 600px) {
+    .form-wrap {
+      padding: 1.6rem 1.2rem;
+    }
+  }
+</style>
