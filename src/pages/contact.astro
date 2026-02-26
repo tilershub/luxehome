@@ -1,0 +1,347 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import ContactForm from '../components/ContactForm.astro';
+
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Get a Free Tiling Quote — TILERSHUB',
+  description: 'Request a free quote for tiling and bathroom renovation services across Sri Lanka.',
+  url: 'https://tilershub.com/contact',
+  mainEntity: {
+    '@type': 'LocalBusiness',
+    name: 'TILERSHUB',
+    telephone: '+94774503744',
+    email: 'tilershub@gmail.com',
+    url: 'https://tilershub.com',
+    address: { '@type': 'PostalAddress', addressCountry: 'LK' },
+    areaServed: 'Sri Lanka',
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+      opens: '08:00',
+      closes: '18:00',
+    },
+  },
+});
+---
+
+<Layout
+  title="Get a Free Tiling Quote | TILERSHUB Sri Lanka"
+  description="Request a free, no-obligation quote for floor tiling, bathroom renovation, staircase tiling, and more across Sri Lanka. We respond within 24 hours."
+>
+  <Nav />
+
+  <main>
+    <script type="application/ld+json" set:html={jsonLd}></script>
+
+    <!-- ── Hero ── -->
+    <header class="contact-hero">
+      <div class="hero-inner">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span aria-hidden="true">›</span>
+          <span>Get a Quote</span>
+        </nav>
+        <div class="stag">Free Quote</div>
+        <h1>Get a <em>Free</em> Quote</h1>
+        <p class="hero-desc">
+          Fill in the form and we'll prepare an honest, no-obligation estimate for your
+          project — usually within 24 hours.
+        </p>
+      </div>
+    </header>
+
+    <!-- ── Two-column layout ── -->
+    <section class="contact-section">
+      <div class="contact-inner">
+
+        <!-- Left: form -->
+        <div class="col-form">
+          <ContactForm />
+        </div>
+
+        <!-- Right: contact alternatives -->
+        <aside class="col-aside">
+
+          <!-- WhatsApp -->
+          <div class="aside-card aside-card--wa">
+            <div class="aside-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
+              </svg>
+            </div>
+            <div class="aside-label">Prefer to chat?</div>
+            <div class="aside-value">WhatsApp Us</div>
+            <p>Message us directly for the fastest response. We typically reply within the hour during business hours.</p>
+            <a
+              href="https://wa.me/94774503744?text=Hello%20TILERSHUB%2C%20I%20would%20like%20a%20free%20quote."
+              class="btn-wa"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open WhatsApp
+            </a>
+          </div>
+
+          <!-- Phone -->
+          <div class="aside-card">
+            <div class="aside-label">Call Us</div>
+            <div class="aside-value">
+              <a href="tel:+94774503744">0774 503 744</a>
+            </div>
+            <p>Available Mon – Sat, 8 am – 6 pm.</p>
+          </div>
+
+          <!-- Email -->
+          <div class="aside-card">
+            <div class="aside-label">Email</div>
+            <div class="aside-value aside-value--sm">
+              <a href="mailto:tilershub@gmail.com">tilershub@gmail.com</a>
+            </div>
+            <p>For written enquiries and project documentation.</p>
+          </div>
+
+          <!-- Hours -->
+          <div class="aside-card">
+            <div class="aside-label">Working Hours</div>
+            <div class="aside-value">Mon – Sat</div>
+            <p>8:00 am – 6:00 pm · Projects across Sri Lanka.</p>
+          </div>
+
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* ── Hero ── */
+  .contact-hero {
+    background: var(--charcoal);
+    padding: 7rem 2rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .contact-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,.012) 60px, rgba(255,255,255,.012) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.012) 60px, rgba(255,255,255,.012) 61px);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .75rem;
+    color: rgba(245, 240, 232, .5);
+    margin-bottom: 1.8rem;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a {
+    color: rgba(245, 240, 232, .5);
+    text-decoration: none;
+    transition: color .2s;
+  }
+
+  .breadcrumb a:hover { color: var(--clay); }
+
+  .contact-hero .stag {
+    color: var(--clay);
+    margin-bottom: .8rem;
+  }
+
+  .contact-hero .stag::before {
+    background: var(--clay);
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    margin-bottom: .9rem;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--clay);
+  }
+
+  .hero-desc {
+    font-size: .96rem;
+    font-weight: 300;
+    color: rgba(245, 240, 232, .7);
+    line-height: 1.75;
+    max-width: 58ch;
+  }
+
+  /* ── Section ── */
+  .contact-section {
+    background: var(--off-white);
+    padding: 5rem 2rem 6rem;
+  }
+
+  .contact-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  /* ── Sidebar ── */
+  .col-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: sticky;
+    top: 5.5rem;
+  }
+
+  .aside-card {
+    background: #fff;
+    border: 1px solid var(--stone);
+    border-radius: 4px;
+    padding: 1.4rem 1.6rem;
+  }
+
+  .aside-card--wa {
+    background: var(--charcoal);
+    border-color: var(--charcoal);
+  }
+
+  .aside-icon {
+    color: var(--clay);
+    margin-bottom: .7rem;
+  }
+
+  .aside-label {
+    font-size: .75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--warm-gray);
+    margin-bottom: .3rem;
+  }
+
+  .aside-card--wa .aside-label {
+    color: rgba(245, 240, 232, .55);
+  }
+
+  .aside-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: .5rem;
+    line-height: 1.2;
+  }
+
+  .aside-card--wa .aside-value {
+    color: var(--cream);
+  }
+
+  .aside-value--sm {
+    font-size: .98rem;
+    word-break: break-all;
+  }
+
+  .aside-value a {
+    color: var(--clay);
+    text-decoration: none;
+    transition: color .2s;
+  }
+
+  .aside-value a:hover { color: #b56a3e; }
+
+  .aside-card p {
+    font-size: .8rem;
+    font-weight: 300;
+    line-height: 1.65;
+    color: var(--warm-gray);
+    margin-bottom: 1.1rem;
+  }
+
+  .aside-card--wa p {
+    color: rgba(245, 240, 232, .6);
+  }
+
+  .aside-card:not(.aside-card--wa) p {
+    margin-bottom: 0;
+  }
+
+  .btn-wa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: #25d366;
+    color: #fff;
+    text-decoration: none;
+    font-size: .86rem;
+    font-weight: 500;
+    padding: .82rem 1.4rem;
+    border-radius: 2px;
+    transition: background .2s, transform .2s;
+  }
+
+  .btn-wa:hover {
+    background: #1da851;
+    transform: translateY(-2px);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 960px) {
+    .contact-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .col-aside {
+      position: static;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .aside-card--wa {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .contact-hero {
+      padding: 6rem 1.5rem 4rem;
+    }
+
+    .contact-section {
+      padding: 3.5rem 1.5rem 4.5rem;
+    }
+
+    .col-aside {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
