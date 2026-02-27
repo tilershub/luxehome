@@ -34,6 +34,7 @@
 /* Base */
 html {
   scroll-behavior: smooth;
+  font-size: 17px;
 }
 
 body {
@@ -47,7 +48,7 @@ body {
 
 h2 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: clamp(2rem, 3.2vw, 3rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -.02em;
@@ -60,7 +61,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: .5rem;
-  font-size: .75rem;
+  font-size: .82rem;
   font-weight: 500;
   letter-spacing: .16em;
   text-transform: uppercase;
@@ -78,7 +79,7 @@ h2 {
 
 /* Section description — used across Services, Materials, Bathroom */
 .sdesc {
-  font-size: .92rem;
+  font-size: 1rem;
   font-weight: 300;
   line-height: 1.82;
   color: var(--warm-gray);
@@ -110,7 +111,7 @@ h2 {
   background: var(--clay);
   color: var(--cream);
   text-decoration: none;
-  font-size: .86rem;
+  font-size: .94rem;
   font-weight: 500;
   padding: .88rem 1.7rem;
   border-radius: 2px;
@@ -128,7 +129,7 @@ h2 {
   gap: .4rem;
   color: var(--charcoal);
   text-decoration: none;
-  font-size: .86rem;
+  font-size: .94rem;
   font-weight: 500;
   padding: .88rem 1rem;
   border-bottom: 2px solid var(--stone);
