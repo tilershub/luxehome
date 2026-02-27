@@ -77,7 +77,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     </script>
   </head>
   <body>
-    <slot />
+    <main id="main-content">
+      <slot />
+    </main>
 
     <!-- Scroll-reveal: activates .reveal elements as they enter the viewport.
          Elements already visible on load are activated immediately (no delay)

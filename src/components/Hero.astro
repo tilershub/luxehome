@@ -35,7 +35,9 @@
   </div>
 
   <div class="hero-right">
-    <div class="mosaic" id="mosaic"></div>
+    <div class="mosaic">
+      {Array.from({length: 48}, (_, i) => <div class="tc" style={`--i:${i}`}></div>)}
+    </div>
     <div class="hero-badge">
       <div class="badge-label">Floor Tiling from</div>
       <div class="badge-value">Rs. 350</div>
@@ -44,16 +46,6 @@
   </div>
 </section>
 
-<!-- Generate mosaic tiles dynamically -->
-<script>
-  const mosaic = document.getElementById('mosaic');
-  for (let i = 0; i < 48; i++) {
-    const tile = document.createElement('div');
-    tile.className = 'tc';
-    tile.style.setProperty('--i', String(i));
-    mosaic.appendChild(tile);
-  }
-</script>
 
 <style>
   .hero {
@@ -79,7 +71,7 @@
     font-weight: 500;
     letter-spacing: .16em;
     text-transform: uppercase;
-    color: var(--clay);
+    color: #894428; /* WCAG AA-compliant on off-white (6.75:1) */
     margin-bottom: 1.4rem;
     opacity: 0;
     animation: fadeUp .8s .2s forwards;
@@ -90,7 +82,7 @@
     display: block;
     width: 2rem;
     height: 1px;
-    background: var(--clay);
+    background: #894428;
   }
 
   h1 {
@@ -173,13 +165,13 @@
     gap: 3px;
     padding: 3px;
     opacity: 0;
-    animation: fadeIn 1.2s .5s forwards;
+    animation: fadeIn 0.7s .2s forwards;
   }
 
-  /* Mosaic tiles are injected by JS, so use :global() to bypass scoping */
+  /* Tiles are rendered server-side; use :global() to bypass Astro scoping */
   :global(.tc) {
     background: #2a2420;
-    animation: tR 1.5s calc(.05s * var(--i)) backwards;
+    animation: tR 0.5s calc(.02s * var(--i)) backwards;
   }
 
   :global(.tc:nth-child(3n))  { background: #24201c; }
