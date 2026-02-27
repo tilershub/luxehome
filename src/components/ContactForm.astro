@@ -19,96 +19,280 @@ const { service: defaultService = '' } = Astro.props;
 
   <form id="quote-form" novalidate>
 
-    <!-- Honeypot: must stay empty or submission is treated as spam -->
+    <!-- Honeypot -->
     <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" />
 
     <!-- Full Name -->
     <div class="field">
-      <label for="cf-name">
-        Full Name <span class="req" aria-hidden="true">*</span>
-      </label>
-      <input
-        type="text"
-        id="cf-name"
-        name="name"
-        placeholder="e.g. Nuwan Perera"
-        required
-        autocomplete="name"
-      />
+      <label for="cf-name">Full Name <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="cf-name" name="name" placeholder="e.g. Nuwan Perera" required autocomplete="name" />
       <span class="field-err" id="err-name" role="alert"></span>
     </div>
 
-    <!-- Phone / WhatsApp -->
+    <!-- Phone -->
     <div class="field">
-      <label for="cf-phone">
-        Phone / WhatsApp <span class="req" aria-hidden="true">*</span>
-      </label>
-      <input
-        type="tel"
-        id="cf-phone"
-        name="phone"
-        placeholder="e.g. 0774 503 744"
-        required
-        autocomplete="tel"
-      />
+      <label for="cf-phone">Phone / WhatsApp <span class="req" aria-hidden="true">*</span></label>
+      <input type="tel" id="cf-phone" name="phone" placeholder="e.g. 0774 503 744" required autocomplete="tel" />
       <span class="field-err" id="err-phone" role="alert"></span>
     </div>
 
     <!-- Service -->
     <div class="field">
-      <label for="cf-service">
-        Service Interested In <span class="req" aria-hidden="true">*</span>
-      </label>
+      <label for="cf-service">Service Interested In <span class="req" aria-hidden="true">*</span></label>
       <div class="select-wrap">
         <select id="cf-service" name="service" required>
           <option value="" disabled={defaultService === ''} selected={defaultService === ''}>Select a service…</option>
-          <option value="Floor Tiling"            selected={defaultService === 'Floor Tiling'}>Floor Tiling</option>
-          <option value="Staircase Tiling"        selected={defaultService === 'Staircase Tiling'}>Staircase Tiling</option>
-          <option value="Bathroom Tiling"         selected={defaultService === 'Bathroom Tiling'}>Bathroom Tiling</option>
-          <option value="Kitchen Pantry"          selected={defaultService === 'Kitchen Pantry'}>Kitchen Pantry</option>
-          <option value="Bathroom Renovation"     selected={defaultService === 'Bathroom Renovation'}>Bathroom Renovation</option>
-          <option value="iPanel Ceiling"          selected={defaultService === 'iPanel Ceiling'}>iPanel Ceiling</option>
-          <option value="Shower Cubicle"          selected={defaultService === 'Shower Cubicle'}>Shower Cubicle</option>
-          <option value="Hand Railing"            selected={defaultService === 'Hand Railing'}>Hand Railing</option>
-          <option value="Pantry Cupboard"         selected={defaultService === 'Pantry Cupboard'}>Pantry Cupboard</option>
-          <option value="Waterproofing"           selected={defaultService === 'Waterproofing'}>Waterproofing</option>
-          <option value="Other"                   selected={defaultService === 'Other'}>Other / Not Sure</option>
+          <option value="Floor Tiling"         selected={defaultService === 'Floor Tiling'}>Floor Tiling</option>
+          <option value="Staircase Tiling"     selected={defaultService === 'Staircase Tiling'}>Staircase Tiling</option>
+          <option value="Bathroom Tiling"      selected={defaultService === 'Bathroom Tiling'}>Bathroom Tiling</option>
+          <option value="Bathroom Renovation"  selected={defaultService === 'Bathroom Renovation'}>Bathroom Renovation</option>
+          <option value="iPanel Ceiling"       selected={defaultService === 'iPanel Ceiling'}>iPanel Ceiling</option>
+          <option value="Shower Cubicle"       selected={defaultService === 'Shower Cubicle'}>Shower Cubicle</option>
+          <option value="Hand Railing"         selected={defaultService === 'Hand Railing'}>Hand Railing</option>
+          <option value="Kitchen Pantry"       selected={defaultService === 'Kitchen Pantry'}>Kitchen Pantry</option>
+          <option value="Pantry Cupboard"      selected={defaultService === 'Pantry Cupboard'}>Pantry Cupboard</option>
+          <option value="Waterproofing"        selected={defaultService === 'Waterproofing'}>Waterproofing</option>
+          <option value="Other"                selected={defaultService === 'Other'}>Other / Not Sure</option>
         </select>
-        <svg class="select-arrow" viewBox="0 0 10 6" aria-hidden="true">
-          <path d="M0 0l5 6 5-6z"/>
-        </svg>
+        <svg class="select-arrow" viewBox="0 0 10 6" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
       </div>
       <span class="field-err" id="err-service" role="alert"></span>
     </div>
 
+    <!-- ── Service-specific fields ── -->
+
+    <!-- Floor Tiling -->
+    <div class="svc-fields" data-svc="Floor Tiling" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="sf-floor-area">Floor Area <span class="req">*</span></label>
+          <div class="input-unit">
+            <input type="number" id="sf-floor-area" name="sf_floor_area" placeholder="e.g. 450" min="1" />
+            <span class="unit">sq.ft</span>
+          </div>
+          <span class="field-err" id="err-sf_floor_area" role="alert"></span>
+        </div>
+        <div class="field">
+          <label for="sf-skirting">Skirting Length <span class="optional">(optional)</span></label>
+          <div class="input-unit">
+            <input type="number" id="sf-skirting" name="sf_skirting" placeholder="e.g. 80" min="0" />
+            <span class="unit">lin.ft</span>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="sf-tile-size">Tile Size <span class="optional">(optional)</span></label>
+        <div class="select-wrap">
+          <select id="sf-tile-size" name="sf_tile_size">
+            <option value="">Select tile size…</option>
+            <option value="300x600 mm">300×600 mm</option>
+            <option value="600x600 mm">600×600 mm</option>
+            <option value="600x1200 mm (2×4)">600×1200 mm (2×4)</option>
+            <option value="800x800 mm">800×800 mm</option>
+            <option value="800x1600 mm">800×1600 mm</option>
+            <option value="Other">Other</option>
+          </select>
+          <svg class="select-arrow" viewBox="0 0 10 6" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staircase Tiling -->
+    <div class="svc-fields" data-svc="Staircase Tiling" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="sf-step-len">Step Length <span class="req">*</span></label>
+          <div class="input-unit">
+            <input type="number" id="sf-step-len" name="sf_step_length" placeholder="e.g. 4.5" min="0" step="0.1" />
+            <span class="unit">ft</span>
+          </div>
+          <span class="field-err" id="err-sf_step_length" role="alert"></span>
+        </div>
+        <div class="field">
+          <label for="sf-step-qty">Number of Steps <span class="req">*</span></label>
+          <input type="number" id="sf-step-qty" name="sf_step_qty" placeholder="e.g. 12" min="1" />
+          <span class="field-err" id="err-sf_step_qty" role="alert"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bathroom Tiling -->
+    <div class="svc-fields" data-svc="Bathroom Tiling" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="sf-bt-area">Total Tiling Area <span class="req">*</span></label>
+          <div class="input-unit">
+            <input type="number" id="sf-bt-area" name="sf_bt_area" placeholder="e.g. 120" min="1" />
+            <span class="unit">sq.ft</span>
+          </div>
+          <span class="field-err" id="err-sf_bt_area" role="alert"></span>
+        </div>
+        <div class="field">
+          <label for="sf-niches">Wall Niches <span class="optional">(optional)</span></label>
+          <input type="number" id="sf-niches" name="sf_niches" placeholder="e.g. 2" min="0" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Bathroom Renovation -->
+    <div class="svc-fields" data-svc="Bathroom Renovation" hidden>
+      <div class="svc-fields-header">Bathroom Size</div>
+      <div class="field-row three-col">
+        <div class="field">
+          <label for="sf-br-len">Length <span class="req">*</span></label>
+          <div class="input-unit">
+            <input type="number" id="sf-br-len" name="sf_br_length" placeholder="e.g. 8" min="1" step="0.1" />
+            <span class="unit">ft</span>
+          </div>
+          <span class="field-err" id="err-sf_br_length" role="alert"></span>
+        </div>
+        <div class="field">
+          <label for="sf-br-wid">Width <span class="req">*</span></label>
+          <div class="input-unit">
+            <input type="number" id="sf-br-wid" name="sf_br_width" placeholder="e.g. 6" min="1" step="0.1" />
+            <span class="unit">ft</span>
+          </div>
+          <span class="field-err" id="err-sf_br_width" role="alert"></span>
+        </div>
+        <div class="field">
+          <label for="sf-br-hgt">Height <span class="req">*</span></label>
+          <div class="input-unit">
+            <input type="number" id="sf-br-hgt" name="sf_br_height" placeholder="e.g. 9" min="1" step="0.1" />
+            <span class="unit">ft</span>
+          </div>
+          <span class="field-err" id="err-sf_br_height" role="alert"></span>
+        </div>
+      </div>
+      <div class="field">
+        <label>What do you need? <span class="optional">(select all that apply)</span></label>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="3D Design" /> 3D Design</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Demolition Work" /> Demolition Work</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Mason Work" /> Mason Work</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Plumbing" /> Plumbing</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Waterproofing" /> Waterproofing</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Electrical Works" /> Electrical Works</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Tiling" /> Tiling</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Ceiling" /> Ceiling</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Fix Fittings" /> Fix Fittings</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Shower Cubicle" /> Shower Cubicle</label>
+          <label class="check-item"><input type="checkbox" name="sf_br_scope" value="Vanity Cupboard" /> Vanity Cupboard</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- iPanel Ceiling -->
+    <div class="svc-fields" data-svc="iPanel Ceiling" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="sf-ceil-area">Total Ceiling Area <span class="req">*</span></label>
+          <div class="input-unit">
+            <input type="number" id="sf-ceil-area" name="sf_ceil_area" placeholder="e.g. 200" min="1" />
+            <span class="unit">sq.ft</span>
+          </div>
+          <span class="field-err" id="err-sf_ceil_area" role="alert"></span>
+        </div>
+        <div class="field">
+          <label>Finish Type <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="sf_ceil_type" value="Plain" /> Plain — Rs. 400/sq.ft</label>
+            <label class="radio-item"><input type="radio" name="sf_ceil_type" value="Design" /> Design — Rs. 500/sq.ft</label>
+          </div>
+          <span class="field-err" id="err-sf_ceil_type" role="alert"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shower Cubicle -->
+    <div class="svc-fields" data-svc="Shower Cubicle" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field">
+        <label for="sf-cub-shape">Cubicle Shape <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select id="sf-cub-shape" name="sf_cub_shape">
+            <option value="">Select shape…</option>
+            <option value="L Shape With Swing Door">L Shape With Swing Door</option>
+            <option value="Panel Type With Swing Door">Panel Type With Swing Door</option>
+            <option value="Panel Type With Sliding Door">Panel Type With Sliding Door</option>
+            <option value="Double Sliding Doors">Double Sliding Doors</option>
+          </select>
+          <svg class="select-arrow" viewBox="0 0 10 6" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+        </div>
+        <span class="field-err" id="err-sf_cub_shape" role="alert"></span>
+      </div>
+      <div class="field">
+        <label for="sf-cub-size">Approximate Size <span class="optional">(optional)</span></label>
+        <input type="text" id="sf-cub-size" name="sf_cub_size" placeholder="e.g. 900×900 mm or 1200×900 mm" />
+      </div>
+    </div>
+
+    <!-- Hand Railing -->
+    <div class="svc-fields" data-svc="Hand Railing" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field">
+        <label for="sf-rail-len">Railing Length <span class="req">*</span></label>
+        <div class="input-unit" style="max-width:220px">
+          <input type="number" id="sf-rail-len" name="sf_rail_length" placeholder="e.g. 20" min="1" step="0.5" />
+          <span class="unit">lin.ft</span>
+        </div>
+        <span class="field-err" id="err-sf_rail_length" role="alert"></span>
+      </div>
+    </div>
+
+    <!-- Waterproofing -->
+    <div class="svc-fields" data-svc="Waterproofing" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field">
+        <label for="sf-wp-area">Waterproofing Area <span class="req">*</span></label>
+        <div class="input-unit" style="max-width:220px">
+          <input type="number" id="sf-wp-area" name="sf_wp_area" placeholder="e.g. 80" min="1" />
+          <span class="unit">sq.ft</span>
+        </div>
+        <span class="field-err" id="err-sf_wp_area" role="alert"></span>
+      </div>
+    </div>
+
+    <!-- Kitchen Pantry -->
+    <div class="svc-fields" data-svc="Kitchen Pantry" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field">
+        <label for="sf-kp-len">Pantry Length <span class="req">*</span></label>
+        <div class="input-unit" style="max-width:220px">
+          <input type="number" id="sf-kp-len" name="sf_kp_length" placeholder="e.g. 12" min="1" step="0.5" />
+          <span class="unit">lin.ft</span>
+        </div>
+        <span class="field-err" id="err-sf_kp_length" role="alert"></span>
+      </div>
+    </div>
+
+    <!-- Pantry Cupboard -->
+    <div class="svc-fields" data-svc="Pantry Cupboard" hidden>
+      <div class="svc-fields-header">Project Details</div>
+      <div class="field">
+        <label for="sf-pc-len">Cupboard Length <span class="req">*</span></label>
+        <div class="input-unit" style="max-width:220px">
+          <input type="number" id="sf-pc-len" name="sf_pc_length" placeholder="e.g. 10" min="1" step="0.5" />
+          <span class="unit">lin.ft</span>
+        </div>
+        <span class="field-err" id="err-sf_pc_length" role="alert"></span>
+      </div>
+    </div>
+
     <!-- Location -->
     <div class="field">
-      <label for="cf-location">
-        Location / Area in Sri Lanka <span class="req" aria-hidden="true">*</span>
-      </label>
-      <input
-        type="text"
-        id="cf-location"
-        name="location"
-        placeholder="e.g. Colombo 7, Kandy, Galle"
-        required
-        autocomplete="address-level2"
-      />
+      <label for="cf-location">City / Area <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="cf-location" name="location" placeholder="e.g. Colombo 7, Kandy, Galle" required autocomplete="address-level2" />
       <span class="field-err" id="err-location" role="alert"></span>
     </div>
 
-    <!-- Project Details -->
+    <!-- Additional notes -->
     <div class="field">
-      <label for="cf-message">
-        Project Details
-        <span class="optional">(optional)</span>
-      </label>
-      <textarea
-        id="cf-message"
-        name="message"
-        rows="4"
-        placeholder="Tell us about your space — approximate area, tile preference, timeline…"
-      ></textarea>
+      <label for="cf-message">Additional Notes <span class="optional">(optional)</span></label>
+      <textarea id="cf-message" name="message" rows="3" placeholder="Any other details — timeline, tile preference, special requirements…"></textarea>
     </div>
 
     <button type="submit" id="btn-submit" class="btn-submit">
@@ -127,78 +311,166 @@ const { service: defaultService = '' } = Astro.props;
   const btnSubmit = document.getElementById('btn-submit') as HTMLButtonElement;
   const btnText   = btnSubmit.querySelector('.btn-text') as HTMLElement;
   const btnLoad   = btnSubmit.querySelector('.btn-loading') as HTMLElement;
+  const svcSelect = document.getElementById('cf-service') as HTMLSelectElement;
+  const allSvcFields = form.querySelectorAll<HTMLElement>('.svc-fields');
 
-  function showFieldErr(id: string, msg: string) {
+  // ── Show / hide service-specific fields ──
+  function showServiceFields(val: string) {
+    allSvcFields.forEach(el => {
+      el.hidden = el.dataset.svc !== val;
+    });
+  }
+
+  svcSelect.addEventListener('change', () => showServiceFields(svcSelect.value));
+
+  // Show on load if a service is pre-selected
+  if (svcSelect.value) showServiceFields(svcSelect.value);
+
+  // ── Validation helpers ──
+  function setErr(id: string, msg: string) {
     const el = document.getElementById('err-' + id);
     if (!el) return;
     el.textContent = msg;
     (el as HTMLElement).style.display = msg ? 'block' : 'none';
   }
 
-  function validate(data: FormData): boolean {
+  function validateBase(data: FormData): boolean {
     let ok = true;
-    (['name', 'phone', 'service', 'location'] as const).forEach(id => showFieldErr(id, ''));
+    ['name','phone','service','location'].forEach(id => setErr(id, ''));
+    if (!data.get('name')?.toString().trim())     { setErr('name',     'Full name is required.');       ok = false; }
+    if (!data.get('phone')?.toString().trim())    { setErr('phone',    'Phone number is required.');    ok = false; }
+    if (!data.get('service')?.toString())         { setErr('service',  'Please select a service.');     ok = false; }
+    if (!data.get('location')?.toString().trim()) { setErr('location', 'City / area is required.');     ok = false; }
+    return ok;
+  }
 
-    if (!data.get('name')?.toString().trim()) {
-      showFieldErr('name', 'Full name is required.'); ok = false;
+  function validateServiceFields(svc: string, data: FormData): boolean {
+    let ok = true;
+    const req: Record<string, [string, string]> = {
+      'Floor Tiling':        ['sf_floor_area',  'Floor area is required.'],
+      'Staircase Tiling':    ['sf_step_length',  'Step length is required.'],
+      'Bathroom Tiling':     ['sf_bt_area',      'Tiling area is required.'],
+      'Bathroom Renovation': ['sf_br_length',    'Bathroom length is required.'],
+      'iPanel Ceiling':      ['sf_ceil_area',    'Ceiling area is required.'],
+      'Shower Cubicle':      ['sf_cub_shape',    'Please select a cubicle shape.'],
+      'Hand Railing':        ['sf_rail_length',  'Railing length is required.'],
+      'Waterproofing':       ['sf_wp_area',      'Waterproofing area is required.'],
+      'Kitchen Pantry':      ['sf_kp_length',    'Pantry length is required.'],
+      'Pantry Cupboard':     ['sf_pc_length',    'Cupboard length is required.'],
+    };
+    // Extra required for staircase
+    if (svc === 'Staircase Tiling') {
+      if (!data.get('sf_step_qty')?.toString().trim()) { setErr('sf_step_qty', 'Number of steps is required.'); ok = false; }
     }
-    if (!data.get('phone')?.toString().trim()) {
-      showFieldErr('phone', 'Phone number is required.'); ok = false;
+    if (svc === 'Bathroom Renovation') {
+      if (!data.get('sf_br_width')?.toString().trim())  { setErr('sf_br_width',  'Width is required.');  ok = false; }
+      if (!data.get('sf_br_height')?.toString().trim()) { setErr('sf_br_height', 'Height is required.'); ok = false; }
     }
-    if (!data.get('service')?.toString()) {
-      showFieldErr('service', 'Please select a service.'); ok = false;
+    if (svc === 'iPanel Ceiling') {
+      const radios = form.querySelectorAll<HTMLInputElement>('input[name="sf_ceil_type"]');
+      const checked = Array.from(radios).some(r => r.checked);
+      if (!checked) { setErr('sf_ceil_type', 'Please select a finish type.'); ok = false; }
     }
-    if (!data.get('location')?.toString().trim()) {
-      showFieldErr('location', 'Location is required.'); ok = false;
+    const entry = req[svc];
+    if (entry) {
+      const [field, msg] = entry;
+      if (!data.get(field)?.toString().trim()) { setErr(field, msg); ok = false; }
     }
     return ok;
   }
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const data = new FormData(form);
-
-    // Honeypot check — bots fill this, real users don't
-    if (data.get('botcheck')) return;
-
-    if (!validate(data)) return;
-
-    // Loading state
-    btnSubmit.disabled = true;
-    btnText.hidden = true;
-    btnLoad.hidden = false;
-
-    // Build pre-filled WhatsApp message
-    const lines = [
+  // ── Build WhatsApp message ──
+  function buildMessage(data: FormData, svc: string): string {
+    const lines: string[] = [
       'New Quote Request — TILERSHUB',
       '',
       `Name: ${data.get('name')?.toString().trim()}`,
       `Phone: ${data.get('phone')?.toString().trim()}`,
-      `Service: ${data.get('service')?.toString()}`,
+      `Service: ${svc}`,
       `Location: ${data.get('location')?.toString().trim()}`,
-      `Details: ${data.get('message')?.toString().trim() || 'Not provided'}`,
     ];
-    const text = encodeURIComponent(lines.join('\n'));
+
+    // Service-specific details
+    const add = (label: string, val: string | null | undefined) => {
+      if (val?.toString().trim()) lines.push(`${label}: ${val.toString().trim()}`);
+    };
+
+    if (svc === 'Floor Tiling') {
+      add('Floor Area', data.get('sf_floor_area')?.toString() + ' sq.ft');
+      const sk = data.get('sf_skirting')?.toString().trim();
+      if (sk) lines.push(`Skirting Length: ${sk} lin.ft`);
+      add('Tile Size', data.get('sf_tile_size')?.toString());
+    }
+    if (svc === 'Staircase Tiling') {
+      add('Step Length', data.get('sf_step_length')?.toString() + ' ft');
+      add('Number of Steps', data.get('sf_step_qty')?.toString());
+    }
+    if (svc === 'Bathroom Tiling') {
+      add('Total Tiling Area', data.get('sf_bt_area')?.toString() + ' sq.ft');
+      const n = data.get('sf_niches')?.toString().trim();
+      if (n && n !== '0') lines.push(`Wall Niches: ${n}`);
+    }
+    if (svc === 'Bathroom Renovation') {
+      lines.push(`Bathroom Size: ${data.get('sf_br_length')} × ${data.get('sf_br_width')} × ${data.get('sf_br_height')} ft`);
+      const scope = data.getAll('sf_br_scope').map(v => v.toString());
+      if (scope.length) lines.push(`Scope: ${scope.join(', ')}`);
+    }
+    if (svc === 'iPanel Ceiling') {
+      add('Ceiling Area', data.get('sf_ceil_area')?.toString() + ' sq.ft');
+      add('Finish Type', data.get('sf_ceil_type')?.toString());
+    }
+    if (svc === 'Shower Cubicle') {
+      add('Cubicle Shape', data.get('sf_cub_shape')?.toString());
+      add('Approximate Size', data.get('sf_cub_size')?.toString());
+    }
+    if (svc === 'Hand Railing') {
+      add('Railing Length', data.get('sf_rail_length')?.toString() + ' lin.ft');
+    }
+    if (svc === 'Waterproofing') {
+      add('Waterproofing Area', data.get('sf_wp_area')?.toString() + ' sq.ft');
+    }
+    if (svc === 'Kitchen Pantry') {
+      add('Pantry Length', data.get('sf_kp_length')?.toString() + ' lin.ft');
+    }
+    if (svc === 'Pantry Cupboard') {
+      add('Cupboard Length', data.get('sf_pc_length')?.toString() + ' lin.ft');
+    }
+
+    const notes = data.get('message')?.toString().trim();
+    if (notes) { lines.push(''); lines.push(`Notes: ${notes}`); }
+
+    return lines.join('\n');
+  }
+
+  // ── Submit ──
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    if (data.get('botcheck')) return;
+
+    const svc = data.get('service')?.toString() ?? '';
+    const baseOk = validateBase(data);
+    const svcOk  = svc ? validateServiceFields(svc, data) : true;
+    if (!baseOk || !svcOk) return;
+
+    btnSubmit.disabled = true;
+    btnText.hidden = true;
+    btnLoad.hidden = false;
+
     const SERVICE_NUMBERS: Record<string, string> = {
       'Shower Cubicle': '94710111506',
       'Hand Railing':   '94710111506',
       'iPanel Ceiling': '94764037403',
-      'Bathroom Tiling': '94774503744',
     };
-    const number = SERVICE_NUMBERS[data.get('service')?.toString() ?? ''] ?? '94774503744';
+    const number = SERVICE_NUMBERS[svc] ?? '94774503744';
+    const text = encodeURIComponent(buildMessage(data, svc));
     window.open(`https://wa.me/${number}?text=${text}`, '_blank');
 
-    // Show success state
     form.hidden = true;
     success.hidden = false;
 
-    // GA4 conversion event
-    if (typeof window.gtag === 'function') {
-      window.gtag('event', 'lead_form_submit', {
-        event_category: 'Lead',
-        event_label: data.get('service')?.toString() || 'Unknown',
-      });
+    if (typeof (window as any).gtag === 'function') {
+      (window as any).gtag('event', 'lead_form_submit', { event_category: 'Lead', event_label: svc });
     }
   });
 </script>
@@ -212,90 +484,47 @@ const { service: defaultService = '' } = Astro.props;
   }
 
   /* ── Success ── */
-  .form-success {
-    text-align: center;
-    padding: 2.5rem 1rem;
-  }
+  .form-success { text-align: center; padding: 2.5rem 1rem; }
 
   .success-icon {
-    width: 3rem;
-    height: 3rem;
-    background: var(--clay);
-    color: var(--cream);
+    width: 3rem; height: 3rem;
+    background: var(--clay); color: var(--cream);
     border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.35rem;
-    font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.35rem; font-weight: 700;
     margin: 0 auto 1.2rem;
   }
 
-  .form-success h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    color: var(--charcoal);
-    margin-bottom: .6rem;
-  }
-
-  .form-success p {
-    font-size: .88rem;
-    font-weight: 300;
-    color: var(--warm-gray);
-    line-height: 1.72;
-  }
-
-  .form-success a { color: var(--clay); }
-
-  /* ── Error banner ── */
-  .form-error {
-    background: rgba(196, 120, 74, .07);
-    border: 1px solid rgba(196, 120, 74, .28);
-    border-radius: 3px;
-    padding: .85rem 1.1rem;
-    margin-bottom: 1.2rem;
-    font-size: .85rem;
-    color: var(--warm-gray);
-    line-height: 1.55;
-  }
-
-  .form-error a { color: var(--clay); font-weight: 500; }
+  .form-success h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--charcoal); margin-bottom: .6rem; }
+  .form-success p  { font-size: .88rem; font-weight: 300; color: var(--warm-gray); line-height: 1.72; }
 
   /* ── Fields ── */
   .field {
-    display: flex;
-    flex-direction: column;
-    gap: .35rem;
+    display: flex; flex-direction: column; gap: .35rem;
     margin-bottom: 1.3rem;
   }
 
   label {
-    font-size: .78rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: .09em;
+    font-size: .78rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: .09em;
     color: var(--charcoal);
-    display: flex;
-    align-items: center;
-    gap: .3rem;
+    display: flex; align-items: center; gap: .3rem;
   }
 
   .req { color: var(--clay); }
 
   .optional {
-    font-size: .75rem;
-    font-weight: 400;
-    text-transform: none;
-    letter-spacing: 0;
+    font-size: .75rem; font-weight: 400;
+    text-transform: none; letter-spacing: 0;
     color: var(--warm-gray);
   }
 
   input[type="text"],
   input[type="tel"],
+  input[type="number"],
   textarea {
     font-family: 'DM Sans', sans-serif;
-    font-size: .9rem;
-    font-weight: 300;
+    font-size: .9rem; font-weight: 300;
     color: var(--charcoal);
     background: var(--off-white);
     border: 1.5px solid var(--stone);
@@ -304,121 +533,176 @@ const { service: defaultService = '' } = Astro.props;
     width: 100%;
     transition: border-color .2s, box-shadow .2s;
     outline: none;
+    box-sizing: border-box;
   }
 
   input[type="text"]:focus,
   input[type="tel"]:focus,
+  input[type="number"]:focus,
   textarea:focus {
     border-color: var(--clay);
-    box-shadow: 0 0 0 3px rgba(196, 120, 74, .11);
+    box-shadow: 0 0 0 3px rgba(196,120,74,.11);
   }
 
-  input::placeholder,
-  textarea::placeholder {
-    color: rgba(107, 95, 84, .45);
-    font-weight: 300;
+  input::placeholder, textarea::placeholder {
+    color: rgba(107,95,84,.45); font-weight: 300;
   }
 
-  textarea {
-    resize: vertical;
-    min-height: 110px;
-    line-height: 1.65;
+  textarea { resize: vertical; min-height: 90px; line-height: 1.65; }
+
+  /* ── Input with unit ── */
+  .input-unit {
+    display: flex; align-items: stretch;
   }
+
+  .input-unit input {
+    border-radius: 2px 0 0 2px;
+    flex: 1;
+  }
+
+  .unit {
+    background: var(--stone);
+    border: 1.5px solid var(--stone);
+    border-left: none;
+    border-radius: 0 2px 2px 0;
+    padding: 0 .85rem;
+    font-size: .8rem;
+    color: var(--warm-gray);
+    display: flex; align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Field row (two-col) ── */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .field-row.three-col { grid-template-columns: 1fr 1fr 1fr; }
 
   /* ── Custom select ── */
-  .select-wrap {
-    position: relative;
-  }
+  .select-wrap { position: relative; }
 
   .select-wrap select {
     font-family: 'DM Sans', sans-serif;
-    font-size: .9rem;
-    font-weight: 300;
+    font-size: .9rem; font-weight: 300;
     color: var(--charcoal);
     background: var(--off-white);
-    border: 1.5px solid var(--stone);
-    border-radius: 2px;
+    border: 1.5px solid var(--stone); border-radius: 2px;
     padding: .78rem 2.5rem .78rem 1rem;
-    width: 100%;
-    cursor: pointer;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
+    width: 100%; cursor: pointer;
+    outline: none; appearance: none; -webkit-appearance: none;
     transition: border-color .2s, box-shadow .2s;
   }
 
   .select-wrap select:focus {
     border-color: var(--clay);
-    box-shadow: 0 0 0 3px rgba(196, 120, 74, .11);
+    box-shadow: 0 0 0 3px rgba(196,120,74,.11);
   }
 
   .select-arrow {
-    position: absolute;
-    right: .9rem;
-    top: 50%;
+    position: absolute; right: .9rem; top: 50%;
     transform: translateY(-50%);
-    width: .6rem;
-    fill: var(--warm-gray);
-    pointer-events: none;
+    width: .6rem; fill: var(--warm-gray); pointer-events: none;
+  }
+
+  /* ── Service-specific field group ── */
+  .svc-fields {
+    background: rgba(196,120,74,.04);
+    border: 1px solid rgba(196,120,74,.18);
+    border-radius: 3px;
+    padding: 1.2rem 1.2rem .2rem;
+    margin-bottom: 1.3rem;
+  }
+
+  .svc-fields-header {
+    font-size: .72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .12em;
+    color: var(--clay);
+    margin-bottom: 1rem;
+  }
+
+  .svc-fields .field { margin-bottom: 1rem; }
+
+  /* ── Checkboxes ── */
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: .5rem .8rem;
+    margin-top: .3rem;
+  }
+
+  .check-item {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .84rem; font-weight: 400;
+    text-transform: none; letter-spacing: 0;
+    color: var(--charcoal);
+    cursor: pointer;
+  }
+
+  .check-item input[type="checkbox"] {
+    width: 1rem; height: 1rem;
+    accent-color: var(--clay);
+    flex-shrink: 0;
+    padding: 0;
+  }
+
+  /* ── Radio group ── */
+  .radio-group {
+    display: flex; flex-direction: column; gap: .5rem;
+    margin-top: .3rem;
+  }
+
+  .radio-item {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .88rem; font-weight: 400;
+    text-transform: none; letter-spacing: 0;
+    color: var(--charcoal);
+    cursor: pointer;
+  }
+
+  .radio-item input[type="radio"] {
+    width: 1rem; height: 1rem;
+    accent-color: var(--clay);
+    flex-shrink: 0;
+    padding: 0;
   }
 
   /* ── Inline errors ── */
   .field-err {
-    display: none;
-    font-size: .76rem;
-    color: #b94040;
+    display: none; font-size: .76rem; color: #b94040;
   }
 
   /* ── Honeypot ── */
-  .honeypot {
-    position: absolute;
-    left: -9999px;
-    opacity: 0;
-    pointer-events: none;
-  }
+  .honeypot { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
 
-  /* ── Submit button ── */
+  /* ── Submit ── */
   .btn-submit {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--clay);
-    color: var(--cream);
-    border: none;
-    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--clay); color: var(--cream);
+    border: none; border-radius: 2px;
     font-family: 'DM Sans', sans-serif;
-    font-size: .88rem;
-    font-weight: 500;
-    letter-spacing: .03em;
-    padding: .96rem 1.8rem;
-    cursor: pointer;
+    font-size: .88rem; font-weight: 500; letter-spacing: .03em;
+    padding: .96rem 1.8rem; cursor: pointer;
     transition: background .2s, transform .2s;
     margin-top: .4rem;
   }
 
-  .btn-submit:hover:not(:disabled) {
-    background: #b56a3e;
-    transform: translateY(-2px);
-  }
-
-  .btn-submit:disabled {
-    opacity: .65;
-    cursor: not-allowed;
-    transform: none;
-  }
+  .btn-submit:hover:not(:disabled) { background: #b56a3e; transform: translateY(-2px); }
+  .btn-submit:disabled { opacity: .65; cursor: not-allowed; transform: none; }
 
   .form-note {
-    font-size: .75rem;
-    color: var(--warm-gray);
-    text-align: center;
-    margin-top: .9rem;
-    font-weight: 300;
+    font-size: .75rem; color: var(--warm-gray);
+    text-align: center; margin-top: .9rem; font-weight: 300;
   }
 
+  /* ── Responsive ── */
   @media (max-width: 600px) {
-    .form-wrap {
-      padding: 1.6rem 1.2rem;
-    }
+    .form-wrap { padding: 1.6rem 1.2rem; }
+    .field-row, .field-row.three-col { grid-template-columns: 1fr; }
+    .check-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
