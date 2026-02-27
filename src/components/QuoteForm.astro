@@ -1,9 +1,11 @@
 ---
+import ContactForm from './ContactForm.astro';
+
 interface Props {
-  phone: string;   // WhatsApp number without +, e.g. "94774503744"
-  service: string; // Service name, e.g. "Floor Tiling"
+  phone: string;
+  service: string;
 }
-const { phone, service } = Astro.props;
+const { service } = Astro.props;
 ---
 
 <section class="qf-section" id="get-a-quote">
@@ -39,137 +41,23 @@ const { phone, service } = Astro.props;
         </li>
       </ul>
     </div>
-
-    <form class="qf-form" id={`quote-form-${phone}`} novalidate>
-      <div class="qf-field">
-        <label for={`qf-name-${phone}`}>Your Name <span class="req">*</span></label>
-        <input
-          type="text"
-          id={`qf-name-${phone}`}
-          name="name"
-          placeholder="e.g. Kasun Perera"
-          autocomplete="name"
-          required
-        />
-      </div>
-
-      <div class="qf-field">
-        <label for={`qf-phone-${phone}`}>Your Phone Number <span class="req">*</span></label>
-        <input
-          type="tel"
-          id={`qf-phone-${phone}`}
-          name="phone"
-          placeholder="e.g. 077 123 4567"
-          autocomplete="tel"
-          required
-        />
-      </div>
-
-      <div class="qf-field">
-        <label for={`qf-city-${phone}`}>City / Area <span class="req">*</span></label>
-        <input
-          type="text"
-          id={`qf-city-${phone}`}
-          name="city"
-          placeholder="e.g. Colombo, Kandy, Galle"
-          required
-        />
-      </div>
-
-      <div class="qf-field">
-        <label for={`qf-msg-${phone}`}>Project Details</label>
-        <textarea
-          id={`qf-msg-${phone}`}
-          name="message"
-          rows="4"
-          placeholder="Tell us about your project — size, tile type, any specific requirements…"
-        ></textarea>
-      </div>
-
-      <p class="qf-error" id={`qf-err-${phone}`} aria-live="polite"></p>
-
-      <button type="submit" class="qf-submit">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
-        </svg>
-        Send via WhatsApp
-      </button>
-
-      <p class="qf-note">
-        Clicking "Send via WhatsApp" will open WhatsApp with your details pre-filled.
-        Your message goes directly to our team.
-      </p>
-    </form>
+    <div class="qf-right">
+      <ContactForm service={service} />
+    </div>
   </div>
 </section>
 
-<script define:vars={{ phone, service }}>
-  (function () {
-    const form = document.getElementById('quote-form-' + phone);
-    if (!form) return;
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const name    = form.elements['name'].value.trim();
-      const userPhone = form.elements['phone'].value.trim();
-      const city    = form.elements['city'].value.trim();
-      const message = form.elements['message'].value.trim();
-      const errEl   = document.getElementById('qf-err-' + phone);
-
-      if (!name || !userPhone || !city) {
-        errEl.textContent = 'Please fill in your name, phone number, and city.';
-        return;
-      }
-
-      errEl.textContent = '';
-
-      const lines = [
-        'Hello TILERSHUB, I would like a quote for *' + service + '*.',
-        '',
-        'Name: ' + name,
-        'Phone: ' + userPhone,
-        'City / Area: ' + city,
-      ];
-
-      if (message) {
-        lines.push('');
-        lines.push('Project details:');
-        lines.push(message);
-      }
-
-      const text = encodeURIComponent(lines.join('\n'));
-      window.open('https://wa.me/' + phone + '?text=' + text, '_blank');
-    });
-  })();
-</script>
-
 <style>
   .qf-section {
-    background: var(--charcoal);
+    background: var(--off-white);
     padding: 5.5rem 4rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .qf-section::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,.01) 60px, rgba(255,255,255,.01) 61px),
-      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.01) 60px, rgba(255,255,255,.01) 61px);
-    pointer-events: none;
   }
 
   .qf-inner {
-    position: relative;
-    z-index: 1;
     max-width: 1100px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 1.3fr;
+    grid-template-columns: 1fr 1.4fr;
     gap: 6rem;
     align-items: start;
   }
@@ -182,7 +70,7 @@ const { phone, service } = Astro.props;
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.8rem, 3vw, 2.6rem);
     font-weight: 700;
-    color: var(--cream);
+    color: var(--charcoal);
     line-height: 1.15;
     letter-spacing: -.02em;
     margin: .6rem 0 1rem;
@@ -191,7 +79,7 @@ const { phone, service } = Astro.props;
   .qf-sub {
     font-size: .88rem;
     font-weight: 300;
-    color: rgba(245,240,232,.6);
+    color: var(--warm-gray);
     line-height: 1.75;
     margin-bottom: 1.8rem;
     max-width: 38ch;
@@ -209,111 +97,13 @@ const { phone, service } = Astro.props;
     align-items: center;
     gap: .7rem;
     font-size: .82rem;
-    color: rgba(245,240,232,.65);
+    color: var(--warm-gray);
   }
 
   .qf-promises svg {
     width: 1.1rem;
     height: 1.1rem;
     flex-shrink: 0;
-  }
-
-  /* ── Form card ── */
-
-  .qf-form {
-    background: rgba(245,240,232,.04);
-    border: 1px solid rgba(245,240,232,.08);
-    border-radius: 6px;
-    padding: 2.4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-
-  .qf-field {
-    display: flex;
-    flex-direction: column;
-    gap: .4rem;
-  }
-
-  .qf-field label {
-    font-size: .75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: rgba(245,240,232,.55);
-  }
-
-  .req { color: var(--clay); }
-
-  .qf-field input,
-  .qf-field textarea {
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(245,240,232,.12);
-    border-radius: 4px;
-    padding: .75rem 1rem;
-    color: var(--cream);
-    font-family: 'DM Sans', sans-serif;
-    font-size: .88rem;
-    font-weight: 300;
-    line-height: 1.5;
-    outline: none;
-    transition: border-color .2s, background .2s;
-    width: 100%;
-    box-sizing: border-box;
-    resize: vertical;
-  }
-
-  .qf-field input::placeholder,
-  .qf-field textarea::placeholder {
-    color: rgba(245,240,232,.28);
-  }
-
-  .qf-field input:focus,
-  .qf-field textarea:focus {
-    border-color: var(--clay);
-    background: rgba(255,255,255,.09);
-  }
-
-  .qf-error {
-    font-size: .78rem;
-    color: #e07b5a;
-    min-height: 1rem;
-    margin: -.4rem 0;
-  }
-
-  .qf-submit {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .6rem;
-    background: #25d366;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: .9rem 1.6rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background .2s, transform .15s;
-    width: 100%;
-    margin-top: .2rem;
-  }
-
-  .qf-submit:hover {
-    background: #1ebe5c;
-    transform: translateY(-1px);
-  }
-
-  .qf-submit svg { flex-shrink: 0; }
-
-  .qf-note {
-    font-size: .72rem;
-    color: rgba(245,240,232,.3);
-    line-height: 1.6;
-    text-align: center;
-    margin-top: -.4rem;
   }
 
   /* ── Responsive ── */
@@ -331,7 +121,5 @@ const { phone, service } = Astro.props;
 
   @media (max-width: 768px) {
     .qf-section { padding: 4rem 1.5rem; }
-
-    .qf-form { padding: 1.8rem 1.4rem; }
   }
 </style>
