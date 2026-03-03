@@ -63,39 +63,65 @@ const { service: defaultService = '' } = Astro.props;
 
     <!-- Floor Tiling -->
     <div class="svc-fields" data-svc="Floor Tiling" hidden>
-      <div class="svc-fields-header">Project Details</div>
-      <div class="field-row">
-        <div class="field">
-          <label for="sf-floor-area">Floor Area <span class="req">*</span></label>
-          <div class="input-unit">
-            <input type="number" id="sf-floor-area" name="sf_floor_area" placeholder="e.g. 450" min="1" />
-            <span class="unit">sq.ft</span>
+      <div class="svc-fields-header">Floor Details</div>
+      <div id="sf-floor-entries">
+        <div class="floor-entry" data-floor-entry>
+          <div class="floor-entry-header">
+            <span class="floor-entry-label">Floor 1</span>
+            <button type="button" class="btn-remove-entry" hidden>✕ Remove</button>
           </div>
-          <span class="field-err" id="err-sf_floor_area" role="alert"></span>
-        </div>
-        <div class="field">
-          <label for="sf-skirting">Skirting Length <span class="optional">(optional)</span></label>
-          <div class="input-unit">
-            <input type="number" id="sf-skirting" name="sf_skirting" placeholder="e.g. 80" min="0" />
-            <span class="unit">lin.ft</span>
+          <div class="field-row">
+            <div class="field">
+              <label>Floor Level <span class="optional">(optional)</span></label>
+              <div class="select-wrap">
+                <select name="sf_floor_level[]">
+                  <option value="">Select level…</option>
+                  <option value="Ground Floor">Ground Floor</option>
+                  <option value="1st Floor">1st Floor</option>
+                  <option value="2nd Floor">2nd Floor</option>
+                  <option value="3rd Floor">3rd Floor</option>
+                  <option value="Basement">Basement</option>
+                  <option value="Rooftop">Rooftop</option>
+                </select>
+                <svg class="select-arrow" viewBox="0 0 10 6" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+              </div>
+            </div>
+            <div class="field">
+              <label>Tile Size <span class="optional">(optional)</span></label>
+              <div class="select-wrap">
+                <select name="sf_floor_tile[]">
+                  <option value="">Select tile size…</option>
+                  <option value="300x600 mm">300×600 mm</option>
+                  <option value="600x600 mm">600×600 mm</option>
+                  <option value="600x1200 mm (2×4)">600×1200 mm (2×4)</option>
+                  <option value="800x800 mm">800×800 mm</option>
+                  <option value="800x1600 mm">800×1600 mm</option>
+                  <option value="Other">Other</option>
+                </select>
+                <svg class="select-arrow" viewBox="0 0 10 6" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Floor Area <span class="req">*</span></label>
+              <div class="input-unit">
+                <input type="number" name="sf_floor_area[]" placeholder="e.g. 450" min="1" />
+                <span class="unit">sq.ft</span>
+              </div>
+              <span class="floor-area-err field-err" role="alert"></span>
+            </div>
+            <div class="field">
+              <label>Skirting Length <span class="optional">(optional)</span></label>
+              <div class="input-unit">
+                <input type="number" name="sf_floor_skirting[]" placeholder="e.g. 80" min="0" />
+                <span class="unit">lin.ft</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="field">
-        <label for="sf-tile-size">Tile Size <span class="optional">(optional)</span></label>
-        <div class="select-wrap">
-          <select id="sf-tile-size" name="sf_tile_size">
-            <option value="">Select tile size…</option>
-            <option value="300x600 mm">300×600 mm</option>
-            <option value="600x600 mm">600×600 mm</option>
-            <option value="600x1200 mm (2×4)">600×1200 mm (2×4)</option>
-            <option value="800x800 mm">800×800 mm</option>
-            <option value="800x1600 mm">800×1600 mm</option>
-            <option value="Other">Other</option>
-          </select>
-          <svg class="select-arrow" viewBox="0 0 10 6" aria-hidden="true"><path d="M0 0l5 6 5-6z"/></svg>
-        </div>
-      </div>
+      <button type="button" id="btn-add-floor" class="btn-add-entry">+ Add Another Floor</button>
     </div>
 
     <!-- Staircase Tiling -->
@@ -339,8 +365,20 @@ const { service: defaultService = '' } = Astro.props;
 
   function validateServiceFields(svc: string, data: FormData): boolean {
     let ok = true;
+    if (svc === 'Floor Tiling') {
+      const entries = form.querySelectorAll<HTMLElement>('[data-floor-entry]');
+      entries.forEach(entry => {
+        const areaInput = entry.querySelector<HTMLInputElement>('input[name="sf_floor_area[]"]');
+        const errEl = entry.querySelector<HTMLElement>('.floor-area-err');
+        if (!areaInput?.value.trim()) {
+          if (errEl) { errEl.textContent = 'Floor area is required.'; errEl.style.display = 'block'; }
+          ok = false;
+        } else {
+          if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+        }
+      });
+    }
     const req: Record<string, [string, string]> = {
-      'Floor Tiling':        ['sf_floor_area',  'Floor area is required.'],
       'Staircase Tiling':    ['sf_stair_length', 'Staircase length is required.'],
       'Bathroom Tiling':     ['sf_bt_area',      'Tiling area is required.'],
       'Bathroom Renovation': ['sf_br_length',    'Bathroom length is required.'],
@@ -385,10 +423,21 @@ const { service: defaultService = '' } = Astro.props;
     };
 
     if (svc === 'Floor Tiling') {
-      add('Floor Area', data.get('sf_floor_area')?.toString() + ' sq.ft');
-      const sk = data.get('sf_skirting')?.toString().trim();
-      if (sk) lines.push(`Skirting Length: ${sk} lin.ft`);
-      add('Tile Size', data.get('sf_tile_size')?.toString());
+      const entries = form.querySelectorAll<HTMLElement>('[data-floor-entry]');
+      entries.forEach((entry, i) => {
+        const labelEl = entry.querySelector<HTMLElement>('.floor-entry-label');
+        const floorLabel = labelEl?.textContent ?? `Floor ${i + 1}`;
+        const level    = entry.querySelector<HTMLSelectElement>('select[name="sf_floor_level[]"]')?.value ?? '';
+        const tile     = entry.querySelector<HTMLSelectElement>('select[name="sf_floor_tile[]"]')?.value ?? '';
+        const area     = entry.querySelector<HTMLInputElement>('input[name="sf_floor_area[]"]')?.value.trim() ?? '';
+        const skirting = entry.querySelector<HTMLInputElement>('input[name="sf_floor_skirting[]"]')?.value.trim() ?? '';
+        lines.push('');
+        lines.push(`${floorLabel}:`);
+        if (level)    lines.push(`  Level: ${level}`);
+        if (tile)     lines.push(`  Tile Size: ${tile}`);
+        if (area)     lines.push(`  Floor Area: ${area} sq.ft`);
+        if (skirting) lines.push(`  Skirting: ${skirting} lin.ft`);
+      });
     }
     if (svc === 'Staircase Tiling') {
       add('Staircase Length', data.get('sf_stair_length')?.toString() + ' lin.ft');
@@ -429,6 +478,42 @@ const { service: defaultService = '' } = Astro.props;
 
     return lines.join('\n');
   }
+
+  // ── Multi-floor add / remove ──
+  const floorEntries = document.getElementById('sf-floor-entries')!;
+  const btnAddFloor  = document.getElementById('btn-add-floor')!;
+
+  function renumberFloors() {
+    const all = floorEntries.querySelectorAll<HTMLElement>('[data-floor-entry]');
+    all.forEach((entry, i) => {
+      const labelEl = entry.querySelector<HTMLElement>('.floor-entry-label');
+      if (labelEl) labelEl.textContent = `Floor ${i + 1}`;
+      const removeBtn = entry.querySelector<HTMLButtonElement>('.btn-remove-entry');
+      if (removeBtn) removeBtn.hidden = all.length === 1;
+    });
+  }
+
+  function attachRemoveListener(entry: HTMLElement) {
+    const removeBtn = entry.querySelector<HTMLButtonElement>('.btn-remove-entry');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => { entry.remove(); renumberFloors(); });
+    }
+  }
+
+  // Attach to the initial entry and set initial state
+  floorEntries.querySelectorAll<HTMLElement>('[data-floor-entry]').forEach(attachRemoveListener);
+  renumberFloors();
+
+  btnAddFloor.addEventListener('click', () => {
+    const template = floorEntries.querySelector<HTMLElement>('[data-floor-entry]')!;
+    const clone = template.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll('input').forEach(inp => { inp.value = ''; });
+    clone.querySelectorAll('select').forEach(sel => { sel.selectedIndex = 0; });
+    clone.querySelectorAll<HTMLElement>('.floor-area-err').forEach(el => { el.textContent = ''; el.style.display = 'none'; });
+    floorEntries.appendChild(clone);
+    attachRemoveListener(clone);
+    renumberFloors();
+  });
 
   // ── Submit ──
   form.addEventListener('submit', (e) => {
@@ -685,6 +770,56 @@ const { service: defaultService = '' } = Astro.props;
   .form-note {
     font-size: .75rem; color: var(--warm-gray);
     text-align: center; margin-top: .9rem; font-weight: 300;
+  }
+
+  /* ── Multi-floor entries ── */
+  .floor-entry {
+    border: 1px dashed rgba(196, 120, 74, .3);
+    border-radius: 3px;
+    padding: 1rem 1rem .2rem;
+    margin-bottom: .9rem;
+  }
+
+  .floor-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .9rem;
+  }
+
+  .floor-entry-label {
+    font-size: .72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .12em;
+    color: var(--clay);
+  }
+
+  .btn-remove-entry {
+    background: none; border: none;
+    color: #b94040;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .76rem; cursor: pointer;
+    padding: .2rem .4rem; border-radius: 2px;
+    transition: background .15s;
+  }
+
+  .btn-remove-entry:hover { background: rgba(185, 64, 64, .08); }
+
+  .btn-add-entry {
+    display: flex; align-items: center; gap: .4rem;
+    background: none;
+    border: 1px dashed rgba(196, 120, 74, .4);
+    border-radius: 2px;
+    color: var(--clay);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem; font-weight: 500;
+    padding: .5rem 1rem; cursor: pointer;
+    margin-top: .3rem;
+    transition: background .2s, border-color .2s;
+  }
+
+  .btn-add-entry:hover {
+    background: rgba(196, 120, 74, .07);
+    border-color: var(--clay);
   }
 
   /* ── Responsive ── */
