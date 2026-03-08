@@ -13,7 +13,7 @@ import Footer from '../../components/Footer.astro';
   <Nav />
 
   <!-- Page Hero -->
-  <section class="page-hero">
+  <section class="page-hero" style="--hero-bg: url('https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1400&q=80')">
     <div class="hero-inner">
       <div class="breadcrumb">
         <a href="/">Home</a>
@@ -21,23 +21,6 @@ import Footer from '../../components/Footer.astro';
         <a href="/#services">Services</a>
         <span>›</span>
         <span>Kitchen Pantry Cupboard</span>
-      </div>
-      <div class="hero-icon reveal">
-        <svg viewBox="0 0 48 48" fill="none">
-          <!-- Cabinet body -->
-          <rect x="4"  y="10" width="40" height="32" rx="1.5" stroke="#c4784a" stroke-width="2" fill="none" opacity=".7"/>
-          <!-- Middle shelf -->
-          <rect x="4"  y="26" width="40" height="2"  rx="0" fill="#c4784a" opacity=".35"/>
-          <!-- Vertical divider -->
-          <rect x="23" y="10" width="2"  height="32" rx="0" fill="#c4784a" opacity=".2"/>
-          <!-- Door handles -->
-          <rect x="17" y="22" width="4"  height="1.5" rx=".75" fill="#c4784a" opacity=".8"/>
-          <rect x="27" y="22" width="4"  height="1.5" rx=".75" fill="#c4784a" opacity=".8"/>
-          <rect x="17" y="32" width="4"  height="1.5" rx=".75" fill="#c4784a" opacity=".8"/>
-          <rect x="27" y="32" width="4"  height="1.5" rx=".75" fill="#c4784a" opacity=".8"/>
-          <!-- Counter top -->
-          <rect x="2"  y="8"  width="44" height="3"  rx="1" fill="#c4784a" opacity=".55"/>
-        </svg>
       </div>
       <h1 class="reveal">Kitchen Pantry Cupboard</h1>
       <p class="hero-desc reveal">
@@ -472,7 +455,11 @@ import Footer from '../../components/Footer.astro';
 
 <style>
   .page-hero {
-    background: var(--charcoal);
+    background:
+      linear-gradient(rgba(30,26,23,.82), rgba(30,26,23,.96)),
+      var(--hero-bg, var(--charcoal));
+    background-size: cover;
+    background-position: center;
     padding: 7rem 4rem 5.5rem;
     position: relative;
     overflow: hidden;
@@ -510,12 +497,6 @@ import Footer from '../../components/Footer.astro';
   }
 
   .breadcrumb a:hover { color: var(--clay); }
-
-  .hero-icon {
-    width: 3.2rem;
-    height: 3.2rem;
-    margin-bottom: 1.4rem;
-  }
 
   h1 {
     font-family: 'Playfair Display', serif;
