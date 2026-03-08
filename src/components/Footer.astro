@@ -212,6 +212,12 @@
 
   /* ── Floating WhatsApp button ── */
 
+  @keyframes wa-pulse {
+    0%   { box-shadow: 0 4px 20px rgba(37,211,102,.4), 0 0 0 0 rgba(37,211,102,.45); }
+    70%  { box-shadow: 0 4px 20px rgba(37,211,102,.4), 0 0 0 12px rgba(37,211,102,0); }
+    100% { box-shadow: 0 4px 20px rgba(37,211,102,.4), 0 0 0 0 rgba(37,211,102,0); }
+  }
+
   .wa-float {
     position: fixed;
     bottom: 2rem;
@@ -225,6 +231,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 20px rgba(37, 211, 102, .4);
+    animation: wa-pulse 2.5s ease-in-out infinite;
     transition: transform .2s, box-shadow .2s;
     text-decoration: none;
   }
@@ -232,6 +239,7 @@
   .wa-float:hover {
     transform: scale(1.1) translateY(-3px);
     box-shadow: 0 8px 28px rgba(37, 211, 102, .5);
+    animation: none;
   }
 
   .wa-float svg {
