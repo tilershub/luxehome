@@ -13,7 +13,7 @@ import Footer from '../../components/Footer.astro';
   <Nav />
 
   <!-- Page Hero -->
-  <section class="page-hero">
+  <section class="page-hero" style="--hero-bg: url('https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1400&q=80')">
     <div class="hero-inner">
       <div class="breadcrumb">
         <a href="/">Home</a>
@@ -21,14 +21,6 @@ import Footer from '../../components/Footer.astro';
         <a href="/#services">Services</a>
         <span>›</span>
         <span>Bathroom Renovation</span>
-      </div>
-      <div class="hero-icon reveal">
-        <svg viewBox="0 0 48 48" fill="none">
-          <rect x="4"  y="4"  width="40" height="40" rx="2" stroke="#c4784a" stroke-width="2.5" fill="none" opacity=".6"/>
-          <path d="M13 28 C13 21 35 21 35 28" stroke="#c4784a" stroke-width="2" fill="none" opacity=".5"/>
-          <circle cx="18" cy="17" r="3" fill="#c4784a" opacity=".45"/>
-          <rect x="20" y="33" width="8" height="9" rx="1" fill="#c4784a" opacity=".38"/>
-        </svg>
       </div>
       <h1 class="reveal">Bathroom Construction<br />&amp; Renovation</h1>
       <p class="hero-desc reveal">
@@ -294,7 +286,11 @@ import Footer from '../../components/Footer.astro';
   /* ── Page Hero ── */
 
   .page-hero {
-    background: var(--charcoal);
+    background:
+      linear-gradient(rgba(30,26,23,.82), rgba(30,26,23,.96)),
+      var(--hero-bg, var(--charcoal));
+    background-size: cover;
+    background-position: center;
     padding: 7rem 4rem 5.5rem;
     position: relative;
     overflow: hidden;
@@ -332,12 +328,6 @@ import Footer from '../../components/Footer.astro';
   }
 
   .breadcrumb a:hover { color: var(--clay); }
-
-  .hero-icon {
-    width: 3.2rem;
-    height: 3.2rem;
-    margin-bottom: 1.4rem;
-  }
 
   h1 {
     font-family: 'Playfair Display', serif;
