@@ -33,23 +33,15 @@
           </div>
         </div>
 
-        <!-- Dimensions -->
+        <!-- Floor Area -->
         <div class="bc-card reveal">
-          <div class="bc-card-title">Bathroom Dimensions</div>
-          <div class="bc-row">
-            <div class="bc-field">
-              <label class="bc-label" for="bc-length">Length (feet)</label>
-              <input class="bc-input bc-dim" type="number" id="bc-length" placeholder="e.g. 8" min="1" max="100" step="0.5" />
+          <div class="bc-card-title">Floor Area</div>
+          <div class="bc-field">
+            <label class="bc-label" for="bc-area">Bathroom Floor Area</label>
+            <div class="bc-area-input-wrap">
+              <input class="bc-input" type="number" id="bc-area" placeholder="e.g. 48" min="1" max="5000" step="0.1" />
+              <span class="bc-area-unit">sq.ft</span>
             </div>
-            <div class="bc-field">
-              <label class="bc-label" for="bc-width">Width (feet)</label>
-              <input class="bc-input bc-dim" type="number" id="bc-width" placeholder="e.g. 6" min="1" max="100" step="0.5" />
-            </div>
-          </div>
-          <div class="bc-area-preview" id="bc-area-preview">
-            <span class="bcap-label">Calculated Area</span>
-            <span class="bcap-value" id="bc-area-value">—</span>
-            <span class="bcap-unit">sq.ft</span>
           </div>
         </div>
 
@@ -248,23 +240,7 @@
     return 'Rs. ' + n.toLocaleString('en-IN');
   }
 
-  // Live area preview
-  const lenEl  = document.getElementById('bc-length');
-  const widEl  = document.getElementById('bc-width');
-  const areaEl = document.getElementById('bc-area-value');
-
-  function updateAreaPreview() {
-    const l = parseFloat((lenEl as HTMLInputElement).value);
-    const w = parseFloat((widEl as HTMLInputElement).value);
-    if (l > 0 && w > 0) {
-      areaEl.textContent = (l * w).toFixed(1);
-    } else {
-      areaEl.textContent = '—';
-    }
-  }
-
-  lenEl.addEventListener('input', updateAreaPreview);
-  widEl.addEventListener('input', updateAreaPreview);
+  const areaInputEl = document.getElementById('bc-area') as HTMLInputElement;
 
   // Package card selection highlight
   document.querySelectorAll('.pkg-card').forEach(card => {
@@ -279,8 +255,7 @@
     const name     = (document.getElementById('bc-name') as HTMLInputElement).value.trim();
     const phone    = (document.getElementById('bc-phone') as HTMLInputElement).value.trim();
     const location = (document.getElementById('bc-location') as HTMLInputElement).value.trim();
-    const length   = parseFloat((lenEl as HTMLInputElement).value);
-    const width    = parseFloat((widEl as HTMLInputElement).value);
+    const area     = parseFloat(areaInputEl.value);
     const pkgKey   = (document.querySelector('input[name="bcpkg"]:checked') as HTMLInputElement)?.value;
     const errorEl  = document.getElementById('bc-error');
 
@@ -289,8 +264,7 @@
     if (!name)              errors.push('Please enter your name.');
     if (!phone)             errors.push('Please enter your phone number.');
     if (!location)          errors.push('Please enter your project location.');
-    if (!(length > 0))      errors.push('Please enter a valid bathroom length.');
-    if (!(width > 0))       errors.push('Please enter a valid bathroom width.');
+    if (!(area > 0))        errors.push('Please enter a valid floor area.');
     if (!pkgKey)            errors.push('Please select a package.');
 
     if (errors.length) {
@@ -300,7 +274,6 @@
     }
     errorEl.style.display = 'none';
 
-    const area = length * width;
     const pkg  = PACKAGES[pkgKey];
     const rate = area > 100 ? pkg.largeRate : pkg.rate;
     const calc = area * rate;
@@ -867,34 +840,22 @@
     background: #fff;
   }
 
-  /* ── Area preview ── */
-  .bc-area-preview {
+  /* ── Area input ── */
+  .bc-area-input-wrap {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: .5rem;
-    background: rgba(196,120,74,.07);
-    border: 1px solid rgba(196,120,74,.2);
-    border-radius: 4px;
-    padding: .7rem 1rem;
-    margin-top: .8rem;
   }
 
-  .bcap-label {
-    font-size: .74rem;
-    color: var(--warm-gray);
+  .bc-area-input-wrap .bc-input {
     flex: 1;
   }
 
-  .bcap-value {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--clay);
-  }
-
-  .bcap-unit {
-    font-size: .75rem;
+  .bc-area-unit {
+    font-size: .8rem;
+    font-weight: 600;
     color: var(--warm-gray);
+    white-space: nowrap;
   }
 
   /* ── Package grid ── */
