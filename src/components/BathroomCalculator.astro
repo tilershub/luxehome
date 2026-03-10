@@ -393,10 +393,11 @@
     }
   });
 
-  // PDF / Print — opens a clean popup with only quote data, then prints it
+  // PDF — injects a hidden iframe (no popup blocker), prints reliably
   document.getElementById('ra-pdf').addEventListener('click', () => {
-    const waBtn   = document.getElementById('ra-wa') as HTMLElement;
-    const pdfBtn  = document.getElementById('ra-pdf') as HTMLElement;
+    const waBtn  = document.getElementById('ra-wa') as HTMLElement;
+    const pdfBtn = document.getElementById('ra-pdf') as HTMLElement;
+
     const name     = waBtn.dataset.name     || '';
     const phone    = waBtn.dataset.phone    || '';
     const location = waBtn.dataset.location || '';
@@ -408,147 +409,340 @@
     const includes = waBtn.dataset.includes || '';
     const date     = (document.getElementById('rp-date') as HTMLElement).textContent || '';
 
-    const scopeItems = includes
-      .split(', ')
-      .map(s => `<li>${s}</li>`)
-      .join('');
+    if (!name) { alert('Generate a quote first before downloading.'); return; }
 
-    const noteRow = note ? `<p class="note">${note}</p>` : '';
+    const scopeItems = includes.split(', ').map(s =>
+      `<li><span class="chk">✓</span>${s}</li>`
+    ).join('');
 
-    const payRows = (pdfBtn.dataset.payRows || '').split(';;').map(row => {
+    const noteHtml = note
+      ? `<div class="note-row"><span class="note-icon">ℹ</span>${note}</div>`
+      : '';
+
+    const payRows = (pdfBtn.dataset.payRows || '').split(';;').map((row, i) => {
       const [pct, label, desc, amt] = row.split('|');
-      return `
-        <tr>
-          <td class="pt-label">${label}</td>
-          <td class="pt-desc">${desc}</td>
-          <td class="pt-pct">${pct}</td>
-          <td class="pt-amt">${amt}</td>
-        </tr>`;
+      const bg = i % 2 === 0 ? '#faf7f2' : '#ffffff';
+      return `<tr style="background:${bg}">
+        <td class="pt-num">${i + 1}</td>
+        <td class="pt-label">${label}</td>
+        <td class="pt-desc">${desc}</td>
+        <td class="pt-pct">${pct}</td>
+        <td class="pt-amt">${amt}</td>
+      </tr>`;
     }).join('');
 
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>TILERSHUB — Renovation Estimate</title>
+<title>TILERSHUB — Renovation Estimate · ${name}</title>
 <style>
-  @page { size: A4; margin: 2cm 2.2cm; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Georgia, 'Times New Roman', serif; color: #1e1a17; background: #fff; font-size: 11pt; line-height: 1.5; }
-  /* Header */
-  .hdr { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 12pt; border-bottom: 2pt solid #c4784a; margin-bottom: 18pt; }
-  .brand-name { font-size: 20pt; font-weight: 900; color: #c4784a; letter-spacing: 2pt; }
-  .brand-sub  { font-size: 8pt; color: #888; margin-top: 2pt; }
-  .doc-title  { font-size: 10pt; color: #888; text-transform: uppercase; letter-spacing: 1pt; text-align: right; }
-  /* Client */
-  .section-title { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1.5pt; color: #c4784a; margin-bottom: 7pt; }
-  .client-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4pt 24pt; margin-bottom: 18pt; }
-  .client-row { font-size: 10pt; }
-  .client-label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1pt; color: #888; display: block; margin-bottom: 1pt; }
-  /* Metrics */
-  .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10pt; margin-bottom: 18pt; }
-  .metric { border: 0.75pt solid #d4c4b0; border-radius: 3pt; padding: 10pt 12pt; }
-  .metric-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #888; margin-bottom: 4pt; }
-  .metric-value { font-size: 14pt; font-weight: 900; color: #1e1a17; }
-  .metric-unit  { font-size: 8pt; color: #888; }
-  /* Total */
-  .total-block { background: #fdf5ee; border: 1pt solid #c4784a; border-radius: 3pt; padding: 16pt 20pt; margin-bottom: 18pt; text-align: center; }
-  .total-label { font-size: 8pt; text-transform: uppercase; letter-spacing: 1.5pt; color: #888; margin-bottom: 5pt; }
-  .total-price { font-size: 26pt; font-weight: 900; color: #c4784a; line-height: 1; }
-  .note { font-size: 8pt; color: #888; font-style: italic; margin-top: 6pt; }
-  /* Scope */
-  .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5pt 18pt; margin-bottom: 18pt; }
-  .scope-grid li { font-size: 9.5pt; color: #1e1a17; list-style: none; padding-left: 12pt; position: relative; line-height: 1.6; }
-  .scope-grid li::before { content: '✓'; position: absolute; left: 0; color: #c4784a; font-size: 9pt; }
-  /* Payment table */
-  .pay-table { width: 100%; border-collapse: collapse; margin-bottom: 18pt; font-size: 9.5pt; }
-  .pay-table th { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #888; text-align: left; padding: 5pt 8pt; border-bottom: 1pt solid #d4c4b0; }
-  .pay-table th.right { text-align: right; }
-  .pay-table td { padding: 7pt 8pt; border-bottom: 0.5pt solid #ede5d8; vertical-align: top; }
-  .pt-label { font-weight: bold; color: #1e1a17; width: 36%; }
-  .pt-desc  { color: #888; font-size: 8.5pt; width: 38%; }
-  .pt-pct   { color: #c4784a; font-weight: bold; text-align: right; width: 10%; }
-  .pt-amt   { font-weight: bold; text-align: right; white-space: nowrap; width: 16%; }
-  /* Disclaimer */
-  .disclaimer { font-size: 8pt; color: #888; line-height: 1.6; padding-top: 12pt; border-top: 0.75pt solid #d4c4b0; margin-top: 4pt; }
-  /* Footer */
-  .footer { display: flex; justify-content: space-between; margin-top: 16pt; padding-top: 10pt; border-top: 0.75pt solid #d4c4b0; font-size: 8pt; color: #aaa; }
+  @page {
+    size: A4 portrait;
+    margin: 1.8cm 2cm 1.5cm;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.55;
+    color: #1e1a17;
+    background: #fff;
+  }
+
+  /* ── Header ── */
+  .hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 10pt;
+    border-bottom: 2.5pt solid #c4784a;
+    margin-bottom: 16pt;
+  }
+  .brand-name {
+    font-size: 22pt;
+    font-weight: 900;
+    color: #c4784a;
+    letter-spacing: 3pt;
+    line-height: 1;
+  }
+  .brand-sub { font-size: 7.5pt; color: #999; margin-top: 3pt; }
+  .doc-meta { text-align: right; }
+  .doc-type {
+    font-size: 9pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5pt;
+    color: #555;
+  }
+  .doc-date { font-size: 8pt; color: #999; margin-top: 2pt; }
+
+  /* ── Section heading ── */
+  .sh {
+    font-size: 7pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.8pt;
+    color: #c4784a;
+    margin-bottom: 6pt;
+    padding-bottom: 3pt;
+    border-bottom: 0.5pt solid #e8d9c0;
+  }
+
+  /* ── Client block ── */
+  .client-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 14pt;
+    background: #faf7f2;
+    border: 0.5pt solid #e8d9c0;
+    border-radius: 3pt;
+  }
+  .client-table td {
+    padding: 6pt 10pt;
+    font-size: 9.5pt;
+    vertical-align: top;
+    border-right: 0.5pt solid #e8d9c0;
+  }
+  .client-table td:last-child { border-right: none; }
+  .cl { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #999; display: block; margin-bottom: 2pt; }
+  .cv { font-weight: 600; color: #1e1a17; }
+
+  /* ── Metrics strip ── */
+  .metrics {
+    display: flex;
+    gap: 8pt;
+    margin-bottom: 14pt;
+  }
+  .metric {
+    flex: 1;
+    border: 0.75pt solid #d4c4b0;
+    border-radius: 3pt;
+    padding: 9pt 10pt;
+    text-align: center;
+  }
+  .m-label { font-size: 6.5pt; text-transform: uppercase; letter-spacing: 1pt; color: #999; margin-bottom: 4pt; }
+  .m-val { font-size: 16pt; font-weight: 900; color: #1e1a17; line-height: 1; }
+  .m-val.clay { color: #c4784a; }
+  .m-unit { font-size: 7.5pt; color: #aaa; margin-top: 2pt; }
+
+  /* ── Total block ── */
+  .total-block {
+    background: #fdf0e6;
+    border: 1pt solid #c4784a;
+    border-radius: 3pt;
+    padding: 14pt 18pt;
+    margin-bottom: 14pt;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tb-left { }
+  .tb-label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1.5pt; color: #888; margin-bottom: 2pt; }
+  .tb-price { font-size: 28pt; font-weight: 900; color: #c4784a; line-height: 1; }
+  .tb-right { text-align: right; }
+  .tb-pkg-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #aaa; margin-bottom: 2pt; }
+  .tb-pkg { font-size: 13pt; font-weight: 700; color: #1e1a17; }
+  .note-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 5pt;
+    font-size: 7.5pt;
+    color: #777;
+    font-style: italic;
+    margin-top: 8pt;
+    padding-top: 8pt;
+    border-top: 0.5pt dashed #ddd;
+  }
+  .note-icon { font-style: normal; color: #c4784a; flex-shrink: 0; }
+
+  /* ── Scope of work ── */
+  .scope-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    list-style: none;
+    margin-bottom: 14pt;
+    border: 0.5pt solid #e8d9c0;
+    border-radius: 3pt;
+    overflow: hidden;
+  }
+  .scope-list li {
+    display: flex;
+    align-items: center;
+    gap: 7pt;
+    padding: 6pt 10pt;
+    font-size: 9.5pt;
+    border-bottom: 0.5pt solid #f0e8dc;
+    background: #fff;
+  }
+  .scope-list li:nth-child(odd) { background: #faf7f2; }
+  .scope-list li:last-child,
+  .scope-list li:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+  .chk { color: #c4784a; font-weight: 700; font-size: 9pt; flex-shrink: 0; }
+
+  /* ── Payment table ── */
+  .pay-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 14pt;
+    font-size: 9.5pt;
+    border: 0.5pt solid #e8d9c0;
+    border-radius: 3pt;
+    overflow: hidden;
+  }
+  .pay-table thead tr { background: #1e1a17; }
+  .pay-table th {
+    font-size: 6.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2pt;
+    color: #e8d9c0;
+    padding: 6pt 9pt;
+    text-align: left;
+  }
+  .pay-table th.r { text-align: right; }
+  .pay-table td { padding: 7.5pt 9pt; border-bottom: 0.5pt solid #ede5d8; vertical-align: middle; }
+  .pay-table tr:last-child td { border-bottom: none; }
+  .pt-num  { width: 6%; color: #aaa; font-size: 8pt; }
+  .pt-label { width: 28%; font-weight: 700; color: #1e1a17; }
+  .pt-desc  { width: 40%; color: #777; font-size: 8.5pt; }
+  .pt-pct   { width: 10%; color: #c4784a; font-weight: 800; font-size: 11pt; text-align: right; }
+  .pt-amt   { width: 16%; font-weight: 700; text-align: right; white-space: nowrap; color: #1e1a17; }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    font-size: 7.5pt;
+    color: #999;
+    line-height: 1.65;
+    padding: 9pt 11pt;
+    background: #fafafa;
+    border: 0.5pt solid #e0e0e0;
+    border-radius: 3pt;
+    margin-bottom: 12pt;
+  }
+  .disclaimer strong { color: #666; }
+
+  /* ── Footer ── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 9pt;
+    border-top: 0.5pt solid #ddd;
+    font-size: 7.5pt;
+    color: #bbb;
+  }
+  .footer-brand { font-weight: 700; color: #c4784a; font-size: 9pt; letter-spacing: 1pt; }
 </style>
 </head>
 <body>
+
   <div class="hdr">
     <div>
       <div class="brand-name">TILERSHUB</div>
-      <div class="brand-sub">Premium Tiling &amp; Renovation · Sri Lanka · tilershub.lk</div>
+      <div class="brand-sub">Premium Tiling &amp; Renovation · Sri Lanka · tilershub.lk · +94 774 503 744</div>
     </div>
-    <div class="doc-title">Renovation Estimate</div>
+    <div class="doc-meta">
+      <div class="doc-type">Renovation Estimate</div>
+      <div class="doc-date">${date}</div>
+    </div>
   </div>
 
-  <div class="section-title">Client Details</div>
-  <div class="client-grid">
-    <div class="client-row"><span class="client-label">Name</span>${name}</div>
-    <div class="client-row"><span class="client-label">Phone</span>${phone}</div>
-    <div class="client-row"><span class="client-label">Location</span>${location}</div>
-    <div class="client-row"><span class="client-label">Date</span>${date}</div>
-  </div>
+  <div class="sh">Client Information</div>
+  <table class="client-table">
+    <tr>
+      <td><span class="cl">Name</span><span class="cv">${name}</span></td>
+      <td><span class="cl">Phone</span><span class="cv">${phone}</span></td>
+      <td><span class="cl">Location</span><span class="cv">${location}</span></td>
+    </tr>
+  </table>
 
-  <div class="section-title">Project Summary</div>
+  <div class="sh">Project Summary</div>
   <div class="metrics">
     <div class="metric">
-      <div class="metric-label">Bathroom Area</div>
-      <div class="metric-value">${area}</div>
-      <div class="metric-unit">sq.ft</div>
+      <div class="m-label">Bathroom Area</div>
+      <div class="m-val">${area}</div>
+      <div class="m-unit">sq.ft</div>
     </div>
     <div class="metric">
-      <div class="metric-label">Selected Package</div>
-      <div class="metric-value" style="color:#c4784a">${pkgName}</div>
+      <div class="m-label">Package</div>
+      <div class="m-val clay">${pkgName}</div>
+      <div class="m-unit">&nbsp;</div>
     </div>
     <div class="metric">
-      <div class="metric-label">Rate Applied</div>
-      <div class="metric-value">${rate}</div>
-      <div class="metric-unit">/sq.ft</div>
+      <div class="m-label">Rate Applied</div>
+      <div class="m-val">${rate.replace('Rs. ','')}</div>
+      <div class="m-unit">Rs. / sq.ft</div>
     </div>
   </div>
 
   <div class="total-block">
-    <div class="total-label">Estimated Total Cost</div>
-    <div class="total-price">${total}</div>
-    ${noteRow}
+    <div class="tb-left">
+      <div class="tb-label">Estimated Total Cost</div>
+      <div class="tb-price">${total}</div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-pkg-label">Package</div>
+      <div class="tb-pkg">${pkgName}</div>
+    </div>
   </div>
+  ${noteHtml}
 
-  <div class="section-title">Scope of Work — ${pkgName} Package</div>
-  <ul class="scope-grid">${scopeItems}</ul>
+  <div class="sh" style="margin-top:${note ? '10pt' : '0'}">Scope of Work — ${pkgName} Package</div>
+  <ul class="scope-list">${scopeItems}</ul>
 
-  <div class="section-title">Payment Schedule</div>
+  <div class="sh">Payment Schedule</div>
   <table class="pay-table">
     <thead>
       <tr>
+        <th>#</th>
         <th>Milestone</th>
-        <th>When</th>
-        <th class="right">%</th>
-        <th class="right">Amount</th>
+        <th>When Due</th>
+        <th class="r">%</th>
+        <th class="r">Amount</th>
       </tr>
     </thead>
     <tbody>${payRows}</tbody>
   </table>
 
   <div class="disclaimer">
-    ⚠ This is an estimated renovation cost. Final quotation will be confirmed after site inspection.
-    Rates are subject to change based on site conditions, scope modifications, and material specification.
+    <strong>Note:</strong> This is an estimated renovation cost based on the information provided.
+    The final quotation will be confirmed following a site inspection and may vary based on site conditions,
+    scope changes, or material specification. Prices are subject to change without notice.
   </div>
 
   <div class="footer">
-    <span>TILERSHUB · tilershub.lk · +94 774 503 744</span>
+    <span><span class="footer-brand">TILERSHUB</span> &nbsp;·&nbsp; tilershub.lk &nbsp;·&nbsp; +94 774 503 744</span>
     <span>Generated ${date}</span>
   </div>
+
 </body>
 </html>`;
 
-    const win = window.open('', '_blank', 'width=794,height=1123');
-    if (!win) { alert('Please allow pop-ups to download the PDF.'); return; }
-    win.document.write(html);
-    win.document.close();
-    win.onload = () => { win.focus(); win.print(); };
+    // Use a hidden iframe — no popup, no race condition with onload
+    const existing = document.getElementById('_pdf_frame');
+    if (existing) existing.remove();
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    const frame = document.createElement('iframe');
+    frame.id = '_pdf_frame';
+    frame.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;border:0;';
+    document.body.appendChild(frame);
+
+    frame.onload = () => {
+      frame.contentWindow!.focus();
+      frame.contentWindow!.print();
+      setTimeout(() => {
+        frame.remove();
+        URL.revokeObjectURL(blobUrl);
+      }, 60000);
+    };
+
+    frame.src = blobUrl;
   });
 
   // WhatsApp
