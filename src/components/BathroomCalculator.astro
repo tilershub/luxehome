@@ -6,7 +6,7 @@
     <div class="stag reveal">Instant Estimate</div>
     <h2 class="reveal">Bathroom Renovation Calculator</h2>
     <p class="sdesc reveal">
-      Enter your bathroom size and select a package — get a cost estimate in seconds.
+      Enter your bathroom floor area and select a package — get a cost estimate in seconds.
     </p>
 
     <div class="bcalc-layout">
@@ -55,17 +55,17 @@
               <input type="radio" name="bcpkg" value="basic" class="pkg-radio" />
               <div class="pkg-header">
                 <span class="pkg-name">Basic</span>
-                <div class="pkg-rate">Rs. 11,000 <span>/sq.ft</span></div>
+                <div class="pkg-base-price">Rs. 450,000</div>
+                <div class="pkg-base-note">up to 40 sq.ft</div>
               </div>
               <ul class="pkg-list">
-                <li>Demolition</li>
                 <li>Masonry Works</li>
-                <li>Waterproofing</li>
                 <li>Plumbing</li>
-                <li>Electrical &amp; Lighting</li>
+                <li>Electrical Wiring</li>
+                <li>Waterproofing</li>
                 <li>Tiling</li>
               </ul>
-              <div class="pkg-min">Min. Rs. 450,000</div>
+              <div class="pkg-extra">+Rs. 5,000 / sq.ft over 40</div>
             </label>
 
             <!-- Standard -->
@@ -74,20 +74,18 @@
               <div class="pkg-popular">Popular</div>
               <div class="pkg-header">
                 <span class="pkg-name">Standard</span>
-                <div class="pkg-rate">Rs. 13,000 <span>/sq.ft</span></div>
+                <div class="pkg-base-price">Rs. 550,000</div>
+                <div class="pkg-base-note">up to 40 sq.ft</div>
               </div>
               <ul class="pkg-list">
-                <li>Bathroom Designing</li>
-                <li>Demolition</li>
                 <li>Masonry Works</li>
-                <li>Waterproofing</li>
                 <li>Plumbing</li>
-                <li>Electrical &amp; Lighting</li>
+                <li>Electrical Wiring</li>
+                <li>Waterproofing</li>
                 <li>Tiling</li>
                 <li>Ceiling</li>
-                <li>Painting</li>
               </ul>
-              <div class="pkg-min">Min. Rs. 550,000</div>
+              <div class="pkg-extra">+Rs. 6,000 / sq.ft over 40</div>
             </label>
 
             <!-- Luxury -->
@@ -95,25 +93,42 @@
               <input type="radio" name="bcpkg" value="luxury" class="pkg-radio" />
               <div class="pkg-header">
                 <span class="pkg-name">Luxury</span>
-                <div class="pkg-rate">Rs. 15,000 <span>/sq.ft</span></div>
+                <div class="pkg-base-price">Rs. 650,000</div>
+                <div class="pkg-base-note">up to 40 sq.ft</div>
               </div>
               <ul class="pkg-list">
-                <li>Bathroom Designing</li>
-                <li>Demolition</li>
                 <li>Masonry Works</li>
-                <li>Waterproofing</li>
                 <li>Plumbing</li>
-                <li>Electrical &amp; Lighting</li>
+                <li>Electrical Wiring</li>
+                <li>Waterproofing</li>
                 <li>Tiling</li>
                 <li>Ceiling</li>
-                <li>Painting</li>
                 <li>Vanity Cupboard</li>
                 <li>Shower Cubicle</li>
               </ul>
-              <div class="pkg-min">Min. Rs. 650,000</div>
+              <div class="pkg-extra">+Rs. 7,000 / sq.ft over 40</div>
             </label>
 
           </div>
+        </div>
+
+        <!-- Add-ons -->
+        <div class="bc-card reveal">
+          <div class="bc-card-title">Optional Add-ons</div>
+          <label class="addon-row">
+            <input type="checkbox" id="addon-demo" class="addon-check" />
+            <div class="addon-info">
+              <span class="addon-name">Demolition Work</span>
+              <span class="addon-price">Rs. 1,000 / sq.ft</span>
+            </div>
+          </label>
+          <label class="addon-row">
+            <input type="checkbox" id="addon-design" class="addon-check" />
+            <div class="addon-info">
+              <span class="addon-name">3D Bathroom Design</span>
+              <span class="addon-price">Rs. 25,000 fixed</span>
+            </div>
+          </label>
         </div>
 
         <button class="bc-generate-btn" id="bc-generate-btn" type="button">
@@ -135,7 +150,6 @@
         <!-- Result card (hidden until generated) -->
         <div class="bcalc-result" id="bcalc-result">
 
-          <!-- Printable area -->
           <div class="result-printable" id="result-printable">
 
             <div class="rp-header">
@@ -155,20 +169,21 @@
                 <span class="rpm-unit">sq.ft</span>
               </div>
               <div class="rp-metric rp-metric--mid">
-                <span class="rpm-label">Selected Package</span>
+                <span class="rpm-label">Package</span>
                 <span class="rpm-value rpm-pkg" id="r-pkg"></span>
               </div>
               <div class="rp-metric">
-                <span class="rpm-label">Rate Applied</span>
-                <span class="rpm-value" id="r-rate"></span>
-                <span class="rpm-unit">/sq.ft</span>
+                <span class="rpm-label">Final Total</span>
+                <span class="rpm-value rpm-total" id="r-total-sm"></span>
               </div>
             </div>
 
+            <!-- Price breakdown -->
+            <div class="rp-breakdown" id="rp-breakdown"></div>
+
             <div class="rp-total-block">
-              <div class="rptb-label">Estimated Total Cost</div>
+              <div class="rptb-label">Final Estimated Price</div>
               <div class="rptb-price" id="r-total"></div>
-              <div class="rptb-note" id="r-note"></div>
             </div>
 
             <div class="rp-includes">
@@ -215,34 +230,32 @@
   const PACKAGES = {
     basic: {
       name: 'Basic',
-      rate: 11000,
-      largeRate: 10500,
-      min: 450000,
-      includes: ['Demolition','Masonry Works','Waterproofing','Plumbing','Electrical & Lighting','Tiling'],
+      basePrice: 450000,
+      baseArea: 40,
+      extraRate: 5000,
+      includes: ['Masonry Works', 'Plumbing', 'Electrical Wiring', 'Waterproofing', 'Tiling'],
     },
     standard: {
       name: 'Standard',
-      rate: 13000,
-      largeRate: 12000,
-      min: 550000,
-      includes: ['Bathroom Designing','Demolition','Masonry Works','Waterproofing','Plumbing','Electrical & Lighting','Tiling','Ceiling','Painting'],
+      basePrice: 550000,
+      baseArea: 40,
+      extraRate: 6000,
+      includes: ['Masonry Works', 'Plumbing', 'Electrical Wiring', 'Waterproofing', 'Tiling', 'Ceiling'],
     },
     luxury: {
       name: 'Luxury',
-      rate: 15000,
-      largeRate: 14000,
-      min: 650000,
-      includes: ['Bathroom Designing','Demolition','Masonry Works','Waterproofing','Plumbing','Electrical & Lighting','Tiling','Ceiling','Painting','Vanity Cupboard','Shower Cubicle'],
+      basePrice: 650000,
+      baseArea: 40,
+      extraRate: 7000,
+      includes: ['Masonry Works', 'Plumbing', 'Electrical Wiring', 'Waterproofing', 'Tiling', 'Ceiling', 'Vanity Cupboard', 'Shower Cubicle'],
     },
   };
 
-  function fmt(n) {
+  function fmt(n: number): string {
     return 'Rs. ' + n.toLocaleString('en-IN');
   }
 
-  const areaInputEl = document.getElementById('bc-area') as HTMLInputElement;
-
-  // Package card selection highlight
+  // Package card highlight
   document.querySelectorAll('.pkg-card').forEach(card => {
     card.addEventListener('click', () => {
       document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('pkg-card--active'));
@@ -251,21 +264,22 @@
   });
 
   // Generate Quote
-  document.getElementById('bc-generate-btn').addEventListener('click', () => {
+  document.getElementById('bc-generate-btn')!.addEventListener('click', () => {
     const name     = (document.getElementById('bc-name') as HTMLInputElement).value.trim();
     const phone    = (document.getElementById('bc-phone') as HTMLInputElement).value.trim();
     const location = (document.getElementById('bc-location') as HTMLInputElement).value.trim();
-    const area     = parseFloat(areaInputEl.value);
+    const area     = parseFloat((document.getElementById('bc-area') as HTMLInputElement).value);
     const pkgKey   = (document.querySelector('input[name="bcpkg"]:checked') as HTMLInputElement)?.value;
-    const errorEl  = document.getElementById('bc-error');
+    const demoChecked   = (document.getElementById('addon-demo') as HTMLInputElement).checked;
+    const designChecked = (document.getElementById('addon-design') as HTMLInputElement).checked;
+    const errorEl  = document.getElementById('bc-error')!;
 
-    // Validation
     const errors: string[] = [];
-    if (!name)              errors.push('Please enter your name.');
-    if (!phone)             errors.push('Please enter your phone number.');
-    if (!location)          errors.push('Please enter your project location.');
-    if (!(area > 0))        errors.push('Please enter a valid floor area.');
-    if (!pkgKey)            errors.push('Please select a package.');
+    if (!name)         errors.push('Please enter your name.');
+    if (!phone)        errors.push('Please enter your phone number.');
+    if (!location)     errors.push('Please enter your project location.');
+    if (!(area > 0))   errors.push('Please enter a valid floor area.');
+    if (!pkgKey)       errors.push('Please select a package.');
 
     if (errors.length) {
       errorEl.innerHTML = errors.map(e => `<span>${e}</span>`).join('');
@@ -274,51 +288,70 @@
     }
     errorEl.style.display = 'none';
 
-    const pkg  = PACKAGES[pkgKey];
-    const rate = area > 100 ? pkg.largeRate : pkg.rate;
-    const calc = area * rate;
-    const total = Math.max(calc, pkg.min);
-    const isMin    = total === pkg.min && calc < pkg.min;
-    const isLarge  = area > 100;
+    const pkg = PACKAGES[pkgKey];
+    const extraArea    = Math.max(0, area - pkg.baseArea);
+    const extraCharge  = Math.round(extraArea * pkg.extraRate);
+    const pkgPrice     = pkg.basePrice + extraCharge;
+    const demolitionCost = demoChecked   ? Math.round(area * 1000) : 0;
+    const designCost     = designChecked ? 25000 : 0;
+    const total          = pkgPrice + demolitionCost + designCost;
 
-    // Populate result
     // Client block
-    const clientEl = document.getElementById('rp-client');
-    clientEl.innerHTML = `
+    document.getElementById('rp-client')!.innerHTML = `
       <div class="rpc-row"><span class="rpc-label">Name</span><span class="rpc-val">${name}</span></div>
       <div class="rpc-row"><span class="rpc-label">Phone</span><span class="rpc-val">${phone}</span></div>
       <div class="rpc-row"><span class="rpc-label">Location</span><span class="rpc-val">${location}</span></div>
     `;
 
-    (document.getElementById('r-area') as HTMLElement).textContent = area.toFixed(1);
-    (document.getElementById('r-pkg') as HTMLElement).textContent  = pkg.name;
-    (document.getElementById('r-rate') as HTMLElement).textContent = `Rs. ${rate.toLocaleString('en-IN')}`;
-    (document.getElementById('r-total') as HTMLElement).textContent = fmt(total);
+    (document.getElementById('r-area') as HTMLElement).textContent    = area.toFixed(1);
+    (document.getElementById('r-pkg') as HTMLElement).textContent     = pkg.name;
+    (document.getElementById('r-total-sm') as HTMLElement).textContent = fmt(total);
+    (document.getElementById('r-total') as HTMLElement).textContent   = fmt(total);
 
-    const noteEl = document.getElementById('r-note');
-    if (isMin) {
-      noteEl.textContent = `Minimum project price applied (calculated: ${fmt(calc)})`;
-      noteEl.style.display = 'block';
-    } else if (isLarge) {
-      noteEl.textContent = `Large bathroom discount applied (area > 100 sq.ft)`;
-      noteEl.style.display = 'block';
-    } else {
-      noteEl.style.display = 'none';
+    // Price breakdown rows
+    type BkdRow = { label: string; sub: string; val: string };
+    const bkdRows: BkdRow[] = [
+      { label: 'Base Package Price', sub: `${pkg.name} — up to ${pkg.baseArea} sq.ft`, val: fmt(pkg.basePrice) },
+    ];
+    if (extraArea > 0) {
+      bkdRows.push({ label: 'Additional Area', sub: `${extraArea.toFixed(1)} sq.ft × ${fmt(pkg.extraRate)} / sq.ft`, val: fmt(extraCharge) });
+    }
+    if (demolitionCost > 0) {
+      bkdRows.push({ label: 'Demolition Work', sub: `${area.toFixed(1)} sq.ft × Rs. 1,000`, val: fmt(demolitionCost) });
+    }
+    if (designCost > 0) {
+      bkdRows.push({ label: '3D Bathroom Design', sub: 'Fixed price', val: fmt(designCost) });
     }
 
-    // Services included
-    const includesEl = document.getElementById('r-includes');
-    includesEl.innerHTML = pkg.includes.map(s => `<div class="rpi-item">${s}</div>`).join('');
+    document.getElementById('rp-breakdown')!.innerHTML = `
+      <div class="bkd-title">Price Breakdown</div>
+      ${bkdRows.map(r => `
+        <div class="bkd-row">
+          <div class="bkd-left">
+            <div class="bkd-label">${r.label}</div>
+            <div class="bkd-sub">${r.sub}</div>
+          </div>
+          <div class="bkd-val">${r.val}</div>
+        </div>`).join('')}
+    `;
+
+    // Services included (add-ons first)
+    const allIncludes = [
+      ...(demoChecked   ? ['Demolition Work']     : []),
+      ...(designChecked ? ['3D Bathroom Design']   : []),
+      ...pkg.includes,
+    ];
+    document.getElementById('r-includes')!.innerHTML =
+      allIncludes.map(s => `<div class="rpi-item">${s}</div>`).join('');
 
     // Payment schedule
     const PAY = [
-      { label: 'Upfront / Deposit',          pct: 10, desc: 'Due before any work commences' },
-      { label: 'On Starting Date',            pct: 60, desc: 'Due on the day work begins on site' },
-      { label: 'After Tiling Completion',     pct: 30, desc: 'Due once all tiling is finished' },
-      { label: 'Final Payment on Handover',   pct: 10, desc: 'Due on project completion & handover' },
+      { label: 'Upfront / Deposit',        pct: 10, desc: 'Due before any work commences' },
+      { label: 'On Starting Date',          pct: 60, desc: 'Due on the day work begins on site' },
+      { label: 'After Tiling Completion',   pct: 30, desc: 'Due once all tiling is finished' },
+      { label: 'Final Payment on Handover', pct: 10, desc: 'Due on project completion & handover' },
     ];
-    const payEl = document.getElementById('r-payment');
-    payEl.innerHTML = PAY.map(p => {
+    document.getElementById('r-payment')!.innerHTML = PAY.map(p => {
       const amt = Math.round(total * p.pct / 100);
       return `
         <div class="rpay-row">
@@ -333,41 +366,37 @@
         </div>`;
     }).join('');
 
-    // Date
     (document.getElementById('rp-date') as HTMLElement).textContent =
       new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    // Store payment data for PDF
+    // Store for PDF
     const pdfBtn = document.getElementById('ra-pdf') as HTMLElement;
-    pdfBtn.dataset.payRows = PAY.map(p =>
+    pdfBtn.dataset.payRows   = PAY.map(p =>
       `${p.pct}%|${p.label}|${p.desc}|${fmt(Math.round(total * p.pct / 100))}`
     ).join(';;');
+    pdfBtn.dataset.breakdown = bkdRows.map(r => `${r.label}|${r.sub}|${r.val}`).join(';;');
 
     // Store for WhatsApp
-    (document.getElementById('ra-wa') as HTMLElement).dataset.name     = name;
-    (document.getElementById('ra-wa') as HTMLElement).dataset.phone    = phone;
-    (document.getElementById('ra-wa') as HTMLElement).dataset.location = location;
-    (document.getElementById('ra-wa') as HTMLElement).dataset.area     = area.toFixed(1);
-    (document.getElementById('ra-wa') as HTMLElement).dataset.pkg      = pkg.name;
-    (document.getElementById('ra-wa') as HTMLElement).dataset.rate     = `Rs. ${rate.toLocaleString('en-IN')}`;
-    (document.getElementById('ra-wa') as HTMLElement).dataset.total    = fmt(total);
-    (document.getElementById('ra-wa') as HTMLElement).dataset.includes = pkg.includes.join(', ');
-    (document.getElementById('ra-wa') as HTMLElement).dataset.note     = isMin
-      ? `Minimum project price applied.`
-      : isLarge ? `Large bathroom discount applied.` : '';
+    const waEl = document.getElementById('ra-wa') as HTMLElement;
+    waEl.dataset.name      = name;
+    waEl.dataset.phone     = phone;
+    waEl.dataset.location  = location;
+    waEl.dataset.area      = area.toFixed(1);
+    waEl.dataset.pkg       = pkg.name;
+    waEl.dataset.total     = fmt(total);
+    waEl.dataset.includes  = allIncludes.join(', ');
+    waEl.dataset.breakdown = bkdRows.map(r => `• ${r.label}: ${r.val}`).join('\n');
 
-    // Show result, hide placeholder
     (document.getElementById('bcalc-placeholder') as HTMLElement).style.display = 'none';
     (document.getElementById('bcalc-result') as HTMLElement).style.display = 'flex';
 
-    // Smooth scroll to result on mobile
     if (window.innerWidth < 900) {
-      document.getElementById('bcalc-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('bcalc-result')!.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
 
-  // PDF — injects a hidden iframe (no popup blocker), prints reliably
-  document.getElementById('ra-pdf').addEventListener('click', () => {
+  // PDF — hidden iframe, no popup blocker, no race condition
+  document.getElementById('ra-pdf')!.addEventListener('click', () => {
     const waBtn  = document.getElementById('ra-wa') as HTMLElement;
     const pdfBtn = document.getElementById('ra-pdf') as HTMLElement;
 
@@ -376,9 +405,7 @@
     const location = waBtn.dataset.location || '';
     const area     = waBtn.dataset.area     || '';
     const pkgName  = waBtn.dataset.pkg      || '';
-    const rate     = waBtn.dataset.rate     || '';
     const total    = waBtn.dataset.total    || '';
-    const note     = waBtn.dataset.note     || '';
     const includes = waBtn.dataset.includes || '';
     const date     = (document.getElementById('rp-date') as HTMLElement).textContent || '';
 
@@ -388,9 +415,14 @@
       `<li><span class="chk">✓</span>${s}</li>`
     ).join('');
 
-    const noteHtml = note
-      ? `<div class="note-row"><span class="note-icon">ℹ</span>${note}</div>`
-      : '';
+    const breakdownRows = (pdfBtn.dataset.breakdown || '').split(';;').map((row, i) => {
+      const [label, sub, val] = row.split('|');
+      const bg = i % 2 === 0 ? '#faf7f2' : '#ffffff';
+      return `<tr style="background:${bg}">
+        <td class="bd-label">${label}<div class="bd-sub">${sub}</div></td>
+        <td class="bd-val">${val}</td>
+      </tr>`;
+    }).join('');
 
     const payRows = (pdfBtn.dataset.payRows || '').split(';;').map((row, i) => {
       const [pct, label, desc, amt] = row.split('|');
@@ -410,203 +442,72 @@
 <meta charset="UTF-8"/>
 <title>TILERSHUB — Renovation Estimate · ${name}</title>
 <style>
-  @page {
-    size: A4 portrait;
-    margin: 1.8cm 2cm 1.5cm;
-  }
+  @page { size: A4 portrait; margin: 1.8cm 2cm 1.5cm; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 10pt;
-    line-height: 1.55;
-    color: #1e1a17;
-    background: #fff;
-  }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; line-height: 1.55; color: #1e1a17; background: #fff; }
 
-  /* ── Header ── */
-  .hdr {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding-bottom: 10pt;
-    border-bottom: 2.5pt solid #c4784a;
-    margin-bottom: 16pt;
-  }
-  .brand-name {
-    font-size: 22pt;
-    font-weight: 900;
-    color: #c4784a;
-    letter-spacing: 3pt;
-    line-height: 1;
-  }
+  .hdr { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 10pt; border-bottom: 2.5pt solid #c4784a; margin-bottom: 16pt; }
+  .brand-name { font-size: 22pt; font-weight: 900; color: #c4784a; letter-spacing: 3pt; line-height: 1; }
   .brand-sub { font-size: 7.5pt; color: #999; margin-top: 3pt; }
   .doc-meta { text-align: right; }
-  .doc-type {
-    font-size: 9pt;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5pt;
-    color: #555;
-  }
+  .doc-type { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5pt; color: #555; }
   .doc-date { font-size: 8pt; color: #999; margin-top: 2pt; }
 
-  /* ── Section heading ── */
-  .sh {
-    font-size: 7pt;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.8pt;
-    color: #c4784a;
-    margin-bottom: 6pt;
-    padding-bottom: 3pt;
-    border-bottom: 0.5pt solid #e8d9c0;
-  }
+  .sh { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.8pt; color: #c4784a; margin-bottom: 6pt; padding-bottom: 3pt; border-bottom: 0.5pt solid #e8d9c0; }
 
-  /* ── Client block ── */
-  .client-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 14pt;
-    background: #faf7f2;
-    border: 0.5pt solid #e8d9c0;
-    border-radius: 3pt;
-  }
-  .client-table td {
-    padding: 6pt 10pt;
-    font-size: 9.5pt;
-    vertical-align: top;
-    border-right: 0.5pt solid #e8d9c0;
-  }
+  .client-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; background: #faf7f2; border: 0.5pt solid #e8d9c0; }
+  .client-table td { padding: 6pt 10pt; font-size: 9.5pt; vertical-align: top; border-right: 0.5pt solid #e8d9c0; }
   .client-table td:last-child { border-right: none; }
   .cl { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #999; display: block; margin-bottom: 2pt; }
   .cv { font-weight: 600; color: #1e1a17; }
 
-  /* ── Metrics strip ── */
-  .metrics {
-    display: flex;
-    gap: 8pt;
-    margin-bottom: 14pt;
-  }
-  .metric {
-    flex: 1;
-    border: 0.75pt solid #d4c4b0;
-    border-radius: 3pt;
-    padding: 9pt 10pt;
-    text-align: center;
-  }
+  .metrics { display: flex; gap: 8pt; margin-bottom: 14pt; }
+  .metric { flex: 1; border: 0.75pt solid #d4c4b0; border-radius: 3pt; padding: 9pt 10pt; text-align: center; }
   .m-label { font-size: 6.5pt; text-transform: uppercase; letter-spacing: 1pt; color: #999; margin-bottom: 4pt; }
-  .m-val { font-size: 16pt; font-weight: 900; color: #1e1a17; line-height: 1; }
+  .m-val { font-size: 15pt; font-weight: 900; color: #1e1a17; line-height: 1; }
   .m-val.clay { color: #c4784a; }
   .m-unit { font-size: 7.5pt; color: #aaa; margin-top: 2pt; }
 
-  /* ── Total block ── */
-  .total-block {
-    background: #fdf0e6;
-    border: 1pt solid #c4784a;
-    border-radius: 3pt;
-    padding: 14pt 18pt;
-    margin-bottom: 14pt;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .tb-left { }
+  .breakdown-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; font-size: 9.5pt; border: 0.5pt solid #e8d9c0; overflow: hidden; }
+  .breakdown-table thead tr { background: #1e1a17; }
+  .breakdown-table th { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2pt; color: #e8d9c0; padding: 6pt 9pt; text-align: left; }
+  .breakdown-table th.r { text-align: right; }
+  .breakdown-table td { padding: 7pt 9pt; border-bottom: 0.5pt solid #ede5d8; vertical-align: top; }
+  .breakdown-table tr:last-child td { border-bottom: none; }
+  .bd-label { font-weight: 600; color: #1e1a17; }
+  .bd-sub { font-size: 7.5pt; color: #999; margin-top: 1pt; }
+  .bd-val { text-align: right; font-weight: 700; white-space: nowrap; color: #1e1a17; }
+
+  .total-block { background: #fdf0e6; border: 1pt solid #c4784a; border-radius: 3pt; padding: 14pt 18pt; margin-bottom: 14pt; display: flex; align-items: center; justify-content: space-between; }
   .tb-label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1.5pt; color: #888; margin-bottom: 2pt; }
   .tb-price { font-size: 28pt; font-weight: 900; color: #c4784a; line-height: 1; }
   .tb-right { text-align: right; }
   .tb-pkg-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #aaa; margin-bottom: 2pt; }
   .tb-pkg { font-size: 13pt; font-weight: 700; color: #1e1a17; }
-  .note-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 5pt;
-    font-size: 7.5pt;
-    color: #777;
-    font-style: italic;
-    margin-top: 8pt;
-    padding-top: 8pt;
-    border-top: 0.5pt dashed #ddd;
-  }
-  .note-icon { font-style: normal; color: #c4784a; flex-shrink: 0; }
 
-  /* ── Scope of work ── */
-  .scope-list {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    list-style: none;
-    margin-bottom: 14pt;
-    border: 0.5pt solid #e8d9c0;
-    border-radius: 3pt;
-    overflow: hidden;
-  }
-  .scope-list li {
-    display: flex;
-    align-items: center;
-    gap: 7pt;
-    padding: 6pt 10pt;
-    font-size: 9.5pt;
-    border-bottom: 0.5pt solid #f0e8dc;
-    background: #fff;
-  }
+  .scope-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0; list-style: none; margin-bottom: 14pt; border: 0.5pt solid #e8d9c0; overflow: hidden; }
+  .scope-list li { display: flex; align-items: center; gap: 7pt; padding: 6pt 10pt; font-size: 9.5pt; border-bottom: 0.5pt solid #f0e8dc; background: #fff; }
   .scope-list li:nth-child(odd) { background: #faf7f2; }
-  .scope-list li:last-child,
-  .scope-list li:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+  .scope-list li:last-child, .scope-list li:nth-last-child(2):nth-child(odd) { border-bottom: none; }
   .chk { color: #c4784a; font-weight: 700; font-size: 9pt; flex-shrink: 0; }
 
-  /* ── Payment table ── */
-  .pay-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 14pt;
-    font-size: 9.5pt;
-    border: 0.5pt solid #e8d9c0;
-    border-radius: 3pt;
-    overflow: hidden;
-  }
+  .pay-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; font-size: 9.5pt; border: 0.5pt solid #e8d9c0; overflow: hidden; }
   .pay-table thead tr { background: #1e1a17; }
-  .pay-table th {
-    font-size: 6.5pt;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2pt;
-    color: #e8d9c0;
-    padding: 6pt 9pt;
-    text-align: left;
-  }
+  .pay-table th { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2pt; color: #e8d9c0; padding: 6pt 9pt; text-align: left; }
   .pay-table th.r { text-align: right; }
   .pay-table td { padding: 7.5pt 9pt; border-bottom: 0.5pt solid #ede5d8; vertical-align: middle; }
   .pay-table tr:last-child td { border-bottom: none; }
-  .pt-num  { width: 6%; color: #aaa; font-size: 8pt; }
+  .pt-num   { width: 6%;  color: #aaa; font-size: 8pt; }
   .pt-label { width: 28%; font-weight: 700; color: #1e1a17; }
   .pt-desc  { width: 40%; color: #777; font-size: 8.5pt; }
   .pt-pct   { width: 10%; color: #c4784a; font-weight: 800; font-size: 11pt; text-align: right; }
   .pt-amt   { width: 16%; font-weight: 700; text-align: right; white-space: nowrap; color: #1e1a17; }
 
-  /* ── Disclaimer ── */
-  .disclaimer {
-    font-size: 7.5pt;
-    color: #999;
-    line-height: 1.65;
-    padding: 9pt 11pt;
-    background: #fafafa;
-    border: 0.5pt solid #e0e0e0;
-    border-radius: 3pt;
-    margin-bottom: 12pt;
-  }
+  .disclaimer { font-size: 7.5pt; color: #999; line-height: 1.65; padding: 9pt 11pt; background: #fafafa; border: 0.5pt solid #e0e0e0; margin-bottom: 12pt; }
   .disclaimer strong { color: #666; }
 
-  /* ── Footer ── */
-  .footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 9pt;
-    border-top: 0.5pt solid #ddd;
-    font-size: 7.5pt;
-    color: #bbb;
-  }
+  .footer { display: flex; justify-content: space-between; align-items: center; padding-top: 9pt; border-top: 0.5pt solid #ddd; font-size: 7.5pt; color: #bbb; }
   .footer-brand { font-weight: 700; color: #c4784a; font-size: 9pt; letter-spacing: 1pt; }
 </style>
 </head>
@@ -645,15 +546,21 @@
       <div class="m-unit">&nbsp;</div>
     </div>
     <div class="metric">
-      <div class="m-label">Rate Applied</div>
-      <div class="m-val">${rate.replace('Rs. ','')}</div>
-      <div class="m-unit">Rs. / sq.ft</div>
+      <div class="m-label">Final Total</div>
+      <div class="m-val clay" style="font-size:11pt">${total}</div>
+      <div class="m-unit">LKR</div>
     </div>
   </div>
 
+  <div class="sh">Price Breakdown</div>
+  <table class="breakdown-table">
+    <thead><tr><th>Item</th><th class="r">Amount</th></tr></thead>
+    <tbody>${breakdownRows}</tbody>
+  </table>
+
   <div class="total-block">
     <div class="tb-left">
-      <div class="tb-label">Estimated Total Cost</div>
+      <div class="tb-label">Final Estimated Price</div>
       <div class="tb-price">${total}</div>
     </div>
     <div class="tb-right">
@@ -661,20 +568,15 @@
       <div class="tb-pkg">${pkgName}</div>
     </div>
   </div>
-  ${noteHtml}
 
-  <div class="sh" style="margin-top:${note ? '10pt' : '0'}">Scope of Work — ${pkgName} Package</div>
+  <div class="sh">Scope of Work — ${pkgName} Package</div>
   <ul class="scope-list">${scopeItems}</ul>
 
   <div class="sh">Payment Schedule</div>
   <table class="pay-table">
     <thead>
       <tr>
-        <th>#</th>
-        <th>Milestone</th>
-        <th>When Due</th>
-        <th class="r">%</th>
-        <th class="r">Amount</th>
+        <th>#</th><th>Milestone</th><th>When Due</th><th class="r">%</th><th class="r">Amount</th>
       </tr>
     </thead>
     <tbody>${payRows}</tbody>
@@ -683,7 +585,7 @@
   <div class="disclaimer">
     <strong>Note:</strong> This is an estimated renovation cost based on the information provided.
     The final quotation will be confirmed following a site inspection and may vary based on site conditions,
-    scope changes, or material specification. Prices are subject to change without notice.
+    scope changes, or material specifications. Prices are subject to change without notice.
   </div>
 
   <div class="footer">
@@ -694,42 +596,34 @@
 </body>
 </html>`;
 
-    // Use a hidden iframe — no popup, no race condition with onload
     const existing = document.getElementById('_pdf_frame');
     if (existing) existing.remove();
 
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const blob    = new Blob([html], { type: 'text/html;charset=utf-8' });
     const blobUrl = URL.createObjectURL(blob);
-
-    const frame = document.createElement('iframe');
+    const frame   = document.createElement('iframe');
     frame.id = '_pdf_frame';
     frame.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;border:0;';
     document.body.appendChild(frame);
-
     frame.onload = () => {
       frame.contentWindow!.focus();
       frame.contentWindow!.print();
-      setTimeout(() => {
-        frame.remove();
-        URL.revokeObjectURL(blobUrl);
-      }, 60000);
+      setTimeout(() => { frame.remove(); URL.revokeObjectURL(blobUrl); }, 60000);
     };
-
     frame.src = blobUrl;
   });
 
   // WhatsApp
-  document.getElementById('ra-wa').addEventListener('click', (e) => {
-    const btn      = e.currentTarget as HTMLElement;
-    const name     = btn.dataset.name;
-    const phone    = btn.dataset.phone;
-    const location = btn.dataset.location;
-    const area     = btn.dataset.area;
-    const pkg      = btn.dataset.pkg;
-    const rate     = btn.dataset.rate;
-    const total    = btn.dataset.total;
-    const includes = btn.dataset.includes;
-    const note     = btn.dataset.note;
+  document.getElementById('ra-wa')!.addEventListener('click', (e) => {
+    const btn       = e.currentTarget as HTMLElement;
+    const name      = btn.dataset.name      || '';
+    const phone     = btn.dataset.phone     || '';
+    const location  = btn.dataset.location  || '';
+    const area      = btn.dataset.area      || '';
+    const pkg       = btn.dataset.pkg       || '';
+    const total     = btn.dataset.total     || '';
+    const includes  = btn.dataset.includes  || '';
+    const breakdown = btn.dataset.breakdown || '';
 
     const msg = [
       `*TILERSHUB — Bathroom Renovation Estimate*`,
@@ -740,9 +634,11 @@
       ``,
       `*Bathroom Area:* ${area} sq.ft`,
       `*Package:* ${pkg}`,
-      `*Rate Applied:* ${rate}/sq.ft`,
-      `*Estimated Total:* ${total}`,
-      note ? `_${note}_` : null,
+      ``,
+      `*Price Breakdown:*`,
+      breakdown,
+      ``,
+      `*Final Estimated Total:* ${total}`,
       ``,
       `*Services Included:* ${includes}`,
       ``,
@@ -755,10 +651,9 @@
       `_This is an estimated cost. Final quotation after site inspection._`,
       ``,
       `tilershub.lk | +94 774 503 744`,
-    ].filter(l => l !== null).join('\n');
+    ].join('\n');
 
-    const url = `https://wa.me/94774503744?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank', 'noopener');
+    window.open(`https://wa.me/94774503744?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   });
 </script>
 
@@ -847,12 +742,10 @@
     gap: .5rem;
   }
 
-  .bc-area-input-wrap .bc-input {
-    flex: 1;
-  }
+  .bc-area-input-wrap .bc-input { flex: 1; }
 
   .bc-area-unit {
-    font-size: .8rem;
+    font-size: .82rem;
     font-weight: 600;
     color: var(--warm-gray);
     white-space: nowrap;
@@ -872,7 +765,7 @@
     border-radius: 6px;
     padding: 1.1rem .9rem 1rem;
     background: var(--off-white);
-    transition: border-color .2s, background .2s, transform .15s;
+    transition: border-color .2s, background .2s;
     display: block;
   }
 
@@ -922,27 +815,27 @@
     font-size: .82rem;
     font-weight: 700;
     color: var(--charcoal);
-    margin-bottom: .2rem;
+    margin-bottom: .25rem;
   }
 
-  .pkg-rate {
+  .pkg-base-price {
     font-family: 'Playfair Display', serif;
     font-size: 1rem;
     font-weight: 900;
     color: var(--clay);
+    line-height: 1.1;
   }
 
-  .pkg-rate span {
-    font-family: inherit;
+  .pkg-base-note {
     font-size: .65rem;
-    font-weight: 400;
     color: var(--warm-gray);
+    margin-top: .1rem;
   }
 
   .pkg-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 .7rem;
+    margin: 0 0 .65rem;
   }
 
   .pkg-list li {
@@ -961,12 +854,63 @@
     font-size: .65rem;
   }
 
-  .pkg-min {
+  .pkg-extra {
     font-size: .67rem;
-    color: rgba(107,95,84,.6);
+    color: rgba(107,95,84,.65);
     border-top: 1px solid var(--stone);
     padding-top: .55rem;
     margin-top: .3rem;
+    font-style: italic;
+  }
+
+  /* ── Add-ons ── */
+  .addon-row {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: .85rem 1rem;
+    border: 1.5px solid var(--stone);
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: .6rem;
+    background: var(--off-white);
+    transition: border-color .2s, background .2s;
+  }
+
+  .addon-row:last-child { margin-bottom: 0; }
+
+  .addon-row:hover {
+    border-color: rgba(196,120,74,.4);
+    background: #fff;
+  }
+
+  .addon-check {
+    accent-color: var(--clay);
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .addon-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    gap: .5rem;
+  }
+
+  .addon-name {
+    font-size: .84rem;
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+
+  .addon-price {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--clay);
+    white-space: nowrap;
   }
 
   /* ── Generate button ── */
@@ -985,11 +929,7 @@
     letter-spacing: .03em;
   }
 
-  .bc-generate-btn:hover {
-    background: var(--terracotta);
-    transform: translateY(-1px);
-  }
-
+  .bc-generate-btn:hover { background: var(--terracotta); transform: translateY(-1px); }
   .bc-generate-btn:active { transform: translateY(0); }
 
   /* ── Error ── */
@@ -1004,10 +944,7 @@
     border-radius: 4px;
   }
 
-  .bc-error span {
-    font-size: .78rem;
-    color: #a83232;
-  }
+  .bc-error span { font-size: .78rem; color: #a83232; }
 
   /* ── Result column ── */
   .bcalc-result-col {
@@ -1048,9 +985,7 @@
     overflow: hidden;
   }
 
-  .result-printable {
-    padding: 2rem;
-  }
+  .result-printable { padding: 2rem; }
 
   /* Header */
   .rp-header {
@@ -1070,11 +1005,7 @@
     letter-spacing: .08em;
   }
 
-  .rph-tagline {
-    font-size: .65rem;
-    color: rgba(245,240,232,.45);
-    margin-top: .2rem;
-  }
+  .rph-tagline { font-size: .65rem; color: rgba(245,240,232,.45); margin-top: .2rem; }
 
   .rph-title {
     font-size: .72rem;
@@ -1092,19 +1023,8 @@
     margin-bottom: 1.3rem;
   }
 
-  .rpc-row {
-    display: flex;
-    gap: .6rem;
-    font-size: .78rem;
-    line-height: 1.75;
-  }
-
-  .rpc-label {
-    color: rgba(245,240,232,.45);
-    min-width: 5rem;
-    font-size: .72rem;
-  }
-
+  .rpc-row { display: flex; gap: .6rem; font-size: .78rem; line-height: 1.75; }
+  .rpc-label { color: rgba(245,240,232,.45); min-width: 5rem; font-size: .72rem; }
   .rpc-val { color: var(--cream); }
 
   /* Metrics */
@@ -1112,7 +1032,7 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: .5rem;
-    margin-bottom: 1.4rem;
+    margin-bottom: 1.2rem;
   }
 
   .rp-metric {
@@ -1124,10 +1044,7 @@
     padding: .9rem 1rem;
   }
 
-  .rp-metric--mid {
-    align-items: center;
-    text-align: center;
-  }
+  .rp-metric--mid { align-items: center; text-align: center; }
 
   .rpm-label {
     font-size: .67rem;
@@ -1144,14 +1061,55 @@
     line-height: 1.1;
   }
 
-  .rpm-pkg {
-    color: var(--clay);
-    font-size: 1.1rem;
+  .rpm-pkg { color: var(--clay); font-size: 1.1rem; }
+  .rpm-total { color: var(--clay); font-size: 1rem; }
+  .rpm-unit { font-size: .68rem; color: rgba(245,240,232,.45); }
+
+  /* Breakdown */
+  .rp-breakdown {
+    background: rgba(255,255,255,.04);
+    border-radius: 4px;
+    padding: .9rem 1.1rem;
+    margin-bottom: 1.2rem;
   }
 
-  .rpm-unit {
+  .bkd-title {
     font-size: .68rem;
-    color: rgba(245,240,232,.45);
+    text-transform: uppercase;
+    letter-spacing: .11em;
+    color: rgba(245,240,232,.4);
+    margin-bottom: .7rem;
+  }
+
+  .bkd-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: .45rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+
+  .bkd-row:last-child { border-bottom: none; }
+
+  .bkd-label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--cream);
+  }
+
+  .bkd-sub {
+    font-size: .68rem;
+    color: rgba(245,240,232,.4);
+    margin-top: .1rem;
+  }
+
+  .bkd-val {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--clay);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   /* Total block */
@@ -1180,18 +1138,8 @@
     line-height: 1;
   }
 
-  .rptb-note {
-    display: none;
-    font-size: .72rem;
-    color: rgba(245,240,232,.55);
-    margin-top: .5rem;
-    font-style: italic;
-  }
-
   /* Includes */
-  .rp-includes {
-    margin-bottom: 1.3rem;
-  }
+  .rp-includes { margin-bottom: 1.3rem; }
 
   .rpi-title {
     font-size: .7rem;
@@ -1201,11 +1149,7 @@
     margin-bottom: .6rem;
   }
 
-  .rpi-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .35rem;
-  }
+  .rpi-grid { display: flex; flex-wrap: wrap; gap: .35rem; }
 
   .rpi-item {
     font-size: .72rem;
@@ -1216,16 +1160,10 @@
     border-radius: 20px;
   }
 
-  /* Payment schedule */
-  .rp-payment {
-    margin-bottom: 1.3rem;
-  }
+  /* Payment */
+  .rp-payment { margin-bottom: 1.3rem; }
 
-  .rp-pay-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
+  .rp-pay-grid { display: flex; flex-direction: column; gap: 0; }
 
   .rpay-row {
     display: flex;
@@ -1237,41 +1175,12 @@
   }
 
   .rpay-row:last-child { border-bottom: none; }
-
   .rpay-left { flex: 1; }
-
-  .rpay-label {
-    font-size: .78rem;
-    font-weight: 600;
-    color: var(--cream);
-    margin-bottom: .1rem;
-  }
-
-  .rpay-desc {
-    font-size: .68rem;
-    color: rgba(245,240,232,.45);
-  }
-
-  .rpay-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: .1rem;
-    flex-shrink: 0;
-  }
-
-  .rpay-pct {
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--clay);
-  }
-
-  .rpay-amt {
-    font-size: .82rem;
-    font-weight: 700;
-    color: var(--cream);
-    white-space: nowrap;
-  }
+  .rpay-label { font-size: .78rem; font-weight: 600; color: var(--cream); margin-bottom: .1rem; }
+  .rpay-desc  { font-size: .68rem; color: rgba(245,240,232,.45); }
+  .rpay-right { display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; flex-shrink: 0; }
+  .rpay-pct   { font-size: .72rem; font-weight: 700; color: var(--clay); }
+  .rpay-amt   { font-size: .82rem; font-weight: 700; color: var(--cream); white-space: nowrap; }
 
   /* Disclaimer */
   .rp-disclaimer {
@@ -1329,56 +1238,25 @@
 
   .ra-pdf:hover { background: rgba(255,255,255,.16); }
 
-  .ra-wa {
-    background: #25D366;
-    color: #fff;
-  }
-
+  .ra-wa { background: #25D366; color: #fff; }
   .ra-wa:hover { background: #1ebe59; }
 
   /* ── Responsive ── */
   @media (max-width: 1100px) {
-    .bcalc-section {
-      padding-left: 2.5rem;
-      padding-right: 2.5rem;
-    }
+    .bcalc-section { padding-left: 2.5rem; padding-right: 2.5rem; }
   }
 
   @media (max-width: 900px) {
-    .bcalc-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .bcalc-result-col {
-      position: static;
-    }
-
-    .pkg-grid {
-      grid-template-columns: 1fr;
-    }
+    .bcalc-layout { grid-template-columns: 1fr; }
+    .bcalc-result-col { position: static; }
+    .pkg-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 640px) {
-    .bcalc-section {
-      padding: 4rem 1.5rem;
-    }
-
-    .bc-row {
-      grid-template-columns: 1fr;
-    }
-
-    .rp-metrics {
-      grid-template-columns: 1fr;
-    }
-
-    .rptb-price {
-      font-size: 1.8rem;
-    }
-
-    .result-actions {
-      flex-direction: column;
-      padding: 1rem 1.4rem;
-    }
+    .bcalc-section { padding: 4rem 1.5rem; }
+    .bc-row { grid-template-columns: 1fr; }
+    .rp-metrics { grid-template-columns: 1fr; }
+    .rptb-price { font-size: 1.8rem; }
+    .result-actions { flex-direction: column; padding: 1rem 1.4rem; }
   }
-
 </style>
