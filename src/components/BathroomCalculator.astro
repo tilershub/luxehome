@@ -1,0 +1,1039 @@
+---
+---
+
+<section class="bcalc-section" id="renovation-calculator">
+  <div class="bcalc-inner">
+    <div class="stag reveal">Instant Estimate</div>
+    <h2 class="reveal">Bathroom Renovation Calculator</h2>
+    <p class="sdesc reveal">
+      Enter your bathroom size and select a package — get a cost estimate in seconds.
+    </p>
+
+    <div class="bcalc-layout">
+
+      <!-- ── LEFT: Input Column ── -->
+      <div class="bcalc-inputs">
+
+        <!-- Client Details -->
+        <div class="bc-card reveal">
+          <div class="bc-card-title">Your Details</div>
+          <div class="bc-row">
+            <div class="bc-field">
+              <label class="bc-label" for="bc-name">Client Name</label>
+              <input class="bc-input" type="text" id="bc-name" placeholder="Your full name" autocomplete="name" />
+            </div>
+            <div class="bc-field">
+              <label class="bc-label" for="bc-phone">Phone Number</label>
+              <input class="bc-input" type="tel" id="bc-phone" placeholder="+94 7xx xxx xxx" autocomplete="tel" />
+            </div>
+          </div>
+          <div class="bc-field">
+            <label class="bc-label" for="bc-location">Project Location</label>
+            <input class="bc-input" type="text" id="bc-location" placeholder="City / Town / District" autocomplete="address-level2" />
+          </div>
+        </div>
+
+        <!-- Dimensions -->
+        <div class="bc-card reveal">
+          <div class="bc-card-title">Bathroom Dimensions</div>
+          <div class="bc-row">
+            <div class="bc-field">
+              <label class="bc-label" for="bc-length">Length (feet)</label>
+              <input class="bc-input bc-dim" type="number" id="bc-length" placeholder="e.g. 8" min="1" max="100" step="0.5" />
+            </div>
+            <div class="bc-field">
+              <label class="bc-label" for="bc-width">Width (feet)</label>
+              <input class="bc-input bc-dim" type="number" id="bc-width" placeholder="e.g. 6" min="1" max="100" step="0.5" />
+            </div>
+          </div>
+          <div class="bc-area-preview" id="bc-area-preview">
+            <span class="bcap-label">Calculated Area</span>
+            <span class="bcap-value" id="bc-area-value">—</span>
+            <span class="bcap-unit">sq.ft</span>
+          </div>
+        </div>
+
+        <!-- Package Selection -->
+        <div class="bc-card reveal">
+          <div class="bc-card-title">Select Package</div>
+          <div class="pkg-grid" id="pkg-grid">
+
+            <!-- Basic -->
+            <label class="pkg-card" data-pkg="basic">
+              <input type="radio" name="bcpkg" value="basic" class="pkg-radio" />
+              <div class="pkg-header">
+                <span class="pkg-name">Basic</span>
+                <div class="pkg-rate">Rs. 11,000 <span>/sq.ft</span></div>
+              </div>
+              <ul class="pkg-list">
+                <li>Demolition</li>
+                <li>Masonry Works</li>
+                <li>Waterproofing</li>
+                <li>Plumbing</li>
+                <li>Electrical &amp; Lighting</li>
+                <li>Tiling</li>
+              </ul>
+              <div class="pkg-min">Min. Rs. 450,000</div>
+            </label>
+
+            <!-- Standard -->
+            <label class="pkg-card" data-pkg="standard">
+              <input type="radio" name="bcpkg" value="standard" class="pkg-radio" />
+              <div class="pkg-popular">Popular</div>
+              <div class="pkg-header">
+                <span class="pkg-name">Standard</span>
+                <div class="pkg-rate">Rs. 13,000 <span>/sq.ft</span></div>
+              </div>
+              <ul class="pkg-list">
+                <li>Bathroom Designing</li>
+                <li>Demolition</li>
+                <li>Masonry Works</li>
+                <li>Waterproofing</li>
+                <li>Plumbing</li>
+                <li>Electrical &amp; Lighting</li>
+                <li>Tiling</li>
+                <li>Ceiling</li>
+                <li>Painting</li>
+              </ul>
+              <div class="pkg-min">Min. Rs. 550,000</div>
+            </label>
+
+            <!-- Luxury -->
+            <label class="pkg-card" data-pkg="luxury">
+              <input type="radio" name="bcpkg" value="luxury" class="pkg-radio" />
+              <div class="pkg-header">
+                <span class="pkg-name">Luxury</span>
+                <div class="pkg-rate">Rs. 15,000 <span>/sq.ft</span></div>
+              </div>
+              <ul class="pkg-list">
+                <li>Bathroom Designing</li>
+                <li>Demolition</li>
+                <li>Masonry Works</li>
+                <li>Waterproofing</li>
+                <li>Plumbing</li>
+                <li>Electrical &amp; Lighting</li>
+                <li>Tiling</li>
+                <li>Ceiling</li>
+                <li>Painting</li>
+                <li>Vanity Cupboard</li>
+                <li>Shower Cubicle</li>
+              </ul>
+              <div class="pkg-min">Min. Rs. 650,000</div>
+            </label>
+
+          </div>
+        </div>
+
+        <button class="bc-generate-btn" id="bc-generate-btn" type="button">
+          Generate Quote →
+        </button>
+        <div class="bc-error" id="bc-error"></div>
+
+      </div><!-- /bcalc-inputs -->
+
+      <!-- ── RIGHT: Result Column ── -->
+      <div class="bcalc-result-col">
+
+        <!-- Placeholder state -->
+        <div class="bcalc-placeholder" id="bcalc-placeholder">
+          <div class="bcp-icon">📐</div>
+          <div class="bcp-text">Fill in the form and click<br /><strong>Generate Quote</strong> to see your estimate</div>
+        </div>
+
+        <!-- Result card (hidden until generated) -->
+        <div class="bcalc-result" id="bcalc-result">
+
+          <!-- Printable area -->
+          <div class="result-printable" id="result-printable">
+
+            <div class="rp-header">
+              <div class="rph-brand">
+                <div class="rph-logo">TILERSHUB</div>
+                <div class="rph-tagline">Premium Tiling &amp; Renovation · Sri Lanka</div>
+              </div>
+              <div class="rph-title">Renovation Estimate</div>
+            </div>
+
+            <div class="rp-client" id="rp-client"></div>
+
+            <div class="rp-metrics">
+              <div class="rp-metric">
+                <span class="rpm-label">Bathroom Area</span>
+                <span class="rpm-value" id="r-area"></span>
+                <span class="rpm-unit">sq.ft</span>
+              </div>
+              <div class="rp-metric rp-metric--mid">
+                <span class="rpm-label">Selected Package</span>
+                <span class="rpm-value rpm-pkg" id="r-pkg"></span>
+              </div>
+              <div class="rp-metric">
+                <span class="rpm-label">Rate Applied</span>
+                <span class="rpm-value" id="r-rate"></span>
+                <span class="rpm-unit">/sq.ft</span>
+              </div>
+            </div>
+
+            <div class="rp-total-block">
+              <div class="rptb-label">Estimated Total Cost</div>
+              <div class="rptb-price" id="r-total"></div>
+              <div class="rptb-note" id="r-note"></div>
+            </div>
+
+            <div class="rp-includes">
+              <div class="rpi-title">Services Included</div>
+              <div class="rpi-grid" id="r-includes"></div>
+            </div>
+
+            <div class="rp-disclaimer">
+              ⚠ This is an estimated renovation cost. Final quotation will be confirmed after site inspection.
+            </div>
+
+            <div class="rp-footer">
+              <div>TILERSHUB · tilershub.lk · +94 774 503 744</div>
+              <div id="rp-date"></div>
+            </div>
+
+          </div><!-- /result-printable -->
+
+          <div class="result-actions">
+            <button class="ra-btn ra-pdf" id="ra-pdf" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            </button>
+            <button class="ra-btn ra-wa" id="ra-wa" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
+              Share on WhatsApp
+            </button>
+          </div>
+
+        </div><!-- /bcalc-result -->
+
+      </div><!-- /bcalc-result-col -->
+
+    </div><!-- /bcalc-layout -->
+  </div>
+</section>
+
+<script>
+  const PACKAGES = {
+    basic: {
+      name: 'Basic',
+      rate: 11000,
+      largeRate: 10500,
+      min: 450000,
+      includes: ['Demolition','Masonry Works','Waterproofing','Plumbing','Electrical & Lighting','Tiling'],
+    },
+    standard: {
+      name: 'Standard',
+      rate: 13000,
+      largeRate: 12000,
+      min: 550000,
+      includes: ['Bathroom Designing','Demolition','Masonry Works','Waterproofing','Plumbing','Electrical & Lighting','Tiling','Ceiling','Painting'],
+    },
+    luxury: {
+      name: 'Luxury',
+      rate: 15000,
+      largeRate: 14000,
+      min: 650000,
+      includes: ['Bathroom Designing','Demolition','Masonry Works','Waterproofing','Plumbing','Electrical & Lighting','Tiling','Ceiling','Painting','Vanity Cupboard','Shower Cubicle'],
+    },
+  };
+
+  function fmt(n) {
+    return 'Rs. ' + n.toLocaleString('en-IN');
+  }
+
+  // Live area preview
+  const lenEl  = document.getElementById('bc-length');
+  const widEl  = document.getElementById('bc-width');
+  const areaEl = document.getElementById('bc-area-value');
+
+  function updateAreaPreview() {
+    const l = parseFloat((lenEl as HTMLInputElement).value);
+    const w = parseFloat((widEl as HTMLInputElement).value);
+    if (l > 0 && w > 0) {
+      areaEl.textContent = (l * w).toFixed(1);
+    } else {
+      areaEl.textContent = '—';
+    }
+  }
+
+  lenEl.addEventListener('input', updateAreaPreview);
+  widEl.addEventListener('input', updateAreaPreview);
+
+  // Package card selection highlight
+  document.querySelectorAll('.pkg-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('pkg-card--active'));
+      card.classList.add('pkg-card--active');
+    });
+  });
+
+  // Generate Quote
+  document.getElementById('bc-generate-btn').addEventListener('click', () => {
+    const name     = (document.getElementById('bc-name') as HTMLInputElement).value.trim();
+    const phone    = (document.getElementById('bc-phone') as HTMLInputElement).value.trim();
+    const location = (document.getElementById('bc-location') as HTMLInputElement).value.trim();
+    const length   = parseFloat((lenEl as HTMLInputElement).value);
+    const width    = parseFloat((widEl as HTMLInputElement).value);
+    const pkgKey   = (document.querySelector('input[name="bcpkg"]:checked') as HTMLInputElement)?.value;
+    const errorEl  = document.getElementById('bc-error');
+
+    // Validation
+    const errors: string[] = [];
+    if (!name)              errors.push('Please enter your name.');
+    if (!phone)             errors.push('Please enter your phone number.');
+    if (!location)          errors.push('Please enter your project location.');
+    if (!(length > 0))      errors.push('Please enter a valid bathroom length.');
+    if (!(width > 0))       errors.push('Please enter a valid bathroom width.');
+    if (!pkgKey)            errors.push('Please select a package.');
+
+    if (errors.length) {
+      errorEl.innerHTML = errors.map(e => `<span>${e}</span>`).join('');
+      errorEl.style.display = 'flex';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    const area = length * width;
+    const pkg  = PACKAGES[pkgKey];
+    const rate = area > 100 ? pkg.largeRate : pkg.rate;
+    const calc = area * rate;
+    const total = Math.max(calc, pkg.min);
+    const isMin    = total === pkg.min && calc < pkg.min;
+    const isLarge  = area > 100;
+
+    // Populate result
+    // Client block
+    const clientEl = document.getElementById('rp-client');
+    clientEl.innerHTML = `
+      <div class="rpc-row"><span class="rpc-label">Name</span><span class="rpc-val">${name}</span></div>
+      <div class="rpc-row"><span class="rpc-label">Phone</span><span class="rpc-val">${phone}</span></div>
+      <div class="rpc-row"><span class="rpc-label">Location</span><span class="rpc-val">${location}</span></div>
+    `;
+
+    (document.getElementById('r-area') as HTMLElement).textContent = area.toFixed(1);
+    (document.getElementById('r-pkg') as HTMLElement).textContent  = pkg.name;
+    (document.getElementById('r-rate') as HTMLElement).textContent = `Rs. ${rate.toLocaleString('en-IN')}`;
+    (document.getElementById('r-total') as HTMLElement).textContent = fmt(total);
+
+    const noteEl = document.getElementById('r-note');
+    if (isMin) {
+      noteEl.textContent = `Minimum project price applied (calculated: ${fmt(calc)})`;
+      noteEl.style.display = 'block';
+    } else if (isLarge) {
+      noteEl.textContent = `Large bathroom discount applied (area > 100 sq.ft)`;
+      noteEl.style.display = 'block';
+    } else {
+      noteEl.style.display = 'none';
+    }
+
+    // Services included
+    const includesEl = document.getElementById('r-includes');
+    includesEl.innerHTML = pkg.includes.map(s => `<div class="rpi-item">${s}</div>`).join('');
+
+    // Date
+    (document.getElementById('rp-date') as HTMLElement).textContent =
+      new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Store for WhatsApp
+    (document.getElementById('ra-wa') as HTMLElement).dataset.name     = name;
+    (document.getElementById('ra-wa') as HTMLElement).dataset.phone    = phone;
+    (document.getElementById('ra-wa') as HTMLElement).dataset.location = location;
+    (document.getElementById('ra-wa') as HTMLElement).dataset.area     = area.toFixed(1);
+    (document.getElementById('ra-wa') as HTMLElement).dataset.pkg      = pkg.name;
+    (document.getElementById('ra-wa') as HTMLElement).dataset.rate     = `Rs. ${rate.toLocaleString('en-IN')}`;
+    (document.getElementById('ra-wa') as HTMLElement).dataset.total    = fmt(total);
+    (document.getElementById('ra-wa') as HTMLElement).dataset.includes = pkg.includes.join(', ');
+    (document.getElementById('ra-wa') as HTMLElement).dataset.note     = isMin
+      ? `Minimum project price applied.`
+      : isLarge ? `Large bathroom discount applied.` : '';
+
+    // Show result, hide placeholder
+    (document.getElementById('bcalc-placeholder') as HTMLElement).style.display = 'none';
+    (document.getElementById('bcalc-result') as HTMLElement).style.display = 'flex';
+
+    // Smooth scroll to result on mobile
+    if (window.innerWidth < 900) {
+      document.getElementById('bcalc-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  // PDF / Print
+  document.getElementById('ra-pdf').addEventListener('click', () => {
+    window.print();
+  });
+
+  // WhatsApp
+  document.getElementById('ra-wa').addEventListener('click', (e) => {
+    const btn      = e.currentTarget as HTMLElement;
+    const name     = btn.dataset.name;
+    const phone    = btn.dataset.phone;
+    const location = btn.dataset.location;
+    const area     = btn.dataset.area;
+    const pkg      = btn.dataset.pkg;
+    const rate     = btn.dataset.rate;
+    const total    = btn.dataset.total;
+    const includes = btn.dataset.includes;
+    const note     = btn.dataset.note;
+
+    const msg = [
+      `*TILERSHUB — Bathroom Renovation Estimate*`,
+      ``,
+      `*Client:* ${name}`,
+      `*Phone:* ${phone}`,
+      `*Location:* ${location}`,
+      ``,
+      `*Bathroom Area:* ${area} sq.ft`,
+      `*Package:* ${pkg}`,
+      `*Rate Applied:* ${rate}/sq.ft`,
+      `*Estimated Total:* ${total}`,
+      note ? `_${note}_` : null,
+      ``,
+      `*Services Included:* ${includes}`,
+      ``,
+      `_This is an estimated cost. Final quotation after site inspection._`,
+      ``,
+      `tilershub.lk | +94 774 503 744`,
+    ].filter(l => l !== null).join('\n');
+
+    const url = `https://wa.me/94774503744?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank', 'noopener');
+  });
+</script>
+
+<style>
+  /* ── Section wrapper ── */
+  .bcalc-section {
+    background: var(--off-white);
+    padding: 5.5rem 4rem;
+  }
+
+  .bcalc-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── Two-column layout ── */
+  .bcalc-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+    margin-top: 2.5rem;
+  }
+
+  /* ── Input cards ── */
+  .bc-card {
+    background: #fff;
+    border: 1px solid var(--stone);
+    border-radius: 6px;
+    padding: 1.6rem 1.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .bc-card-title {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--clay);
+    margin-bottom: 1.2rem;
+  }
+
+  .bc-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .bc-field {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    margin-bottom: .8rem;
+  }
+
+  .bc-field:last-child { margin-bottom: 0; }
+
+  .bc-label {
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+
+  .bc-input {
+    border: 1.5px solid var(--stone);
+    border-radius: 4px;
+    padding: .65rem .85rem;
+    font-size: .88rem;
+    font-family: inherit;
+    color: var(--charcoal);
+    background: var(--off-white);
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+
+  .bc-input:focus {
+    outline: none;
+    border-color: var(--clay);
+    background: #fff;
+  }
+
+  /* ── Area preview ── */
+  .bc-area-preview {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    background: rgba(196,120,74,.07);
+    border: 1px solid rgba(196,120,74,.2);
+    border-radius: 4px;
+    padding: .7rem 1rem;
+    margin-top: .8rem;
+  }
+
+  .bcap-label {
+    font-size: .74rem;
+    color: var(--warm-gray);
+    flex: 1;
+  }
+
+  .bcap-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--clay);
+  }
+
+  .bcap-unit {
+    font-size: .75rem;
+    color: var(--warm-gray);
+  }
+
+  /* ── Package grid ── */
+  .pkg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .75rem;
+  }
+
+  .pkg-card {
+    position: relative;
+    cursor: pointer;
+    border: 2px solid var(--stone);
+    border-radius: 6px;
+    padding: 1.1rem .9rem 1rem;
+    background: var(--off-white);
+    transition: border-color .2s, background .2s, transform .15s;
+    display: block;
+  }
+
+  .pkg-card:hover {
+    border-color: rgba(196,120,74,.5);
+    background: #fff;
+  }
+
+  .pkg-card--active {
+    border-color: var(--clay) !important;
+    background: rgba(196,120,74,.05) !important;
+    box-shadow: 0 0 0 3px rgba(196,120,74,.12);
+  }
+
+  .pkg-radio {
+    position: absolute;
+    top: .8rem;
+    right: .8rem;
+    accent-color: var(--clay);
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .pkg-popular {
+    position: absolute;
+    top: -.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--clay);
+    color: var(--cream);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .15rem .55rem;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .pkg-header {
+    margin-bottom: .7rem;
+    padding-right: 1.4rem;
+  }
+
+  .pkg-name {
+    display: block;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: .2rem;
+  }
+
+  .pkg-rate {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--clay);
+  }
+
+  .pkg-rate span {
+    font-family: inherit;
+    font-size: .65rem;
+    font-weight: 400;
+    color: var(--warm-gray);
+  }
+
+  .pkg-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 .7rem;
+  }
+
+  .pkg-list li {
+    font-size: .72rem;
+    color: var(--warm-gray);
+    line-height: 1.6;
+    padding-left: .9rem;
+    position: relative;
+  }
+
+  .pkg-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--clay);
+    font-size: .65rem;
+  }
+
+  .pkg-min {
+    font-size: .67rem;
+    color: rgba(107,95,84,.6);
+    border-top: 1px solid var(--stone);
+    padding-top: .55rem;
+    margin-top: .3rem;
+  }
+
+  /* ── Generate button ── */
+  .bc-generate-btn {
+    width: 100%;
+    background: var(--clay);
+    color: var(--cream);
+    border: none;
+    border-radius: 4px;
+    padding: 1rem;
+    font-size: .9rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+    letter-spacing: .03em;
+  }
+
+  .bc-generate-btn:hover {
+    background: var(--terracotta);
+    transform: translateY(-1px);
+  }
+
+  .bc-generate-btn:active { transform: translateY(0); }
+
+  /* ── Error ── */
+  .bc-error {
+    display: none;
+    flex-direction: column;
+    gap: .3rem;
+    margin-top: .8rem;
+    padding: .9rem 1rem;
+    background: rgba(196,50,50,.06);
+    border: 1px solid rgba(196,50,50,.2);
+    border-radius: 4px;
+  }
+
+  .bc-error span {
+    font-size: .78rem;
+    color: #a83232;
+  }
+
+  /* ── Result column ── */
+  .bcalc-result-col {
+    position: sticky;
+    top: 7rem;
+  }
+
+  /* ── Placeholder ── */
+  .bcalc-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1rem;
+    min-height: 380px;
+    background: #fff;
+    border: 2px dashed var(--stone);
+    border-radius: 6px;
+    padding: 3rem 2rem;
+    color: var(--warm-gray);
+  }
+
+  .bcp-icon { font-size: 2.5rem; opacity: .5; }
+
+  .bcp-text {
+    font-size: .86rem;
+    line-height: 1.7;
+    color: var(--warm-gray);
+  }
+
+  /* ── Result card ── */
+  .bcalc-result {
+    display: none;
+    flex-direction: column;
+    background: var(--charcoal);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .result-printable {
+    padding: 2rem;
+  }
+
+  /* Header */
+  .rp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    margin-bottom: 1.4rem;
+  }
+
+  .rph-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--clay);
+    letter-spacing: .08em;
+  }
+
+  .rph-tagline {
+    font-size: .65rem;
+    color: rgba(245,240,232,.45);
+    margin-top: .2rem;
+  }
+
+  .rph-title {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: rgba(245,240,232,.5);
+    align-self: center;
+  }
+
+  /* Client */
+  .rp-client {
+    background: rgba(255,255,255,.04);
+    border-radius: 4px;
+    padding: .9rem 1.1rem;
+    margin-bottom: 1.3rem;
+  }
+
+  .rpc-row {
+    display: flex;
+    gap: .6rem;
+    font-size: .78rem;
+    line-height: 1.75;
+  }
+
+  .rpc-label {
+    color: rgba(245,240,232,.45);
+    min-width: 5rem;
+    font-size: .72rem;
+  }
+
+  .rpc-val { color: var(--cream); }
+
+  /* Metrics */
+  .rp-metrics {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: .5rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .rp-metric {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    background: rgba(255,255,255,.04);
+    border-radius: 4px;
+    padding: .9rem 1rem;
+  }
+
+  .rp-metric--mid {
+    align-items: center;
+    text-align: center;
+  }
+
+  .rpm-label {
+    font-size: .67rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: rgba(245,240,232,.45);
+  }
+
+  .rpm-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1.1;
+  }
+
+  .rpm-pkg {
+    color: var(--clay);
+    font-size: 1.1rem;
+  }
+
+  .rpm-unit {
+    font-size: .68rem;
+    color: rgba(245,240,232,.45);
+  }
+
+  /* Total block */
+  .rp-total-block {
+    background: rgba(196,120,74,.12);
+    border: 1px solid rgba(196,120,74,.3);
+    border-radius: 4px;
+    padding: 1.3rem 1.5rem;
+    margin-bottom: 1.4rem;
+    text-align: center;
+  }
+
+  .rptb-label {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .13em;
+    color: rgba(245,240,232,.55);
+    margin-bottom: .4rem;
+  }
+
+  .rptb-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--clay);
+    line-height: 1;
+  }
+
+  .rptb-note {
+    display: none;
+    font-size: .72rem;
+    color: rgba(245,240,232,.55);
+    margin-top: .5rem;
+    font-style: italic;
+  }
+
+  /* Includes */
+  .rp-includes {
+    margin-bottom: 1.3rem;
+  }
+
+  .rpi-title {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: rgba(245,240,232,.45);
+    margin-bottom: .6rem;
+  }
+
+  .rpi-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+  }
+
+  .rpi-item {
+    font-size: .72rem;
+    color: rgba(245,240,232,.75);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    padding: .22rem .65rem;
+    border-radius: 20px;
+  }
+
+  /* Disclaimer */
+  .rp-disclaimer {
+    font-size: .72rem;
+    color: rgba(245,240,232,.45);
+    line-height: 1.6;
+    padding: .9rem 1rem;
+    border-top: 1px solid rgba(255,255,255,.08);
+    margin-top: .5rem;
+  }
+
+  /* Footer (print only) */
+  .rp-footer {
+    display: none;
+    font-size: .68rem;
+    color: rgba(245,240,232,.35);
+    margin-top: .7rem;
+    padding-top: .7rem;
+    border-top: 1px solid rgba(255,255,255,.08);
+    justify-content: space-between;
+  }
+
+  /* Action buttons */
+  .result-actions {
+    display: flex;
+    gap: .8rem;
+    padding: 1.2rem 2rem;
+    border-top: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.02);
+  }
+
+  .ra-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    border: none;
+    border-radius: 4px;
+    padding: .75rem .5rem;
+    font-size: .82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+
+  .ra-btn:active { transform: scale(.97); }
+
+  .ra-pdf {
+    background: rgba(255,255,255,.1);
+    color: var(--cream);
+    border: 1px solid rgba(255,255,255,.15);
+  }
+
+  .ra-pdf:hover { background: rgba(255,255,255,.16); }
+
+  .ra-wa {
+    background: #25D366;
+    color: #fff;
+  }
+
+  .ra-wa:hover { background: #1ebe59; }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .bcalc-section {
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .bcalc-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .bcalc-result-col {
+      position: static;
+    }
+
+    .pkg-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bcalc-section {
+      padding: 4rem 1.5rem;
+    }
+
+    .bc-row {
+      grid-template-columns: 1fr;
+    }
+
+    .rp-metrics {
+      grid-template-columns: 1fr;
+    }
+
+    .rptb-price {
+      font-size: 1.8rem;
+    }
+
+    .result-actions {
+      flex-direction: column;
+      padding: 1rem 1.4rem;
+    }
+  }
+
+  /* ── Print styles ── */
+  @media print {
+    .bcalc-section {
+      padding: 0;
+      background: #fff;
+    }
+
+    .bcalc-layout {
+      display: block;
+    }
+
+    .bcalc-inputs,
+    .bcalc-placeholder,
+    .result-actions {
+      display: none !important;
+    }
+
+    .bcalc-result-col {
+      position: static;
+    }
+
+    .bcalc-result {
+      display: flex !important;
+      background: #fff;
+      color: #000;
+      border-radius: 0;
+    }
+
+    .result-printable {
+      padding: 2rem;
+    }
+
+    .rp-header,
+    .rp-client,
+    .rp-metrics,
+    .rp-total-block,
+    .rp-includes,
+    .rp-disclaimer {
+      color: #000;
+    }
+
+    .rph-logo { color: #c4784a; }
+    .rph-tagline, .rph-title { color: #666; }
+    .rpc-val, .rpm-value { color: #1e1a17; }
+    .rpm-pkg { color: #c4784a; }
+    .rpm-label, .rpm-unit, .rpc-label, .rpi-title, .rptb-label { color: #888; }
+    .rp-client, .rp-metric, .rptb-price { color: #1e1a17; }
+    .rptb-price { color: #c4784a; }
+    .rp-total-block { background: #faf0e8; border-color: #c4784a; }
+    .rpi-item { background: #f5f0e8; border-color: #d4c4b0; color: #1e1a17; }
+    .rp-disclaimer { color: #888; }
+    .rptb-note { color: #888; }
+    .rp-footer { display: flex !important; color: #aaa; }
+
+    /* Page setup */
+    @page {
+      size: A4;
+      margin: 1.5cm 2cm;
+    }
+  }
+</style>
