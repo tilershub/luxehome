@@ -184,6 +184,11 @@
               <div class="rpi-grid" id="r-includes"></div>
             </div>
 
+            <div class="rp-payment">
+              <div class="rpi-title">Payment Schedule</div>
+              <div class="rp-pay-grid" id="r-payment"></div>
+            </div>
+
             <div class="rp-disclaimer">
               ⚠ This is an estimated renovation cost. Final quotation will be confirmed after site inspection.
             </div>
@@ -332,9 +337,38 @@
     const includesEl = document.getElementById('r-includes');
     includesEl.innerHTML = pkg.includes.map(s => `<div class="rpi-item">${s}</div>`).join('');
 
+    // Payment schedule
+    const PAY = [
+      { label: 'Upfront / Deposit',          pct: 10, desc: 'Due before any work commences' },
+      { label: 'On Starting Date',            pct: 60, desc: 'Due on the day work begins on site' },
+      { label: 'After Tiling Completion',     pct: 30, desc: 'Due once all tiling is finished' },
+      { label: 'Final Payment on Handover',   pct: 10, desc: 'Due on project completion & handover' },
+    ];
+    const payEl = document.getElementById('r-payment');
+    payEl.innerHTML = PAY.map(p => {
+      const amt = Math.round(total * p.pct / 100);
+      return `
+        <div class="rpay-row">
+          <div class="rpay-left">
+            <div class="rpay-label">${p.label}</div>
+            <div class="rpay-desc">${p.desc}</div>
+          </div>
+          <div class="rpay-right">
+            <span class="rpay-pct">${p.pct}%</span>
+            <span class="rpay-amt">${fmt(amt)}</span>
+          </div>
+        </div>`;
+    }).join('');
+
     // Date
     (document.getElementById('rp-date') as HTMLElement).textContent =
       new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Store payment data for PDF
+    const pdfBtn = document.getElementById('ra-pdf') as HTMLElement;
+    pdfBtn.dataset.payRows = PAY.map(p =>
+      `${p.pct}%|${p.label}|${p.desc}|${fmt(Math.round(total * p.pct / 100))}`
+    ).join(';;');
 
     // Store for WhatsApp
     (document.getElementById('ra-wa') as HTMLElement).dataset.name     = name;
@@ -362,6 +396,7 @@
   // PDF / Print — opens a clean popup with only quote data, then prints it
   document.getElementById('ra-pdf').addEventListener('click', () => {
     const waBtn   = document.getElementById('ra-wa') as HTMLElement;
+    const pdfBtn  = document.getElementById('ra-pdf') as HTMLElement;
     const name     = waBtn.dataset.name     || '';
     const phone    = waBtn.dataset.phone    || '';
     const location = waBtn.dataset.location || '';
@@ -378,9 +413,18 @@
       .map(s => `<li>${s}</li>`)
       .join('');
 
-    const noteRow = note
-      ? `<p class="note">${note}</p>`
-      : '';
+    const noteRow = note ? `<p class="note">${note}</p>` : '';
+
+    const payRows = (pdfBtn.dataset.payRows || '').split(';;').map(row => {
+      const [pct, label, desc, amt] = row.split('|');
+      return `
+        <tr>
+          <td class="pt-label">${label}</td>
+          <td class="pt-desc">${desc}</td>
+          <td class="pt-pct">${pct}</td>
+          <td class="pt-amt">${amt}</td>
+        </tr>`;
+    }).join('');
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -416,6 +460,15 @@
   .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5pt 18pt; margin-bottom: 18pt; }
   .scope-grid li { font-size: 9.5pt; color: #1e1a17; list-style: none; padding-left: 12pt; position: relative; line-height: 1.6; }
   .scope-grid li::before { content: '✓'; position: absolute; left: 0; color: #c4784a; font-size: 9pt; }
+  /* Payment table */
+  .pay-table { width: 100%; border-collapse: collapse; margin-bottom: 18pt; font-size: 9.5pt; }
+  .pay-table th { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #888; text-align: left; padding: 5pt 8pt; border-bottom: 1pt solid #d4c4b0; }
+  .pay-table th.right { text-align: right; }
+  .pay-table td { padding: 7pt 8pt; border-bottom: 0.5pt solid #ede5d8; vertical-align: top; }
+  .pt-label { font-weight: bold; color: #1e1a17; width: 36%; }
+  .pt-desc  { color: #888; font-size: 8.5pt; width: 38%; }
+  .pt-pct   { color: #c4784a; font-weight: bold; text-align: right; width: 10%; }
+  .pt-amt   { font-weight: bold; text-align: right; white-space: nowrap; width: 16%; }
   /* Disclaimer */
   .disclaimer { font-size: 8pt; color: #888; line-height: 1.6; padding-top: 12pt; border-top: 0.75pt solid #d4c4b0; margin-top: 4pt; }
   /* Footer */
@@ -466,6 +519,19 @@
   <div class="section-title">Scope of Work — ${pkgName} Package</div>
   <ul class="scope-grid">${scopeItems}</ul>
 
+  <div class="section-title">Payment Schedule</div>
+  <table class="pay-table">
+    <thead>
+      <tr>
+        <th>Milestone</th>
+        <th>When</th>
+        <th class="right">%</th>
+        <th class="right">Amount</th>
+      </tr>
+    </thead>
+    <tbody>${payRows}</tbody>
+  </table>
+
   <div class="disclaimer">
     ⚠ This is an estimated renovation cost. Final quotation will be confirmed after site inspection.
     Rates are subject to change based on site conditions, scope modifications, and material specification.
@@ -512,6 +578,12 @@
       note ? `_${note}_` : null,
       ``,
       `*Services Included:* ${includes}`,
+      ``,
+      `*Payment Schedule:*`,
+      `• 10% Upfront / Deposit`,
+      `• 60% On Starting Date`,
+      `• 30% After Tiling Completion`,
+      `• 10% Final Payment on Handover`,
       ``,
       `_This is an estimated cost. Final quotation after site inspection._`,
       ``,
@@ -987,6 +1059,63 @@
     border: 1px solid rgba(255,255,255,.1);
     padding: .22rem .65rem;
     border-radius: 20px;
+  }
+
+  /* Payment schedule */
+  .rp-payment {
+    margin-bottom: 1.3rem;
+  }
+
+  .rp-pay-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .rpay-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: .65rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+
+  .rpay-row:last-child { border-bottom: none; }
+
+  .rpay-left { flex: 1; }
+
+  .rpay-label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: .1rem;
+  }
+
+  .rpay-desc {
+    font-size: .68rem;
+    color: rgba(245,240,232,.45);
+  }
+
+  .rpay-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .1rem;
+    flex-shrink: 0;
+  }
+
+  .rpay-pct {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--clay);
+  }
+
+  .rpay-amt {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--cream);
+    white-space: nowrap;
   }
 
   /* Disclaimer */
