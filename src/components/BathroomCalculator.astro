@@ -359,9 +359,130 @@
     }
   });
 
-  // PDF / Print
+  // PDF / Print — opens a clean popup with only quote data, then prints it
   document.getElementById('ra-pdf').addEventListener('click', () => {
-    window.print();
+    const waBtn   = document.getElementById('ra-wa') as HTMLElement;
+    const name     = waBtn.dataset.name     || '';
+    const phone    = waBtn.dataset.phone    || '';
+    const location = waBtn.dataset.location || '';
+    const area     = waBtn.dataset.area     || '';
+    const pkgName  = waBtn.dataset.pkg      || '';
+    const rate     = waBtn.dataset.rate     || '';
+    const total    = waBtn.dataset.total    || '';
+    const note     = waBtn.dataset.note     || '';
+    const includes = waBtn.dataset.includes || '';
+    const date     = (document.getElementById('rp-date') as HTMLElement).textContent || '';
+
+    const scopeItems = includes
+      .split(', ')
+      .map(s => `<li>${s}</li>`)
+      .join('');
+
+    const noteRow = note
+      ? `<p class="note">${note}</p>`
+      : '';
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>TILERSHUB — Renovation Estimate</title>
+<style>
+  @page { size: A4; margin: 2cm 2.2cm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: #1e1a17; background: #fff; font-size: 11pt; line-height: 1.5; }
+  /* Header */
+  .hdr { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 12pt; border-bottom: 2pt solid #c4784a; margin-bottom: 18pt; }
+  .brand-name { font-size: 20pt; font-weight: 900; color: #c4784a; letter-spacing: 2pt; }
+  .brand-sub  { font-size: 8pt; color: #888; margin-top: 2pt; }
+  .doc-title  { font-size: 10pt; color: #888; text-transform: uppercase; letter-spacing: 1pt; text-align: right; }
+  /* Client */
+  .section-title { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1.5pt; color: #c4784a; margin-bottom: 7pt; }
+  .client-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4pt 24pt; margin-bottom: 18pt; }
+  .client-row { font-size: 10pt; }
+  .client-label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1pt; color: #888; display: block; margin-bottom: 1pt; }
+  /* Metrics */
+  .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10pt; margin-bottom: 18pt; }
+  .metric { border: 0.75pt solid #d4c4b0; border-radius: 3pt; padding: 10pt 12pt; }
+  .metric-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #888; margin-bottom: 4pt; }
+  .metric-value { font-size: 14pt; font-weight: 900; color: #1e1a17; }
+  .metric-unit  { font-size: 8pt; color: #888; }
+  /* Total */
+  .total-block { background: #fdf5ee; border: 1pt solid #c4784a; border-radius: 3pt; padding: 16pt 20pt; margin-bottom: 18pt; text-align: center; }
+  .total-label { font-size: 8pt; text-transform: uppercase; letter-spacing: 1.5pt; color: #888; margin-bottom: 5pt; }
+  .total-price { font-size: 26pt; font-weight: 900; color: #c4784a; line-height: 1; }
+  .note { font-size: 8pt; color: #888; font-style: italic; margin-top: 6pt; }
+  /* Scope */
+  .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5pt 18pt; margin-bottom: 18pt; }
+  .scope-grid li { font-size: 9.5pt; color: #1e1a17; list-style: none; padding-left: 12pt; position: relative; line-height: 1.6; }
+  .scope-grid li::before { content: '✓'; position: absolute; left: 0; color: #c4784a; font-size: 9pt; }
+  /* Disclaimer */
+  .disclaimer { font-size: 8pt; color: #888; line-height: 1.6; padding-top: 12pt; border-top: 0.75pt solid #d4c4b0; margin-top: 4pt; }
+  /* Footer */
+  .footer { display: flex; justify-content: space-between; margin-top: 16pt; padding-top: 10pt; border-top: 0.75pt solid #d4c4b0; font-size: 8pt; color: #aaa; }
+</style>
+</head>
+<body>
+  <div class="hdr">
+    <div>
+      <div class="brand-name">TILERSHUB</div>
+      <div class="brand-sub">Premium Tiling &amp; Renovation · Sri Lanka · tilershub.lk</div>
+    </div>
+    <div class="doc-title">Renovation Estimate</div>
+  </div>
+
+  <div class="section-title">Client Details</div>
+  <div class="client-grid">
+    <div class="client-row"><span class="client-label">Name</span>${name}</div>
+    <div class="client-row"><span class="client-label">Phone</span>${phone}</div>
+    <div class="client-row"><span class="client-label">Location</span>${location}</div>
+    <div class="client-row"><span class="client-label">Date</span>${date}</div>
+  </div>
+
+  <div class="section-title">Project Summary</div>
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Bathroom Area</div>
+      <div class="metric-value">${area}</div>
+      <div class="metric-unit">sq.ft</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Selected Package</div>
+      <div class="metric-value" style="color:#c4784a">${pkgName}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Rate Applied</div>
+      <div class="metric-value">${rate}</div>
+      <div class="metric-unit">/sq.ft</div>
+    </div>
+  </div>
+
+  <div class="total-block">
+    <div class="total-label">Estimated Total Cost</div>
+    <div class="total-price">${total}</div>
+    ${noteRow}
+  </div>
+
+  <div class="section-title">Scope of Work — ${pkgName} Package</div>
+  <ul class="scope-grid">${scopeItems}</ul>
+
+  <div class="disclaimer">
+    ⚠ This is an estimated renovation cost. Final quotation will be confirmed after site inspection.
+    Rates are subject to change based on site conditions, scope modifications, and material specification.
+  </div>
+
+  <div class="footer">
+    <span>TILERSHUB · tilershub.lk · +94 774 503 744</span>
+    <span>Generated ${date}</span>
+  </div>
+</body>
+</html>`;
+
+    const win = window.open('', '_blank', 'width=794,height=1123');
+    if (!win) { alert('Please allow pop-ups to download the PDF.'); return; }
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { win.focus(); win.print(); };
   });
 
   // WhatsApp
@@ -976,64 +1097,4 @@
     }
   }
 
-  /* ── Print styles ── */
-  @media print {
-    .bcalc-section {
-      padding: 0;
-      background: #fff;
-    }
-
-    .bcalc-layout {
-      display: block;
-    }
-
-    .bcalc-inputs,
-    .bcalc-placeholder,
-    .result-actions {
-      display: none !important;
-    }
-
-    .bcalc-result-col {
-      position: static;
-    }
-
-    .bcalc-result {
-      display: flex !important;
-      background: #fff;
-      color: #000;
-      border-radius: 0;
-    }
-
-    .result-printable {
-      padding: 2rem;
-    }
-
-    .rp-header,
-    .rp-client,
-    .rp-metrics,
-    .rp-total-block,
-    .rp-includes,
-    .rp-disclaimer {
-      color: #000;
-    }
-
-    .rph-logo { color: #c4784a; }
-    .rph-tagline, .rph-title { color: #666; }
-    .rpc-val, .rpm-value { color: #1e1a17; }
-    .rpm-pkg { color: #c4784a; }
-    .rpm-label, .rpm-unit, .rpc-label, .rpi-title, .rptb-label { color: #888; }
-    .rp-client, .rp-metric, .rptb-price { color: #1e1a17; }
-    .rptb-price { color: #c4784a; }
-    .rp-total-block { background: #faf0e8; border-color: #c4784a; }
-    .rpi-item { background: #f5f0e8; border-color: #d4c4b0; color: #1e1a17; }
-    .rp-disclaimer { color: #888; }
-    .rptb-note { color: #888; }
-    .rp-footer { display: flex !important; color: #aaa; }
-
-    /* Page setup */
-    @page {
-      size: A4;
-      margin: 1.5cm 2cm;
-    }
-  }
 </style>
