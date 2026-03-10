@@ -36,14 +36,30 @@
         <!-- Dimensions -->
         <div class="bc-card reveal">
           <div class="bc-card-title">Bathroom Dimensions</div>
-          <div class="bc-row">
-            <div class="bc-field">
-              <label class="bc-label" for="bc-length">Length (feet)</label>
-              <input class="bc-input bc-dim" type="number" id="bc-length" placeholder="e.g. 8" min="1" max="100" step="0.5" />
+          <div class="bc-dim-row">
+            <span class="bc-dim-label">Length</span>
+            <div class="bc-fi-group">
+              <div class="bc-fi">
+                <input class="bc-input bc-dim" type="number" id="bc-lf" min="0" max="200" placeholder="8" />
+                <span class="bc-unit">ft</span>
+              </div>
+              <div class="bc-fi">
+                <input class="bc-input bc-dim bc-in" type="number" id="bc-li" min="0" max="11" placeholder="0" />
+                <span class="bc-unit">in</span>
+              </div>
             </div>
-            <div class="bc-field">
-              <label class="bc-label" for="bc-width">Width (feet)</label>
-              <input class="bc-input bc-dim" type="number" id="bc-width" placeholder="e.g. 6" min="1" max="100" step="0.5" />
+          </div>
+          <div class="bc-dim-row">
+            <span class="bc-dim-label">Width</span>
+            <div class="bc-fi-group">
+              <div class="bc-fi">
+                <input class="bc-input bc-dim" type="number" id="bc-wf" min="0" max="200" placeholder="6" />
+                <span class="bc-unit">ft</span>
+              </div>
+              <div class="bc-fi">
+                <input class="bc-input bc-dim bc-in" type="number" id="bc-wi" min="0" max="11" placeholder="0" />
+                <span class="bc-unit">in</span>
+              </div>
             </div>
           </div>
           <div class="bc-area-preview" id="bc-area-preview">
@@ -249,13 +265,21 @@
   }
 
   // Live area preview
-  const lenEl  = document.getElementById('bc-length');
-  const widEl  = document.getElementById('bc-width');
+  const lfEl   = document.getElementById('bc-lf');
+  const liEl   = document.getElementById('bc-li');
+  const wfEl   = document.getElementById('bc-wf');
+  const wiEl   = document.getElementById('bc-wi');
+
+  function toFt(feetEl: HTMLInputElement, inchEl: HTMLInputElement): number {
+    const ft   = parseFloat(feetEl.value)  || 0;
+    const inch = Math.min(parseFloat(inchEl.value) || 0, 11);
+    return ft + inch / 12;
+  }
   const areaEl = document.getElementById('bc-area-value');
 
   function updateAreaPreview() {
-    const l = parseFloat((lenEl as HTMLInputElement).value);
-    const w = parseFloat((widEl as HTMLInputElement).value);
+    const l = toFt(lfEl as HTMLInputElement, liEl as HTMLInputElement);
+    const w = toFt(wfEl as HTMLInputElement, wiEl as HTMLInputElement);
     if (l > 0 && w > 0) {
       areaEl.textContent = (l * w).toFixed(1);
     } else {
@@ -263,8 +287,7 @@
     }
   }
 
-  lenEl.addEventListener('input', updateAreaPreview);
-  widEl.addEventListener('input', updateAreaPreview);
+  [lfEl, liEl, wfEl, wiEl].forEach(el => el && el.addEventListener('input', updateAreaPreview));
 
   // Package card selection highlight
   document.querySelectorAll('.pkg-card').forEach(card => {
@@ -279,8 +302,8 @@
     const name     = (document.getElementById('bc-name') as HTMLInputElement).value.trim();
     const phone    = (document.getElementById('bc-phone') as HTMLInputElement).value.trim();
     const location = (document.getElementById('bc-location') as HTMLInputElement).value.trim();
-    const length   = parseFloat((lenEl as HTMLInputElement).value);
-    const width    = parseFloat((widEl as HTMLInputElement).value);
+    const length   = toFt(lfEl as HTMLInputElement, liEl as HTMLInputElement);
+    const width    = toFt(wfEl as HTMLInputElement, wiEl as HTMLInputElement);
     const pkgKey   = (document.querySelector('input[name="bcpkg"]:checked') as HTMLInputElement)?.value;
     const errorEl  = document.getElementById('bc-error');
 
@@ -865,6 +888,50 @@
     outline: none;
     border-color: var(--clay);
     background: #fff;
+  }
+
+  /* ── Feet + inches dimension rows ── */
+  .bc-dim-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: .9rem;
+  }
+
+  .bc-dim-label {
+    width: 3.5rem;
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    flex-shrink: 0;
+  }
+
+  .bc-fi-group {
+    display: flex;
+    gap: .6rem;
+    flex: 1;
+  }
+
+  .bc-fi {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    flex: 1;
+  }
+
+  .bc-fi .bc-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .bc-fi .bc-input.bc-in {
+    max-width: 4.5rem;
+  }
+
+  .bc-unit {
+    font-size: .75rem;
+    color: var(--warm-gray);
+    white-space: nowrap;
   }
 
   /* ── Area preview ── */
