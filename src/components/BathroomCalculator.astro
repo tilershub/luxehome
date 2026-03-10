@@ -33,39 +33,15 @@
           </div>
         </div>
 
-        <!-- Dimensions -->
+        <!-- Floor Area -->
         <div class="bc-card reveal">
-          <div class="bc-card-title">Bathroom Dimensions</div>
-          <div class="bc-dim-row">
-            <span class="bc-dim-label">Length</span>
-            <div class="bc-fi-group">
-              <div class="bc-fi">
-                <input class="bc-input bc-dim" type="number" id="bc-lf" min="0" max="200" placeholder="8" />
-                <span class="bc-unit">ft</span>
-              </div>
-              <div class="bc-fi">
-                <input class="bc-input bc-dim bc-in" type="number" id="bc-li" min="0" max="11" placeholder="0" />
-                <span class="bc-unit">in</span>
-              </div>
+          <div class="bc-card-title">Floor Area</div>
+          <div class="bc-field">
+            <label class="bc-label" for="bc-area">Bathroom Floor Area</label>
+            <div class="bc-area-input-wrap">
+              <input class="bc-input" type="number" id="bc-area" placeholder="e.g. 48" min="1" max="5000" step="0.1" />
+              <span class="bc-area-unit">sq.ft</span>
             </div>
-          </div>
-          <div class="bc-dim-row">
-            <span class="bc-dim-label">Width</span>
-            <div class="bc-fi-group">
-              <div class="bc-fi">
-                <input class="bc-input bc-dim" type="number" id="bc-wf" min="0" max="200" placeholder="6" />
-                <span class="bc-unit">ft</span>
-              </div>
-              <div class="bc-fi">
-                <input class="bc-input bc-dim bc-in" type="number" id="bc-wi" min="0" max="11" placeholder="0" />
-                <span class="bc-unit">in</span>
-              </div>
-            </div>
-          </div>
-          <div class="bc-area-preview" id="bc-area-preview">
-            <span class="bcap-label">Calculated Area</span>
-            <span class="bcap-value" id="bc-area-value">—</span>
-            <span class="bcap-unit">sq.ft</span>
           </div>
         </div>
 
@@ -264,30 +240,7 @@
     return 'Rs. ' + n.toLocaleString('en-IN');
   }
 
-  // Live area preview
-  const lfEl   = document.getElementById('bc-lf');
-  const liEl   = document.getElementById('bc-li');
-  const wfEl   = document.getElementById('bc-wf');
-  const wiEl   = document.getElementById('bc-wi');
-
-  function toFt(feetEl: HTMLInputElement, inchEl: HTMLInputElement): number {
-    const ft   = parseFloat(feetEl.value)  || 0;
-    const inch = Math.min(parseFloat(inchEl.value) || 0, 11);
-    return ft + inch / 12;
-  }
-  const areaEl = document.getElementById('bc-area-value');
-
-  function updateAreaPreview() {
-    const l = toFt(lfEl as HTMLInputElement, liEl as HTMLInputElement);
-    const w = toFt(wfEl as HTMLInputElement, wiEl as HTMLInputElement);
-    if (l > 0 && w > 0) {
-      areaEl.textContent = (l * w).toFixed(1);
-    } else {
-      areaEl.textContent = '—';
-    }
-  }
-
-  [lfEl, liEl, wfEl, wiEl].forEach(el => el && el.addEventListener('input', updateAreaPreview));
+  const areaInputEl = document.getElementById('bc-area') as HTMLInputElement;
 
   // Package card selection highlight
   document.querySelectorAll('.pkg-card').forEach(card => {
@@ -302,8 +255,7 @@
     const name     = (document.getElementById('bc-name') as HTMLInputElement).value.trim();
     const phone    = (document.getElementById('bc-phone') as HTMLInputElement).value.trim();
     const location = (document.getElementById('bc-location') as HTMLInputElement).value.trim();
-    const length   = toFt(lfEl as HTMLInputElement, liEl as HTMLInputElement);
-    const width    = toFt(wfEl as HTMLInputElement, wiEl as HTMLInputElement);
+    const area     = parseFloat(areaInputEl.value);
     const pkgKey   = (document.querySelector('input[name="bcpkg"]:checked') as HTMLInputElement)?.value;
     const errorEl  = document.getElementById('bc-error');
 
@@ -312,8 +264,7 @@
     if (!name)              errors.push('Please enter your name.');
     if (!phone)             errors.push('Please enter your phone number.');
     if (!location)          errors.push('Please enter your project location.');
-    if (!(length > 0))      errors.push('Please enter a valid bathroom length.');
-    if (!(width > 0))       errors.push('Please enter a valid bathroom width.');
+    if (!(area > 0))        errors.push('Please enter a valid floor area.');
     if (!pkgKey)            errors.push('Please select a package.');
 
     if (errors.length) {
@@ -323,7 +274,6 @@
     }
     errorEl.style.display = 'none';
 
-    const area = length * width;
     const pkg  = PACKAGES[pkgKey];
     const rate = area > 100 ? pkg.largeRate : pkg.rate;
     const calc = area * rate;
@@ -890,78 +840,22 @@
     background: #fff;
   }
 
-  /* ── Feet + inches dimension rows ── */
-  .bc-dim-row {
+  /* ── Area input ── */
+  .bc-area-input-wrap {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: .9rem;
+    gap: .5rem;
   }
 
-  .bc-dim-label {
-    width: 3.5rem;
-    font-size: .76rem;
+  .bc-area-input-wrap .bc-input {
+    flex: 1;
+  }
+
+  .bc-area-unit {
+    font-size: .8rem;
     font-weight: 600;
-    color: var(--charcoal);
-    flex-shrink: 0;
-  }
-
-  .bc-fi-group {
-    display: flex;
-    gap: .6rem;
-    flex: 1;
-  }
-
-  .bc-fi {
-    display: flex;
-    align-items: center;
-    gap: .3rem;
-    flex: 1;
-  }
-
-  .bc-fi .bc-input {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .bc-fi .bc-input.bc-in {
-    max-width: 4.5rem;
-  }
-
-  .bc-unit {
-    font-size: .75rem;
     color: var(--warm-gray);
     white-space: nowrap;
-  }
-
-  /* ── Area preview ── */
-  .bc-area-preview {
-    display: flex;
-    align-items: baseline;
-    gap: .5rem;
-    background: rgba(196,120,74,.07);
-    border: 1px solid rgba(196,120,74,.2);
-    border-radius: 4px;
-    padding: .7rem 1rem;
-    margin-top: .8rem;
-  }
-
-  .bcap-label {
-    font-size: .74rem;
-    color: var(--warm-gray);
-    flex: 1;
-  }
-
-  .bcap-value {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--clay);
-  }
-
-  .bcap-unit {
-    font-size: .75rem;
-    color: var(--warm-gray);
   }
 
   /* ── Package grid ── */
