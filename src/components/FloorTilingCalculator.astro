@@ -1,0 +1,659 @@
+---
+---
+
+<section class="ftcalc-section" id="floor-calculator">
+  <div class="ftcalc-inner">
+    <div class="stag">Area Calculator</div>
+    <h2>Floor Area &amp; Skirting Calculator</h2>
+    <p class="sdesc">
+      Enter your room dimensions in feet and inches — area, skirting length, and cost estimates update instantly.
+    </p>
+
+    <div class="ftcalc-layout">
+
+      <!-- ── Inputs ── -->
+      <div class="ftc-inputs">
+
+        <div class="ftc-card">
+          <div class="ftc-card-title">Room Dimensions</div>
+
+          <div class="ftc-dim-row">
+            <span class="ftc-dim-label">Length</span>
+            <div class="ftc-dim-fields">
+              <div class="ftc-fi">
+                <input class="ftc-input" type="number" id="ftc-lf" min="0" max="500" placeholder="13" />
+                <span class="ftc-unit">ft</span>
+              </div>
+              <div class="ftc-fi">
+                <input class="ftc-input ftc-in" type="number" id="ftc-li" min="0" max="11" placeholder="2" />
+                <span class="ftc-unit">in</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ftc-dim-row">
+            <span class="ftc-dim-label">Width</span>
+            <div class="ftc-dim-fields">
+              <div class="ftc-fi">
+                <input class="ftc-input" type="number" id="ftc-wf" min="0" max="500" placeholder="11" />
+                <span class="ftc-unit">ft</span>
+              </div>
+              <div class="ftc-fi">
+                <input class="ftc-input ftc-in" type="number" id="ftc-wi" min="0" max="11" placeholder="8" />
+                <span class="ftc-unit">in</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ftc-card">
+          <div class="ftc-card-title">Deductions</div>
+          <div class="ftc-deduct-row">
+            <label class="ftc-deduct-label" for="ftc-doors">
+              Door openings
+              <span class="ftc-hint">Deducted from skirting perimeter (3 ft each)</span>
+            </label>
+            <div class="ftc-stepper">
+              <button class="ftc-step-btn" id="ftc-doors-minus" type="button" aria-label="Remove door">−</button>
+              <span class="ftc-step-val" id="ftc-doors-val">0</span>
+              <button class="ftc-step-btn" id="ftc-doors-plus" type="button" aria-label="Add door">+</button>
+            </div>
+          </div>
+          <div class="ftc-deduct-row">
+            <label class="ftc-deduct-label" for="ftc-wastage">
+              Tile wastage allowance
+              <span class="ftc-hint">Added to tile quantity for cuts &amp; breakage</span>
+            </label>
+            <div class="ftc-select-wrap">
+              <select class="ftc-select" id="ftc-wastage">
+                <option value="10">10% — Standard room</option>
+                <option value="15">15% — Complex cuts / pattern</option>
+                <option value="20">20% — Diagonal / feature</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="ftc-wa-wrap">
+          <button class="ftc-wa-btn" id="ftc-wa-btn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
+            Send to WhatsApp
+          </button>
+        </div>
+
+      </div><!-- /ftc-inputs -->
+
+      <!-- ── Results ── -->
+      <div class="ftc-results" id="ftc-results">
+
+        <!-- Dimension echo -->
+        <div class="ftcr-dim" id="ftcr-dim">— × —</div>
+
+        <!-- Main metrics -->
+        <div class="ftcr-metrics">
+          <div class="ftcr-metric">
+            <div class="ftcrm-label">Floor Area</div>
+            <div class="ftcrm-value" id="ftcr-area">—</div>
+            <div class="ftcrm-unit">sq.ft</div>
+          </div>
+          <div class="ftcr-metric">
+            <div class="ftcrm-label">Skirting Length</div>
+            <div class="ftcrm-value" id="ftcr-skirting">—</div>
+            <div class="ftcrm-unit">lin.ft</div>
+          </div>
+          <div class="ftcr-metric">
+            <div class="ftcrm-label">Tiles Needed</div>
+            <div class="ftcrm-value" id="ftcr-tiles">—</div>
+            <div class="ftcrm-unit">sq.ft incl. wastage</div>
+          </div>
+        </div>
+
+        <div class="ftcr-divider"></div>
+
+        <!-- Cost breakdown -->
+        <div class="ftcr-costs">
+          <div class="ftcr-cost-title">Estimated Labour Cost</div>
+
+          <div class="ftcr-cost-row">
+            <span class="ftcrc-label">Floor tiling</span>
+            <span class="ftcrc-sub" id="ftcrc-floor-sub"></span>
+            <span class="ftcrc-amt" id="ftcrc-floor">—</span>
+          </div>
+          <div class="ftcr-cost-row">
+            <span class="ftcrc-label">Skirting</span>
+            <span class="ftcrc-sub" id="ftcrc-sk-sub"></span>
+            <span class="ftcrc-amt" id="ftcrc-sk">—</span>
+          </div>
+
+          <div class="ftcr-total-row">
+            <span class="ftcrt-label">Total Estimate</span>
+            <span class="ftcrt-amt" id="ftcrc-total">—</span>
+          </div>
+        </div>
+
+        <div class="ftcr-note">
+          Rates: Rs. 350/sq.ft · Skirting Rs. 250/lin.ft · Labour only, tiles not included.
+        </div>
+
+      </div><!-- /ftc-results -->
+
+    </div><!-- /ftcalc-layout -->
+  </div>
+</section>
+
+<script>
+  const FLOOR_RATE   = 350;
+  const SKIRTING_RATE = 250;
+  const DOOR_WIDTH   = 3; // ft per opening
+
+  function toFt(feetEl: HTMLInputElement, inchEl: HTMLInputElement): number {
+    const ft = parseFloat(feetEl.value) || 0;
+    const inch = Math.min(parseFloat(inchEl.value) || 0, 11);
+    return ft + inch / 12;
+  }
+
+  function fmtFtIn(totalFt: number): string {
+    const ft = Math.floor(totalFt);
+    const inch = Math.round((totalFt - ft) * 12);
+    return inch > 0 ? `${ft}' ${inch}"` : `${ft}'`;
+  }
+
+  function fmtRs(n: number): string {
+    return 'Rs. ' + Math.round(n).toLocaleString('en-IN');
+  }
+
+  function round2(n: number): string {
+    return n.toFixed(2);
+  }
+
+  let doors = 0;
+
+  // Door stepper
+  document.getElementById('ftc-doors-minus').addEventListener('click', () => {
+    if (doors > 0) { doors--; (document.getElementById('ftc-doors-val') as HTMLElement).textContent = String(doors); recalc(); }
+  });
+  document.getElementById('ftc-doors-plus').addEventListener('click', () => {
+    doors++;
+    (document.getElementById('ftc-doors-val') as HTMLElement).textContent = String(doors);
+    recalc();
+  });
+
+  // Input listeners
+  ['ftc-lf','ftc-li','ftc-wf','ftc-wi'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recalc);
+  });
+  document.getElementById('ftc-wastage').addEventListener('change', recalc);
+
+  function recalc() {
+    const lf = document.getElementById('ftc-lf') as HTMLInputElement;
+    const li = document.getElementById('ftc-li') as HTMLInputElement;
+    const wf = document.getElementById('ftc-wf') as HTMLInputElement;
+    const wi = document.getElementById('ftc-wi') as HTMLInputElement;
+
+    const L = toFt(lf, li);
+    const W = toFt(wf, wi);
+
+    if (L <= 0 || W <= 0) {
+      // Reset to placeholders
+      (document.getElementById('ftcr-dim') as HTMLElement).textContent = '— × —';
+      ['ftcr-area','ftcr-skirting','ftcr-tiles','ftcrc-floor','ftcrc-sk','ftcrc-total'].forEach(id => {
+        (document.getElementById(id) as HTMLElement).textContent = '—';
+      });
+      ['ftcrc-floor-sub','ftcrc-sk-sub'].forEach(id => {
+        (document.getElementById(id) as HTMLElement).textContent = '';
+      });
+      return;
+    }
+
+    const wastage = parseInt((document.getElementById('ftc-wastage') as HTMLSelectElement).value);
+    const area    = L * W;
+    const perim   = 2 * (L + W);
+    const skirt   = Math.max(0, perim - doors * DOOR_WIDTH);
+    const tiles   = area * (1 + wastage / 100);
+
+    const floorCost  = area * FLOOR_RATE;
+    const skirtCost  = skirt * SKIRTING_RATE;
+    const totalCost  = floorCost + skirtCost;
+
+    (document.getElementById('ftcr-dim') as HTMLElement).textContent =
+      `${fmtFtIn(L)} × ${fmtFtIn(W)}`;
+
+    (document.getElementById('ftcr-area') as HTMLElement).textContent     = round2(area);
+    (document.getElementById('ftcr-skirting') as HTMLElement).textContent = round2(skirt);
+    (document.getElementById('ftcr-tiles') as HTMLElement).textContent    = round2(tiles);
+
+    (document.getElementById('ftcrc-floor-sub') as HTMLElement).textContent =
+      `${round2(area)} sq.ft × Rs. ${FLOOR_RATE}`;
+    (document.getElementById('ftcrc-sk-sub') as HTMLElement).textContent =
+      `${round2(skirt)} lin.ft × Rs. ${SKIRTING_RATE}`;
+
+    (document.getElementById('ftcrc-floor') as HTMLElement).textContent = fmtRs(floorCost);
+    (document.getElementById('ftcrc-sk') as HTMLElement).textContent    = fmtRs(skirtCost);
+    (document.getElementById('ftcrc-total') as HTMLElement).textContent = fmtRs(totalCost);
+
+    // Store for WhatsApp
+    const waBtn = document.getElementById('ftc-wa-btn') as HTMLElement;
+    waBtn.dataset.dim     = `${fmtFtIn(L)} × ${fmtFtIn(W)}`;
+    waBtn.dataset.area    = round2(area);
+    waBtn.dataset.skirt   = round2(skirt);
+    waBtn.dataset.tiles   = round2(tiles);
+    waBtn.dataset.wastage = String(wastage);
+    waBtn.dataset.floor   = fmtRs(floorCost);
+    waBtn.dataset.sk      = fmtRs(skirtCost);
+    waBtn.dataset.total   = fmtRs(totalCost);
+  }
+
+  // WhatsApp
+  document.getElementById('ftc-wa-btn').addEventListener('click', () => {
+    const btn = document.getElementById('ftc-wa-btn') as HTMLElement;
+    const dim  = btn.dataset.dim;
+    if (!dim) { alert('Enter dimensions first.'); return; }
+
+    const msg = [
+      `*TILERSHUB — Floor Tiling Estimate*`,
+      ``,
+      `*Room Dimensions:* ${btn.dataset.dim}`,
+      `*Floor Area:* ${btn.dataset.area} sq.ft`,
+      `*Skirting Length:* ${btn.dataset.skirt} lin.ft`,
+      `*Tile Qty (incl. ${btn.dataset.wastage}% wastage):* ${btn.dataset.tiles} sq.ft`,
+      ``,
+      `*Floor Tiling Labour:* ${btn.dataset.floor}`,
+      `*Skirting Labour:* ${btn.dataset.sk}`,
+      `*Total Estimate:* ${btn.dataset.total}`,
+      ``,
+      `_Rates: Rs. 350/sq.ft floor · Rs. 250/lin.ft skirting · Labour only._`,
+      `_Tiles not included._`,
+      ``,
+      `tilershub.lk | +94 774 503 744`,
+    ].join('\n');
+
+    window.open(`https://wa.me/94774503744?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+  });
+
+  // Run once on load to initialise with placeholder values
+  recalc();
+</script>
+
+<style>
+  .ftcalc-section {
+    background: var(--sand);
+    padding: 5.5rem 4rem;
+  }
+
+  .ftcalc-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .ftcalc-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 2.5rem;
+    align-items: start;
+    margin-top: 2.5rem;
+  }
+
+  /* ── Input cards ── */
+  .ftc-card {
+    background: #fff;
+    border: 1px solid var(--stone);
+    border-radius: 6px;
+    padding: 1.6rem 1.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .ftc-card-title {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--clay);
+    margin-bottom: 1.3rem;
+  }
+
+  /* Dimension row */
+  .ftc-dim-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: .8rem 0;
+    border-bottom: 1px solid var(--stone);
+  }
+
+  .ftc-dim-row:last-child { border-bottom: none; }
+
+  .ftc-dim-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    min-width: 3.5rem;
+  }
+
+  .ftc-dim-fields {
+    display: flex;
+    gap: .75rem;
+    flex: 1;
+  }
+
+  .ftc-fi {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    flex: 1;
+  }
+
+  .ftc-input {
+    width: 100%;
+    border: 1.5px solid var(--stone);
+    border-radius: 4px;
+    padding: .6rem .75rem;
+    font-size: 1rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--charcoal);
+    background: var(--off-white);
+    text-align: center;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+
+  .ftc-input:focus {
+    outline: none;
+    border-color: var(--clay);
+    background: #fff;
+  }
+
+  /* tighter for inches (max 2 digits) */
+  .ftc-input.ftc-in { max-width: 4rem; }
+
+  .ftc-unit {
+    font-size: .75rem;
+    color: var(--warm-gray);
+    flex-shrink: 0;
+  }
+
+  /* Deductions */
+  .ftc-deduct-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .85rem 0;
+    border-bottom: 1px solid var(--stone);
+  }
+
+  .ftc-deduct-row:last-child { border-bottom: none; }
+
+  .ftc-deduct-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+  }
+
+  .ftc-hint {
+    font-size: .7rem;
+    font-weight: 400;
+    color: var(--warm-gray);
+  }
+
+  /* Stepper */
+  .ftc-stepper {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-shrink: 0;
+  }
+
+  .ftc-step-btn {
+    width: 2rem;
+    height: 2rem;
+    border: 1.5px solid var(--stone);
+    border-radius: 3px;
+    background: var(--off-white);
+    color: var(--charcoal);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ftc-step-btn:hover {
+    background: var(--clay);
+    color: var(--cream);
+    border-color: var(--clay);
+  }
+
+  .ftc-step-val {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    min-width: 1.5rem;
+    text-align: center;
+  }
+
+  /* Select */
+  .ftc-select-wrap {
+    flex-shrink: 0;
+  }
+
+  .ftc-select {
+    border: 1.5px solid var(--stone);
+    border-radius: 4px;
+    padding: .5rem .7rem;
+    font-size: .78rem;
+    font-family: inherit;
+    color: var(--charcoal);
+    background: var(--off-white);
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+
+  .ftc-select:focus {
+    outline: none;
+    border-color: var(--clay);
+  }
+
+  /* WhatsApp button */
+  .ftc-wa-wrap { margin-top: .3rem; }
+
+  .ftc-wa-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: .9rem 1rem;
+    font-size: .88rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+
+  .ftc-wa-btn:hover { background: #1ebe59; transform: translateY(-1px); }
+  .ftc-wa-btn:active { transform: translateY(0); }
+
+  /* ── Results panel ── */
+  .ftc-results {
+    background: var(--charcoal);
+    border-radius: 6px;
+    padding: 2rem;
+    position: sticky;
+    top: 7rem;
+  }
+
+  .ftcr-dim {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--cream);
+    letter-spacing: -.01em;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .ftcr-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ftcr-metric {
+    background: rgba(255,255,255,.04);
+    border-radius: 4px;
+    padding: .9rem .8rem;
+    text-align: center;
+  }
+
+  .ftcrm-label {
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: rgba(245,240,232,.45);
+    margin-bottom: .35rem;
+  }
+
+  .ftcrm-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--clay);
+    line-height: 1;
+    margin-bottom: .2rem;
+  }
+
+  .ftcrm-unit {
+    font-size: .62rem;
+    color: rgba(245,240,232,.35);
+  }
+
+  .ftcr-divider {
+    height: 1px;
+    background: rgba(255,255,255,.08);
+    margin-bottom: 1.4rem;
+  }
+
+  /* Cost breakdown */
+  .ftcr-cost-title {
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: rgba(245,240,232,.45);
+    margin-bottom: .9rem;
+  }
+
+  .ftcr-cost-row {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    padding: .55rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+
+  .ftcr-cost-row:last-of-type { border-bottom: none; }
+
+  .ftcrc-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--cream);
+    flex-shrink: 0;
+  }
+
+  .ftcrc-sub {
+    font-size: .68rem;
+    color: rgba(245,240,232,.4);
+    flex: 1;
+  }
+
+  .ftcrc-amt {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--cream);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Total row */
+  .ftcr-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: .9rem;
+    padding: .9rem 1rem;
+    background: rgba(196,120,74,.12);
+    border: 1px solid rgba(196,120,74,.3);
+    border-radius: 4px;
+  }
+
+  .ftcrt-label {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: rgba(245,240,232,.6);
+  }
+
+  .ftcrt-amt {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: var(--clay);
+  }
+
+  .ftcr-note {
+    margin-top: 1rem;
+    font-size: .68rem;
+    color: rgba(245,240,232,.35);
+    line-height: 1.6;
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding-top: .9rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .ftcalc-section {
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .ftcalc-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .ftc-results {
+      position: static;
+    }
+
+    .ftcr-metrics {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .ftcalc-section {
+      padding: 4rem 1.5rem;
+    }
+
+    .ftcr-metrics {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ftcr-metrics .ftcr-metric:last-child {
+      grid-column: span 2;
+    }
+  }
+</style>
