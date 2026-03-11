@@ -492,6 +492,15 @@
   .scope-list li:last-child, .scope-list li:nth-last-child(2):nth-child(odd) { border-bottom: none; }
   .chk { color: #c4784a; font-weight: 700; font-size: 9pt; flex-shrink: 0; }
 
+  .supply-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; font-size: 9.5pt; border: 0.5pt solid #e8d9c0; overflow: hidden; }
+  .supply-table thead tr { background: #1e1a17; }
+  .supply-table th { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2pt; color: #e8d9c0; padding: 6pt 9pt; text-align: left; }
+  .supply-table td { padding: 7.5pt 9pt; border-bottom: 0.5pt solid #ede5d8; vertical-align: top; }
+  .supply-table tr:last-child td { border-bottom: none; }
+  .s-num  { width: 5%; color: #aaa; font-size: 8pt; }
+  .s-item { width: 28%; font-weight: 700; color: #1e1a17; }
+  .s-note { width: 67%; color: #666; font-size: 8.5pt; line-height: 1.55; }
+
   .pay-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; font-size: 9.5pt; border: 0.5pt solid #e8d9c0; overflow: hidden; }
   .pay-table thead tr { background: #1e1a17; }
   .pay-table th { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2pt; color: #e8d9c0; padding: 6pt 9pt; text-align: left; }
@@ -571,6 +580,28 @@
 
   <div class="sh">Scope of Work — ${pkgName} Package</div>
   <ul class="scope-list">${scopeItems}</ul>
+
+  <div class="sh">Materials — What You Supply</div>
+  <table class="supply-table">
+    <thead><tr><th>#</th><th>Item</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr style="background:#faf7f2">
+        <td class="s-num">01</td>
+        <td class="s-item">Tiles</td>
+        <td class="s-note">Floor tiles, wall tiles, and any feature tiles of your choice. We advise on quantities once measurements are confirmed.</td>
+      </tr>
+      <tr style="background:#ffffff">
+        <td class="s-num">02</td>
+        <td class="s-item">Bathware Fittings</td>
+        <td class="s-note">WC suite, wash basin, shower tray or base, and shower cubicle / screen.</td>
+      </tr>
+      <tr style="background:#faf7f2">
+        <td class="s-num">03</td>
+        <td class="s-item">Tapware &amp; Accessories</td>
+        <td class="s-note">Mixer taps, showerhead, towel rails, toilet roll holders, mirror, and surface-mounted accessories.</td>
+      </tr>
+    </tbody>
+  </table>
 
   <div class="sh">Payment Schedule</div>
   <table class="pay-table">
