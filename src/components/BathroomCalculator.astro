@@ -627,21 +627,12 @@
 </body>
 </html>`;
 
-    const existing = document.getElementById('_pdf_frame');
-    if (existing) existing.remove();
-
-    const blob    = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const blobUrl = URL.createObjectURL(blob);
-    const frame   = document.createElement('iframe');
-    frame.id = '_pdf_frame';
-    frame.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;border:0;';
-    document.body.appendChild(frame);
-    frame.onload = () => {
-      frame.contentWindow!.focus();
-      frame.contentWindow!.print();
-      setTimeout(() => { frame.remove(); URL.revokeObjectURL(blobUrl); }, 60000);
-    };
-    frame.src = blobUrl;
+    const pw = window.open('', '_blank', 'width=900,height=700,scrollbars=yes,menubar=yes,toolbar=yes');
+    if (!pw) { alert('Please allow pop-ups for this site to download the PDF.'); return; }
+    pw.document.open();
+    pw.document.write(html);
+    pw.document.close();
+    pw.onload = () => { pw.focus(); pw.print(); };
   });
 
   // WhatsApp
