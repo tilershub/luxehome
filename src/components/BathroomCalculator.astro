@@ -637,6 +637,15 @@
 
     if (!name) { alert('Generate a quote first before downloading.'); return; }
 
+    const clientSupplyItems: string[] = [];
+    if (!tileCostPdf)    clientSupplyItems.push('Tiles (floor, wall &amp; feature)');
+    if (!bathwareCostPdf) clientSupplyItems.push('Bathware fittings (WC, basin, shower tray/screen) &nbsp;·&nbsp; Tapware &amp; accessories (taps, showerhead, towel rails, mirrors)');
+    const youSupplyHtml = clientSupplyItems.length > 0
+      ? clientSupplyItems.join(' &nbsp;·&nbsp; ') + ((tileCostPdf || bathwareCostPdf)
+          ? '<br/><span style="font-size:7pt;color:#2e7d32;font-style:italic;">Note: Selected add-ons are supplied by TILERSHUB as part of this quote.</span>'
+          : '')
+      : '<span style="color:#2e7d32;font-style:italic;">All materials covered by your selected add-ons — supplied by TILERSHUB.</span>';
+
     const scopeItems = includes.split(', ').map(s =>
       `<li><span class="chk">✓</span>${s}</li>`
     ).join('');
@@ -958,18 +967,7 @@
         <span class="mat-tag cl2">CLIENT</span>
       </div>
       <div class="mat-desc">
-        ${(() => {
-          const items = [
-            ...(!tileCostPdf ? ['Tiles (floor, wall &amp; feature)'] : []),
-            ...(!bathwareCostPdf ? ['Bathware fittings (WC, basin, shower tray/screen) &nbsp;·&nbsp; Tapware &amp; accessories (taps, showerhead, towel rails, mirrors)'] : []),
-          ];
-          const note = (tileCostPdf || bathwareCostPdf)
-            ? '<br/><span style="font-size:7pt;color:#2e7d32;font-style:italic;">Note: Selected add-ons are supplied by TILERSHUB as part of this quote.</span>'
-            : '';
-          return items.length > 0
-            ? items.join(' &nbsp;·&nbsp; ') + note
-            : '<span style="color:#2e7d32;font-style:italic;">All materials covered by your selected add-ons — supplied by TILERSHUB.</span>';
-        })()}
+        ${youSupplyHtml}
       </div>
     </div>
   </div>
