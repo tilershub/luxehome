@@ -503,7 +503,7 @@
     if (bathwareCost > 0) {
       bkdRows.push({
         label: `Bathware + Taps + Geyser${bwPkg ? ` — ${bwPkg.name}` : ''}`,
-        sub: bwPkg ? bwPkg.items.join(' · ') : 'Swiss Bathware · Swiss Taps · Ferroli Geyser',
+        sub: bwPkg ? bwPkg.items.map(i => `✓ ${i}`).join('<br>') : '✓ Swiss Bathware · Swiss Taps · Ferroli Geyser',
         val: fmt(bathwareCost),
       });
     }
