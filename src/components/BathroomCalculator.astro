@@ -546,7 +546,7 @@
     const PAY = [
       { label: 'Upfront / Deposit',        pct: 10, desc: 'Due before any work commences' },
       { label: 'On Starting Date',          pct: 60, desc: 'Due on the day work begins on site' },
-      { label: 'After Tiling Completion',   pct: 30, desc: 'Due once all tiling is finished' },
+      { label: 'After Tiling Completion',   pct: 20, desc: 'Due once all tiling is finished' },
       { label: 'Final Payment on Handover', pct: 10, desc: 'Due on project completion & handover' },
     ];
     document.getElementById('r-payment')!.innerHTML = PAY.map(p => {
@@ -1064,7 +1064,7 @@
     lines.push(`*Payment Schedule:*`);
     lines.push(`• 10% Upfront / Deposit`);
     lines.push(`• 60% On Starting Date`);
-    lines.push(`• 30% After Tiling Completion`);
+    lines.push(`• 20% After Tiling Completion`);
     lines.push(`• 10% Final Payment on Handover`);
     lines.push(``);
     lines.push(`_This is an estimated cost. Final quotation after site inspection._`);
