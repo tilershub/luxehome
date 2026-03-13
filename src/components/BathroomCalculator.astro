@@ -6,7 +6,7 @@
     <div class="stag reveal">Instant Estimate</div>
     <h2 class="reveal">Bathroom Renovation Calculator</h2>
     <p class="sdesc reveal">
-      Enter your bathroom floor area and select a package — get a cost estimate in seconds.
+      Enter your bathroom details and select a package — get a cost estimate in seconds.
     </p>
 
     <div class="bcalc-layout">
@@ -33,14 +33,23 @@
           </div>
         </div>
 
-        <!-- Floor Area -->
+        <!-- Bathroom Details -->
         <div class="bc-card reveal">
-          <div class="bc-card-title">Floor Area</div>
-          <div class="bc-field">
-            <label class="bc-label" for="bc-area">Bathroom Floor Area</label>
-            <div class="bc-area-input-wrap">
-              <input class="bc-input" type="number" id="bc-area" placeholder="e.g. 48" min="1" max="5000" step="0.1" />
-              <span class="bc-area-unit">sq.ft</span>
+          <div class="bc-card-title">Bathroom Details</div>
+          <div class="bc-row">
+            <div class="bc-field">
+              <label class="bc-label" for="bc-area">Floor Area</label>
+              <div class="bc-area-input-wrap">
+                <input class="bc-input" type="number" id="bc-area" placeholder="e.g. 48" min="1" max="5000" step="0.1" />
+                <span class="bc-area-unit">sq.ft</span>
+              </div>
+            </div>
+            <div class="bc-field">
+              <label class="bc-label" for="bc-wall-area">Wall Area</label>
+              <div class="bc-area-input-wrap">
+                <input class="bc-input" type="number" id="bc-wall-area" placeholder="e.g. 220" min="0" max="10000" step="0.1" />
+                <span class="bc-area-unit">sq.ft</span>
+              </div>
             </div>
           </div>
         </div>
@@ -131,6 +140,74 @@
           </label>
         </div>
 
+        <!-- Tile Supply Add-on -->
+        <div class="bc-card reveal">
+          <div class="bc-card-title">Tile Supply (Add-on)</div>
+          <p class="bc-addon-helper">Rocell Tiles &mdash; Rate applies to both floor &amp; wall area with 5% wastage allowance</p>
+          <label class="addon-row">
+            <input type="radio" name="bc-tile" value="0" class="addon-check" checked />
+            <div class="addon-info">
+              <span class="addon-name">None</span>
+              <span class="addon-price">Tiles not included</span>
+            </div>
+          </label>
+          <label class="addon-row">
+            <input type="radio" name="bc-tile" value="600" class="addon-check" />
+            <div class="addon-info">
+              <span class="addon-name">Rocell Tiles</span>
+              <span class="addon-price">Rs. 600 / sq.ft</span>
+            </div>
+          </label>
+          <label class="addon-row">
+            <input type="radio" name="bc-tile" value="700" class="addon-check" />
+            <div class="addon-info">
+              <span class="addon-name">Rocell Tiles</span>
+              <span class="addon-price">Rs. 700 / sq.ft</span>
+            </div>
+          </label>
+          <label class="addon-row">
+            <input type="radio" name="bc-tile" value="800" class="addon-check" />
+            <div class="addon-info">
+              <span class="addon-name">Rocell Tiles</span>
+              <span class="addon-price">Rs. 800 / sq.ft</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Bathware + Taps + Geyser Add-on -->
+        <div class="bc-card reveal">
+          <div class="bc-card-title">Bathware + Taps + Geyser (Add-on)</div>
+          <p class="bc-addon-helper">Swiss Bathware &middot; Swiss Taps &middot; Ferroli Geyser</p>
+          <label class="addon-row">
+            <input type="radio" name="bc-bw" value="0" class="addon-check" checked />
+            <div class="addon-info">
+              <span class="addon-name">None</span>
+              <span class="addon-price">Not included</span>
+            </div>
+          </label>
+          <label class="addon-row">
+            <input type="radio" name="bc-bw" value="300000" class="addon-check" />
+            <div class="addon-info">
+              <span class="addon-name">Package A</span>
+              <span class="addon-price">Rs. 300,000</span>
+            </div>
+          </label>
+          <label class="addon-row">
+            <input type="radio" name="bc-bw" value="350000" class="addon-check" />
+            <div class="addon-info">
+              <span class="addon-name">Package B</span>
+              <span class="addon-price">Rs. 350,000</span>
+            </div>
+          </label>
+          <label class="addon-row">
+            <input type="radio" name="bc-bw" value="400000" class="addon-check" />
+            <div class="addon-info">
+              <span class="addon-name">Package C</span>
+              <span class="addon-price">Rs. 400,000</span>
+            </div>
+          </label>
+        </div>
+
         <button class="bc-generate-btn" id="bc-generate-btn" type="button">
           Generate Quote →
         </button>
@@ -189,6 +266,7 @@
             <div class="rp-includes">
               <div class="rpi-title">Services Included</div>
               <div class="rpi-grid" id="r-includes"></div>
+              <div id="r-brands"></div>
             </div>
 
             <div class="rp-payment">
@@ -269,9 +347,13 @@
     const phone    = (document.getElementById('bc-phone') as HTMLInputElement).value.trim();
     const location = (document.getElementById('bc-location') as HTMLInputElement).value.trim();
     const area     = parseFloat((document.getElementById('bc-area') as HTMLInputElement).value);
+    const wallAreaRaw = parseFloat((document.getElementById('bc-wall-area') as HTMLInputElement).value);
+    const wallArea = isNaN(wallAreaRaw) ? 0 : Math.max(0, wallAreaRaw);
     const pkgKey   = (document.querySelector('input[name="bcpkg"]:checked') as HTMLInputElement)?.value;
     const demoChecked   = (document.getElementById('addon-demo') as HTMLInputElement).checked;
     const designChecked = (document.getElementById('addon-design') as HTMLInputElement).checked;
+    const tileRate  = parseFloat((document.querySelector('input[name="bc-tile"]:checked') as HTMLInputElement)?.value || '0');
+    const bwAmt     = parseFloat((document.querySelector('input[name="bc-bw"]:checked') as HTMLInputElement)?.value || '0');
     const errorEl  = document.getElementById('bc-error')!;
 
     const errors: string[] = [];
@@ -294,13 +376,24 @@
     const pkgPrice     = pkg.basePrice + extraCharge;
     const demolitionCost = demoChecked   ? Math.round(area * 1000) : 0;
     const designCost     = designChecked ? 25000 : 0;
-    const total          = pkgPrice + demolitionCost + designCost;
+
+    // Tile calculation with 5% wastage
+    const baseTileArea        = tileRate > 0 ? (area + wallArea) : 0;
+    const tileAreaWithWastage = parseFloat((baseTileArea * 1.05).toFixed(2));
+    const tileCost            = Math.round(tileAreaWithWastage * tileRate);
+
+    // Bathware cost
+    const bathwareCost = Math.round(bwAmt);
+
+    const total = pkgPrice + demolitionCost + designCost + tileCost + bathwareCost;
 
     // Client block
     document.getElementById('rp-client')!.innerHTML = `
       <div class="rpc-row"><span class="rpc-label">Name</span><span class="rpc-val">${name}</span></div>
       <div class="rpc-row"><span class="rpc-label">Phone</span><span class="rpc-val">${phone}</span></div>
       <div class="rpc-row"><span class="rpc-label">Location</span><span class="rpc-val">${location}</span></div>
+      <div class="rpc-row"><span class="rpc-label">Floor Area</span><span class="rpc-val">${area.toFixed(1)} sq.ft</span></div>
+      ${wallArea > 0 ? `<div class="rpc-row"><span class="rpc-label">Wall Area</span><span class="rpc-val">${wallArea.toFixed(1)} sq.ft</span></div>` : ''}
     `;
 
     (document.getElementById('r-area') as HTMLElement).textContent    = area.toFixed(1);
@@ -321,6 +414,20 @@
     }
     if (designCost > 0) {
       bkdRows.push({ label: '3D Bathroom Design', sub: 'Fixed price', val: fmt(designCost) });
+    }
+    if (tileCost > 0) {
+      bkdRows.push({
+        label: 'Tile Supply — Rocell Tiles',
+        sub: `Base area: ${baseTileArea.toFixed(1)} sq.ft (floor + wall) + 5% wastage = ${tileAreaWithWastage.toFixed(1)} sq.ft × Rs. ${tileRate.toLocaleString('en-IN')} / sq.ft`,
+        val: fmt(tileCost),
+      });
+    }
+    if (bathwareCost > 0) {
+      bkdRows.push({
+        label: 'Bathware + Taps + Geyser',
+        sub: 'Swiss Bathware · Swiss Taps · Ferroli Geyser',
+        val: fmt(bathwareCost),
+      });
     }
 
     document.getElementById('rp-breakdown')!.innerHTML = `
@@ -343,6 +450,19 @@
     ];
     document.getElementById('r-includes')!.innerHTML =
       allIncludes.map(s => `<div class="rpi-item">${s}</div>`).join('');
+
+    // Selected add-on brands
+    const brandLines: string[] = [];
+    if (tileCost > 0)    brandLines.push('Rocell Tiles');
+    if (bathwareCost > 0) { brandLines.push('Swiss Bathware'); brandLines.push('Swiss Taps'); brandLines.push('Ferroli Geyser'); }
+
+    const brandsEl = document.getElementById('r-brands') as HTMLElement;
+    if (brandLines.length > 0) {
+      brandsEl.innerHTML = `<div class="rpi-title rpi-title--brands">Selected Add-on Brands</div><div class="rpi-grid">${brandLines.map(b => `<div class="rpi-item rpi-item--brand">${b}</div>`).join('')}</div>`;
+      brandsEl.style.display = 'block';
+    } else {
+      brandsEl.style.display = 'none';
+    }
 
     // Payment schedule
     const PAY = [
@@ -371,10 +491,17 @@
 
     // Store for PDF
     const pdfBtn = document.getElementById('ra-pdf') as HTMLElement;
-    pdfBtn.dataset.payRows   = PAY.map(p =>
+    pdfBtn.dataset.payRows              = PAY.map(p =>
       `${p.pct}%|${p.label}|${p.desc}|${fmt(Math.round(total * p.pct / 100))}`
     ).join(';;');
-    pdfBtn.dataset.breakdown = bkdRows.map(r => `${r.label}|${r.sub}|${r.val}`).join(';;');
+    pdfBtn.dataset.breakdown            = bkdRows.map(r => `${r.label}|${r.sub}|${r.val}`).join(';;');
+    pdfBtn.dataset.wallArea             = wallArea.toFixed(1);
+    pdfBtn.dataset.tileRate             = tileRate > 0 ? tileRate.toString() : '';
+    pdfBtn.dataset.baseTileArea         = baseTileArea.toFixed(1);
+    pdfBtn.dataset.tileAreaWithWastage  = tileAreaWithWastage.toFixed(1);
+    pdfBtn.dataset.tileCost             = tileCost > 0 ? fmt(tileCost) : '';
+    pdfBtn.dataset.bathwareCost         = bathwareCost > 0 ? fmt(bathwareCost) : '';
+    pdfBtn.dataset.brandLines           = brandLines.join(', ');
 
     // Store for WhatsApp
     const waEl = document.getElementById('ra-wa') as HTMLElement;
@@ -382,10 +509,17 @@
     waEl.dataset.phone     = phone;
     waEl.dataset.location  = location;
     waEl.dataset.area      = area.toFixed(1);
+    waEl.dataset.wallArea  = wallArea > 0 ? wallArea.toFixed(1) : '';
     waEl.dataset.pkg       = pkg.name;
     waEl.dataset.total     = fmt(total);
     waEl.dataset.includes  = allIncludes.join(', ');
     waEl.dataset.breakdown = bkdRows.map(r => `• ${r.label}: ${r.val}`).join('\n');
+    waEl.dataset.tileInfo  = tileCost > 0
+      ? `Rocell Tiles — Rs. ${tileRate}/sq.ft — Area: ${tileAreaWithWastage.toFixed(1)} sq.ft (incl. 5% wastage) — Cost: ${fmt(tileCost)}`
+      : '';
+    waEl.dataset.bwInfo    = bathwareCost > 0
+      ? `Swiss Bathware + Swiss Taps + Ferroli Geyser — ${fmt(bathwareCost)}`
+      : '';
 
     (document.getElementById('bcalc-placeholder') as HTMLElement).style.display = 'none';
     (document.getElementById('bcalc-result') as HTMLElement).style.display = 'flex';
@@ -404,10 +538,18 @@
     const phone    = waBtn.dataset.phone    || '';
     const location = waBtn.dataset.location || '';
     const area     = waBtn.dataset.area     || '';
+    const wallArea = pdfBtn.dataset.wallArea || '';
     const pkgName  = waBtn.dataset.pkg      || '';
     const total    = waBtn.dataset.total    || '';
     const includes = waBtn.dataset.includes || '';
     const date     = (document.getElementById('rp-date') as HTMLElement).textContent || '';
+
+    const tileRate             = pdfBtn.dataset.tileRate             || '';
+    const baseTileArea         = pdfBtn.dataset.baseTileArea         || '';
+    const tileAreaWithWastage  = pdfBtn.dataset.tileAreaWithWastage  || '';
+    const tileCostPdf          = pdfBtn.dataset.tileCost             || '';
+    const bathwareCostPdf      = pdfBtn.dataset.bathwareCost         || '';
+    const brandLinesPdf        = pdfBtn.dataset.brandLines           || '';
 
     if (!name) { alert('Generate a quote first before downloading.'); return; }
 
@@ -638,17 +780,22 @@
   <div class="sh">Project Summary</div>
   <div class="metrics">
     <div class="metric">
-      <div class="m-label">Bathroom Area</div>
+      <div class="m-label">Floor Area</div>
       <div class="m-val">${area}</div>
       <div class="m-unit">sq.ft</div>
     </div>
+    ${wallArea && parseFloat(wallArea) > 0 ? `<div class="metric">
+      <div class="m-label">Wall Area</div>
+      <div class="m-val">${wallArea}</div>
+      <div class="m-unit">sq.ft</div>
+    </div>` : ''}
     <div class="metric">
       <div class="m-label">Package</div>
       <div class="m-val clay">${pkgName}</div>
       <div class="m-unit">&nbsp;</div>
     </div>
     <div class="metric">
-      <div class="m-label">Final Total</div>
+      <div class="m-label">Grand Total</div>
       <div class="m-val clay" style="font-size:11pt">${total}</div>
       <div class="m-unit">LKR</div>
     </div>
@@ -662,7 +809,7 @@
 
   <div class="total-block">
     <div class="tb-left">
-      <div class="tb-label">Final Estimated Price</div>
+      <div class="tb-label">Grand Total (All Inclusive)</div>
       <div class="tb-price">${total} LKR</div>
     </div>
     <div class="tb-right">
@@ -670,6 +817,38 @@
       <div class="tb-pkg">${pkgName}</div>
     </div>
   </div>
+
+  ${tileCostPdf || bathwareCostPdf ? `
+  <div class="sh">Add-on Supply Details</div>
+  <div style="display:grid;grid-template-columns:${tileCostPdf && bathwareCostPdf ? '1fr 1fr' : '1fr'};gap:8pt;margin-bottom:14pt;">
+    ${tileCostPdf ? `
+    <div style="border:0.5pt solid #e8d9c0;border-radius:3pt;padding:9pt 11pt;background:#faf7f2;">
+      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#c4784a;margin-bottom:5pt;">Tile Supply</div>
+      <div style="font-size:9pt;font-weight:700;color:#1e1a17;margin-bottom:4pt;">Rocell Tiles</div>
+      <div style="font-size:8pt;color:#666;line-height:1.7;">
+        Floor + Wall Area: <strong>${baseTileArea} sq.ft</strong><br/>
+        With 5% Wastage: <strong>${tileAreaWithWastage} sq.ft</strong><br/>
+        Rate: <strong>Rs. ${tileRate} / sq.ft</strong><br/>
+        Tile Supply Cost: <strong style="color:#c4784a;">${tileCostPdf}</strong>
+      </div>
+    </div>` : ''}
+    ${bathwareCostPdf ? `
+    <div style="border:0.5pt solid #e8d9c0;border-radius:3pt;padding:9pt 11pt;background:#faf7f2;">
+      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#c4784a;margin-bottom:5pt;">Bathware + Taps + Geyser</div>
+      <div style="font-size:9pt;font-weight:700;color:#1e1a17;margin-bottom:4pt;">Swiss Bathware &middot; Swiss Taps &middot; Ferroli Geyser</div>
+      <div style="font-size:8pt;color:#666;line-height:1.7;">
+        Package Cost: <strong style="color:#c4784a;">${bathwareCostPdf}</strong>
+      </div>
+    </div>` : ''}
+  </div>
+  ` : ''}
+
+  ${brandLinesPdf ? `
+  <div style="background:#fdf0e6;border:0.5pt solid #c4784a;border-radius:3pt;padding:8pt 11pt;margin-bottom:14pt;font-size:8.5pt;">
+    <span style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1pt;color:#c4784a;">Selected Add-on Brands:</span>
+    &nbsp; ${brandLinesPdf.split(', ').map(b => `<span style="font-weight:600;color:#1e1a17;">${b}</span>`).join(' &nbsp;·&nbsp; ')}
+  </div>
+  ` : ''}
 
   <div class="sh">Scope of Work — ${pkgName} Package</div>
   <ul class="scope-list">${scopeItems}</ul>
@@ -695,8 +874,8 @@
         <span class="mat-tag cl2">CLIENT</span>
       </div>
       <div class="mat-desc">
-        Tiles (floor, wall &amp; feature) &nbsp;·&nbsp; Bathware fittings (WC, basin, shower tray/screen) &nbsp;·&nbsp;
-        Tapware &amp; accessories (taps, showerhead, towel rails, mirrors)
+        ${!tileCostPdf ? 'Tiles (floor, wall &amp; feature) &nbsp;·&nbsp; ' : ''}${!bathwareCostPdf ? 'Bathware fittings (WC, basin, shower tray/screen) &nbsp;·&nbsp; Tapware &amp; accessories (taps, showerhead, towel rails, mirrors)' : 'Mirrors &amp; decorative accessories'}
+        ${tileCostPdf || bathwareCostPdf ? '<br/><span style="font-size:7pt;color:#2e7d32;font-style:italic;">Note: Selected add-ons are supplied by TILERSHUB as part of this quote.</span>' : ''}
       </div>
     </div>
   </div>
@@ -755,39 +934,52 @@
     const phone     = btn.dataset.phone     || '';
     const location  = btn.dataset.location  || '';
     const area      = btn.dataset.area      || '';
+    const wallArea  = btn.dataset.wallArea  || '';
     const pkg       = btn.dataset.pkg       || '';
     const total     = btn.dataset.total     || '';
     const includes  = btn.dataset.includes  || '';
     const breakdown = btn.dataset.breakdown || '';
+    const tileInfo  = btn.dataset.tileInfo  || '';
+    const bwInfo    = btn.dataset.bwInfo    || '';
 
-    const msg = [
+    const lines = [
       `*TILERSHUB — Bathroom Renovation Estimate*`,
       ``,
       `*Client:* ${name}`,
       `*Phone:* ${phone}`,
       `*Location:* ${location}`,
       ``,
-      `*Bathroom Area:* ${area} sq.ft`,
-      `*Package:* ${pkg}`,
-      ``,
-      `*Price Breakdown:*`,
-      breakdown,
-      ``,
-      `*Final Estimated Total:* ${total}`,
-      ``,
-      `*Services Included:* ${includes}`,
-      ``,
-      `*Payment Schedule:*`,
-      `• 10% Upfront / Deposit`,
-      `• 60% On Starting Date`,
-      `• 30% After Tiling Completion`,
-      `• 10% Final Payment on Handover`,
-      ``,
-      `_This is an estimated cost. Final quotation after site inspection._`,
-      ``,
-      `tilershub.lk | +94 774 503 744`,
-    ].join('\n');
+      `*Floor Area:* ${area} sq.ft`,
+    ];
+    if (wallArea) lines.push(`*Wall Area:* ${wallArea} sq.ft`);
+    lines.push(`*Package:* ${pkg}`);
+    lines.push(``);
+    lines.push(`*Price Breakdown:*`);
+    lines.push(breakdown);
+    lines.push(``);
+    if (tileInfo) { lines.push(`*Tile Supply (Rocell):* ${tileInfo}`); lines.push(``); }
+    if (bwInfo)   { lines.push(`*Bathware Package:* ${bwInfo}`);       lines.push(``); }
+    lines.push(`*Grand Total:* ${total}`);
+    lines.push(``);
+    lines.push(`*Services Included:* ${includes}`);
+    if (tileInfo || bwInfo) {
+      lines.push(``);
+      lines.push(`*Selected Add-on Brands:*`);
+      if (tileInfo) lines.push(`• Rocell Tiles`);
+      if (bwInfo)   { lines.push(`• Swiss Bathware`); lines.push(`• Swiss Taps`); lines.push(`• Ferroli Geyser`); }
+    }
+    lines.push(``);
+    lines.push(`*Payment Schedule:*`);
+    lines.push(`• 10% Upfront / Deposit`);
+    lines.push(`• 60% On Starting Date`);
+    lines.push(`• 30% After Tiling Completion`);
+    lines.push(`• 10% Final Payment on Handover`);
+    lines.push(``);
+    lines.push(`_This is an estimated cost. Final quotation after site inspection._`);
+    lines.push(``);
+    lines.push(`tilershub.lk | +94 774 503 744`);
 
+    const msg = lines.join('\n');
     window.open(`https://wa.me/94774503744?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   });
 </script>
@@ -996,6 +1188,14 @@
     padding-top: .55rem;
     margin-top: .3rem;
     font-style: italic;
+  }
+
+  /* ── Add-on helper text ── */
+  .bc-addon-helper {
+    font-size: .73rem;
+    color: var(--warm-gray);
+    margin: -.4rem 0 .9rem;
+    line-height: 1.5;
   }
 
   /* ── Add-ons ── */
@@ -1284,6 +1484,10 @@
     margin-bottom: .6rem;
   }
 
+  .rpi-title--brands {
+    margin-top: .8rem;
+  }
+
   .rpi-grid { display: flex; flex-wrap: wrap; gap: .35rem; }
 
   .rpi-item {
@@ -1293,6 +1497,13 @@
     border: 1px solid rgba(255,255,255,.1);
     padding: .22rem .65rem;
     border-radius: 20px;
+  }
+
+  .rpi-item--brand {
+    color: var(--clay);
+    background: rgba(196,120,74,.1);
+    border-color: rgba(196,120,74,.25);
+    font-weight: 600;
   }
 
   /* Payment */
