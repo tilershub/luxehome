@@ -154,21 +154,30 @@
           <label class="addon-row">
             <input type="radio" name="bc-tile" value="600" class="addon-check" />
             <div class="addon-info">
-              <span class="addon-name">Rocell Tiles</span>
+              <div>
+                <span class="addon-name">Rocell Tiles</span>
+                <span class="addon-size">60cm × 60cm</span>
+              </div>
               <span class="addon-price">Rs. 600 / sq.ft</span>
             </div>
           </label>
           <label class="addon-row">
             <input type="radio" name="bc-tile" value="700" class="addon-check" />
             <div class="addon-info">
-              <span class="addon-name">Rocell Tiles</span>
+              <div>
+                <span class="addon-name">Rocell Tiles</span>
+                <span class="addon-size">45cm × 90cm</span>
+              </div>
               <span class="addon-price">Rs. 700 / sq.ft</span>
             </div>
           </label>
           <label class="addon-row">
             <input type="radio" name="bc-tile" value="800" class="addon-check" />
             <div class="addon-info">
-              <span class="addon-name">Rocell Tiles</span>
+              <div>
+                <span class="addon-name">Rocell Tiles</span>
+                <span class="addon-size">120cm × 120cm</span>
+              </div>
               <span class="addon-price">Rs. 800 / sq.ft</span>
             </div>
           </label>
@@ -185,25 +194,49 @@
               <span class="addon-price">Not included</span>
             </div>
           </label>
-          <label class="addon-row">
-            <input type="radio" name="bc-bw" value="300000" class="addon-check" />
-            <div class="addon-info">
-              <span class="addon-name">Package A</span>
-              <span class="addon-price">Rs. 300,000</span>
+          <label class="addon-row addon-row--pkg">
+            <input type="radio" name="bc-bw" value="300000" class="addon-check addon-check--top" />
+            <div class="addon-pkg-content">
+              <div class="addon-info">
+                <span class="addon-name">Package A</span>
+                <span class="addon-price">Rs. 300,000</span>
+              </div>
+              <ul class="addon-pkg-list">
+                <li>Swiss Back to Wall WC</li>
+                <li>Swiss Vanity Basin</li>
+                <li>Swiss Brass Shower &amp; Taps (Stainless Steel) &mdash; 5yr corrosion-free warranty</li>
+                <li>Ferroli 10L Geyser</li>
+              </ul>
             </div>
           </label>
-          <label class="addon-row">
-            <input type="radio" name="bc-bw" value="350000" class="addon-check" />
-            <div class="addon-info">
-              <span class="addon-name">Package B</span>
-              <span class="addon-price">Rs. 350,000</span>
+          <label class="addon-row addon-row--pkg">
+            <input type="radio" name="bc-bw" value="350000" class="addon-check addon-check--top" />
+            <div class="addon-pkg-content">
+              <div class="addon-info">
+                <span class="addon-name">Package B</span>
+                <span class="addon-price">Rs. 350,000</span>
+              </div>
+              <ul class="addon-pkg-list">
+                <li>Swiss Wall Mount WC</li>
+                <li>Swiss Vanity Basin</li>
+                <li>Swiss Brass Concealed Shower &amp; Taps (Stainless Steel) &mdash; 5yr corrosion-free warranty</li>
+                <li>Ferroli 10L Geyser</li>
+              </ul>
             </div>
           </label>
-          <label class="addon-row">
-            <input type="radio" name="bc-bw" value="400000" class="addon-check" />
-            <div class="addon-info">
-              <span class="addon-name">Package C</span>
-              <span class="addon-price">Rs. 400,000</span>
+          <label class="addon-row addon-row--pkg">
+            <input type="radio" name="bc-bw" value="400000" class="addon-check addon-check--top" />
+            <div class="addon-pkg-content">
+              <div class="addon-info">
+                <span class="addon-name">Package C</span>
+                <span class="addon-price">Rs. 400,000</span>
+              </div>
+              <ul class="addon-pkg-list">
+                <li>Swiss Wall Mount WC</li>
+                <li>Swiss Vanity Basin</li>
+                <li>Swiss Brass Concealed Shower &amp; Taps (BrushGold / Gun Gray) &mdash; 5yr corrosion-free warranty</li>
+                <li>Ferroli 10L Geyser</li>
+              </ul>
             </div>
           </label>
         </div>
@@ -329,6 +362,43 @@
     },
   };
 
+  const TILE_SIZES: Record<string, string> = {
+    '600': '60cm × 60cm',
+    '700': '45cm × 90cm',
+    '800': '120cm × 120cm',
+  };
+
+  type BwPkg = { name: string; items: string[] };
+  const BW_PACKAGES: Record<string, BwPkg> = {
+    '300000': {
+      name: 'Package A',
+      items: [
+        'Swiss Back to Wall WC',
+        'Swiss Vanity Basin',
+        'Swiss Brass Shower & Taps (Stainless Steel) — 5yr corrosion-free warranty',
+        'Ferroli 10L Geyser',
+      ],
+    },
+    '350000': {
+      name: 'Package B',
+      items: [
+        'Swiss Wall Mount WC',
+        'Swiss Vanity Basin',
+        'Swiss Brass Concealed Shower & Taps (Stainless Steel) — 5yr corrosion-free warranty',
+        'Ferroli 10L Geyser',
+      ],
+    },
+    '400000': {
+      name: 'Package C',
+      items: [
+        'Swiss Wall Mount WC',
+        'Swiss Vanity Basin',
+        'Swiss Brass Concealed Shower & Taps (BrushGold / Gun Gray) — 5yr corrosion-free warranty',
+        'Ferroli 10L Geyser',
+      ],
+    },
+  };
+
   function fmt(n: number): string {
     return 'Rs. ' + n.toLocaleString('en-IN');
   }
@@ -415,17 +485,19 @@
     if (designCost > 0) {
       bkdRows.push({ label: '3D Bathroom Design', sub: 'Fixed price', val: fmt(designCost) });
     }
+    const tileSize = tileRate > 0 ? (TILE_SIZES[tileRate.toString()] || '') : '';
     if (tileCost > 0) {
       bkdRows.push({
-        label: 'Tile Supply — Rocell Tiles',
+        label: `Tile Supply — Rocell Tiles${tileSize ? ` (${tileSize})` : ''}`,
         sub: `Base area: ${baseTileArea.toFixed(1)} sq.ft (floor + wall) + 5% wastage = ${tileAreaWithWastage.toFixed(1)} sq.ft × Rs. ${tileRate.toLocaleString('en-IN')} / sq.ft`,
         val: fmt(tileCost),
       });
     }
+    const bwPkg = bathwareCost > 0 ? (BW_PACKAGES[bwAmt.toString()] || null) : null;
     if (bathwareCost > 0) {
       bkdRows.push({
-        label: 'Bathware + Taps + Geyser',
-        sub: 'Swiss Bathware · Swiss Taps · Ferroli Geyser',
+        label: `Bathware + Taps + Geyser${bwPkg ? ` — ${bwPkg.name}` : ''}`,
+        sub: bwPkg ? bwPkg.items.join(' · ') : 'Swiss Bathware · Swiss Taps · Ferroli Geyser',
         val: fmt(bathwareCost),
       });
     }
@@ -497,10 +569,13 @@
     pdfBtn.dataset.breakdown            = bkdRows.map(r => `${r.label}|${r.sub}|${r.val}`).join(';;');
     pdfBtn.dataset.wallArea             = wallArea.toFixed(1);
     pdfBtn.dataset.tileRate             = tileRate > 0 ? tileRate.toString() : '';
+    pdfBtn.dataset.tileSize             = tileSize;
     pdfBtn.dataset.baseTileArea         = baseTileArea.toFixed(1);
     pdfBtn.dataset.tileAreaWithWastage  = tileAreaWithWastage.toFixed(1);
     pdfBtn.dataset.tileCost             = tileCost > 0 ? fmt(tileCost) : '';
     pdfBtn.dataset.bathwareCost         = bathwareCost > 0 ? fmt(bathwareCost) : '';
+    pdfBtn.dataset.bwPkgName            = bwPkg ? bwPkg.name : '';
+    pdfBtn.dataset.bwItems              = bwPkg ? bwPkg.items.join(';;') : '';
     pdfBtn.dataset.brandLines           = brandLines.join(', ');
 
     // Store for WhatsApp
@@ -545,10 +620,13 @@
     const date     = (document.getElementById('rp-date') as HTMLElement).textContent || '';
 
     const tileRate             = pdfBtn.dataset.tileRate             || '';
+    const tileSize             = pdfBtn.dataset.tileSize             || '';
     const baseTileArea         = pdfBtn.dataset.baseTileArea         || '';
     const tileAreaWithWastage  = pdfBtn.dataset.tileAreaWithWastage  || '';
     const tileCostPdf          = pdfBtn.dataset.tileCost             || '';
     const bathwareCostPdf      = pdfBtn.dataset.bathwareCost         || '';
+    const bwPkgNamePdf         = pdfBtn.dataset.bwPkgName            || '';
+    const bwItemsPdf           = pdfBtn.dataset.bwItems              || '';
     const brandLinesPdf        = pdfBtn.dataset.brandLines           || '';
 
     if (!name) { alert('Generate a quote first before downloading.'); return; }
@@ -824,7 +902,7 @@
     ${tileCostPdf ? `
     <div style="border:0.5pt solid #e8d9c0;border-radius:3pt;padding:9pt 11pt;background:#faf7f2;">
       <div style="font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#c4784a;margin-bottom:5pt;">Tile Supply</div>
-      <div style="font-size:9pt;font-weight:700;color:#1e1a17;margin-bottom:4pt;">Rocell Tiles</div>
+      <div style="font-size:9pt;font-weight:700;color:#1e1a17;margin-bottom:4pt;">Rocell Tiles${tileSize ? ` &mdash; ${tileSize}` : ''}</div>
       <div style="font-size:8pt;color:#666;line-height:1.7;">
         Floor + Wall Area: <strong>${baseTileArea} sq.ft</strong><br/>
         With 5% Wastage: <strong>${tileAreaWithWastage} sq.ft</strong><br/>
@@ -834,11 +912,11 @@
     </div>` : ''}
     ${bathwareCostPdf ? `
     <div style="border:0.5pt solid #e8d9c0;border-radius:3pt;padding:9pt 11pt;background:#faf7f2;">
-      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#c4784a;margin-bottom:5pt;">Bathware + Taps + Geyser</div>
-      <div style="font-size:9pt;font-weight:700;color:#1e1a17;margin-bottom:4pt;">Swiss Bathware &middot; Swiss Taps &middot; Ferroli Geyser</div>
-      <div style="font-size:8pt;color:#666;line-height:1.7;">
-        Package Cost: <strong style="color:#c4784a;">${bathwareCostPdf}</strong>
+      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#c4784a;margin-bottom:5pt;">Bathware + Taps + Geyser${bwPkgNamePdf ? ` — ${bwPkgNamePdf}` : ''}</div>
+      <div style="font-size:8pt;color:#666;line-height:1.8;">
+        ${bwItemsPdf ? bwItemsPdf.split(';;').map(item => `<span style="display:block;">&#10003; ${item}</span>`).join('') : 'Swiss Bathware &middot; Swiss Taps &middot; Ferroli Geyser'}
       </div>
+      <div style="font-size:8pt;color:#666;margin-top:4pt;">Package Cost: <strong style="color:#c4784a;">${bathwareCostPdf}</strong></div>
     </div>` : ''}
   </div>
   ` : ''}
@@ -1196,6 +1274,49 @@
     color: var(--warm-gray);
     margin: -.4rem 0 .9rem;
     line-height: 1.5;
+  }
+
+  /* ── Tile size chip ── */
+  .addon-size {
+    display: block;
+    font-size: .68rem;
+    color: var(--warm-gray);
+    margin-top: .1rem;
+  }
+
+  /* ── Bathware package expanded row ── */
+  .addon-row--pkg {
+    align-items: flex-start;
+  }
+
+  .addon-check--top {
+    margin-top: .18rem;
+  }
+
+  .addon-pkg-content {
+    flex: 1;
+  }
+
+  .addon-pkg-list {
+    list-style: none;
+    padding: 0;
+    margin: .35rem 0 0;
+  }
+
+  .addon-pkg-list li {
+    font-size: .70rem;
+    color: var(--warm-gray);
+    line-height: 1.65;
+    padding-left: .9rem;
+    position: relative;
+  }
+
+  .addon-pkg-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--clay);
+    font-size: .62rem;
   }
 
   /* ── Add-ons ── */
