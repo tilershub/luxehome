@@ -14,7 +14,8 @@
     <!-- Floor Tiling -->
     <a href="/services/floor-tiling" class="sc" aria-label="Floor Tiling — view service details">
       <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/1144871/pexels-photo-1144871.jpeg?auto=compress&cs=tinysrgb&w=600&h=280&fit=crop" alt="Floor tiling" loading="lazy" width="600" height="280" />
+        <img src="https://images.pexels.com/photos/1144871/pexels-photo-1144871.jpeg?auto=compress&cs=tinysrgb&w=600&h=340&fit=crop" alt="Floor tiling" loading="lazy" width="600" height="340" />
+        <span class="sc-badge">Most Popular</span>
       </div>
       <div class="svc-name">Floor Tiling</div>
       <div class="svc-tag">Up to 4×2 tile size · Tile leveling system</div>
@@ -25,7 +26,7 @@
     <!-- Staircase Tiling -->
     <a href="/services/staircase-tiling" class="sc" aria-label="Staircase Tiling — view service details">
       <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/10991408/pexels-photo-10991408.jpeg?auto=compress&cs=tinysrgb&w=600&h=280&fit=crop" alt="Staircase tiling" loading="lazy" width="600" height="280" />
+        <img src="https://images.pexels.com/photos/10991408/pexels-photo-10991408.jpeg?auto=compress&cs=tinysrgb&w=600&h=340&fit=crop" alt="Staircase tiling" loading="lazy" width="600" height="340" />
       </div>
       <div class="svc-name">Staircase Tiling</div>
       <div class="svc-tag">Double nosing · Router edge · Skirting included</div>
@@ -36,7 +37,7 @@
     <!-- Bathroom -->
     <a href="/services/bathroom" class="sc" aria-label="Bathroom Services — tiling & renovation">
       <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/16249146/pexels-photo-16249146.jpeg?auto=compress&cs=tinysrgb&w=600&h=280&fit=crop" alt="Bathroom tiling and renovation" loading="lazy" width="600" height="280" />
+        <img src="https://images.pexels.com/photos/16249146/pexels-photo-16249146.jpeg?auto=compress&cs=tinysrgb&w=600&h=340&fit=crop" alt="Bathroom tiling and renovation" loading="lazy" width="600" height="340" />
       </div>
       <div class="svc-name">Bathroom</div>
       <div class="svc-tag">Tiling from Rs. 500/sq.ft · Full renovation from Rs. 450,000</div>
@@ -47,7 +48,7 @@
     <!-- Kitchen Pantry -->
     <a href="/services/kitchen-pantry" class="sc" aria-label="Kitchen Pantry — view service details">
       <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg?auto=compress&cs=tinysrgb&w=600&h=280&fit=crop" alt="Kitchen pantry tiling" loading="lazy" width="600" height="280" />
+        <img src="https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg?auto=compress&cs=tinysrgb&w=600&h=340&fit=crop" alt="Kitchen pantry tiling" loading="lazy" width="600" height="340" />
       </div>
       <div class="svc-name">Kitchen Pantry</div>
       <div class="svc-tag">Countertop & backsplash · Waterproof joints</div>
@@ -58,7 +59,7 @@
     <!-- iPanel Ceiling -->
     <a href="/services/ceiling" class="sc" aria-label="iPanel Ceiling — view service details">
       <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600&h=280&fit=crop" alt="iPanel ceiling installation" loading="lazy" width="600" height="280" />
+        <img src="https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600&h=340&fit=crop" alt="iPanel ceiling installation" loading="lazy" width="600" height="340" />
       </div>
       <div class="svc-name">iPanel Ceiling</div>
       <div class="svc-tag">Plain or decorative PVC panels · Any room</div>
@@ -69,7 +70,7 @@
     <!-- Hand Railing -->
     <a href="/services/hand-railing" class="sc" aria-label="Hand Railing — view service details">
       <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/6127375/pexels-photo-6127375.jpeg?auto=compress&cs=tinysrgb&w=600&h=280&fit=crop" alt="Hand railing installation" loading="lazy" width="600" height="280" />
+        <img src="https://images.pexels.com/photos/6127375/pexels-photo-6127375.jpeg?auto=compress&cs=tinysrgb&w=600&h=340&fit=crop" alt="Hand railing installation" loading="lazy" width="600" height="340" />
       </div>
       <div class="svc-name">Hand Railing</div>
       <div class="svc-tag">Staircase & balcony · Glass & stainless steel</div>
@@ -183,9 +184,25 @@
 
   .sc-thumb {
     margin: -2rem -2rem 1.2rem;
-    height: 155px;
+    height: 185px;
     overflow: hidden;
     flex-shrink: 0;
+    position: relative;
+  }
+
+  .sc-badge {
+    position: absolute;
+    top: .85rem;
+    left: .85rem;
+    background: var(--clay);
+    color: var(--cream);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .28rem .75rem;
+    border-radius: 2px;
+    z-index: 2;
   }
 
   .sc-thumb img {

@@ -19,15 +19,15 @@
       <a href="#services" class="btn-ghost">View Services →</a>
     </div>
     <div class="hero-stats">
-      <div>
+      <div class="stat">
         <div class="stat-num">500+</div>
         <div class="stat-label">Projects Done</div>
       </div>
-      <div>
+      <div class="stat">
         <div class="stat-num">5★</div>
         <div class="stat-label">Client Rating</div>
       </div>
-      <div>
+      <div class="stat">
         <div class="stat-num">4×2</div>
         <div class="stat-label">Max Tile Size</div>
       </div>
@@ -35,14 +35,39 @@
   </div>
 
   <div class="hero-right">
-    <div class="mosaic">
-      {Array.from({length: 48}, (_, i) => <div class="tc" style={`--i:${i}`}></div>)}
-    </div>
+    <!-- Real tiling photo, darkened to maintain drama -->
+    <img
+      class="hr-img"
+      src="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1200&h=1600&fit=crop"
+      alt=""
+      role="presentation"
+      width="1200"
+      height="1600"
+      fetchpriority="high"
+    />
+    <!-- Subtle tile-line grid overlay — evokes large-format tiles -->
+    <div class="hr-grid" aria-hidden="true"></div>
+    <!-- Gradient vignette for depth -->
+    <div class="hr-vignette" aria-hidden="true"></div>
+
     <div class="hero-badge">
       <div class="badge-label">Floor Tiling from</div>
       <div class="badge-value">Rs. 350</div>
       <div class="badge-sub">per sq.ft · up to 4×2</div>
     </div>
+
+    <!-- WhatsApp shortcut in hero panel -->
+    <a
+      href="https://wa.me/94774503744?text=Hello%20TILERSHUB%2C%20I%20would%20like%20a%20free%20quote."
+      class="hr-wa"
+      aria-label="WhatsApp TILERSHUB for a free quote"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
+      </svg>
+      <span>WhatsApp us</span>
+    </a>
   </div>
 </section>
 
@@ -55,6 +80,8 @@
     padding-top: 4.5rem;
     overflow: hidden;
   }
+
+  /* ── Left panel ── */
 
   .hero-left {
     display: flex;
@@ -71,7 +98,7 @@
     font-weight: 500;
     letter-spacing: .16em;
     text-transform: uppercase;
-    color: #894428; /* WCAG AA-compliant on off-white (6.75:1) */
+    color: #894428;
     margin-bottom: 1.4rem;
     opacity: 0;
     animation: fadeUp .8s .2s forwards;
@@ -131,6 +158,12 @@
     animation: fadeUp .9s .95s forwards;
   }
 
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+  }
+
   .stat-num {
     font-family: 'Playfair Display', serif;
     font-size: 2rem;
@@ -143,12 +176,11 @@
     font-size: .75rem;
     font-weight: 400;
     color: var(--warm-gray);
-    margin-top: .3rem;
     text-transform: uppercase;
     letter-spacing: .08em;
   }
 
-  /* ── Right panel: mosaic ── */
+  /* ── Right panel: photo + tile grid overlay ── */
 
   .hero-right {
     position: relative;
@@ -156,36 +188,48 @@
     background: var(--charcoal);
   }
 
-  .mosaic {
+  .hr-img {
     position: absolute;
     inset: 0;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    gap: 3px;
-    padding: 3px;
-    opacity: 0;
-    animation: fadeIn 0.7s .2s forwards;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(.42) saturate(.6);
+    animation: fadeIn 1.4s .1s both;
   }
 
-  /* Tiles are rendered server-side; use :global() to bypass Astro scoping */
-  :global(.tc) {
-    background: #2a2420;
-    animation: tR 0.5s calc(.02s * var(--i)) backwards;
+  /* Large-format tile grid lines — evokes the craft */
+  .hr-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(196, 120, 74, .15) 1.5px, transparent 1.5px),
+      linear-gradient(90deg, rgba(196, 120, 74, .15) 1.5px, transparent 1.5px);
+    background-size: 90px 90px;
+    animation: fadeIn 1s .8s both;
   }
 
-  :global(.tc:nth-child(3n))  { background: #24201c; }
-  :global(.tc:nth-child(5n))  { background: #2f2620; }
-  :global(.tc:nth-child(7n))  { background: #382e26; }
-  :global(.tc:nth-child(11n)) { background: #3d342c; }
+  /* Vignette: dark on left edge so left panel content reads cleanly */
+  .hr-vignette {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(30, 26, 23, .55) 0%,
+      transparent 40%,
+      transparent 70%,
+      rgba(30, 26, 23, .25) 100%
+    );
+  }
 
-  /* ── Hero badge ── */
+  /* ── Price badge ── */
 
   .hero-badge {
     position: absolute;
     bottom: 2.5rem;
     left: 2.5rem;
-    background: var(--charcoal);
+    background: rgba(30, 26, 23, .88);
+    backdrop-filter: blur(8px);
     border: 1px solid var(--clay);
     color: var(--cream);
     padding: 1.3rem 1.8rem;
@@ -217,6 +261,35 @@
     margin-top: .2rem;
   }
 
+  /* ── WhatsApp shortcut ── */
+
+  .hr-wa {
+    position: absolute;
+    top: 2.5rem;
+    right: 2.5rem;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    background: rgba(37, 211, 102, .15);
+    border: 1px solid rgba(37, 211, 102, .4);
+    color: #25d366;
+    text-decoration: none;
+    font-size: .78rem;
+    font-weight: 500;
+    padding: .55rem 1rem;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    transition: background .2s, border-color .2s;
+    opacity: 0;
+    animation: fadeUp .8s 1.4s forwards;
+  }
+
+  .hr-wa:hover {
+    background: rgba(37, 211, 102, .25);
+    border-color: rgba(37, 211, 102, .65);
+  }
+
   /* ── Responsive ── */
 
   @media (max-width: 1100px) {
@@ -231,7 +304,18 @@
     }
 
     .hero-right {
-      height: 50vw;
+      height: 56vw;
+      min-height: 260px;
+    }
+
+    .hr-wa {
+      top: 1.5rem;
+      right: 1.5rem;
+    }
+
+    .hero-badge {
+      bottom: 1.5rem;
+      left: 1.5rem;
     }
 
     h1 {
