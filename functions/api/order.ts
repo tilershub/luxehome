@@ -138,11 +138,11 @@ function buildCustomerEmail(o: OrderPayload): string {
           </tr>
           <tr>
             <td style="padding:6px 0;font-size:12px;color:rgba(245,240,232,.45);">Account Number</td>
-            <td style="padding:6px 0;font-size:13px;color:#f5f0e8;font-weight:600;">[ACCOUNT NUMBER]</td>
+            <td style="padding:6px 0;font-size:13px;color:#f5f0e8;font-weight:600;">001020003416</td>
           </tr>
           <tr>
             <td style="padding:6px 0;font-size:12px;color:rgba(245,240,232,.45);">Branch</td>
-            <td style="padding:6px 0;font-size:13px;color:#f5f0e8;font-weight:600;">[BRANCH]</td>
+            <td style="padding:6px 0;font-size:13px;color:#f5f0e8;font-weight:600;">Head Office</td>
           </tr>
         </table>
         <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:rgba(245,240,232,.55);line-height:1.7;">
