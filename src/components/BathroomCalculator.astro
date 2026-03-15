@@ -31,6 +31,11 @@
             <label class="bc-label" for="bc-location">Project Location</label>
             <input class="bc-input" type="text" id="bc-location" placeholder="City / Town / District" autocomplete="address-level2" />
           </div>
+          <div class="bc-field">
+            <label class="bc-label" for="bc-email">Email Address <span class="bc-label-req">*</span></label>
+            <input class="bc-input" type="email" id="bc-email" placeholder="your@email.com" autocomplete="email" />
+            <div class="bc-label-hint">Your invoice will be sent to this address</div>
+          </div>
         </div>
 
         <!-- Bathroom Details -->
@@ -296,15 +301,15 @@
             <div class="cart-error" id="cart-error" style="display:none"></div>
 
             <button class="btn-checkout" id="btn-checkout" type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 001.97 1.61h9.72a2 2 0 001.97-1.61L23 6H6"/>
               </svg>
-              Confirm Booking on WhatsApp
+              Place Order
             </button>
 
             <p class="cart-disclaimer">
-              ⚠ Estimated cost — final price confirmed after site inspection.
+              ⚠ Estimated cost — final price confirmed after site inspection. Confirm by paying 10% deposit.
             </p>
 
           </div><!-- /cart-footer -->
@@ -315,6 +320,107 @@
     </div><!-- /bcalc-layout -->
   </div>
 </section>
+
+<!-- ── Checkout Modal ── -->
+<div id="checkout-overlay" class="checkout-overlay" style="display:none" aria-modal="true" role="dialog" aria-labelledby="cm-title">
+
+  <div class="checkout-modal">
+
+    <!-- State: Review -->
+    <div id="checkout-review" class="checkout-state">
+      <div class="cm-header">
+        <div class="cm-header-left">
+          <span class="cm-brand">TILERSHUB</span>
+          <span class="cm-header-sub">Order Review</span>
+        </div>
+        <div class="cm-ref-badge" id="cm-ref">TH-000000-0000</div>
+        <button class="cm-close" id="cm-close" type="button" aria-label="Close modal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="cm-body">
+
+        <!-- Order items -->
+        <div class="cm-section">
+          <div class="cm-section-title">Order Summary</div>
+          <div id="cm-items" class="cm-items-list"></div>
+          <div class="cm-total-row">
+            <span class="cm-total-label">Estimated Total</span>
+            <span class="cm-total-val" id="cm-total">—</span>
+          </div>
+        </div>
+
+        <!-- Payment schedule -->
+        <div class="cm-section">
+          <div class="cm-section-title">Payment Schedule</div>
+          <div id="cm-schedule" class="cm-schedule-list"></div>
+        </div>
+
+        <!-- Bank transfer -->
+        <div class="cm-bank-box">
+          <div class="cm-bank-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+            Bank Transfer Details — Pay 10% Deposit to Confirm
+          </div>
+          <div class="cm-bank-grid">
+            <span class="cm-bank-key">Bank</span>         <span class="cm-bank-val">Dialog Finance</span>
+            <span class="cm-bank-key">Account Name</span> <span class="cm-bank-val">TILERSHUB (Pvt) Ltd</span>
+            <span class="cm-bank-key">Account No.</span>  <span class="cm-bank-val cm-bank-val--accent">001020003416</span>
+            <span class="cm-bank-key">Branch</span>       <span class="cm-bank-val">Head Office</span>
+          </div>
+          <p class="cm-bank-note">
+            After transferring the 10% deposit, send payment proof to
+            <strong>tilershub@gmail.com</strong> or WhatsApp <strong>+94 774 503 744</strong>
+            with your order reference.
+          </p>
+        </div>
+
+        <div id="cm-error" class="cm-error" style="display:none"></div>
+
+      </div>
+
+      <div class="cm-footer">
+        <button class="cm-btn-cancel" id="cm-cancel" type="button">Cancel</button>
+        <button class="cm-btn-confirm" id="cm-confirm" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirm Order &amp; Send Invoice
+        </button>
+      </div>
+    </div>
+
+    <!-- State: Loading -->
+    <div id="checkout-loading" class="checkout-state" style="display:none">
+      <div class="cm-loading-state">
+        <div class="cm-spinner"></div>
+        <div class="cm-loading-title">Sending your invoice…</div>
+        <div class="cm-loading-sub">Please wait a moment</div>
+      </div>
+    </div>
+
+    <!-- State: Success -->
+    <div id="checkout-success" class="checkout-state" style="display:none">
+      <div class="cm-success-state">
+        <div class="cm-success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 class="cm-success-title" id="cm-title">Order Placed!</h3>
+        <p class="cm-success-ref" id="cm-success-ref"></p>
+        <p class="cm-success-email" id="cm-success-email"></p>
+        <div class="cm-success-bank">
+          <div class="cm-success-bank-label">Next: Transfer your 10% deposit to confirm your start date</div>
+          <div class="cm-success-deposit" id="cm-success-deposit"></div>
+          <div class="cm-success-bank-detail">
+            Dialog Finance &nbsp;·&nbsp; TILERSHUB (Pvt) Ltd<br/>
+            Acc: 001020003416 &nbsp;·&nbsp; Head Office
+          </div>
+        </div>
+        <button class="cm-btn-done" id="cm-done" type="button">Done</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <script>
   // ── Data ──────────────────────────────────────────────────────────────────
@@ -594,87 +700,197 @@
     chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
   });
 
-  // ── Checkout (WhatsApp) ───────────────────────────────────────────────────
+  // ── Order ref generator ──────────────────────────────────────────────────
 
-  document.getElementById('btn-checkout')?.addEventListener('click', function () {
-    const name     = (document.getElementById('bc-name') as HTMLInputElement).value.trim();
-    const phone    = (document.getElementById('bc-phone') as HTMLInputElement).value.trim();
+  function generateOrderRef(): string {
+    const now = new Date();
+    const yr  = now.getFullYear();
+    const mo  = String(now.getMonth() + 1).padStart(2, '0');
+    const rnd = Math.floor(1000 + Math.random() * 9000);
+    return `TH-${yr}${mo}-${rnd}`;
+  }
+
+  // ── Modal state helpers ──────────────────────────────────────────────────
+
+  function showCheckoutState(state: 'review' | 'loading' | 'success') {
+    (['checkout-review', 'checkout-loading', 'checkout-success'] as const).forEach(id => {
+      const el = document.getElementById(id) as HTMLElement;
+      el.style.display = id === `checkout-${state}` ? 'block' : 'none';
+    });
+  }
+
+  function closeCheckoutModal() {
+    const overlay = document.getElementById('checkout-overlay')!;
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // ── Open checkout modal ───────────────────────────────────────────────────
+
+  document.getElementById('btn-checkout')?.addEventListener('click', () => {
+    const name     = (document.getElementById('bc-name')     as HTMLInputElement).value.trim();
+    const phone    = (document.getElementById('bc-phone')    as HTMLInputElement).value.trim();
+    const email    = (document.getElementById('bc-email')    as HTMLInputElement).value.trim();
     const location = (document.getElementById('bc-location') as HTMLInputElement).value.trim();
     const errorEl  = document.getElementById('cart-error')!;
 
-    // Validate details
-    if (!name || !phone || !location) {
-      errorEl.textContent  = '⚠ Please fill in your name, phone number, and location at the top of the form before confirming your booking.';
+    if (!name || !phone || !email || !location) {
+      errorEl.textContent  = '⚠ Please fill in your name, phone, email address, and location before placing your order.';
       errorEl.style.display = 'block';
-      document.getElementById('bc-details-card')!.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      document.getElementById('bc-details-card')!.classList.add('bc-card--highlight');
-      setTimeout(() => document.getElementById('bc-details-card')!.classList.remove('bc-card--highlight'), 2000);
+      const card = document.getElementById('bc-details-card')!;
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('bc-card--highlight');
+      setTimeout(() => card.classList.remove('bc-card--highlight'), 2000);
+      return;
+    }
+
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(email)) {
+      errorEl.textContent  = '⚠ Please enter a valid email address so we can send your invoice.';
+      errorEl.style.display = 'block';
+      document.getElementById('bc-email')?.focus();
       return;
     }
 
     errorEl.style.display = 'none';
 
-    // Gather values
-    const pkgKey   = (document.querySelector('.pkg-radio:checked') as HTMLInputElement | null)?.value ?? '';
-    const area     = parseFloat((document.getElementById('bc-area') as HTMLInputElement)?.value) || 0;
-    const wallArea = parseFloat((document.getElementById('bc-wall-area') as HTMLInputElement)?.value) || 0;
-    const demoOn   = (document.getElementById('addon-demo') as HTMLInputElement)?.checked;
-    const designOn = (document.getElementById('addon-design') as HTMLInputElement)?.checked;
+    // Gather all order data (mirrors renderCart logic)
+    const pkgKey   = (document.querySelector('.pkg-radio:checked')          as HTMLInputElement | null)?.value ?? '';
+    const area     = parseFloat((document.getElementById('bc-area')          as HTMLInputElement)?.value) || 0;
+    const wallArea = parseFloat((document.getElementById('bc-wall-area')     as HTMLInputElement)?.value) || 0;
+    const demoOn   = (document.getElementById('addon-demo')                  as HTMLInputElement)?.checked;
+    const designOn = (document.getElementById('addon-design')                as HTMLInputElement)?.checked;
     const tileRate = parseInt((document.querySelector('input[name="bc-tile"]:checked') as HTMLInputElement | null)?.value ?? '0') || 0;
-    const bwAmt    = parseFloat((document.querySelector('input[name="bc-bw"]:checked') as HTMLInputElement | null)?.value ?? '0') || 0;
-    const total    = parseFloat(this.dataset.total ?? '0') || 0;
+    const bwAmt    = parseFloat((document.querySelector('input[name="bc-bw"]:checked')  as HTMLInputElement | null)?.value ?? '0') || 0;
+    const total    = parseFloat((document.getElementById('btn-checkout') as HTMLButtonElement).dataset.total ?? '0') || 0;
 
     const pkg = pkgKey ? PACKAGES[pkgKey] : null;
 
-    const lines: string[] = [];
-    lines.push(`*TILERSHUB — Bathroom Renovation Booking*`);
-    lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
-    lines.push(`*Client:* ${name}`);
-    lines.push(`*Phone:* ${phone}`);
-    lines.push(`*Location:* ${location}`);
-    lines.push(``);
-    lines.push(`*Project Details:*`);
-    if (area > 0)     lines.push(`• Floor Area: ${area} sq.ft`);
-    if (wallArea > 0) lines.push(`• Wall Area: ${wallArea} sq.ft`);
-    if (pkg)          lines.push(`• Package: ${pkg.name}`);
-    lines.push(``);
-    lines.push(`*Order Summary:*`);
+    const orderItems: { name: string; desc: string; price: number }[] = [];
 
     if (pkg && area > 0) {
       const extraArea   = Math.max(0, area - pkg.baseArea);
       const extraCharge = Math.round(extraArea * pkg.extraRate);
-      lines.push(`• ${pkg.name} Package — ${fmt(pkg.basePrice)}`);
-      if (extraCharge > 0) lines.push(`• Area Surcharge (${extraArea} sq.ft over ${pkg.baseArea}) — ${fmt(extraCharge)}`);
+      orderItems.push({ name: `${pkg.name} Package`, desc: pkg.includes.join(' · '), price: pkg.basePrice });
+      if (extraCharge > 0) {
+        orderItems.push({ name: 'Area Surcharge', desc: `${extraArea} sq.ft over ${pkg.baseArea} sq.ft × Rs. ${pkg.extraRate.toLocaleString('en-IN')}/sq.ft`, price: extraCharge });
+      }
     }
 
-    if (demoOn && area > 0) lines.push(`• Demolition Works — ${fmt(area * 1000)}`);
-    if (designOn)           lines.push(`• 3D Bathroom Design — Rs. 25,000`);
+    if (demoOn && area > 0) {
+      orderItems.push({ name: 'Demolition Works', desc: `${area} sq.ft × Rs. 1,000/sq.ft`, price: Math.round(area * 1000) });
+    }
+
+    if (designOn) {
+      orderItems.push({ name: '3D Bathroom Design', desc: 'Design consultation & full 3D rendering', price: 25000 });
+    }
 
     if (tileRate > 0 && (area + wallArea) > 0) {
-      const areaWithWaste = parseFloat(((area + wallArea) * 1.05).toFixed(2));
-      lines.push(`• Rocell Tile Supply (${TILE_SIZES[String(tileRate)] ?? ''}) — ${fmt(areaWithWaste * tileRate)}`);
-      lines.push(`  ${areaWithWaste} sq.ft (5% wastage) × ${fmt(tileRate)}/sq.ft`);
+      const combined = parseFloat(((area + wallArea) * 1.05).toFixed(2));
+      orderItems.push({
+        name: `Rocell Tile Supply — ${TILE_SIZES[String(tileRate)] ?? ''}`,
+        desc: `${combined} sq.ft (incl. 5% wastage) × Rs. ${tileRate.toLocaleString('en-IN')}/sq.ft`,
+        price: Math.round(combined * tileRate),
+      });
     }
 
     if (bwAmt > 0) {
       const bw = BW_PACKAGES[String(bwAmt)];
-      lines.push(`• Swiss Bathware ${bw.name} — ${fmt(bwAmt)}`);
+      orderItems.push({ name: `Swiss Bathware ${bw.name}`, desc: bw.items.join(' · '), price: Math.round(bwAmt) });
     }
 
-    lines.push(``);
-    lines.push(`*Total Estimated Cost: ${fmt(total)}*`);
-    lines.push(``);
-    lines.push(`*Payment Schedule:*`);
-    PAY.forEach(p => {
-      lines.push(`• ${p.pct}% ${p.label} — ${fmt(Math.round(total * p.pct / 100))}`);
-    });
-    lines.push(``);
-    lines.push(`_This is an estimated cost. Final price will be confirmed after site inspection._`);
-    lines.push(``);
-    lines.push(`TILERSHUB · tilershub.lk · +94 774 503 744`);
+    const paySchedule = PAY.map(p => ({ ...p, amount: Math.round(total * p.pct / 100) }));
+    const orderRef    = generateOrderRef();
+    const orderDate   = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    const msg = lines.join('\n');
-    window.open(`https://wa.me/94774503744?text=${encodeURIComponent(msg)}`, '_blank');
+    // Store on overlay for submission
+    const overlay = document.getElementById('checkout-overlay')! as HTMLElement & { _order?: unknown };
+    overlay._order = { orderRef, orderDate, name, email, phone, location, items: orderItems, total, paySchedule };
+
+    // Populate modal
+    document.getElementById('cm-ref')!.textContent = orderRef;
+
+    document.getElementById('cm-items')!.innerHTML = orderItems.map(item => `
+      <div class="cm-item">
+        <div class="cm-item-info">
+          <div class="cm-item-name">${item.name}</div>
+          <div class="cm-item-desc">${item.desc}</div>
+        </div>
+        <div class="cm-item-price">${fmt(item.price)}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('cm-total')!.textContent = fmt(total);
+
+    document.getElementById('cm-schedule')!.innerHTML = paySchedule.map((p, i) => `
+      <div class="cm-sched-row${i === 0 ? ' cm-sched-row--deposit' : ''}">
+        <div class="cm-sched-left">
+          <span class="cm-sched-pct">${p.pct}%</span>
+          <div class="cm-sched-info">
+            <span class="cm-sched-label">${p.label}${i === 0 ? '<span class="cm-pay-now">Pay Now</span>' : ''}</span>
+            <span class="cm-sched-desc">${p.desc}</span>
+          </div>
+        </div>
+        <span class="cm-sched-amt">${fmt(p.amount)}</span>
+      </div>
+    `).join('');
+
+    document.getElementById('cm-error')!.style.display = 'none';
+    showCheckoutState('review');
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  });
+
+  // ── Submit order ──────────────────────────────────────────────────────────
+
+  document.getElementById('cm-confirm')?.addEventListener('click', async () => {
+    const overlay  = document.getElementById('checkout-overlay')! as HTMLElement & { _order?: unknown };
+    const errorEl  = document.getElementById('cm-error')!;
+    const orderData = overlay._order as Record<string, unknown>;
+
+    showCheckoutState('loading');
+
+    try {
+      const res  = await fetch('/api/order', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(orderData),
+      });
+      const json: { success?: boolean; error?: string; note?: string } = await res.json();
+
+      if (!res.ok || json.error) {
+        showCheckoutState('review');
+        errorEl.textContent  = json.error ?? 'Something went wrong. Please try again or contact us on WhatsApp.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      // Success
+      const data = orderData as { orderRef: string; email: string; paySchedule: { amount: number }[] };
+      document.getElementById('cm-success-ref')!.textContent   = `Order Reference: ${data.orderRef}`;
+      document.getElementById('cm-success-email')!.textContent  = `Invoice sent to: ${data.email}`;
+      document.getElementById('cm-success-deposit')!.textContent = fmt(data.paySchedule[0].amount);
+      showCheckoutState('success');
+
+    } catch {
+      showCheckoutState('review');
+      errorEl.textContent  = 'Connection error. Please check your internet and try again.';
+      errorEl.style.display = 'block';
+    }
+  });
+
+  // ── Modal close / backdrop ────────────────────────────────────────────────
+
+  document.getElementById('cm-close')?.addEventListener('click',  closeCheckoutModal);
+  document.getElementById('cm-cancel')?.addEventListener('click', closeCheckoutModal);
+  document.getElementById('cm-done')?.addEventListener('click',   closeCheckoutModal);
+
+  document.getElementById('checkout-overlay')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('checkout-overlay')) closeCheckoutModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeCheckoutModal();
   });
 </script>
 
@@ -1288,6 +1504,16 @@
     line-height: 1.55;
   }
 
+  /* Email hint */
+  .bc-label-req { color: var(--clay); }
+
+  .bc-label-hint {
+    font-size: .7rem;
+    color: var(--warm-gray);
+    margin-top: .3rem;
+    line-height: 1.4;
+  }
+
   /* Checkout button */
   .btn-checkout {
     display: flex;
@@ -1295,7 +1521,7 @@
     justify-content: center;
     gap: .55rem;
     width: 100%;
-    background: #25d366;
+    background: var(--clay);
     color: #fff;
     border: none;
     border-radius: 3px;
@@ -1308,8 +1534,491 @@
     transition: background .2s, transform .15s;
   }
 
-  .btn-checkout:hover { background: #1fb855; transform: translateY(-1px); }
+  .btn-checkout:hover  { background: var(--terracotta); transform: translateY(-1px); }
   .btn-checkout:active { transform: translateY(0); }
+
+  /* ── Checkout Modal ── */
+
+  .checkout-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 26, 23, .72);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+
+  .checkout-modal {
+    background: #fff;
+    border-radius: 6px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, .28);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .checkout-state { display: block; }
+
+  /* Modal header */
+  .cm-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--stone);
+    background: var(--charcoal);
+    border-radius: 6px 6px 0 0;
+    flex-shrink: 0;
+  }
+
+  .cm-header-left { flex: 1; }
+
+  .cm-brand {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: .06em;
+  }
+
+  .cm-header-sub {
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: rgba(245, 240, 232, .45);
+    margin-top: 1px;
+    display: block;
+  }
+
+  .cm-ref-badge {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: var(--clay);
+    background: rgba(196, 120, 74, .15);
+    border: 1px solid rgba(196, 120, 74, .3);
+    padding: .3rem .7rem;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .cm-close {
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 3px;
+    color: rgba(245, 240, 232, .6);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+    flex-shrink: 0;
+  }
+
+  .cm-close:hover { background: rgba(255, 255, 255, .15); color: var(--cream); }
+
+  /* Modal body */
+  .cm-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .cm-section { margin-bottom: 1.4rem; }
+
+  .cm-section-title {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    margin-bottom: .75rem;
+  }
+
+  /* Order items */
+  .cm-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--stone);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: .75rem;
+  }
+
+  .cm-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .85rem 1rem;
+    border-bottom: 1px solid var(--stone);
+  }
+
+  .cm-item:last-child { border-bottom: none; }
+
+  .cm-item-info { flex: 1; min-width: 0; }
+
+  .cm-item-name {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: .2rem;
+  }
+
+  .cm-item-desc {
+    font-size: .7rem;
+    color: var(--warm-gray);
+    line-height: 1.45;
+  }
+
+  .cm-item-price {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .cm-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .75rem 1rem;
+    background: rgba(196, 120, 74, .06);
+    border: 1px solid rgba(196, 120, 74, .2);
+    border-radius: 3px;
+  }
+
+  .cm-total-label { font-size: .82rem; font-weight: 600; color: var(--charcoal); }
+
+  .cm-total-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--clay);
+  }
+
+  /* Payment schedule */
+  .cm-schedule-list {
+    border: 1px solid var(--stone);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .cm-sched-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .7rem 1rem;
+    border-bottom: 1px solid var(--stone);
+    gap: .75rem;
+  }
+
+  .cm-sched-row:last-child { border-bottom: none; }
+
+  .cm-sched-row--deposit {
+    background: rgba(196, 120, 74, .06);
+    border-bottom-color: rgba(196, 120, 74, .2);
+  }
+
+  .cm-sched-left { display: flex; align-items: center; gap: .6rem; flex: 1; min-width: 0; }
+
+  .cm-sched-pct {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--warm-gray);
+    min-width: 2rem;
+  }
+
+  .cm-sched-row--deposit .cm-sched-pct { color: var(--clay); }
+
+  .cm-sched-info {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    min-width: 0;
+  }
+
+  .cm-sched-label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+
+  .cm-sched-row--deposit .cm-sched-label { color: var(--clay); }
+
+  .cm-pay-now {
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    background: var(--clay);
+    color: #fff;
+    padding: .15rem .5rem;
+    border-radius: 20px;
+  }
+
+  .cm-sched-desc { font-size: .67rem; color: var(--warm-gray); }
+
+  .cm-sched-amt {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .cm-sched-row--deposit .cm-sched-amt { color: var(--clay); }
+
+  /* Bank box */
+  .cm-bank-box {
+    background: var(--charcoal);
+    border-radius: 4px;
+    padding: 1.2rem 1.3rem;
+    margin-bottom: .75rem;
+  }
+
+  .cm-bank-title {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 1rem;
+  }
+
+  .cm-bank-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .35rem .9rem;
+    margin-bottom: 1rem;
+  }
+
+  .cm-bank-key {
+    font-size: .72rem;
+    color: rgba(245, 240, 232, .45);
+    align-self: center;
+    white-space: nowrap;
+  }
+
+  .cm-bank-val {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--cream);
+  }
+
+  .cm-bank-val--accent { color: var(--clay); }
+
+  .cm-bank-note {
+    font-size: .72rem;
+    color: rgba(245, 240, 232, .55);
+    line-height: 1.6;
+    border-top: 1px solid rgba(255, 255, 255, .07);
+    padding-top: .9rem;
+    margin: 0;
+  }
+
+  .cm-bank-note strong { color: var(--clay); }
+
+  /* Error */
+  .cm-error {
+    background: rgba(220, 60, 60, .08);
+    border: 1px solid rgba(220, 60, 60, .25);
+    border-radius: 3px;
+    color: #c0392b;
+    font-size: .78rem;
+    padding: .75rem 1rem;
+    line-height: 1.5;
+    margin-top: .5rem;
+  }
+
+  /* Footer */
+  .cm-footer {
+    display: flex;
+    gap: .75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--stone);
+    background: var(--off-white);
+    border-radius: 0 0 6px 6px;
+    flex-shrink: 0;
+  }
+
+  .cm-btn-cancel {
+    flex: 0 0 auto;
+    background: transparent;
+    border: 1.5px solid var(--stone);
+    border-radius: 3px;
+    color: var(--warm-gray);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem;
+    font-weight: 600;
+    padding: .75rem 1.2rem;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+
+  .cm-btn-cancel:hover { border-color: var(--charcoal); color: var(--charcoal); }
+
+  .cm-btn-confirm {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    background: var(--clay);
+    border: none;
+    border-radius: 3px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: .75rem 1.2rem;
+    cursor: pointer;
+    transition: background .2s;
+  }
+
+  .cm-btn-confirm:hover { background: var(--terracotta); }
+
+  /* Loading state */
+  .cm-loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1.2rem;
+    text-align: center;
+  }
+
+  .cm-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--stone);
+    border-top-color: var(--clay);
+    border-radius: 50%;
+    animation: cm-spin .7s linear infinite;
+  }
+
+  @keyframes cm-spin { to { transform: rotate(360deg); } }
+
+  .cm-loading-title { font-size: .95rem; font-weight: 600; color: var(--charcoal); }
+  .cm-loading-sub   { font-size: .8rem; color: var(--warm-gray); }
+
+  /* Success state */
+  .cm-success-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    gap: .75rem;
+  }
+
+  .cm-success-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(196, 120, 74, .1);
+    border: 2px solid var(--clay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--clay);
+    margin-bottom: .5rem;
+  }
+
+  .cm-success-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin: 0;
+  }
+
+  .cm-success-ref {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--clay);
+    background: rgba(196, 120, 74, .08);
+    border: 1px solid rgba(196, 120, 74, .2);
+    padding: .35rem .9rem;
+    border-radius: 20px;
+    margin: 0;
+  }
+
+  .cm-success-email {
+    font-size: .8rem;
+    color: var(--warm-gray);
+    margin: 0;
+  }
+
+  .cm-success-bank {
+    width: 100%;
+    background: var(--charcoal);
+    border-radius: 4px;
+    padding: 1.2rem;
+    text-align: left;
+    margin: .5rem 0;
+  }
+
+  .cm-success-bank-label {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: .4rem;
+  }
+
+  .cm-success-deposit {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: .5rem;
+  }
+
+  .cm-success-bank-detail {
+    font-size: .72rem;
+    color: rgba(245, 240, 232, .5);
+    line-height: 1.65;
+  }
+
+  .cm-btn-done {
+    background: var(--clay);
+    border: none;
+    border-radius: 3px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    padding: .75rem 2rem;
+    cursor: pointer;
+    transition: background .2s;
+    margin-top: .5rem;
+  }
+
+  .cm-btn-done:hover { background: var(--terracotta); }
 
   .cart-disclaimer {
     font-size: .7rem;
