@@ -45,7 +45,7 @@ const { service: defaultService = '' } = Astro.props;
           <option value="Floor Tiling"         selected={defaultService === 'Floor Tiling'}>Floor Tiling</option>
           <option value="Staircase Tiling"     selected={defaultService === 'Staircase Tiling'}>Staircase Tiling</option>
           <option value="Bathroom Tiling"      selected={defaultService === 'Bathroom Tiling'}>Bathroom Tiling</option>
-          <option value="Bathroom Renovation"  selected={defaultService === 'Bathroom Renovation'}>Bathroom Renovation</option>
+          <option value="Bathroom Construction/Renovation"  selected={defaultService === 'Bathroom Construction/Renovation'}>Bathroom Construction/Renovation</option>
           <option value="iPanel Ceiling"       selected={defaultService === 'iPanel Ceiling'}>iPanel Ceiling</option>
           <option value="Shower Cubicle"       selected={defaultService === 'Shower Cubicle'}>Shower Cubicle</option>
           <option value="Hand Railing"         selected={defaultService === 'Hand Railing'}>Hand Railing</option>
@@ -130,8 +130,8 @@ const { service: defaultService = '' } = Astro.props;
       </div>
     </div>
 
-    <!-- Bathroom Renovation -->
-    <div class="svc-fields" data-svc="Bathroom Renovation" hidden>
+    <!-- Bathroom Construction/Renovation -->
+    <div class="svc-fields" data-svc="Bathroom Construction/Renovation" hidden>
       <div class="svc-fields-header">Bathroom Size</div>
       <div class="field-row three-col">
         <div class="field">
@@ -343,7 +343,7 @@ const { service: defaultService = '' } = Astro.props;
       'Floor Tiling':        ['sf_floor_area',  'Floor area is required.'],
       'Staircase Tiling':    ['sf_stair_length', 'Staircase length is required.'],
       'Bathroom Tiling':     ['sf_bt_area',      'Tiling area is required.'],
-      'Bathroom Renovation': ['sf_br_length',    'Bathroom length is required.'],
+      'Bathroom Construction/Renovation': ['sf_br_length',    'Bathroom length is required.'],
       'iPanel Ceiling':      ['sf_ceil_area',    'Ceiling area is required.'],
       'Shower Cubicle':      ['sf_cub_shape',    'Please select a cubicle shape.'],
       'Hand Railing':        ['sf_rail_length',  'Railing length is required.'],
@@ -351,7 +351,7 @@ const { service: defaultService = '' } = Astro.props;
       'Kitchen Pantry':      ['sf_kp_length',    'Pantry length is required.'],
       'Pantry Cupboard':     ['sf_pc_length',    'Cupboard length is required.'],
     };
-    if (svc === 'Bathroom Renovation') {
+    if (svc === 'Bathroom Construction/Renovation') {
       if (!data.get('sf_br_width')?.toString().trim())  { setErr('sf_br_width',  'Width is required.');  ok = false; }
       if (!data.get('sf_br_height')?.toString().trim()) { setErr('sf_br_height', 'Height is required.'); ok = false; }
     }
@@ -398,7 +398,7 @@ const { service: defaultService = '' } = Astro.props;
       const n = data.get('sf_niches')?.toString().trim();
       if (n && n !== '0') lines.push(`Wall Niches: ${n}`);
     }
-    if (svc === 'Bathroom Renovation') {
+    if (svc === 'Bathroom Construction/Renovation') {
       lines.push(`Bathroom Size: ${data.get('sf_br_length')} × ${data.get('sf_br_width')} × ${data.get('sf_br_height')} ft`);
       const scope = data.getAll('sf_br_scope').map(v => v.toString());
       if (scope.length) lines.push(`Scope: ${scope.join(', ')}`);
