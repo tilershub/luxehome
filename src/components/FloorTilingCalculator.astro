@@ -74,6 +74,41 @@
           </div>
         </div>
 
+        <!-- Add-ons -->
+        <div class="ftc-card">
+          <div class="ftc-card-title">Optional Add-ons</div>
+          <label class="ftc-addon-row">
+            <input type="checkbox" id="addon-removal" class="ftc-addon-check" />
+            <div class="ftc-addon-info">
+              <div>
+                <span class="ftc-addon-name">Old Tile Removal</span>
+                <span class="ftc-addon-hint">Strip and dispose of existing floor tiles</span>
+              </div>
+              <span class="ftc-addon-price">Rs. 100 / sq.ft</span>
+            </div>
+          </label>
+          <label class="ftc-addon-row">
+            <input type="checkbox" id="addon-screed" class="ftc-addon-check" />
+            <div class="ftc-addon-info">
+              <div>
+                <span class="ftc-addon-name">Floor Leveling Screed</span>
+                <span class="ftc-addon-hint">Leveling compound for uneven subfloor</span>
+              </div>
+              <span class="ftc-addon-price">Rs. 150 / sq.ft</span>
+            </div>
+          </label>
+          <label class="ftc-addon-row">
+            <input type="checkbox" id="addon-waterproof" class="ftc-addon-check" />
+            <div class="ftc-addon-info">
+              <div>
+                <span class="ftc-addon-name">Waterproofing Membrane</span>
+                <span class="ftc-addon-hint">Recommended for kitchens &amp; wet areas</span>
+              </div>
+              <span class="ftc-addon-price">Rs. 200 / sq.ft</span>
+            </div>
+          </label>
+        </div>
+
         <div class="ftc-wa-wrap">
           <button class="ftc-wa-btn" id="ftc-wa-btn" type="button">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
@@ -124,6 +159,21 @@
             <span class="ftcrc-sub" id="ftcrc-sk-sub"></span>
             <span class="ftcrc-amt" id="ftcrc-sk">—</span>
           </div>
+          <div class="ftcr-cost-row ftcr-addon-row" id="ftcr-addon-removal-row" style="display:none">
+            <span class="ftcrc-label">Old Tile Removal</span>
+            <span class="ftcrc-sub" id="ftcrc-removal-sub"></span>
+            <span class="ftcrc-amt" id="ftcrc-removal">—</span>
+          </div>
+          <div class="ftcr-cost-row ftcr-addon-row" id="ftcr-addon-screed-row" style="display:none">
+            <span class="ftcrc-label">Leveling Screed</span>
+            <span class="ftcrc-sub" id="ftcrc-screed-sub"></span>
+            <span class="ftcrc-amt" id="ftcrc-screed">—</span>
+          </div>
+          <div class="ftcr-cost-row ftcr-addon-row" id="ftcr-addon-waterproof-row" style="display:none">
+            <span class="ftcrc-label">Waterproofing</span>
+            <span class="ftcrc-sub" id="ftcrc-waterproof-sub"></span>
+            <span class="ftcrc-amt" id="ftcrc-waterproof">—</span>
+          </div>
 
           <div class="ftcr-total-row">
             <span class="ftcrt-label">Total Estimate</span>
@@ -132,7 +182,7 @@
         </div>
 
         <div class="ftcr-note">
-          Rates: Rs. 350/sq.ft · Skirting Rs. 250/lin.ft · Labour only, tiles not included.
+          Rates: Rs. 350/sq.ft floor · Rs. 250/lin.ft skirting · Labour only, tiles not included. Add-ons are optional extras priced per sq.ft of floor area.
         </div>
 
       </div><!-- /ftc-results -->
@@ -142,9 +192,12 @@
 </section>
 
 <script>
-  const FLOOR_RATE   = 350;
-  const SKIRTING_RATE = 250;
-  const DOOR_WIDTH   = 3; // ft per opening
+  const FLOOR_RATE       = 350;
+  const SKIRTING_RATE    = 250;
+  const DOOR_WIDTH       = 3; // ft per opening
+  const REMOVAL_RATE     = 100;
+  const SCREED_RATE      = 150;
+  const WATERPROOF_RATE  = 200;
 
   function toFt(feetEl: HTMLInputElement, inchEl: HTMLInputElement): number {
     const ft = parseFloat(feetEl.value) || 0;
@@ -183,6 +236,9 @@
     document.getElementById(id).addEventListener('input', recalc);
   });
   document.getElementById('ftc-wastage').addEventListener('change', recalc);
+  ['addon-removal','addon-screed','addon-waterproof'].forEach(id => {
+    document.getElementById(id).addEventListener('change', recalc);
+  });
 
   function recalc() {
     const lf = document.getElementById('ftc-lf') as HTMLInputElement;
@@ -202,6 +258,9 @@
       ['ftcrc-floor-sub','ftcrc-sk-sub'].forEach(id => {
         (document.getElementById(id) as HTMLElement).textContent = '';
       });
+      ['ftcr-addon-removal-row','ftcr-addon-screed-row','ftcr-addon-waterproof-row'].forEach(id => {
+        (document.getElementById(id) as HTMLElement).style.display = 'none';
+      });
       return;
     }
 
@@ -213,7 +272,16 @@
 
     const floorCost  = area * FLOOR_RATE;
     const skirtCost  = skirt * SKIRTING_RATE;
-    const totalCost  = floorCost + skirtCost;
+
+    const chkRemoval    = (document.getElementById('addon-removal') as HTMLInputElement).checked;
+    const chkScreed     = (document.getElementById('addon-screed') as HTMLInputElement).checked;
+    const chkWaterproof = (document.getElementById('addon-waterproof') as HTMLInputElement).checked;
+
+    const removalCost    = chkRemoval    ? area * REMOVAL_RATE    : 0;
+    const screedCost     = chkScreed     ? area * SCREED_RATE     : 0;
+    const waterproofCost = chkWaterproof ? area * WATERPROOF_RATE : 0;
+
+    const totalCost  = floorCost + skirtCost + removalCost + screedCost + waterproofCost;
 
     (document.getElementById('ftcr-dim') as HTMLElement).textContent =
       `${fmtFtIn(L)} × ${fmtFtIn(W)}`;
@@ -231,6 +299,28 @@
     (document.getElementById('ftcrc-sk') as HTMLElement).textContent    = fmtRs(skirtCost);
     (document.getElementById('ftcrc-total') as HTMLElement).textContent = fmtRs(totalCost);
 
+    // Add-on rows
+    const removalRow    = document.getElementById('ftcr-addon-removal-row') as HTMLElement;
+    const screedRow     = document.getElementById('ftcr-addon-screed-row') as HTMLElement;
+    const waterproofRow = document.getElementById('ftcr-addon-waterproof-row') as HTMLElement;
+
+    removalRow.style.display    = chkRemoval    ? 'flex' : 'none';
+    screedRow.style.display     = chkScreed     ? 'flex' : 'none';
+    waterproofRow.style.display = chkWaterproof ? 'flex' : 'none';
+
+    if (chkRemoval) {
+      (document.getElementById('ftcrc-removal-sub') as HTMLElement).textContent = `${round2(area)} sq.ft × Rs. ${REMOVAL_RATE}`;
+      (document.getElementById('ftcrc-removal') as HTMLElement).textContent = fmtRs(removalCost);
+    }
+    if (chkScreed) {
+      (document.getElementById('ftcrc-screed-sub') as HTMLElement).textContent = `${round2(area)} sq.ft × Rs. ${SCREED_RATE}`;
+      (document.getElementById('ftcrc-screed') as HTMLElement).textContent = fmtRs(screedCost);
+    }
+    if (chkWaterproof) {
+      (document.getElementById('ftcrc-waterproof-sub') as HTMLElement).textContent = `${round2(area)} sq.ft × Rs. ${WATERPROOF_RATE}`;
+      (document.getElementById('ftcrc-waterproof') as HTMLElement).textContent = fmtRs(waterproofCost);
+    }
+
     // Store for WhatsApp
     const waBtn = document.getElementById('ftc-wa-btn') as HTMLElement;
     waBtn.dataset.dim     = `${fmtFtIn(L)} × ${fmtFtIn(W)}`;
@@ -238,9 +328,12 @@
     waBtn.dataset.skirt   = round2(skirt);
     waBtn.dataset.tiles   = round2(tiles);
     waBtn.dataset.wastage = String(wastage);
-    waBtn.dataset.floor   = fmtRs(floorCost);
-    waBtn.dataset.sk      = fmtRs(skirtCost);
-    waBtn.dataset.total   = fmtRs(totalCost);
+    waBtn.dataset.floor      = fmtRs(floorCost);
+    waBtn.dataset.sk         = fmtRs(skirtCost);
+    waBtn.dataset.total      = fmtRs(totalCost);
+    waBtn.dataset.removal    = chkRemoval    ? fmtRs(removalCost)    : '';
+    waBtn.dataset.screed     = chkScreed     ? fmtRs(screedCost)     : '';
+    waBtn.dataset.waterproof = chkWaterproof ? fmtRs(waterproofCost) : '';
   }
 
   // WhatsApp
@@ -248,6 +341,11 @@
     const btn = document.getElementById('ftc-wa-btn') as HTMLElement;
     const dim  = btn.dataset.dim;
     if (!dim) { alert('Enter dimensions first.'); return; }
+
+    const addonLines: string[] = [];
+    if (btn.dataset.removal)    addonLines.push(`*Old Tile Removal:* ${btn.dataset.removal}`);
+    if (btn.dataset.screed)     addonLines.push(`*Leveling Screed:* ${btn.dataset.screed}`);
+    if (btn.dataset.waterproof) addonLines.push(`*Waterproofing:* ${btn.dataset.waterproof}`);
 
     const msg = [
       `*TILERSHUB — Floor Tiling Estimate*`,
@@ -259,6 +357,8 @@
       ``,
       `*Floor Tiling Labour:* ${btn.dataset.floor}`,
       `*Skirting Labour:* ${btn.dataset.sk}`,
+      ...(addonLines.length ? [``, `*Add-ons:*`, ...addonLines] : []),
+      ``,
       `*Total Estimate:* ${btn.dataset.total}`,
       ``,
       `_Rates: Rs. 350/sq.ft floor · Rs. 250/lin.ft skirting · Labour only._`,
@@ -619,6 +719,66 @@
     line-height: 1.6;
     border-top: 1px solid rgba(255,255,255,.06);
     padding-top: .9rem;
+  }
+
+  /* ── Add-ons ── */
+  .ftc-addon-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .65rem .75rem;
+    border: 1.5px solid var(--stone);
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: .5rem;
+    transition: border-color .2s, background .2s;
+    background: var(--off-white);
+  }
+
+  .ftc-addon-row:last-child { margin-bottom: 0; }
+
+  .ftc-addon-row:hover {
+    border-color: var(--clay);
+    background: rgba(196,120,74,.03);
+  }
+
+  .ftc-addon-check {
+    margin-top: .15rem;
+    accent-color: var(--clay);
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+  }
+
+  .ftc-addon-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    gap: .5rem;
+  }
+
+  .ftc-addon-name {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    display: block;
+  }
+
+  .ftc-addon-hint {
+    font-size: .7rem;
+    font-weight: 400;
+    color: var(--warm-gray);
+    display: block;
+    margin-top: .1rem;
+  }
+
+  .ftc-addon-price {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--clay);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   /* ── Responsive ── */
