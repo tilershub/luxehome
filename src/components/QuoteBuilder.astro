@@ -168,9 +168,9 @@
     { id:'floor-large', cat:'flooring', name:'Floor Tiling', tier:'Large / Slabs',  sub:'Levelling clips · Expert handling · Seamless finish',        unit:'sq.ft', rate:700,    skirtRate:450 },
     // BATHROOM
     { id:'bath-tile',   cat:'bathroom', name:'Bathroom Tiling',                      sub:'Floor + walls · Waterproof joints · Swisstek grout',         unit:'sq.ft', rate:500 },
-    { id:'bath-basic',  cat:'bathroom', name:'Bathroom Renovation', tier:'Basic',    sub:'Full scope up to 40 sq.ft · +Rs. 5,000/sq.ft over',          unit:'fixed', rate:450000 },
-    { id:'bath-std',    cat:'bathroom', name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Up to 40 sq.ft · +Rs. 6,000/sq.ft over',      unit:'fixed', rate:550000, popular:true },
-    { id:'bath-lux',    cat:'bathroom', name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finish · Up to 40 sq.ft · +Rs. 7,000/sq.ft over',    unit:'fixed', rate:650000 },
+    { id:'bath-basic',  cat:'bathroom', name:'Bathroom Renovation', tier:'Basic',    sub:'Full scope · Demo to finish · You supply tiles & bathware', unit:'pkg', rate:450000, baseArea:40, overageRate:5000 },
+    { id:'bath-std',    cat:'bathroom', name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Demo to finish · You supply tiles & bathware', unit:'pkg', rate:550000, baseArea:40, overageRate:6000, popular:true },
+    { id:'bath-lux',    cat:'bathroom', name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finish · Demo to finish · You supply tiles & bathware', unit:'pkg', rate:650000, baseArea:40, overageRate:7000 },
     // OTHERS
     { id:'staircase',   cat:'others', name:'Staircase Tiling',          sub:'Double nosing · Router edge · Skirting included',               unit:'lin.ft', rate:2400 },
     { id:'pantry-tile', cat:'others', name:'Kitchen Pantry Tiling',     sub:'Countertop & backsplash · Waterproof joints',                   unit:'lin.ft', rate:5000 },
@@ -218,8 +218,11 @@
 
     grid.innerHTML = svcs.map(function(s) {
       var inCart = cart.some(function(c) { return c.id === s.id; });
+      var isPkg  = s.unit === 'pkg';
       var isFixed = s.unit === 'fixed';
-      var priceLabel = isFixed ? fmt(s.rate) : (fmt(s.rate) + '\u00a0/\u00a0' + s.unit);
+      var priceLabel = (isPkg || isFixed)
+        ? ('From\u00a0' + fmt(s.rate))
+        : (fmt(s.rate) + '\u00a0/\u00a0' + s.unit);
 
       var addedBadge = [
         '<div class="qb-svc-added">',
@@ -229,6 +232,22 @@
       ].join('');
 
       var fixedBtn = '<button class="qb-add-btn" onclick="qbAddFixed(\'' + s.id + '\')">Add to Quote</button>';
+
+      var pkgForm = [
+        '<div class="qb-qty-form">',
+          '<div class="qb-qty-row">',
+            '<label>Bathroom Area</label>',
+            '<div class="qb-qty-wrap">',
+              '<input type="number" id="qty-' + s.id + '" min="1" placeholder="e.g. 45" class="qb-qty-in qb-pkg-input" data-id="' + s.id + '">',
+              '<span class="qb-qty-unit">sq.ft</span>',
+            '</div>',
+          '</div>',
+          '<div class="qb-pkg-preview" id="preview-' + s.id + '">',
+            'Base: ' + fmt(s.rate) + ' (up to ' + s.baseArea + '\u00a0sq.ft) · +' + fmt(s.overageRate) + '/sq.ft over',
+          '</div>',
+          '<button class="qb-add-btn" onclick="qbAddPkg(\'' + s.id + '\')">Add to Quote \u2192</button>',
+        '</div>',
+      ].join('');
 
       var qtyForm = [
         '<div class="qb-qty-form">',
@@ -252,13 +271,15 @@
         '</div>',
       ].join('');
 
+      var control = inCart ? addedBadge : (isPkg ? pkgForm : (isFixed ? fixedBtn : qtyForm));
+
       return [
         '<div class="qb-svc-card' + (inCart ? ' in-cart' : '') + '" data-id="' + s.id + '">',
           (s.popular ? '<div class="qb-popular">Most Popular</div>' : ''),
           '<div class="qb-svc-name">' + s.name + (s.tier ? '<span class="qb-svc-tier"> \u2014 ' + s.tier + '</span>' : '') + '</div>',
           '<div class="qb-svc-sub">' + s.sub + '</div>',
           '<div class="qb-svc-price">' + priceLabel + '</div>',
-          (inCart ? addedBadge : (isFixed ? fixedBtn : qtyForm)),
+          control,
         '</div>',
       ].join('');
     }).join('');
@@ -300,6 +321,57 @@
     renderServices(activeCat);
     renderCart();
   };
+
+  /* Package (bathroom reno) — area-based pricing */
+  window.qbAddPkg = function(id) {
+    var s = SERVICES.find(function(x) { return x.id === id; });
+    if (!s) return;
+    var qtyEl = document.getElementById('qty-' + id);
+    var area = parseFloat((qtyEl && qtyEl.value) || '0');
+    if (!area || area <= 0) { if (qtyEl) qtyEl.focus(); return; }
+
+    var extraArea  = Math.max(0, area - s.baseArea);
+    var extraCharge = extraArea * s.overageRate;
+    var totalPrice = s.rate + extraCharge;
+
+    var desc = area + '\u00a0sq.ft \u00b7 Package ' + fmt(s.rate) + ' (up to ' + s.baseArea + '\u00a0sq.ft)';
+    if (extraArea > 0) {
+      desc += ' + ' + extraArea + '\u00a0sq.ft overage \u00d7 ' + fmt(s.overageRate) + '/sq.ft';
+    }
+
+    var item = { id: s.id, name: s.name + (s.tier ? ' \u2014 ' + s.tier : ''), desc: desc, price: totalPrice };
+    var idx = cart.findIndex(function(c) { return c.id === id; });
+    if (idx >= 0) { cart[idx] = item; } else { cart.push(item); }
+    renderServices(activeCat);
+    renderCart();
+  };
+
+  /* Live price preview for pkg inputs */
+  document.addEventListener('input', function(e) {
+    var el = e.target;
+    if (!el || !el.classList || !el.classList.contains('qb-pkg-input')) return;
+    var id = el.dataset.id;
+    var s  = SERVICES.find(function(x) { return x.id === id; });
+    if (!s) return;
+    var preview = document.getElementById('preview-' + id);
+    if (!preview) return;
+
+    var area = parseFloat(el.value || '0');
+    if (!area || area <= 0) {
+      preview.textContent = 'Base: ' + fmt(s.rate) + ' (up to ' + s.baseArea + '\u00a0sq.ft) \u00b7 +' + fmt(s.overageRate) + '/sq.ft over';
+      preview.classList.remove('qb-pkg-preview--active');
+      return;
+    }
+
+    var extraArea  = Math.max(0, area - s.baseArea);
+    var totalPrice = s.rate + extraArea * s.overageRate;
+    if (extraArea > 0) {
+      preview.textContent = fmt(s.rate) + ' + ' + extraArea + '\u00a0sq.ft \u00d7 ' + fmt(s.overageRate) + ' = ' + fmt(totalPrice);
+    } else {
+      preview.textContent = 'Total: ' + fmt(totalPrice) + ' \u2014 within included 40\u00a0sq.ft';
+    }
+    preview.classList.add('qb-pkg-preview--active');
+  });
 
   window.qbRemove = function(id) {
     cart = cart.filter(function(c) { return c.id !== id; });
@@ -800,6 +872,24 @@
     font-size: .72rem;
     color: var(--warm-gray);
     white-space: nowrap;
+  }
+
+  /* Package price preview */
+  .qb-pkg-preview {
+    font-size: .72rem;
+    color: var(--warm-gray);
+    background: rgba(196, 120, 74, .06);
+    border: 1px solid rgba(196, 120, 74, .18);
+    border-radius: 2px;
+    padding: .4rem .6rem;
+    line-height: 1.4;
+  }
+
+  .qb-pkg-preview--active {
+    background: rgba(196, 120, 74, .12);
+    border-color: rgba(196, 120, 74, .35);
+    color: var(--charcoal);
+    font-weight: 600;
   }
 
   /* Add button */
