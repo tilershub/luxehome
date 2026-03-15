@@ -6,7 +6,7 @@
     <div class="stag reveal">Instant Estimate</div>
     <h2 class="reveal">Bathroom Renovation Calculator</h2>
     <p class="sdesc reveal">
-      Enter your bathroom details and select a package — get a cost estimate in seconds.
+      Build your bathroom renovation — select a package and add-ons to see a live order total.
     </p>
 
     <div class="bcalc-layout">
@@ -15,7 +15,7 @@
       <div class="bcalc-inputs">
 
         <!-- Client Details -->
-        <div class="bc-card reveal">
+        <div class="bc-card reveal" id="bc-details-card">
           <div class="bc-card-title">Your Details</div>
           <div class="bc-row">
             <div class="bc-field">
@@ -244,104 +244,82 @@
           </label>
         </div>
 
-        <button class="bc-generate-btn" id="bc-generate-btn" type="button">
-          Generate Quote →
-        </button>
-        <div class="bc-error" id="bc-error"></div>
-
       </div><!-- /bcalc-inputs -->
 
-      <!-- ── RIGHT: Result Column ── -->
-      <div class="bcalc-result-col">
+      <!-- ── RIGHT: Cart Column ── -->
+      <div class="bcalc-cart-col">
+        <div class="cart-panel" id="cart-panel">
 
-        <!-- Placeholder state -->
-        <div class="bcalc-placeholder" id="bcalc-placeholder">
-          <div class="bcp-icon">📐</div>
-          <div class="bcp-text">Fill in the form and click<br /><strong>Generate Quote</strong> to see your estimate</div>
-        </div>
-
-        <!-- Result card (hidden until generated) -->
-        <div class="bcalc-result" id="bcalc-result">
-
-          <div class="result-printable" id="result-printable">
-
-            <div class="rp-header">
-              <div class="rph-brand">
-                <div class="rph-logo">TILERSHUB</div>
-                <div class="rph-tagline">Premium Tiling &amp; Renovation · Sri Lanka</div>
-              </div>
-              <div class="rph-title">Renovation Estimate</div>
+          <!-- Cart Header -->
+          <div class="cart-header">
+            <div class="cart-header-left">
+              <svg class="cart-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 001.97 1.61h9.72a2 2 0 001.97-1.61L23 6H6"/>
+              </svg>
+              <span class="cart-title">Your Order</span>
             </div>
-
-            <div class="rp-client" id="rp-client"></div>
-
-            <div class="rp-metrics">
-              <div class="rp-metric">
-                <span class="rpm-label">Bathroom Area</span>
-                <span class="rpm-value" id="r-area"></span>
-                <span class="rpm-unit">sq.ft</span>
-              </div>
-              <div class="rp-metric rp-metric--mid">
-                <span class="rpm-label">Package</span>
-                <span class="rpm-value rpm-pkg" id="r-pkg"></span>
-              </div>
-              <div class="rp-metric">
-                <span class="rpm-label">Final Total</span>
-                <span class="rpm-value rpm-total" id="r-total-sm"></span>
-              </div>
-            </div>
-
-            <!-- Price breakdown -->
-            <div class="rp-breakdown" id="rp-breakdown"></div>
-
-            <div class="rp-total-block">
-              <div class="rptb-label">Final Estimated Price</div>
-              <div class="rptb-price" id="r-total"></div>
-            </div>
-
-            <div class="rp-includes">
-              <div class="rpi-title">Services Included</div>
-              <div class="rpi-grid" id="r-includes"></div>
-              <div id="r-brands"></div>
-            </div>
-
-            <div class="rp-payment">
-              <div class="rpi-title">Payment Schedule</div>
-              <div class="rp-pay-grid" id="r-payment"></div>
-            </div>
-
-            <div class="rp-disclaimer">
-              ⚠ This is an estimated renovation cost. Final quotation will be confirmed after site inspection.
-            </div>
-
-            <div class="rp-footer">
-              <div>TILERSHUB · tilershub.lk · +94 774 503 744</div>
-              <div id="rp-date"></div>
-            </div>
-
-          </div><!-- /result-printable -->
-
-          <div class="result-actions">
-            <button class="ra-btn ra-pdf" id="ra-pdf" type="button">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download PDF
-            </button>
-            <button class="ra-btn ra-wa" id="ra-wa" type="button">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
-              Share on WhatsApp
-            </button>
+            <span class="cart-badge" id="cart-badge" style="display:none">0</span>
           </div>
 
-        </div><!-- /bcalc-result -->
+          <!-- Empty State -->
+          <div class="cart-empty" id="cart-empty">
+            <div class="ce-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/>
+              </svg>
+            </div>
+            <p class="ce-msg">Select a package to<br />start building your order</p>
+          </div>
 
-      </div><!-- /bcalc-result-col -->
+          <!-- Cart Items -->
+          <div class="cart-items" id="cart-items" style="display:none"></div>
+
+          <!-- Cart Footer: total + payment + checkout -->
+          <div class="cart-footer" id="cart-footer" style="display:none">
+
+            <div class="cart-subtotal-row">
+              <span class="csr-label">Estimated Total</span>
+              <span class="csr-value" id="cart-total">Rs. 0</span>
+            </div>
+
+            <div class="cart-payment-section">
+              <div class="cps-header" id="cps-toggle">
+                <span class="cps-title">Payment Schedule</span>
+                <svg class="cps-chevron" id="cps-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div class="cps-body" id="cps-body">
+                <div class="cps-rows" id="cps-rows"></div>
+              </div>
+            </div>
+
+            <div class="cart-error" id="cart-error" style="display:none"></div>
+
+            <button class="btn-checkout" id="btn-checkout" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
+              </svg>
+              Confirm Booking on WhatsApp
+            </button>
+
+            <p class="cart-disclaimer">
+              ⚠ Estimated cost — final price confirmed after site inspection.
+            </p>
+
+          </div><!-- /cart-footer -->
+
+        </div><!-- /cart-panel -->
+      </div><!-- /bcalc-cart-col -->
 
     </div><!-- /bcalc-layout -->
   </div>
 </section>
 
 <script>
-  const PACKAGES = {
+  // ── Data ──────────────────────────────────────────────────────────────────
+
+  const PACKAGES: Record<string, { name: string; basePrice: number; baseArea: number; extraRate: number; includes: string[] }> = {
     basic: {
       name: 'Basic',
       basePrice: 450000,
@@ -371,708 +349,332 @@
     '800': '120cm × 120cm',
   };
 
-  type BwPkg = { name: string; items: string[] };
-  const BW_PACKAGES: Record<string, BwPkg> = {
+  const BW_PACKAGES: Record<string, { name: string; items: string[] }> = {
     '300000': {
       name: 'Package A',
-      items: [
-        'Swiss Back to Wall WC',
-        'Swiss Vanity Basin',
-        'Swiss Brass Shower & Taps (Stainless Steel) — 5yr corrosion-free warranty',
-        'Ferroli 10L Geyser',
-        'Mirrors & Decorative Accessories',
-      ],
+      items: ['Swiss Back to Wall WC', 'Swiss Vanity Basin', 'Swiss Brass Shower & Taps (Stainless Steel)', 'Ferroli 10L Geyser', 'Mirrors & Decorative Accessories'],
     },
     '350000': {
       name: 'Package B',
-      items: [
-        'Swiss Wall Mount WC',
-        'Swiss Vanity Basin',
-        'Swiss Brass Concealed Shower & Taps (Stainless Steel) — 5yr corrosion-free warranty',
-        'Ferroli 10L Geyser',
-        'Mirrors & Decorative Accessories',
-      ],
+      items: ['Swiss Wall Mount WC', 'Swiss Vanity Basin', 'Swiss Brass Concealed Shower & Taps (Stainless Steel)', 'Ferroli 10L Geyser', 'Mirrors & Decorative Accessories'],
     },
     '400000': {
       name: 'Package C',
-      items: [
-        'Swiss Wall Mount WC',
-        'Swiss Vanity Basin',
-        'Swiss Brass Concealed Shower & Taps (BrushGold / Gun Gray) — 5yr corrosion-free warranty',
-        'Ferroli 10L Geyser',
-        'Mirrors & Decorative Accessories',
-      ],
+      items: ['Swiss Wall Mount WC', 'Swiss Vanity Basin', 'Swiss Brass Concealed Shower & Taps (BrushGold / Gun Gray)', 'Ferroli 10L Geyser', 'Mirrors & Decorative Accessories'],
     },
   };
 
+  const PAY = [
+    { label: 'Upfront / Deposit',         pct: 10, desc: 'Due before any work commences' },
+    { label: 'On Starting Date',           pct: 60, desc: 'Due on the day work begins on site' },
+    { label: 'After Tiling Completion',    pct: 20, desc: 'Due once all tiling is finished' },
+    { label: 'Final Payment on Handover',  pct: 10, desc: 'Due on project completion & handover' },
+  ];
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
   function fmt(n: number): string {
-    return 'Rs. ' + n.toLocaleString('en-IN');
+    return 'Rs. ' + Math.round(n).toLocaleString('en-IN');
   }
 
-  // Package card highlight
-  document.querySelectorAll('.pkg-card').forEach(card => {
-    card.addEventListener('click', () => {
+  // ── Package card selected state ───────────────────────────────────────────
+
+  document.querySelectorAll('.pkg-radio').forEach(radio => {
+    radio.addEventListener('change', () => {
       document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('pkg-card--active'));
-      card.classList.add('pkg-card--active');
+      const checked = document.querySelector('.pkg-radio:checked') as HTMLInputElement | null;
+      if (checked) checked.closest('.pkg-card')?.classList.add('pkg-card--active');
+      renderCart();
     });
   });
 
-  // Generate Quote
-  document.getElementById('bc-generate-btn')!.addEventListener('click', () => {
+  // ── Live listeners ────────────────────────────────────────────────────────
+
+  ['bc-area', 'bc-wall-area'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderCart);
+  });
+
+  document.querySelectorAll('#addon-demo, #addon-design').forEach(el => {
+    el.addEventListener('change', renderCart);
+  });
+
+  document.querySelectorAll('input[name="bc-tile"], input[name="bc-bw"]').forEach(el => {
+    el.addEventListener('change', renderCart);
+  });
+
+  // ── Cart renderer ─────────────────────────────────────────────────────────
+
+  function renderCart() {
+    const pkgKey   = (document.querySelector('.pkg-radio:checked') as HTMLInputElement | null)?.value ?? '';
+    const area     = parseFloat((document.getElementById('bc-area') as HTMLInputElement)?.value) || 0;
+    const wallArea = parseFloat((document.getElementById('bc-wall-area') as HTMLInputElement)?.value) || 0;
+    const demoOn   = (document.getElementById('addon-demo') as HTMLInputElement)?.checked;
+    const designOn = (document.getElementById('addon-design') as HTMLInputElement)?.checked;
+    const tileRate = parseInt((document.querySelector('input[name="bc-tile"]:checked') as HTMLInputElement | null)?.value ?? '0') || 0;
+    const bwAmt    = parseFloat((document.querySelector('input[name="bc-bw"]:checked') as HTMLInputElement | null)?.value ?? '0') || 0;
+
+    interface CartItem {
+      key: string;
+      name: string;
+      desc: string;
+      price: number | null;
+      pending?: string;
+    }
+
+    const items: CartItem[] = [];
+    let total = 0;
+
+    // Package
+    if (pkgKey && PACKAGES[pkgKey]) {
+      const p = PACKAGES[pkgKey];
+      if (area > 0) {
+        const extraArea   = Math.max(0, area - p.baseArea);
+        const extraCharge = Math.round(extraArea * p.extraRate);
+        const pkgPrice    = p.basePrice + extraCharge;
+        total += pkgPrice;
+
+        items.push({
+          key: 'pkg',
+          name: `${p.name} Package`,
+          desc: p.includes.join(' · '),
+          price: p.basePrice,
+        });
+
+        if (extraCharge > 0) {
+          items.push({
+            key: 'extra',
+            name: 'Area Surcharge',
+            desc: `${extraArea} sq.ft over ${p.baseArea} sq.ft × ${fmt(p.extraRate)} / sq.ft`,
+            price: extraCharge,
+          });
+        }
+      } else {
+        items.push({
+          key: 'pkg',
+          name: `${p.name} Package`,
+          desc: p.includes.join(' · '),
+          price: null,
+          pending: 'Enter floor area above to calculate price',
+        });
+      }
+    }
+
+    // Demolition
+    if (demoOn) {
+      if (area > 0) {
+        const cost = Math.round(area * 1000);
+        total += cost;
+        items.push({
+          key: 'demo',
+          name: 'Demolition Works',
+          desc: `${area} sq.ft × Rs. 1,000 / sq.ft`,
+          price: cost,
+        });
+      } else {
+        items.push({
+          key: 'demo',
+          name: 'Demolition Works',
+          desc: 'Rs. 1,000 / sq.ft',
+          price: null,
+          pending: 'Enter floor area above to calculate price',
+        });
+      }
+    }
+
+    // 3D Design
+    if (designOn) {
+      total += 25000;
+      items.push({
+        key: 'design',
+        name: '3D Bathroom Design',
+        desc: 'Design consultation & 3D rendering',
+        price: 25000,
+      });
+    }
+
+    // Tile Supply
+    if (tileRate > 0) {
+      const combined = area + wallArea;
+      if (combined > 0) {
+        const areaWithWaste = parseFloat((combined * 1.05).toFixed(2));
+        const cost = Math.round(areaWithWaste * tileRate);
+        total += cost;
+        items.push({
+          key: 'tiles',
+          name: `Rocell Tile Supply — ${TILE_SIZES[String(tileRate)] ?? ''}`,
+          desc: `${areaWithWaste} sq.ft (incl. 5% wastage) × ${fmt(tileRate)} / sq.ft`,
+          price: cost,
+        });
+      } else {
+        items.push({
+          key: 'tiles',
+          name: `Rocell Tile Supply — ${TILE_SIZES[String(tileRate)] ?? ''}`,
+          desc: `${fmt(tileRate)} / sq.ft · enter floor & wall area above`,
+          price: null,
+          pending: 'Enter bathroom areas above to calculate price',
+        });
+      }
+    }
+
+    // Bathware
+    if (bwAmt > 0) {
+      const bw = BW_PACKAGES[String(bwAmt)];
+      total += bwAmt;
+      items.push({
+        key: 'bw',
+        name: `Swiss Bathware ${bw.name}`,
+        desc: bw.items.join(' · '),
+        price: Math.round(bwAmt),
+      });
+    }
+
+    // ── Render ──
+    const emptyEl  = document.getElementById('cart-empty')!;
+    const itemsEl  = document.getElementById('cart-items')!;
+    const footerEl = document.getElementById('cart-footer')!;
+    const badgeEl  = document.getElementById('cart-badge')!;
+    const errorEl  = document.getElementById('cart-error')!;
+
+    if (items.length === 0) {
+      emptyEl.style.display  = 'flex';
+      itemsEl.style.display  = 'none';
+      footerEl.style.display = 'none';
+      badgeEl.style.display  = 'none';
+      itemsEl.innerHTML = '';
+      return;
+    }
+
+    const pricedCount = items.filter(i => i.price !== null).length;
+    emptyEl.style.display  = 'none';
+    itemsEl.style.display  = 'block';
+    footerEl.style.display = 'block';
+    badgeEl.style.display  = 'inline-flex';
+    badgeEl.textContent    = String(items.length);
+    errorEl.style.display  = 'none';
+
+    // Cart items HTML
+    itemsEl.innerHTML = items.map((item, i) => `
+      <div class="cart-item${i < items.length - 1 ? ' cart-item--border' : ''}">
+        <div class="ci-info">
+          <div class="ci-name">${item.name}</div>
+          <div class="ci-desc">${item.desc}</div>
+          ${item.pending ? `<div class="ci-pending"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${item.pending}</div>` : ''}
+        </div>
+        <div class="ci-price${item.price === null ? ' ci-price--pending' : ''}">${item.price !== null ? fmt(item.price) : '—'}</div>
+      </div>
+    `).join('');
+
+    // Total
+    document.getElementById('cart-total')!.textContent = total > 0 ? fmt(total) : '—';
+
+    // Payment schedule rows
+    document.getElementById('cps-rows')!.innerHTML = PAY.map(p => `
+      <div class="cpr-row">
+        <div class="cpr-left">
+          <span class="cpr-pct">${p.pct}%</span>
+          <div class="cpr-labels">
+            <span class="cpr-label">${p.label}</span>
+            <span class="cpr-desc">${p.desc}</span>
+          </div>
+        </div>
+        <span class="cpr-amt">${total > 0 ? fmt(Math.round(total * p.pct / 100)) : '—'}</span>
+      </div>
+    `).join('');
+
+    // Store total on checkout button
+    (document.getElementById('btn-checkout') as HTMLButtonElement).dataset.total = String(total);
+  }
+
+  // ── Payment schedule toggle ───────────────────────────────────────────────
+
+  document.getElementById('cps-toggle')?.addEventListener('click', () => {
+    const body    = document.getElementById('cps-body')!;
+    const chevron = document.getElementById('cps-chevron')!;
+    const open    = body.classList.toggle('cps-body--open');
+    chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+  });
+
+  // ── Checkout (WhatsApp) ───────────────────────────────────────────────────
+
+  document.getElementById('btn-checkout')?.addEventListener('click', function () {
     const name     = (document.getElementById('bc-name') as HTMLInputElement).value.trim();
     const phone    = (document.getElementById('bc-phone') as HTMLInputElement).value.trim();
     const location = (document.getElementById('bc-location') as HTMLInputElement).value.trim();
-    const area     = parseFloat((document.getElementById('bc-area') as HTMLInputElement).value);
-    const wallAreaRaw = parseFloat((document.getElementById('bc-wall-area') as HTMLInputElement).value);
-    const wallArea = isNaN(wallAreaRaw) ? 0 : Math.max(0, wallAreaRaw);
-    const pkgKey   = (document.querySelector('input[name="bcpkg"]:checked') as HTMLInputElement)?.value;
-    const demoChecked   = (document.getElementById('addon-demo') as HTMLInputElement).checked;
-    const designChecked = (document.getElementById('addon-design') as HTMLInputElement).checked;
-    const tileRate  = parseFloat((document.querySelector('input[name="bc-tile"]:checked') as HTMLInputElement)?.value || '0');
-    const bwAmt     = parseFloat((document.querySelector('input[name="bc-bw"]:checked') as HTMLInputElement)?.value || '0');
-    const errorEl  = document.getElementById('bc-error')!;
+    const errorEl  = document.getElementById('cart-error')!;
 
-    const errors: string[] = [];
-    if (!name)         errors.push('Please enter your name.');
-    if (!phone)        errors.push('Please enter your phone number.');
-    if (!location)     errors.push('Please enter your project location.');
-    if (!(area > 0))   errors.push('Please enter a valid floor area.');
-    if (!pkgKey)       errors.push('Please select a package.');
-
-    if (errors.length) {
-      errorEl.innerHTML = errors.map(e => `<span>${e}</span>`).join('');
-      errorEl.style.display = 'flex';
+    // Validate details
+    if (!name || !phone || !location) {
+      errorEl.textContent  = '⚠ Please fill in your name, phone number, and location at the top of the form before confirming your booking.';
+      errorEl.style.display = 'block';
+      document.getElementById('bc-details-card')!.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('bc-details-card')!.classList.add('bc-card--highlight');
+      setTimeout(() => document.getElementById('bc-details-card')!.classList.remove('bc-card--highlight'), 2000);
       return;
     }
+
     errorEl.style.display = 'none';
 
-    const pkg = PACKAGES[pkgKey];
-    const extraArea    = Math.max(0, area - pkg.baseArea);
-    const extraCharge  = Math.round(extraArea * pkg.extraRate);
-    const pkgPrice     = pkg.basePrice + extraCharge;
-    const demolitionCost = demoChecked   ? Math.round(area * 1000) : 0;
-    const designCost     = designChecked ? 25000 : 0;
-
-    // Tile calculation with 5% wastage
-    const baseTileArea        = tileRate > 0 ? (area + wallArea) : 0;
-    const tileAreaWithWastage = parseFloat((baseTileArea * 1.05).toFixed(2));
-    const tileCost            = Math.round(tileAreaWithWastage * tileRate);
-
-    // Bathware cost
-    const bathwareCost = Math.round(bwAmt);
-
-    const total = pkgPrice + demolitionCost + designCost + tileCost + bathwareCost;
-
-    // Client block
-    document.getElementById('rp-client')!.innerHTML = `
-      <div class="rpc-row"><span class="rpc-label">Name</span><span class="rpc-val">${name}</span></div>
-      <div class="rpc-row"><span class="rpc-label">Phone</span><span class="rpc-val">${phone}</span></div>
-      <div class="rpc-row"><span class="rpc-label">Location</span><span class="rpc-val">${location}</span></div>
-      <div class="rpc-row"><span class="rpc-label">Floor Area</span><span class="rpc-val">${area.toFixed(1)} sq.ft</span></div>
-      ${wallArea > 0 ? `<div class="rpc-row"><span class="rpc-label">Wall Area</span><span class="rpc-val">${wallArea.toFixed(1)} sq.ft</span></div>` : ''}
-    `;
-
-    (document.getElementById('r-area') as HTMLElement).textContent    = area.toFixed(1);
-    (document.getElementById('r-pkg') as HTMLElement).textContent     = pkg.name;
-    (document.getElementById('r-total-sm') as HTMLElement).textContent = fmt(total);
-    (document.getElementById('r-total') as HTMLElement).textContent   = fmt(total);
-
-    // Price breakdown rows
-    type BkdRow = { label: string; sub: string; val: string };
-    const bkdRows: BkdRow[] = [
-      { label: 'Base Package Price', sub: `${pkg.name} — up to ${pkg.baseArea} sq.ft`, val: fmt(pkg.basePrice) },
-    ];
-    if (extraArea > 0) {
-      bkdRows.push({ label: 'Additional Area', sub: `${extraArea.toFixed(1)} sq.ft × ${fmt(pkg.extraRate)} / sq.ft`, val: fmt(extraCharge) });
-    }
-    if (demolitionCost > 0) {
-      bkdRows.push({ label: 'Demolition Work', sub: `${area.toFixed(1)} sq.ft × Rs. 1,000`, val: fmt(demolitionCost) });
-    }
-    if (designCost > 0) {
-      bkdRows.push({ label: '3D Bathroom Design', sub: 'Fixed price', val: fmt(designCost) });
-    }
-    const tileSize = tileRate > 0 ? (TILE_SIZES[tileRate.toString()] || '') : '';
-    if (tileCost > 0) {
-      bkdRows.push({
-        label: `Tile Supply — Rocell Tiles${tileSize ? ` (${tileSize})` : ''}`,
-        sub: `Base area: ${baseTileArea.toFixed(1)} sq.ft (floor + wall) + 5% wastage = ${tileAreaWithWastage.toFixed(1)} sq.ft × Rs. ${tileRate.toLocaleString('en-IN')} / sq.ft`,
-        val: fmt(tileCost),
-      });
-    }
-    const bwPkg = bathwareCost > 0 ? (BW_PACKAGES[bwAmt.toString()] || null) : null;
-    if (bathwareCost > 0) {
-      bkdRows.push({
-        label: `Bathware + Taps + Geyser${bwPkg ? ` — ${bwPkg.name}` : ''}`,
-        sub: bwPkg ? bwPkg.items.map(i => `✓ ${i}`).join('<br>') : '✓ Swiss Bathware · Swiss Taps · Ferroli Geyser',
-        val: fmt(bathwareCost),
-      });
-    }
-
-    document.getElementById('rp-breakdown')!.innerHTML = `
-      <div class="bkd-title">Price Breakdown</div>
-      ${bkdRows.map(r => `
-        <div class="bkd-row">
-          <div class="bkd-left">
-            <div class="bkd-label">${r.label}</div>
-            <div class="bkd-sub">${r.sub}</div>
-          </div>
-          <div class="bkd-val">${r.val}</div>
-        </div>`).join('')}
-    `;
-
-    // Services included (add-ons first)
-    const allIncludes = [
-      ...(demoChecked   ? ['Demolition Work']     : []),
-      ...(designChecked ? ['3D Bathroom Design']   : []),
-      ...pkg.includes,
-    ];
-    document.getElementById('r-includes')!.innerHTML =
-      allIncludes.map(s => `<div class="rpi-item">${s}</div>`).join('');
-
-    // Selected add-on brands
-    const brandLines: string[] = [];
-    if (tileCost > 0)    brandLines.push('Rocell Tiles');
-    if (bathwareCost > 0) { brandLines.push('Swiss Bathware'); brandLines.push('Swiss Taps'); brandLines.push('Ferroli Geyser'); }
-
-    const brandsEl = document.getElementById('r-brands') as HTMLElement;
-    if (brandLines.length > 0) {
-      brandsEl.innerHTML = `<div class="rpi-title rpi-title--brands">Selected Add-on Brands</div><div class="rpi-grid">${brandLines.map(b => `<div class="rpi-item rpi-item--brand">${b}</div>`).join('')}</div>`;
-      brandsEl.style.display = 'block';
-    } else {
-      brandsEl.style.display = 'none';
-    }
-
-    // Payment schedule
-    const PAY = [
-      { label: 'Upfront / Deposit',        pct: 10, desc: 'Due before any work commences' },
-      { label: 'On Starting Date',          pct: 60, desc: 'Due on the day work begins on site' },
-      { label: 'After Tiling Completion',   pct: 20, desc: 'Due once all tiling is finished' },
-      { label: 'Final Payment on Handover', pct: 10, desc: 'Due on project completion & handover' },
-    ];
-    document.getElementById('r-payment')!.innerHTML = PAY.map(p => {
-      const amt = Math.round(total * p.pct / 100);
-      return `
-        <div class="rpay-row">
-          <div class="rpay-left">
-            <div class="rpay-label">${p.label}</div>
-            <div class="rpay-desc">${p.desc}</div>
-          </div>
-          <div class="rpay-right">
-            <span class="rpay-pct">${p.pct}%</span>
-            <span class="rpay-amt">${fmt(amt)}</span>
-          </div>
-        </div>`;
-    }).join('');
-
-    (document.getElementById('rp-date') as HTMLElement).textContent =
-      new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-
-    // Store for PDF
-    const pdfBtn = document.getElementById('ra-pdf') as HTMLElement;
-    pdfBtn.dataset.payRows              = PAY.map(p =>
-      `${p.pct}%|${p.label}|${p.desc}|${fmt(Math.round(total * p.pct / 100))}`
-    ).join(';;');
-    pdfBtn.dataset.breakdown            = bkdRows.map(r => `${r.label}|${r.sub}|${r.val}`).join(';;');
-    pdfBtn.dataset.wallArea             = wallArea.toFixed(1);
-    pdfBtn.dataset.tileRate             = tileRate > 0 ? tileRate.toString() : '';
-    pdfBtn.dataset.tileSize             = tileSize;
-    pdfBtn.dataset.baseTileArea         = baseTileArea.toFixed(1);
-    pdfBtn.dataset.tileAreaWithWastage  = tileAreaWithWastage.toFixed(1);
-    pdfBtn.dataset.tileCost             = tileCost > 0 ? fmt(tileCost) : '';
-    pdfBtn.dataset.bathwareCost         = bathwareCost > 0 ? fmt(bathwareCost) : '';
-    pdfBtn.dataset.bwPkgName            = bwPkg ? bwPkg.name : '';
-    pdfBtn.dataset.bwItems              = bwPkg ? bwPkg.items.join(';;') : '';
-    pdfBtn.dataset.brandLines           = brandLines.join(', ');
-
-    // Store for WhatsApp
-    const waEl = document.getElementById('ra-wa') as HTMLElement;
-    waEl.dataset.name      = name;
-    waEl.dataset.phone     = phone;
-    waEl.dataset.location  = location;
-    waEl.dataset.area      = area.toFixed(1);
-    waEl.dataset.wallArea  = wallArea > 0 ? wallArea.toFixed(1) : '';
-    waEl.dataset.pkg       = pkg.name;
-    waEl.dataset.total     = fmt(total);
-    waEl.dataset.includes  = allIncludes.join(', ');
-    waEl.dataset.breakdown = bkdRows.map(r => `• ${r.label}: ${r.val}`).join('\n');
-    waEl.dataset.tileInfo  = tileCost > 0
-      ? `Rocell Tiles — Rs. ${tileRate}/sq.ft — Area: ${tileAreaWithWastage.toFixed(1)} sq.ft (incl. 5% wastage) — Cost: ${fmt(tileCost)}`
-      : '';
-    waEl.dataset.bwInfo    = bathwareCost > 0
-      ? `Swiss Bathware + Swiss Taps + Ferroli Geyser — ${fmt(bathwareCost)}`
-      : '';
-
-    (document.getElementById('bcalc-placeholder') as HTMLElement).style.display = 'none';
-    (document.getElementById('bcalc-result') as HTMLElement).style.display = 'flex';
-
-    if (window.innerWidth < 900) {
-      document.getElementById('bcalc-result')!.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-
-  // PDF — hidden iframe, no popup blocker, no race condition
-  document.getElementById('ra-pdf')!.addEventListener('click', () => {
-    const waBtn  = document.getElementById('ra-wa') as HTMLElement;
-    const pdfBtn = document.getElementById('ra-pdf') as HTMLElement;
-
-    const name     = waBtn.dataset.name     || '';
-    const phone    = waBtn.dataset.phone    || '';
-    const location = waBtn.dataset.location || '';
-    const area     = waBtn.dataset.area     || '';
-    const wallArea = pdfBtn.dataset.wallArea || '';
-    const pkgName  = waBtn.dataset.pkg      || '';
-    const total    = waBtn.dataset.total    || '';
-    const includes = waBtn.dataset.includes || '';
-    const date     = (document.getElementById('rp-date') as HTMLElement).textContent || '';
-
-    const tileRate             = pdfBtn.dataset.tileRate             || '';
-    const tileSize             = pdfBtn.dataset.tileSize             || '';
-    const baseTileArea         = pdfBtn.dataset.baseTileArea         || '';
-    const tileAreaWithWastage  = pdfBtn.dataset.tileAreaWithWastage  || '';
-    const tileCostPdf          = pdfBtn.dataset.tileCost             || '';
-    const bathwareCostPdf      = pdfBtn.dataset.bathwareCost         || '';
-    const bwPkgNamePdf         = pdfBtn.dataset.bwPkgName            || '';
-    const bwItemsPdf           = pdfBtn.dataset.bwItems              || '';
-    const brandLinesPdf        = pdfBtn.dataset.brandLines           || '';
-
-    if (!name) { alert('Generate a quote first before downloading.'); return; }
-
-    const clientSupplyItems: string[] = [];
-    if (!tileCostPdf)    clientSupplyItems.push('Tiles (floor, wall &amp; feature)');
-    if (!bathwareCostPdf) clientSupplyItems.push('Bathware fittings (WC, basin, shower tray/screen) &nbsp;·&nbsp; Tapware &amp; accessories (taps, showerhead, towel rails, mirrors)');
-    const youSupplyHtml = clientSupplyItems.length > 0
-      ? clientSupplyItems.join(' &nbsp;·&nbsp; ') + ((tileCostPdf || bathwareCostPdf)
-          ? '<br/><span style="font-size:7pt;color:#2e7d32;font-style:italic;">Note: Selected add-ons are supplied by TILERSHUB as part of this quote.</span>'
-          : '')
-      : '<span style="color:#2e7d32;font-style:italic;">All materials covered by your selected add-ons — supplied by TILERSHUB.</span>';
-
-    const scopeItems = includes.split(', ').map(s =>
-      `<li><span class="chk">✓</span>${s}</li>`
-    ).join('');
-
-    const breakdownRows = (pdfBtn.dataset.breakdown || '').split(';;').map((row, i) => {
-      const [label, sub, val] = row.split('|');
-      const bg = i % 2 === 0 ? '#faf7f2' : '#ffffff';
-      return `<tr style="background:${bg}">
-        <td class="bd-label">${label}<div class="bd-sub">${sub}</div></td>
-        <td class="bd-val">${val}</td>
-      </tr>`;
-    }).join('');
-
-    const payRows = (pdfBtn.dataset.payRows || '').split(';;').map((row, i) => {
-      const [pct, label, desc, amt] = row.split('|');
-      const bg = i % 2 === 0 ? '#faf7f2' : '#ffffff';
-      return `<tr style="background:${bg}">
-        <td class="pt-num">${i + 1}</td>
-        <td class="pt-label">${label}</td>
-        <td class="pt-desc">${desc}</td>
-        <td class="pt-pct">${pct}</td>
-        <td class="pt-amt">${amt}</td>
-      </tr>`;
-    }).join('');
-
-    const waText = encodeURIComponent(
-      `Hi TILERSHUB, I'd like to discuss my bathroom renovation quote.\n\nClient: ${name} | ${phone} | ${location}\nPackage: ${pkgName} | Area: ${area} sq.ft | Total: LKR ${total}\n\nPlease confirm availability.`
-    );
-    const waUrl = 'https://wa.me/94774503744?text=' + waText;
-
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>TILERSHUB — Renovation Estimate · ${name}</title>
-<style>
-  @page { size: A4 portrait; margin: 1.8cm 2cm 1.5cm; }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; line-height: 1.55; color: #1e1a17; background: #f5f0eb; }
-  .page { background: #fff; max-width: 820px; margin: 0 auto; padding: 2cm 2.2cm; }
-
-  /* ── Toolbar (screen only) ── */
-  .toolbar { display: flex; gap: 10px; align-items: center; justify-content: flex-end;
-             background: #1e1a17; padding: 12px 20px; position: sticky; top: 0; z-index: 99; }
-  .tb-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px;
-             border: none; border-radius: 6px; font-size: 13px; font-weight: 700;
-             cursor: pointer; letter-spacing: .3px; text-decoration: none; }
-  .tb-pdf  { background: #c4784a; color: #fff; }
-  .tb-pdf:hover { background: #b0663c; }
-  .tb-wa   { background: #25d366; color: #fff; }
-  .tb-wa:hover { background: #1eb858; }
-  .tb-hint { color: #888; font-size: 11px; margin-right: auto; }
-  @media print { .toolbar { display: none; } body { background: #fff; } .page { padding: 0; max-width: 100%; } }
-
-  /* ── Document ── */
-  .hdr { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 10pt; border-bottom: 2.5pt solid #c4784a; margin-bottom: 16pt; }
-  .brand-name { font-size: 22pt; font-weight: 900; color: #c4784a; letter-spacing: 3pt; line-height: 1; }
-  .brand-sub { font-size: 7.5pt; color: #999; margin-top: 3pt; }
-  .doc-meta { text-align: right; }
-  .doc-type { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5pt; color: #555; }
-  .doc-date { font-size: 8pt; color: #999; margin-top: 2pt; }
-
-  .sh { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.8pt; color: #c4784a; margin-bottom: 6pt; padding-bottom: 3pt; border-bottom: 0.5pt solid #e8d9c0; }
-
-  .client-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; background: #faf7f2; border: 0.5pt solid #e8d9c0; }
-  .client-table td { padding: 6pt 10pt; font-size: 9.5pt; vertical-align: top; border-right: 0.5pt solid #e8d9c0; }
-  .client-table td:last-child { border-right: none; }
-  .cl { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #999; display: block; margin-bottom: 2pt; }
-  .cv { font-weight: 600; color: #1e1a17; }
-
-  .metrics { display: flex; gap: 8pt; margin-bottom: 14pt; }
-  .metric { flex: 1; border: 0.75pt solid #d4c4b0; border-radius: 3pt; padding: 9pt 10pt; text-align: center; }
-  .m-label { font-size: 6.5pt; text-transform: uppercase; letter-spacing: 1pt; color: #999; margin-bottom: 4pt; }
-  .m-val { font-size: 15pt; font-weight: 900; color: #1e1a17; line-height: 1; }
-  .m-val.clay { color: #c4784a; }
-  .m-unit { font-size: 7.5pt; color: #aaa; margin-top: 2pt; }
-
-  .breakdown-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; font-size: 9.5pt; border: 0.5pt solid #e8d9c0; overflow: hidden; }
-  .breakdown-table thead tr { background: #1e1a17; }
-  .breakdown-table th { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2pt; color: #e8d9c0; padding: 6pt 9pt; text-align: left; }
-  .breakdown-table th.r { text-align: right; }
-  .breakdown-table td { padding: 7pt 9pt; border-bottom: 0.5pt solid #ede5d8; vertical-align: top; }
-  .breakdown-table tr:last-child td { border-bottom: none; }
-  .bd-label { font-weight: 600; color: #1e1a17; }
-  .bd-sub { font-size: 7.5pt; color: #999; margin-top: 1pt; }
-  .bd-val { text-align: right; font-weight: 700; white-space: nowrap; color: #1e1a17; }
-
-  .total-block { background: #fdf0e6; border: 1pt solid #c4784a; border-radius: 3pt; padding: 14pt 18pt; margin-bottom: 14pt; display: flex; align-items: center; justify-content: space-between; }
-  .tb-label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1.5pt; color: #888; margin-bottom: 2pt; }
-  .tb-price { font-size: 28pt; font-weight: 900; color: #c4784a; line-height: 1; }
-  .tb-right { text-align: right; }
-  .tb-pkg-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 1pt; color: #aaa; margin-bottom: 2pt; }
-  .tb-pkg { font-size: 13pt; font-weight: 700; color: #1e1a17; }
-
-  .scope-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0; list-style: none; margin-bottom: 14pt; border: 0.5pt solid #e8d9c0; overflow: hidden; }
-  .scope-list li { display: flex; align-items: center; gap: 7pt; padding: 6pt 10pt; font-size: 9.5pt; border-bottom: 0.5pt solid #f0e8dc; background: #fff; }
-  .scope-list li:nth-child(odd) { background: #faf7f2; }
-  .scope-list li:last-child, .scope-list li:nth-last-child(2):nth-child(odd) { border-bottom: none; }
-  .chk { color: #c4784a; font-weight: 700; font-size: 9pt; flex-shrink: 0; }
-
-  .mat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; margin-bottom: 14pt; }
-  .mat-card { border: 0.5pt solid #e8d9c0; border-radius: 3pt; padding: 9pt 11pt; }
-  .mat-card-head { display: flex; align-items: center; gap: 6pt; margin-bottom: 5pt; }
-  .mat-icon { width: 18pt; height: 18pt; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9pt; flex-shrink: 0; }
-  .mat-icon.th  { background: #fdf0e6; color: #c4784a; }
-  .mat-icon.cl2 { background: #eef6ee; color: #2e7d32; }
-  .mat-title { font-weight: 700; font-size: 9.5pt; color: #1e1a17; }
-  .mat-tag { font-size: 6.5pt; text-transform: uppercase; letter-spacing: 1pt; border-radius: 2pt; padding: 1pt 5pt; margin-left: auto; font-weight: 700; }
-  .mat-tag.th  { background: #fdf0e6; color: #c4784a; }
-  .mat-tag.cl2 { background: #eef6ee; color: #2e7d32; }
-  .mat-desc { font-size: 8pt; color: #666; line-height: 1.55; }
-
-  .pay-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; font-size: 9.5pt; border: 0.5pt solid #e8d9c0; overflow: hidden; }
-  .pay-table thead tr { background: #1e1a17; }
-  .pay-table th { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2pt; color: #e8d9c0; padding: 6pt 9pt; text-align: left; }
-  .pay-table th.r { text-align: right; }
-  .pay-table td { padding: 7.5pt 9pt; border-bottom: 0.5pt solid #ede5d8; vertical-align: middle; }
-  .pay-table tr:last-child td { border-bottom: none; }
-  .pt-num   { width: 6%;  color: #aaa; font-size: 8pt; }
-  .pt-label { width: 28%; font-weight: 700; color: #1e1a17; }
-  .pt-desc  { width: 40%; color: #777; font-size: 8.5pt; }
-  .pt-pct   { width: 10%; color: #c4784a; font-weight: 800; font-size: 11pt; text-align: right; }
-  .pt-amt   { width: 16%; font-weight: 700; text-align: right; white-space: nowrap; color: #1e1a17; }
-
-  .contacts-block { display: flex; gap: 8pt; margin-bottom: 14pt; }
-  .contact-item { flex: 1; border: 0.5pt solid #e8d9c0; border-radius: 3pt; padding: 8pt 10pt; background: #faf7f2; }
-  .c-label { font-size: 6.5pt; text-transform: uppercase; letter-spacing: 1pt; color: #999; margin-bottom: 3pt; }
-  .c-val   { font-weight: 700; font-size: 10pt; color: #1e1a17; }
-
-  .disclaimer { font-size: 7.5pt; color: #999; line-height: 1.65; padding: 9pt 11pt; background: #fafafa; border: 0.5pt solid #e0e0e0; margin-bottom: 12pt; }
-  .disclaimer strong { color: #666; }
-
-  .footer { display: flex; justify-content: space-between; align-items: center; padding-top: 9pt; border-top: 0.5pt solid #ddd; font-size: 7.5pt; color: #bbb; }
-  .footer-brand { font-weight: 700; color: #c4784a; font-size: 9pt; letter-spacing: 1pt; }
-
-  /* ── Mobile ── */
-  @media (max-width: 600px) {
-    body  { font-size: 9pt; background: #fff; }
-    .page { padding: 16px; }
-
-    /* Toolbar: stack buttons full-width */
-    .toolbar { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
-    .tb-hint { width: 100%; margin-right: 0; font-size: 10px; }
-    .tb-btn  { flex: 1; justify-content: center; font-size: 12px; padding: 10px 12px; }
-
-    /* Header: stack brand + meta */
-    .hdr { flex-direction: column; align-items: flex-start; gap: 6pt; }
-    .doc-meta { text-align: left; }
-    .brand-name { font-size: 18pt; }
-
-    /* Client table: stack rows */
-    .client-table, .client-table tbody, .client-table tr, .client-table td { display: block; width: 100%; }
-    .client-table td { border-right: none; border-bottom: 0.5pt solid #e8d9c0; padding: 7pt 10pt; }
-    .client-table tr td:last-child { border-bottom: none; }
-
-    /* Metrics: 1 row of 3, smaller font */
-    .metrics { gap: 6pt; }
-    .m-val { font-size: 12pt; }
-    .m-label { font-size: 6pt; }
-
-    /* Total block: stack */
-    .total-block { flex-direction: column; align-items: flex-start; gap: 6pt; padding: 12pt 14pt; }
-    .tb-price { font-size: 22pt; }
-    .tb-right { text-align: left; }
-
-    /* Scope list: single column */
-    .scope-list { grid-template-columns: 1fr; }
-    .scope-list li:nth-last-child(2):nth-child(odd) { border-bottom: 0.5pt solid #f0e8dc; }
-    .scope-list li:last-child { border-bottom: none; }
-
-    /* Materials: stack cards */
-    .mat-grid { grid-template-columns: 1fr; }
-
-    /* Payment table: hide "When Due" column, compress */
-    .pt-desc { display: none; }
-    .pt-num  { width: 8%; }
-    .pt-label{ width: 46%; }
-    .pt-pct  { width: 18%; font-size: 10pt; }
-    .pt-amt  { width: 28%; }
-    .pay-table td, .pay-table th { padding: 6pt 7pt; font-size: 8.5pt; }
-
-    /* Contacts: stack */
-    .contacts-block { flex-direction: column; gap: 6pt; }
-
-    /* Footer: stack */
-    .footer { flex-direction: column; align-items: flex-start; gap: 4pt; }
-
-    /* Breakdown table */
-    .breakdown-table td, .breakdown-table th { padding: 6pt 8pt; font-size: 8.5pt; }
-  }
-</style>
-</head>
-<body>
-
-  <div class="toolbar">
-    <span class="tb-hint">Use "Save as PDF" in the print dialog to download</span>
-    <a class="tb-btn tb-wa" href="${waUrl}" target="_blank">&#128172; Share via WhatsApp</a>
-    <button class="tb-btn tb-pdf" onclick="window.print()">&#8964; Save as PDF</button>
-  </div>
-
-  <div class="page">
-
-  <div class="hdr">
-    <div>
-      <div class="brand-name">TILERSHUB</div>
-      <div class="brand-sub">Premium Tiling &amp; Renovation · Sri Lanka</div>
-    </div>
-    <div class="doc-meta">
-      <div class="doc-type">Renovation Estimate</div>
-      <div class="doc-date">${date}</div>
-    </div>
-  </div>
-
-  <div class="sh">Client Information</div>
-  <table class="client-table">
-    <tr>
-      <td><span class="cl">Name</span><span class="cv">${name}</span></td>
-      <td><span class="cl">Phone</span><span class="cv">${phone}</span></td>
-      <td><span class="cl">Location</span><span class="cv">${location}</span></td>
-    </tr>
-  </table>
-
-  <div class="sh">Project Summary</div>
-  <div class="metrics">
-    <div class="metric">
-      <div class="m-label">Floor Area</div>
-      <div class="m-val">${area}</div>
-      <div class="m-unit">sq.ft</div>
-    </div>
-    ${wallArea && parseFloat(wallArea) > 0 ? `<div class="metric">
-      <div class="m-label">Wall Area</div>
-      <div class="m-val">${wallArea}</div>
-      <div class="m-unit">sq.ft</div>
-    </div>` : ''}
-    <div class="metric">
-      <div class="m-label">Package</div>
-      <div class="m-val clay">${pkgName}</div>
-      <div class="m-unit">&nbsp;</div>
-    </div>
-    <div class="metric">
-      <div class="m-label">Grand Total</div>
-      <div class="m-val clay" style="font-size:11pt">${total}</div>
-      <div class="m-unit">LKR</div>
-    </div>
-  </div>
-
-  <div class="sh">Price Breakdown</div>
-  <table class="breakdown-table">
-    <thead><tr><th>Item</th><th class="r">Amount (LKR)</th></tr></thead>
-    <tbody>${breakdownRows}</tbody>
-  </table>
-
-  <div class="total-block">
-    <div class="tb-left">
-      <div class="tb-label">Grand Total (All Inclusive)</div>
-      <div class="tb-price">${total} LKR</div>
-    </div>
-    <div class="tb-right">
-      <div class="tb-pkg-label">Package</div>
-      <div class="tb-pkg">${pkgName}</div>
-    </div>
-  </div>
-
-  ${tileCostPdf || bathwareCostPdf ? `
-  <div class="sh">Add-on Supply Details</div>
-  <div style="display:grid;grid-template-columns:${tileCostPdf && bathwareCostPdf ? '1fr 1fr' : '1fr'};gap:8pt;margin-bottom:14pt;">
-    ${tileCostPdf ? `
-    <div style="border:0.5pt solid #e8d9c0;border-radius:3pt;padding:9pt 11pt;background:#faf7f2;">
-      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#c4784a;margin-bottom:5pt;">Tile Supply</div>
-      <div style="font-size:9pt;font-weight:700;color:#1e1a17;margin-bottom:4pt;">Rocell Tiles${tileSize ? ` &mdash; ${tileSize}` : ''}</div>
-      <div style="font-size:8pt;color:#666;line-height:1.7;">
-        Floor + Wall Area: <strong>${baseTileArea} sq.ft</strong><br/>
-        With 5% Wastage: <strong>${tileAreaWithWastage} sq.ft</strong><br/>
-        Rate: <strong>Rs. ${tileRate} / sq.ft</strong><br/>
-        Tile Supply Cost: <strong style="color:#c4784a;">${tileCostPdf}</strong>
-      </div>
-    </div>` : ''}
-    ${bathwareCostPdf ? `
-    <div style="border:0.5pt solid #e8d9c0;border-radius:3pt;padding:9pt 11pt;background:#faf7f2;">
-      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#c4784a;margin-bottom:5pt;">Bathware + Taps + Geyser${bwPkgNamePdf ? ` — ${bwPkgNamePdf}` : ''}</div>
-      <div style="font-size:8pt;color:#666;line-height:1.8;">
-        ${bwItemsPdf ? bwItemsPdf.split(';;').map(item => `<span style="display:block;">&#10003; ${item}</span>`).join('') : 'Swiss Bathware &middot; Swiss Taps &middot; Ferroli Geyser'}
-      </div>
-      <div style="font-size:8pt;color:#666;margin-top:4pt;">Package Cost: <strong style="color:#c4784a;">${bathwareCostPdf}</strong></div>
-    </div>` : ''}
-  </div>
-  ` : ''}
-
-  ${brandLinesPdf ? `
-  <div style="background:#fdf0e6;border:0.5pt solid #c4784a;border-radius:3pt;padding:8pt 11pt;margin-bottom:14pt;font-size:8.5pt;">
-    <span style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1pt;color:#c4784a;">Selected Add-on Brands:</span>
-    &nbsp; ${brandLinesPdf.split(', ').map(b => `<span style="font-weight:600;color:#1e1a17;">${b}</span>`).join(' &nbsp;·&nbsp; ')}
-  </div>
-  ` : ''}
-
-  <div class="sh">Scope of Work — ${pkgName} Package</div>
-  <ul class="scope-list">${scopeItems}</ul>
-
-  <div class="sh">Materials</div>
-  <div class="mat-grid">
-    <div class="mat-card">
-      <div class="mat-card-head">
-        <div class="mat-icon th">&#9679;</div>
-        <span class="mat-title">We Supply</span>
-        <span class="mat-tag th">TILERSHUB</span>
-      </div>
-      <div class="mat-desc">
-        Tile adhesive &amp; grout &nbsp;·&nbsp; Waterproofing membrane &nbsp;·&nbsp;
-        Wall &amp; floor preparation compounds &nbsp;·&nbsp; Silicone sealant &nbsp;·&nbsp;
-        All installation tools &amp; equipment &nbsp;·&nbsp; Skilled labour &amp; supervision
-      </div>
-    </div>
-    <div class="mat-card">
-      <div class="mat-card-head">
-        <div class="mat-icon cl2">&#9679;</div>
-        <span class="mat-title">You Supply</span>
-        <span class="mat-tag cl2">CLIENT</span>
-      </div>
-      <div class="mat-desc">
-        ${youSupplyHtml}
-      </div>
-    </div>
-  </div>
-
-  <div class="sh">Payment Schedule</div>
-  <table class="pay-table">
-    <thead>
-      <tr><th>#</th><th>Milestone</th><th>When Due</th><th class="r">%</th><th class="r">Amount (LKR)</th></tr>
-    </thead>
-    <tbody>${payRows}</tbody>
-  </table>
-
-  <div class="sh">Contact Us</div>
-  <div class="contacts-block">
-    <div class="contact-item">
-      <div class="c-label">Phone / WhatsApp</div>
-      <div class="c-val">+94 774 503 744</div>
-    </div>
-    <div class="contact-item">
-      <div class="c-label">Website</div>
-      <div class="c-val">tilershub.lk</div>
-    </div>
-    <div class="contact-item">
-      <div class="c-label">Service Area</div>
-      <div class="c-val">Sri Lanka</div>
-    </div>
-  </div>
-
-  <div class="disclaimer">
-    <strong>Note:</strong> This is an estimated renovation cost based on the information provided.
-    The final quotation will be confirmed following a site inspection and may vary based on site conditions,
-    scope changes, or material specifications. Prices are subject to change without notice.
-  </div>
-
-  <div class="footer">
-    <span><span class="footer-brand">TILERSHUB</span> &nbsp;·&nbsp; tilershub.lk &nbsp;·&nbsp; +94 774 503 744</span>
-    <span>Generated ${date}</span>
-  </div>
-
-  </div><!-- /page -->
-</body>
-</html>`;
-
-    const pw = window.open('', '_blank', 'width=900,height=700,scrollbars=yes,menubar=yes,toolbar=yes');
-    if (!pw) { alert('Please allow pop-ups for this site to download the PDF.'); return; }
-    pw.document.open();
-    pw.document.write(html);
-    pw.document.close();
-    pw.onload = () => { pw.focus(); pw.print(); };
-  });
-
-  // WhatsApp
-  document.getElementById('ra-wa')!.addEventListener('click', (e) => {
-    const btn       = e.currentTarget as HTMLElement;
-    const name      = btn.dataset.name      || '';
-    const phone     = btn.dataset.phone     || '';
-    const location  = btn.dataset.location  || '';
-    const area      = btn.dataset.area      || '';
-    const wallArea  = btn.dataset.wallArea  || '';
-    const pkg       = btn.dataset.pkg       || '';
-    const total     = btn.dataset.total     || '';
-    const includes  = btn.dataset.includes  || '';
-    const breakdown = btn.dataset.breakdown || '';
-    const tileInfo  = btn.dataset.tileInfo  || '';
-    const bwInfo    = btn.dataset.bwInfo    || '';
-
-    const lines = [
-      `*TILERSHUB — Bathroom Renovation Estimate*`,
-      ``,
-      `*Client:* ${name}`,
-      `*Phone:* ${phone}`,
-      `*Location:* ${location}`,
-      ``,
-      `*Floor Area:* ${area} sq.ft`,
-    ];
-    if (wallArea) lines.push(`*Wall Area:* ${wallArea} sq.ft`);
-    lines.push(`*Package:* ${pkg}`);
+    // Gather values
+    const pkgKey   = (document.querySelector('.pkg-radio:checked') as HTMLInputElement | null)?.value ?? '';
+    const area     = parseFloat((document.getElementById('bc-area') as HTMLInputElement)?.value) || 0;
+    const wallArea = parseFloat((document.getElementById('bc-wall-area') as HTMLInputElement)?.value) || 0;
+    const demoOn   = (document.getElementById('addon-demo') as HTMLInputElement)?.checked;
+    const designOn = (document.getElementById('addon-design') as HTMLInputElement)?.checked;
+    const tileRate = parseInt((document.querySelector('input[name="bc-tile"]:checked') as HTMLInputElement | null)?.value ?? '0') || 0;
+    const bwAmt    = parseFloat((document.querySelector('input[name="bc-bw"]:checked') as HTMLInputElement | null)?.value ?? '0') || 0;
+    const total    = parseFloat(this.dataset.total ?? '0') || 0;
+
+    const pkg = pkgKey ? PACKAGES[pkgKey] : null;
+
+    const lines: string[] = [];
+    lines.push(`*TILERSHUB — Bathroom Renovation Booking*`);
+    lines.push(`━━━━━━━━━━━━━━━━━━━━━━`);
+    lines.push(`*Client:* ${name}`);
+    lines.push(`*Phone:* ${phone}`);
+    lines.push(`*Location:* ${location}`);
     lines.push(``);
-    lines.push(`*Price Breakdown:*`);
-    lines.push(breakdown);
+    lines.push(`*Project Details:*`);
+    if (area > 0)     lines.push(`• Floor Area: ${area} sq.ft`);
+    if (wallArea > 0) lines.push(`• Wall Area: ${wallArea} sq.ft`);
+    if (pkg)          lines.push(`• Package: ${pkg.name}`);
     lines.push(``);
-    if (tileInfo) { lines.push(`*Tile Supply (Rocell):* ${tileInfo}`); lines.push(``); }
-    if (bwInfo)   { lines.push(`*Bathware Package:* ${bwInfo}`);       lines.push(``); }
-    lines.push(`*Grand Total:* ${total}`);
-    lines.push(``);
-    lines.push(`*Services Included:* ${includes}`);
-    if (tileInfo || bwInfo) {
-      lines.push(``);
-      lines.push(`*Selected Add-on Brands:*`);
-      if (tileInfo) lines.push(`• Rocell Tiles`);
-      if (bwInfo)   { lines.push(`• Swiss Bathware`); lines.push(`• Swiss Taps`); lines.push(`• Ferroli Geyser`); }
+    lines.push(`*Order Summary:*`);
+
+    if (pkg && area > 0) {
+      const extraArea   = Math.max(0, area - pkg.baseArea);
+      const extraCharge = Math.round(extraArea * pkg.extraRate);
+      lines.push(`• ${pkg.name} Package — ${fmt(pkg.basePrice)}`);
+      if (extraCharge > 0) lines.push(`• Area Surcharge (${extraArea} sq.ft over ${pkg.baseArea}) — ${fmt(extraCharge)}`);
     }
+
+    if (demoOn && area > 0) lines.push(`• Demolition Works — ${fmt(area * 1000)}`);
+    if (designOn)           lines.push(`• 3D Bathroom Design — Rs. 25,000`);
+
+    if (tileRate > 0 && (area + wallArea) > 0) {
+      const areaWithWaste = parseFloat(((area + wallArea) * 1.05).toFixed(2));
+      lines.push(`• Rocell Tile Supply (${TILE_SIZES[String(tileRate)] ?? ''}) — ${fmt(areaWithWaste * tileRate)}`);
+      lines.push(`  ${areaWithWaste} sq.ft (5% wastage) × ${fmt(tileRate)}/sq.ft`);
+    }
+
+    if (bwAmt > 0) {
+      const bw = BW_PACKAGES[String(bwAmt)];
+      lines.push(`• Swiss Bathware ${bw.name} — ${fmt(bwAmt)}`);
+    }
+
+    lines.push(``);
+    lines.push(`*Total Estimated Cost: ${fmt(total)}*`);
     lines.push(``);
     lines.push(`*Payment Schedule:*`);
-    lines.push(`• 10% Upfront / Deposit`);
-    lines.push(`• 60% On Starting Date`);
-    lines.push(`• 20% After Tiling Completion`);
-    lines.push(`• 10% Final Payment on Handover`);
+    PAY.forEach(p => {
+      lines.push(`• ${p.pct}% ${p.label} — ${fmt(Math.round(total * p.pct / 100))}`);
+    });
     lines.push(``);
-    lines.push(`_This is an estimated cost. Final quotation after site inspection._`);
+    lines.push(`_This is an estimated cost. Final price will be confirmed after site inspection._`);
     lines.push(``);
-    lines.push(`tilershub.lk | +94 774 503 744`);
+    lines.push(`TILERSHUB · tilershub.lk · +94 774 503 744`);
 
     const msg = lines.join('\n');
-    window.open(`https://wa.me/94774503744?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+    window.open(`https://wa.me/94774503744?text=${encodeURIComponent(msg)}`, '_blank');
   });
 </script>
 
@@ -1084,35 +686,71 @@
   }
 
   .bcalc-inner {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
+  }
+
+  .stag {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: .75rem;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 700;
+    color: var(--charcoal);
+    line-height: 1.2;
+    margin-bottom: .75rem;
+  }
+
+  .sdesc {
+    font-size: .95rem;
+    color: var(--warm-gray);
+    line-height: 1.7;
+    max-width: 54ch;
+    margin-bottom: 2.5rem;
   }
 
   /* ── Two-column layout ── */
   .bcalc-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 380px;
     gap: 2.5rem;
     align-items: start;
-    margin-top: 2.5rem;
   }
 
   /* ── Input cards ── */
+  .bcalc-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
   .bc-card {
     background: #fff;
     border: 1px solid var(--stone);
-    border-radius: 6px;
-    padding: 1.6rem 1.8rem;
-    margin-bottom: 1.2rem;
+    border-radius: 3px;
+    padding: 1.6rem;
+    transition: border-color .25s, box-shadow .25s;
+  }
+
+  .bc-card--highlight {
+    border-color: var(--clay) !important;
+    box-shadow: 0 0 0 3px rgba(196, 120, 74, .15) !important;
   }
 
   .bc-card-title {
-    font-size: .78rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-size: .72rem;
+    font-weight: 600;
     letter-spacing: .12em;
+    text-transform: uppercase;
     color: var(--clay);
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.1rem;
   }
 
   .bc-row {
@@ -1125,142 +763,139 @@
     display: flex;
     flex-direction: column;
     gap: .4rem;
-    margin-bottom: .8rem;
   }
 
-  .bc-field:last-child { margin-bottom: 0; }
-
   .bc-label {
-    font-size: .76rem;
-    font-weight: 600;
+    font-size: .75rem;
+    font-weight: 500;
     color: var(--charcoal);
+    letter-spacing: .04em;
   }
 
   .bc-input {
-    border: 1.5px solid var(--stone);
-    border-radius: 4px;
+    border: 1px solid var(--stone);
+    border-radius: 2px;
     padding: .65rem .85rem;
     font-size: .88rem;
-    font-family: inherit;
+    font-family: 'DM Sans', sans-serif;
     color: var(--charcoal);
-    background: var(--off-white);
-    transition: border-color .2s;
-    -webkit-appearance: none;
+    background: var(--cream);
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .bc-input:focus {
     outline: none;
     border-color: var(--clay);
-    background: #fff;
+    box-shadow: 0 0 0 3px rgba(196, 120, 74, .12);
   }
 
-  /* ── Area input ── */
   .bc-area-input-wrap {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: .5rem;
   }
 
-  .bc-area-input-wrap .bc-input { flex: 1; }
+  .bc-area-input-wrap .bc-input {
+    padding-right: 3rem;
+  }
 
   .bc-area-unit {
-    font-size: .82rem;
-    font-weight: 600;
+    position: absolute;
+    right: .75rem;
+    font-size: .72rem;
     color: var(--warm-gray);
-    white-space: nowrap;
+    pointer-events: none;
   }
 
-  /* ── Package grid ── */
+  /* ── Package cards ── */
   .pkg-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: .75rem;
+    gap: .85rem;
   }
 
   .pkg-card {
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1.5px solid var(--stone);
+    border-radius: 3px;
+    padding: 1rem;
     cursor: pointer;
-    border: 2px solid var(--stone);
-    border-radius: 6px;
-    padding: 1.1rem .9rem 1rem;
-    background: var(--off-white);
-    transition: border-color .2s, background .2s;
-    display: block;
+    position: relative;
+    transition: border-color .2s, box-shadow .2s;
+    background: var(--cream);
   }
 
-  .pkg-card:hover {
-    border-color: rgba(196,120,74,.5);
-    background: #fff;
-  }
+  .pkg-card:hover { border-color: var(--clay); }
 
   .pkg-card--active {
-    border-color: var(--clay) !important;
-    background: rgba(196,120,74,.05) !important;
-    box-shadow: 0 0 0 3px rgba(196,120,74,.12);
+    border-color: var(--clay);
+    background: rgba(196, 120, 74, .04);
+    box-shadow: 0 0 0 3px rgba(196, 120, 74, .12);
   }
 
-  .pkg-radio {
-    position: absolute;
-    top: .8rem;
-    right: .8rem;
-    accent-color: var(--clay);
-    width: 1rem;
-    height: 1rem;
-  }
+  .pkg-radio { display: none; }
 
   .pkg-popular {
     position: absolute;
-    top: -.6rem;
+    top: -1px;
     left: 50%;
     transform: translateX(-50%);
     background: var(--clay);
-    color: var(--cream);
+    color: #fff;
     font-size: .62rem;
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
-    padding: .15rem .55rem;
-    border-radius: 20px;
+    padding: .18rem .55rem;
+    border-radius: 0 0 3px 3px;
     white-space: nowrap;
   }
 
-  .pkg-header {
-    margin-bottom: .7rem;
-    padding-right: 1.4rem;
-  }
+  .pkg-header { margin-bottom: .65rem; }
 
   .pkg-name {
-    display: block;
-    font-size: .82rem;
+    font-size: .72rem;
     font-weight: 700;
-    color: var(--charcoal);
-    margin-bottom: .25rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--warm-gray);
   }
+
+  .pkg-card--active .pkg-name { color: var(--clay); }
 
   .pkg-base-price {
     font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 900;
-    color: var(--clay);
-    line-height: 1.1;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    line-height: 1.2;
+    margin-top: .2rem;
   }
 
+  .pkg-card--active .pkg-base-price { color: var(--clay); }
+
   .pkg-base-note {
-    font-size: .65rem;
+    font-size: .68rem;
     color: var(--warm-gray);
-    margin-top: .1rem;
+    margin-top: .15rem;
   }
 
   .pkg-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 .65rem;
+    margin: 0 0 .7rem;
+    display: flex;
+    flex-direction: column;
+    gap: .28rem;
+    flex: 1;
   }
 
   .pkg-list li {
     font-size: .72rem;
     color: var(--warm-gray);
-    line-height: 1.6;
     padding-left: .9rem;
     position: relative;
   }
@@ -1274,93 +909,49 @@
   }
 
   .pkg-extra {
-    font-size: .67rem;
-    color: rgba(107,95,84,.65);
+    font-size: .65rem;
+    color: var(--warm-gray);
     border-top: 1px solid var(--stone);
     padding-top: .55rem;
-    margin-top: .3rem;
-    font-style: italic;
+    margin-top: auto;
   }
 
-  /* ── Add-on helper text ── */
+  /* ── Add-on rows ── */
   .bc-addon-helper {
-    font-size: .73rem;
+    font-size: .78rem;
     color: var(--warm-gray);
-    margin: -.4rem 0 .9rem;
+    margin-bottom: .9rem;
     line-height: 1.5;
   }
 
-  /* ── Tile size chip ── */
-  .addon-size {
-    display: block;
-    font-size: .68rem;
-    color: var(--warm-gray);
-    margin-top: .1rem;
-  }
-
-  /* ── Bathware package expanded row ── */
-  .addon-row--pkg {
-    align-items: flex-start;
-  }
-
-  .addon-check--top {
-    margin-top: .18rem;
-  }
-
-  .addon-pkg-content {
-    flex: 1;
-  }
-
-  .addon-pkg-list {
-    list-style: none;
-    padding: 0;
-    margin: .35rem 0 0;
-  }
-
-  .addon-pkg-list li {
-    font-size: .70rem;
-    color: var(--warm-gray);
-    line-height: 1.65;
-    padding-left: .9rem;
-    position: relative;
-  }
-
-  .addon-pkg-list li::before {
-    content: '✓';
-    position: absolute;
-    left: 0;
-    color: var(--clay);
-    font-size: .62rem;
-  }
-
-  /* ── Add-ons ── */
   .addon-row {
     display: flex;
-    align-items: center;
-    gap: .9rem;
-    padding: .85rem 1rem;
-    border: 1.5px solid var(--stone);
-    border-radius: 5px;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .7rem .85rem;
+    border: 1px solid var(--stone);
+    border-radius: 2px;
     cursor: pointer;
-    margin-bottom: .6rem;
-    background: var(--off-white);
+    margin-bottom: .5rem;
     transition: border-color .2s, background .2s;
+    background: var(--cream);
   }
 
   .addon-row:last-child { margin-bottom: 0; }
 
-  .addon-row:hover {
-    border-color: rgba(196,120,74,.4);
-    background: #fff;
-  }
+  .addon-row:hover { border-color: var(--clay); background: rgba(196, 120, 74, .03); }
+
+  .addon-row--pkg { align-items: flex-start; }
 
   .addon-check {
+    margin-top: .15rem;
     accent-color: var(--clay);
-    width: 1.1rem;
-    height: 1.1rem;
     flex-shrink: 0;
-    cursor: pointer;
+    width: 15px;
+    height: 15px;
   }
+
+  .addon-check--top { margin-top: .3rem; }
 
   .addon-info {
     display: flex;
@@ -1370,374 +961,374 @@
     gap: .5rem;
   }
 
+  .addon-pkg-content { flex: 1; }
+
   .addon-name {
-    font-size: .84rem;
-    font-weight: 600;
+    font-size: .85rem;
+    font-weight: 500;
     color: var(--charcoal);
   }
 
+  .addon-size {
+    font-size: .72rem;
+    color: var(--warm-gray);
+    margin-left: .4rem;
+  }
+
   .addon-price {
-    font-size: .75rem;
+    font-size: .78rem;
     font-weight: 600;
     color: var(--clay);
     white-space: nowrap;
   }
 
-  /* ── Generate button ── */
-  .bc-generate-btn {
-    width: 100%;
-    background: var(--clay);
-    color: var(--cream);
-    border: none;
-    border-radius: 4px;
-    padding: 1rem;
-    font-size: .9rem;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background .2s, transform .15s;
-    letter-spacing: .03em;
-  }
-
-  .bc-generate-btn:hover { background: var(--terracotta); transform: translateY(-1px); }
-  .bc-generate-btn:active { transform: translateY(0); }
-
-  /* ── Error ── */
-  .bc-error {
-    display: none;
+  .addon-pkg-list {
+    list-style: none;
+    padding: 0;
+    margin: .5rem 0 0;
+    display: flex;
     flex-direction: column;
-    gap: .3rem;
-    margin-top: .8rem;
-    padding: .9rem 1rem;
-    background: rgba(196,50,50,.06);
-    border: 1px solid rgba(196,50,50,.2);
-    border-radius: 4px;
+    gap: .2rem;
   }
 
-  .bc-error span { font-size: .78rem; color: #a83232; }
+  .addon-pkg-list li {
+    font-size: .72rem;
+    color: var(--warm-gray);
+    padding-left: .85rem;
+    position: relative;
+    line-height: 1.45;
+  }
 
-  /* ── Result column ── */
-  .bcalc-result-col {
+  .addon-pkg-list li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--clay);
+    font-weight: 700;
+  }
+
+  /* ── Cart column ── */
+  .bcalc-cart-col {
     position: sticky;
-    top: 7rem;
+    top: 100px;
   }
 
-  /* ── Placeholder ── */
-  .bcalc-placeholder {
+  .cart-panel {
+    background: #fff;
+    border: 1px solid var(--stone);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(30, 26, 23, .07);
+  }
+
+  /* Cart header */
+  .cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 1.4rem;
+    background: var(--charcoal);
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+
+  .cart-header-left {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+
+  .cart-icon { color: rgba(245, 240, 232, .7); }
+
+  .cart-title {
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--cream);
+  }
+
+  .cart-badge {
+    background: var(--clay);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: .15rem .55rem;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  /* Empty state */
+  .cart-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
     gap: 1rem;
-    min-height: 380px;
-    background: #fff;
-    border: 2px dashed var(--stone);
-    border-radius: 6px;
     padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .ce-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--off-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--warm-gray);
   }
 
-  .bcp-icon { font-size: 2.5rem; opacity: .5; }
-
-  .bcp-text {
-    font-size: .86rem;
-    line-height: 1.7;
+  .ce-msg {
+    font-size: .82rem;
     color: var(--warm-gray);
+    line-height: 1.6;
   }
 
-  /* ── Result card ── */
-  .bcalc-result {
-    display: none;
-    flex-direction: column;
-    background: var(--charcoal);
-    border-radius: 6px;
-    overflow: hidden;
+  /* Cart items */
+  .cart-items {
+    padding: .5rem 0;
   }
 
-  .result-printable { padding: 2rem; }
-
-  /* Header */
-  .rp-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding-bottom: 1.2rem;
-    border-bottom: 1px solid rgba(255,255,255,.1);
-    margin-bottom: 1.4rem;
-  }
-
-  .rph-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: var(--clay);
-    letter-spacing: .08em;
-  }
-
-  .rph-tagline { font-size: .65rem; color: rgba(245,240,232,.45); margin-top: .2rem; }
-
-  .rph-title {
-    font-size: .72rem;
-    text-transform: uppercase;
-    letter-spacing: .14em;
-    color: rgba(245,240,232,.5);
-    align-self: center;
-  }
-
-  /* Client */
-  .rp-client {
-    background: rgba(255,255,255,.04);
-    border-radius: 4px;
-    padding: .9rem 1.1rem;
-    margin-bottom: 1.3rem;
-  }
-
-  .rpc-row { display: flex; gap: .6rem; font-size: .78rem; line-height: 1.75; }
-  .rpc-label { color: rgba(245,240,232,.45); min-width: 5rem; font-size: .72rem; }
-  .rpc-val { color: var(--cream); }
-
-  /* Metrics */
-  .rp-metrics {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: .5rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .rp-metric {
-    display: flex;
-    flex-direction: column;
-    gap: .2rem;
-    background: rgba(255,255,255,.04);
-    border-radius: 4px;
-    padding: .9rem 1rem;
-  }
-
-  .rp-metric--mid { align-items: center; text-align: center; }
-
-  .rpm-label {
-    font-size: .67rem;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: rgba(245,240,232,.45);
-  }
-
-  .rpm-value {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    font-weight: 900;
-    color: var(--cream);
-    line-height: 1.1;
-  }
-
-  .rpm-pkg { color: var(--clay); font-size: 1.1rem; }
-  .rpm-total { color: var(--clay); font-size: 1rem; }
-  .rpm-unit { font-size: .68rem; color: rgba(245,240,232,.45); }
-
-  /* Breakdown */
-  .rp-breakdown {
-    background: rgba(255,255,255,.04);
-    border-radius: 4px;
-    padding: .9rem 1.1rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .bkd-title {
-    font-size: .68rem;
-    text-transform: uppercase;
-    letter-spacing: .11em;
-    color: rgba(245,240,232,.4);
-    margin-bottom: .7rem;
-  }
-
-  .bkd-row {
+  .cart-item {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
-    padding: .45rem 0;
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    padding: .9rem 1.4rem;
   }
 
-  .bkd-row:last-child { border-bottom: none; }
-
-  .bkd-label {
-    font-size: .8rem;
-    font-weight: 600;
-    color: var(--cream);
+  .cart-item--border {
+    border-bottom: 1px solid var(--stone);
   }
 
-  .bkd-sub {
-    font-size: .68rem;
-    color: rgba(245,240,232,.4);
-    margin-top: .1rem;
-  }
+  .ci-info { flex: 1; min-width: 0; }
 
-  .bkd-val {
+  .ci-name {
     font-size: .82rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    line-height: 1.3;
+    margin-bottom: .2rem;
+  }
+
+  .ci-desc {
+    font-size: .72rem;
+    color: var(--warm-gray);
+    line-height: 1.5;
+  }
+
+  .ci-pending {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .68rem;
+    color: #b4852d;
+    margin-top: .3rem;
+    font-style: italic;
+  }
+
+  .ci-price {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
     font-weight: 700;
-    color: var(--clay);
+    color: var(--charcoal);
     white-space: nowrap;
     flex-shrink: 0;
   }
 
-  /* Total block */
-  .rp-total-block {
-    background: rgba(196,120,74,.12);
-    border: 1px solid rgba(196,120,74,.3);
-    border-radius: 4px;
-    padding: 1.3rem 1.5rem;
-    margin-bottom: 1.4rem;
-    text-align: center;
+  .ci-price--pending {
+    color: var(--warm-gray);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: .85rem;
   }
 
-  .rptb-label {
-    font-size: .72rem;
-    text-transform: uppercase;
-    letter-spacing: .13em;
-    color: rgba(245,240,232,.55);
-    margin-bottom: .4rem;
-  }
-
-  .rptb-price {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.2rem;
-    font-weight: 900;
-    color: var(--clay);
-    line-height: 1;
-  }
-
-  /* Includes */
-  .rp-includes { margin-bottom: 1.3rem; }
-
-  .rpi-title {
-    font-size: .7rem;
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    color: rgba(245,240,232,.45);
-    margin-bottom: .6rem;
-  }
-
-  .rpi-title--brands {
-    margin-top: .8rem;
-  }
-
-  .rpi-grid { display: flex; flex-wrap: wrap; gap: .35rem; }
-
-  .rpi-item {
-    font-size: .72rem;
-    color: rgba(245,240,232,.75);
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.1);
-    padding: .22rem .65rem;
-    border-radius: 20px;
-  }
-
-  .rpi-item--brand {
-    color: var(--clay);
-    background: rgba(196,120,74,.1);
-    border-color: rgba(196,120,74,.25);
-    font-weight: 600;
-  }
-
-  /* Payment */
-  .rp-payment { margin-bottom: 1.3rem; }
-
-  .rp-pay-grid { display: flex; flex-direction: column; gap: 0; }
-
-  .rpay-row {
+  /* Cart footer */
+  .cart-footer {
+    border-top: 2px solid var(--stone);
+    padding: 1.2rem 1.4rem 1.4rem;
     display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .cart-subtotal-row {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: space-between;
-    gap: .8rem;
-    padding: .65rem 0;
-    border-bottom: 1px solid rgba(255,255,255,.06);
   }
 
-  .rpay-row:last-child { border-bottom: none; }
-  .rpay-left { flex: 1; }
-  .rpay-label { font-size: .78rem; font-weight: 600; color: var(--cream); margin-bottom: .1rem; }
-  .rpay-desc  { font-size: .68rem; color: rgba(245,240,232,.45); }
-  .rpay-right { display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; flex-shrink: 0; }
-  .rpay-pct   { font-size: .72rem; font-weight: 700; color: var(--clay); }
-  .rpay-amt   { font-size: .82rem; font-weight: 700; color: var(--cream); white-space: nowrap; }
-
-  /* Disclaimer */
-  .rp-disclaimer {
+  .csr-label {
     font-size: .72rem;
-    color: rgba(245,240,232,.45);
-    line-height: 1.6;
-    padding: .9rem 1rem;
-    border-top: 1px solid rgba(255,255,255,.08);
-    margin-top: .5rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--warm-gray);
   }
 
-  /* Footer (print only) */
-  .rp-footer {
-    display: none;
-    font-size: .68rem;
-    color: rgba(245,240,232,.35);
-    margin-top: .7rem;
-    padding-top: .7rem;
-    border-top: 1px solid rgba(255,255,255,.08);
-    justify-content: space-between;
+  .csr-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--clay);
   }
 
-  /* Action buttons */
-  .result-actions {
+  /* Payment schedule */
+  .cart-payment-section {
+    border: 1px solid var(--stone);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .cps-header {
     display: flex;
-    gap: .8rem;
-    padding: 1.2rem 2rem;
-    border-top: 1px solid rgba(255,255,255,.08);
-    background: rgba(255,255,255,.02);
+    justify-content: space-between;
+    align-items: center;
+    padding: .75rem 1rem;
+    cursor: pointer;
+    background: var(--off-white);
+    user-select: none;
+    transition: background .2s;
   }
 
-  .ra-btn {
+  .cps-header:hover { background: var(--stone); }
+
+  .cps-title {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--charcoal);
+  }
+
+  .cps-chevron {
+    color: var(--warm-gray);
+    transition: transform .25s ease;
+    flex-shrink: 0;
+  }
+
+  .cps-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease;
+  }
+
+  .cps-body--open {
+    max-height: 400px;
+  }
+
+  .cps-rows {
+    padding: .6rem .9rem .8rem;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+  }
+
+  .cpr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: .75rem;
+  }
+
+  .cpr-left {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
     flex: 1;
+    min-width: 0;
+  }
+
+  .cpr-pct {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--clay);
+    background: rgba(196, 120, 74, .1);
+    border-radius: 2px;
+    padding: .1rem .35rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: .05rem;
+  }
+
+  .cpr-labels { display: flex; flex-direction: column; gap: .1rem; }
+
+  .cpr-label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    line-height: 1.3;
+  }
+
+  .cpr-desc {
+    font-size: .68rem;
+    color: var(--warm-gray);
+    line-height: 1.4;
+  }
+
+  .cpr-amt {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding-top: .05rem;
+  }
+
+  /* Error */
+  .cart-error {
+    font-size: .78rem;
+    color: #c94040;
+    background: rgba(201, 64, 64, .07);
+    border: 1px solid rgba(201, 64, 64, .2);
+    border-radius: 2px;
+    padding: .65rem .85rem;
+    line-height: 1.55;
+  }
+
+  /* Checkout button */
+  .btn-checkout {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: .5rem;
+    gap: .55rem;
+    width: 100%;
+    background: #25d366;
+    color: #fff;
     border: none;
-    border-radius: 4px;
-    padding: .75rem .5rem;
-    font-size: .82rem;
-    font-weight: 600;
-    font-family: inherit;
+    border-radius: 3px;
+    padding: .9rem 1.4rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .05em;
     cursor: pointer;
     transition: background .2s, transform .15s;
   }
 
-  .ra-btn:active { transform: scale(.97); }
+  .btn-checkout:hover { background: #1fb855; transform: translateY(-1px); }
+  .btn-checkout:active { transform: translateY(0); }
 
-  .ra-pdf {
-    background: rgba(255,255,255,.1);
-    color: var(--cream);
-    border: 1px solid rgba(255,255,255,.15);
+  .cart-disclaimer {
+    font-size: .7rem;
+    color: var(--warm-gray);
+    text-align: center;
+    line-height: 1.5;
   }
-
-  .ra-pdf:hover { background: rgba(255,255,255,.16); }
-
-  .ra-wa { background: #25D366; color: #fff; }
-  .ra-wa:hover { background: #1ebe59; }
 
   /* ── Responsive ── */
   @media (max-width: 1100px) {
-    .bcalc-section { padding-left: 2.5rem; padding-right: 2.5rem; }
-  }
-
-  @media (max-width: 900px) {
+    .bcalc-section { padding: 4.5rem 2.5rem; }
     .bcalc-layout { grid-template-columns: 1fr; }
-    .bcalc-result-col { position: static; }
-    .pkg-grid { grid-template-columns: 1fr; }
+    .bcalc-cart-col { position: static; }
+    .pkg-grid { grid-template-columns: repeat(3, 1fr); }
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     .bcalc-section { padding: 4rem 1.5rem; }
     .bc-row { grid-template-columns: 1fr; }
-    .rp-metrics { grid-template-columns: 1fr; }
-    .rptb-price { font-size: 1.8rem; }
-    .result-actions { flex-direction: column; padding: 1rem 1.4rem; }
+    .pkg-grid { grid-template-columns: 1fr; }
   }
 </style>
