@@ -1,0 +1,1261 @@
+---
+---
+
+<section id="quote-builder" class="qb">
+  <div class="qb-inner">
+
+    <div class="qb-head reveal">
+      <div class="stag">Book Online</div>
+      <h2>Get Your Price &amp; Book Today</h2>
+      <p class="qb-sub">Add services below, see live pricing, then pay the 10% advance to secure your booking.</p>
+    </div>
+
+    <div class="qb-layout">
+
+      <!-- LEFT: Service Selector -->
+      <div class="qb-left">
+        <div class="qb-step-label">
+          <span class="qb-step-num">1</span>
+          Choose Your Services
+        </div>
+        <div class="qb-cats" role="tablist" aria-label="Service categories">
+          <button class="qb-cat active" data-cat="flooring" role="tab">Flooring</button>
+          <button class="qb-cat" data-cat="bathroom" role="tab">Bathroom</button>
+          <button class="qb-cat" data-cat="others" role="tab">Other Services</button>
+        </div>
+        <div class="qb-grid" id="qb-grid"></div>
+      </div>
+
+      <!-- RIGHT: Cart (sticky) -->
+      <div class="qb-right">
+        <div class="qb-cart-box">
+          <div class="qb-cart-title">Your Quote</div>
+          <div id="qb-empty-state" class="qb-empty-state">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <p>Select a service to build your quote</p>
+          </div>
+          <div id="qb-items" class="qb-items-list" style="display:none"></div>
+          <div id="qb-totals" class="qb-totals" style="display:none">
+            <div class="qb-totals-row">
+              <span>Estimated Total</span>
+              <strong id="qb-total-val">Rs. 0</strong>
+            </div>
+            <div class="qb-totals-advance">
+              <span>10% Advance (pay now)</span>
+              <strong id="qb-advance-val">Rs. 0</strong>
+            </div>
+            <p class="qb-totals-note">* Estimate — final price confirmed after free site inspection</p>
+            <a class="qb-proceed-btn" href="#qb-checkout" id="qb-proceed">Proceed to Book →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CHECKOUT: Contact + Payment -->
+    <div id="qb-checkout" class="qb-checkout" style="display:none">
+
+      <div class="qb-section-label">
+        <span class="qb-step-num">2</span>
+        Your Details
+      </div>
+
+      <div class="qb-fields">
+        <label class="qb-field">
+          <span>Full Name *</span>
+          <input id="qb-name" type="text" placeholder="Your name" autocomplete="name">
+        </label>
+        <label class="qb-field">
+          <span>Phone *</span>
+          <input id="qb-phone" type="tel" placeholder="+94 77 XXX XXXX" autocomplete="tel">
+        </label>
+        <label class="qb-field">
+          <span>Email *</span>
+          <input id="qb-email" type="email" placeholder="you@example.com" autocomplete="email">
+        </label>
+        <label class="qb-field">
+          <span>Project Location *</span>
+          <input id="qb-location" type="text" placeholder="City / Area" autocomplete="address-level2">
+        </label>
+      </div>
+
+      <div class="qb-section-label" style="margin-top:2.5rem">
+        <span class="qb-step-num">3</span>
+        Payment Method
+      </div>
+
+      <div class="qb-pay-tabs">
+        <button class="qb-pay-tab active" data-tab="payhere">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="1" y="4" width="22" height="16" rx="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+          <div>
+            <div class="qb-pay-tab-name">Pay Online</div>
+            <div class="qb-pay-tab-sub">Credit / Debit Card · Instant</div>
+          </div>
+        </button>
+        <button class="qb-pay-tab" data-tab="bank">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <div>
+            <div class="qb-pay-tab-name">Bank Transfer</div>
+            <div class="qb-pay-tab-sub">Dialog Finance · Manual</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- PayHere Panel -->
+      <div id="qb-panel-payhere" class="qb-pay-panel">
+        <p class="qb-pay-desc">
+          Pay <strong id="qb-ph-advance"></strong> now via credit or debit card to secure your booking.
+          The balance is paid in 3 stages during the project.
+        </p>
+        <button id="qb-btn-payhere" class="qb-submit-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <rect x="1" y="4" width="22" height="16" rx="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+          Pay <span id="qb-ph-btn-amt"></span> Now
+        </button>
+        <p class="qb-pay-trust">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Secured by PayHere · Sri Lanka's trusted payment gateway
+        </p>
+      </div>
+
+      <!-- Bank Transfer Panel -->
+      <div id="qb-panel-bank" class="qb-pay-panel" style="display:none">
+        <p class="qb-pay-desc">
+          Submit your order, then transfer <strong id="qb-bank-advance"></strong> to our account.
+          Send payment proof to confirm and lock in your booking.
+        </p>
+        <div class="qb-bank-box">
+          <div class="qb-bank-row"><span>Bank</span><strong>Dialog Finance</strong></div>
+          <div class="qb-bank-row"><span>Account Name</span><strong>TILERSHUB (Pvt) Ltd</strong></div>
+          <div class="qb-bank-row"><span>Account No.</span><strong>001020003416</strong></div>
+          <div class="qb-bank-row"><span>Branch</span><strong>Head Office</strong></div>
+        </div>
+        <button id="qb-btn-bank" class="qb-submit-btn" type="button">
+          Submit Order →
+        </button>
+      </div>
+
+      <div id="qb-error-msg" class="qb-error-msg" role="alert" style="display:none"></div>
+
+    </div>
+
+    <!-- SUCCESS SCREEN -->
+    <div id="qb-success" class="qb-success-panel" style="display:none"></div>
+
+  </div>
+</section>
+
+<script is:inline>
+(function () {
+
+  /* ─── SERVICE DATA ─────────────────────────────────────────── */
+  var SERVICES = [
+    // FLOORING
+    { id:'floor-std',   cat:'flooring', name:'Floor Tiling', tier:'Standard',       sub:'Up to 4×2 tiles · Spacer joint · Swisstek grout',         unit:'sq.ft', rate:350,    skirtRate:250 },
+    { id:'floor-med',   cat:'flooring', name:'Floor Tiling', tier:'Medium Tiles',   sub:'Router edge · Precision levelling · Large format',          unit:'sq.ft', rate:500,    skirtRate:350 },
+    { id:'floor-large', cat:'flooring', name:'Floor Tiling', tier:'Large / Slabs',  sub:'Levelling clips · Expert handling · Seamless finish',        unit:'sq.ft', rate:700,    skirtRate:450 },
+    // BATHROOM
+    { id:'bath-tile',   cat:'bathroom', name:'Bathroom Tiling',                      sub:'Floor + walls · Waterproof joints · Swisstek grout',         unit:'sq.ft', rate:500 },
+    { id:'bath-basic',  cat:'bathroom', name:'Bathroom Renovation', tier:'Basic',    sub:'Full scope up to 40 sq.ft · +Rs. 5,000/sq.ft over',          unit:'fixed', rate:450000 },
+    { id:'bath-std',    cat:'bathroom', name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Up to 40 sq.ft · +Rs. 6,000/sq.ft over',      unit:'fixed', rate:550000, popular:true },
+    { id:'bath-lux',    cat:'bathroom', name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finish · Up to 40 sq.ft · +Rs. 7,000/sq.ft over',    unit:'fixed', rate:650000 },
+    // OTHERS
+    { id:'staircase',   cat:'others', name:'Staircase Tiling',          sub:'Double nosing · Router edge · Skirting included',               unit:'lin.ft', rate:2400 },
+    { id:'pantry-tile', cat:'others', name:'Kitchen Pantry Tiling',     sub:'Countertop & backsplash · Waterproof joints',                   unit:'lin.ft', rate:5000 },
+    { id:'ceiling',     cat:'others', name:'iPanel Ceiling',            sub:'Plain or decorative PVC panels · Any room',                     unit:'sq.ft',  rate:400 },
+    { id:'railing',     cat:'others', name:'Hand Railing',              sub:'Staircase & balcony · Glass & stainless steel',                 unit:'lin.ft', rate:12500 },
+    { id:'cupboard',    cat:'others', name:'Kitchen Pantry Cupboard',   sub:'Eco board · Melamine · Mcoco accessories · Quartz top',         unit:'lin.ft', rate:40000 },
+    { id:'waterproof',  cat:'others', name:'Waterproofing',             sub:'Balcony · Terrace · Bathroom · Tokyo Super 2K membrane',        unit:'sq.ft',  rate:350 },
+  ];
+
+  /* ─── STATE ────────────────────────────────────────────────── */
+  var cart = [];
+  var activeCat = 'flooring';
+  var payMethod = 'payhere';
+
+  /* ─── UTILS ─────────────────────────────────────────────────── */
+  function fmt(n) {
+    return 'Rs.\u00a0' + Math.round(n).toLocaleString('en-IN');
+  }
+
+  function genRef() {
+    var d = new Date();
+    var yy = d.getFullYear().toString().slice(-2);
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    var r = Math.floor(Math.random() * 9000) + 1000;
+    return 'TH-' + yy + mm + dd + '-' + r;
+  }
+
+  function buildPaySchedule(total) {
+    return [
+      { label:'Advance Deposit',       pct:10, amount:total * 0.1, desc:'Pay now to secure your booking' },
+      { label:'After Site Inspection', pct:30, amount:total * 0.3, desc:'After inspection & final price confirmed' },
+      { label:'During Work',           pct:40, amount:total * 0.4, desc:'Progress payment at project midpoint' },
+      { label:'On Completion',         pct:20, amount:total * 0.2, desc:'Final payment on project handover' },
+    ];
+  }
+
+  function getTotal()   { return cart.reduce(function(s, i) { return s + i.price; }, 0); }
+  function getAdvance() { return getTotal() * 0.1; }
+
+  /* ─── RENDER SERVICE CARDS ──────────────────────────────────── */
+  function renderServices(cat) {
+    var grid = document.getElementById('qb-grid');
+    var svcs = SERVICES.filter(function(s) { return s.cat === cat; });
+
+    grid.innerHTML = svcs.map(function(s) {
+      var inCart = cart.some(function(c) { return c.id === s.id; });
+      var isFixed = s.unit === 'fixed';
+      var priceLabel = isFixed ? fmt(s.rate) : (fmt(s.rate) + '\u00a0/\u00a0' + s.unit);
+
+      var addedBadge = [
+        '<div class="qb-svc-added">',
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>',
+          'Added to quote',
+        '</div>',
+      ].join('');
+
+      var fixedBtn = '<button class="qb-add-btn" onclick="qbAddFixed(\'' + s.id + '\')">Add to Quote</button>';
+
+      var qtyForm = [
+        '<div class="qb-qty-form">',
+          '<div class="qb-qty-row">',
+            '<label>' + (s.unit === 'sq.ft' ? 'Area' : 'Length') + '</label>',
+            '<div class="qb-qty-wrap">',
+              '<input type="number" id="qty-' + s.id + '" min="1" placeholder="0" class="qb-qty-in">',
+              '<span class="qb-qty-unit">' + s.unit + '</span>',
+            '</div>',
+          '</div>',
+          (s.skirtRate ? [
+            '<div class="qb-qty-row">',
+              '<label>Skirting <span class="qb-opt">(optional)</span></label>',
+              '<div class="qb-qty-wrap">',
+                '<input type="number" id="skirt-' + s.id + '" min="0" placeholder="0" class="qb-qty-in">',
+                '<span class="qb-qty-unit">lin.ft</span>',
+              '</div>',
+            '</div>',
+          ].join('') : ''),
+          '<button class="qb-add-btn" onclick="qbAddQty(\'' + s.id + '\')">Add to Quote \u2192</button>',
+        '</div>',
+      ].join('');
+
+      return [
+        '<div class="qb-svc-card' + (inCart ? ' in-cart' : '') + '" data-id="' + s.id + '">',
+          (s.popular ? '<div class="qb-popular">Most Popular</div>' : ''),
+          '<div class="qb-svc-name">' + s.name + (s.tier ? '<span class="qb-svc-tier"> \u2014 ' + s.tier + '</span>' : '') + '</div>',
+          '<div class="qb-svc-sub">' + s.sub + '</div>',
+          '<div class="qb-svc-price">' + priceLabel + '</div>',
+          (inCart ? addedBadge : (isFixed ? fixedBtn : qtyForm)),
+        '</div>',
+      ].join('');
+    }).join('');
+  }
+
+  /* ─── ADD TO CART ───────────────────────────────────────────── */
+  window.qbAddFixed = function(id) {
+    var s = SERVICES.find(function(x) { return x.id === id; });
+    if (!s) return;
+    if (cart.some(function(c) { return c.id === id; })) return;
+    cart.push({
+      id: s.id,
+      name: s.name + (s.tier ? ' \u2014 ' + s.tier : ''),
+      desc: 'Package · Fixed price',
+      price: s.rate,
+    });
+    renderServices(activeCat);
+    renderCart();
+  };
+
+  window.qbAddQty = function(id) {
+    var s = SERVICES.find(function(x) { return x.id === id; });
+    if (!s) return;
+    var qtyEl = document.getElementById('qty-' + id);
+    var qty = parseFloat((qtyEl && qtyEl.value) || '0');
+    if (!qty || qty <= 0) { if (qtyEl) qtyEl.focus(); return; }
+
+    var skirtEl = document.getElementById('skirt-' + id);
+    var skirtQty = skirtEl ? parseFloat(skirtEl.value || '0') : 0;
+
+    var price = qty * s.rate + skirtQty * (s.skirtRate || 0);
+    var desc = qty + ' ' + s.unit + ' @ ' + fmt(s.rate) + '/' + s.unit;
+    if (skirtQty > 0) desc += ' + ' + skirtQty + ' lin.ft skirting @ ' + fmt(s.skirtRate) + '/lin.ft';
+
+    var idx = cart.findIndex(function(c) { return c.id === id; });
+    var item = { id: s.id, name: s.name + (s.tier ? ' \u2014 ' + s.tier : ''), desc: desc, price: price };
+    if (idx >= 0) { cart[idx] = item; } else { cart.push(item); }
+
+    renderServices(activeCat);
+    renderCart();
+  };
+
+  window.qbRemove = function(id) {
+    cart = cart.filter(function(c) { return c.id !== id; });
+    renderServices(activeCat);
+    renderCart();
+  };
+
+  /* ─── RENDER CART ───────────────────────────────────────────── */
+  function renderCart() {
+    var emptyState = document.getElementById('qb-empty-state');
+    var itemsList  = document.getElementById('qb-items');
+    var totals     = document.getElementById('qb-totals');
+    var checkout   = document.getElementById('qb-checkout');
+    var total      = getTotal();
+    var advance    = getAdvance();
+
+    if (cart.length === 0) {
+      emptyState.style.display = '';
+      itemsList.style.display  = 'none';
+      totals.style.display     = 'none';
+      checkout.style.display   = 'none';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    itemsList.style.display  = '';
+    totals.style.display     = '';
+    checkout.style.display   = '';
+
+    itemsList.innerHTML = cart.map(function(item) {
+      return [
+        '<div class="qb-cart-item">',
+          '<div class="qb-cart-item-info">',
+            '<div class="qb-cart-item-name">' + item.name + '</div>',
+            '<div class="qb-cart-item-desc">' + item.desc + '</div>',
+          '</div>',
+          '<div class="qb-cart-item-right">',
+            '<div class="qb-cart-item-price">' + fmt(item.price) + '</div>',
+            '<button class="qb-remove" onclick="qbRemove(\'' + item.id + '\')" aria-label="Remove">\u00d7</button>',
+          '</div>',
+        '</div>',
+      ].join('');
+    }).join('');
+
+    document.getElementById('qb-total-val').textContent   = fmt(total);
+    document.getElementById('qb-advance-val').textContent  = fmt(advance);
+    document.getElementById('qb-ph-advance').textContent   = fmt(advance);
+    document.getElementById('qb-ph-btn-amt').textContent   = fmt(advance);
+    document.getElementById('qb-bank-advance').textContent = fmt(advance);
+  }
+
+  /* ─── VALIDATION ─────────────────────────────────────────────── */
+  function validate() {
+    var name     = document.getElementById('qb-name').value.trim();
+    var phone    = document.getElementById('qb-phone').value.trim();
+    var email    = document.getElementById('qb-email').value.trim();
+    var location = document.getElementById('qb-location').value.trim();
+
+    if (!name)                       { showError('Please enter your name.');                     document.getElementById('qb-name').focus();     return null; }
+    if (!phone)                      { showError('Please enter your phone number.');              document.getElementById('qb-phone').focus();    return null; }
+    if (!email || !email.includes('@')) { showError('Please enter a valid email address.');       document.getElementById('qb-email').focus();    return null; }
+    if (!location)                   { showError('Please enter your project location.');          document.getElementById('qb-location').focus(); return null; }
+    if (cart.length === 0)           { showError('Please add at least one service to your quote.'); return null; }
+
+    hideError();
+    return { name: name, phone: phone, email: email, location: location };
+  }
+
+  function showError(msg) {
+    var el = document.getElementById('qb-error-msg');
+    el.textContent = msg;
+    el.style.display = '';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function hideError() {
+    document.getElementById('qb-error-msg').style.display = 'none';
+  }
+
+  /* ─── SUBMIT ORDER ───────────────────────────────────────────── */
+  function submitOrder(orderRef, paymentMethod, paymentRef, details) {
+    var total   = getTotal();
+    var payload = {
+      orderRef:      orderRef,
+      orderDate:     new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }),
+      name:          details.name,
+      email:         details.email,
+      phone:         details.phone,
+      location:      details.location,
+      paymentMethod: paymentMethod,
+      paymentRef:    paymentRef || null,
+      items:         cart.map(function(item) { return { name:item.name, desc:item.desc, price:item.price }; }),
+      total:         total,
+      paySchedule:   buildPaySchedule(total),
+    };
+
+    return fetch('/api/order', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    }).then(function(res) {
+      if (!res.ok) throw new Error('Server error');
+      showSuccess(orderRef, paymentMethod, getAdvance(), details);
+      return true;
+    }).catch(function() {
+      showError('Failed to send your order. Please try again or contact us on WhatsApp.');
+      return false;
+    });
+  }
+
+  /* ─── SUCCESS SCREEN ─────────────────────────────────────────── */
+  function showSuccess(orderRef, method, advance, details) {
+    document.querySelector('.qb-layout').style.display = 'none';
+    document.getElementById('qb-checkout').style.display = 'none';
+
+    var bankSection = method === 'bank' ? [
+      '<div class="qb-succ-bank">',
+        '<div class="qb-succ-bank-head">Transfer ' + fmt(advance) + ' to</div>',
+        '<div class="qb-succ-bank-grid">',
+          '<span>Bank</span><strong>Dialog Finance</strong>',
+          '<span>Account Name</span><strong>TILERSHUB (Pvt) Ltd</strong>',
+          '<span>Account No.</span><strong>001020003416</strong>',
+          '<span>Branch</span><strong>Head Office</strong>',
+        '</div>',
+        '<p>After transferring, send payment proof to <a href="mailto:tilershub@gmail.com">tilershub@gmail.com</a> or WhatsApp <a href="https://wa.me/94774503744">+94 774 503 744</a> with your order reference <strong>' + orderRef + '</strong>.</p>',
+      '</div>',
+    ].join('') : [
+      '<div class="qb-succ-paid">',
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>',
+        fmt(advance) + ' paid online \u2014 booking secured.',
+      '</div>',
+    ].join('');
+
+    var el = document.getElementById('qb-success');
+    el.innerHTML = [
+      '<div class="qb-succ-icon">',
+        '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+      '</div>',
+      '<h3>Order Confirmed \u2014 ' + orderRef + '</h3>',
+      '<p class="qb-succ-sub">A full invoice has been sent to <strong>' + details.email + '</strong>. We\'ll be in touch to arrange your free site inspection.</p>',
+      bankSection,
+      '<div class="qb-succ-steps">',
+        '<div class="qb-succ-steps-title">What happens next</div>',
+        '<ol>',
+          '<li>' + (method === 'bank' ? 'Transfer the 10% deposit and send payment proof to confirm' : 'Your 10% deposit has been paid — booking confirmed') + '</li>',
+          '<li>We arrange a free site inspection at your convenience</li>',
+          '<li>Final price is agreed after inspection, then we schedule your start date</li>',
+          '<li>Project is completed in stages with milestone payments</li>',
+        '</ol>',
+      '</div>',
+    ].join('');
+    el.style.display = '';
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ─── PAYHERE ────────────────────────────────────────────────── */
+  function loadPayHere() {
+    return new Promise(function(resolve) {
+      if (window.payhere) { resolve(); return; }
+      var s = document.createElement('script');
+      s.src = 'https://www.payhere.lk/lib/payhere.js';
+      s.onload = resolve;
+      s.onerror = resolve;
+      document.head.appendChild(s);
+    });
+  }
+
+  document.getElementById('qb-btn-payhere').addEventListener('click', function() {
+    var details = validate();
+    if (!details) return;
+
+    var btn = document.getElementById('qb-btn-payhere');
+    btn.disabled = true;
+    btn.textContent = 'Loading payment\u2026';
+
+    var advance  = getAdvance();
+    var orderRef = genRef();
+
+    loadPayHere().then(function() {
+      if (!window.payhere) {
+        showError('Payment gateway failed to load. Please use bank transfer or contact us directly.');
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay ' + fmt(advance) + ' Now';
+        return;
+      }
+
+      return fetch('/api/payhere-init', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ orderId: orderRef, amount: advance.toFixed(2) }),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.hash) throw new Error('no hash');
+
+        payhere.onCompleted = function(paidOrderId) {
+          submitOrder(orderRef, 'payhere', paidOrderId, details);
+        };
+        payhere.onDismissed = function() {
+          btn.disabled = false;
+          btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay ' + fmt(advance) + ' Now';
+        };
+        payhere.onError = function(err) {
+          showError('Payment error. Please try again or use bank transfer.');
+          btn.disabled = false;
+          btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay ' + fmt(advance) + ' Now';
+        };
+
+        payhere.startPayment({
+          sandbox:     false,
+          merchant_id: data.merchantId,
+          return_url:  window.location.origin,
+          cancel_url:  window.location.href,
+          notify_url:  window.location.origin + '/api/payhere-notify',
+          order_id:    orderRef,
+          items:       'TILERSHUB Services — ' + orderRef,
+          amount:      advance.toFixed(2),
+          currency:    'LKR',
+          hash:        data.hash,
+          first_name:  details.name.split(' ')[0],
+          last_name:   details.name.split(' ').slice(1).join(' ') || '.',
+          email:       details.email,
+          phone:       details.phone,
+          address:     details.location,
+          city:        details.location,
+          country:     'Sri Lanka',
+        });
+
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay ' + fmt(advance) + ' Now';
+      })
+      .catch(function() {
+        showError('Could not initialise payment. Please use bank transfer or contact us directly.');
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pay ' + fmt(advance) + ' Now';
+      });
+    });
+  });
+
+  document.getElementById('qb-btn-bank').addEventListener('click', function() {
+    var details = validate();
+    if (!details) return;
+
+    var btn = document.getElementById('qb-btn-bank');
+    btn.disabled = true;
+    btn.textContent = 'Submitting\u2026';
+
+    submitOrder(genRef(), 'bank-transfer', null, details).then(function(ok) {
+      if (!ok) {
+        btn.disabled = false;
+        btn.textContent = 'Submit Order \u2192';
+      }
+    });
+  });
+
+  /* ─── CATEGORY TABS ──────────────────────────────────────────── */
+  document.querySelectorAll('.qb-cat').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.qb-cat').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeCat = btn.dataset.cat;
+      renderServices(activeCat);
+    });
+  });
+
+  /* ─── PAYMENT METHOD TABS ────────────────────────────────────── */
+  document.querySelectorAll('.qb-pay-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.qb-pay-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      payMethod = tab.dataset.tab;
+      document.getElementById('qb-panel-payhere').style.display = payMethod === 'payhere' ? '' : 'none';
+      document.getElementById('qb-panel-bank').style.display     = payMethod === 'bank'    ? '' : 'none';
+    });
+  });
+
+  /* ─── INIT ───────────────────────────────────────────────────── */
+  renderServices('flooring');
+
+  // Auto-select service from URL hash  (e.g. #book=bathroom)
+  (function() {
+    var hash = window.location.hash;
+    var m = hash.match(/^#book=(\w+)/);
+    if (!m) return;
+    var cat = m[1];
+    var catBtn = document.querySelector('.qb-cat[data-cat="' + cat + '"]');
+    if (!catBtn) return;
+    catBtn.click();
+    document.getElementById('quote-builder').scrollIntoView({ behavior:'smooth' });
+  })();
+
+})();
+</script>
+
+<style>
+  .qb {
+    background: var(--cream);
+    padding: 6rem 4rem;
+  }
+
+  .qb-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── Head ── */
+  .qb-head {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .qb-head h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    color: var(--charcoal);
+    margin-bottom: .6rem;
+  }
+
+  .qb-sub {
+    color: var(--warm-gray);
+    font-size: .95rem;
+    font-weight: 300;
+    max-width: 56ch;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* ── Layout ── */
+  .qb-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  /* ── Step label ── */
+  .qb-step-label {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    margin-bottom: 1.2rem;
+  }
+
+  .qb-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    background: var(--clay);
+    color: #fff;
+    border-radius: 50%;
+    font-size: .75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── Category Tabs ── */
+  .qb-cats {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .qb-cat {
+    padding: .5rem 1.2rem;
+    border: 1.5px solid var(--stone);
+    background: #fff;
+    color: var(--warm-gray);
+    font-size: .82rem;
+    font-weight: 500;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all .18s;
+  }
+
+  .qb-cat:hover { border-color: var(--clay); color: var(--clay); }
+  .qb-cat.active {
+    background: var(--charcoal);
+    border-color: var(--charcoal);
+    color: var(--cream);
+  }
+
+  /* ── Service Grid ── */
+  .qb-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .qb-svc-card {
+    background: #fff;
+    border: 1.5px solid var(--stone);
+    border-radius: 4px;
+    padding: 1.4rem;
+    position: relative;
+    transition: border-color .18s, box-shadow .18s;
+  }
+
+  .qb-svc-card:hover {
+    border-color: var(--clay);
+    box-shadow: 0 4px 16px rgba(196, 120, 74, .1);
+  }
+
+  .qb-svc-card.in-cart {
+    border-color: #4caf50;
+    background: #f8fff8;
+  }
+
+  .qb-popular {
+    position: absolute;
+    top: -.7rem;
+    right: 1rem;
+    background: var(--clay);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .2rem .7rem;
+    border-radius: 20px;
+  }
+
+  .qb-svc-name {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: .3rem;
+    line-height: 1.3;
+  }
+
+  .qb-svc-tier {
+    font-weight: 400;
+    color: var(--clay);
+  }
+
+  .qb-svc-sub {
+    font-size: .75rem;
+    color: var(--warm-gray);
+    line-height: 1.5;
+    margin-bottom: .7rem;
+  }
+
+  .qb-svc-price {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: .9rem;
+  }
+
+  /* Quantity form */
+  .qb-qty-form { display: flex; flex-direction: column; gap: .5rem; }
+
+  .qb-qty-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .78rem;
+  }
+
+  .qb-qty-row label {
+    white-space: nowrap;
+    color: var(--warm-gray);
+    font-weight: 500;
+    min-width: 52px;
+  }
+
+  .qb-opt { color: var(--warm-gray); font-weight: 300; }
+
+  .qb-qty-wrap {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    flex: 1;
+  }
+
+  .qb-qty-in {
+    width: 70px;
+    border: 1.5px solid var(--stone);
+    border-radius: 2px;
+    padding: .4rem .5rem;
+    font-size: .82rem;
+    color: var(--charcoal);
+    outline: none;
+    transition: border-color .18s;
+  }
+
+  .qb-qty-in:focus { border-color: var(--clay); }
+
+  .qb-qty-unit {
+    font-size: .72rem;
+    color: var(--warm-gray);
+    white-space: nowrap;
+  }
+
+  /* Add button */
+  .qb-add-btn {
+    width: 100%;
+    margin-top: .4rem;
+    padding: .55rem .8rem;
+    background: var(--charcoal);
+    color: var(--cream);
+    border: none;
+    border-radius: 2px;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .18s;
+  }
+
+  .qb-add-btn:hover { background: var(--clay); }
+
+  .qb-svc-added {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    color: #4caf50;
+    font-size: .8rem;
+    font-weight: 600;
+  }
+
+  /* ── Cart Box ── */
+  .qb-right { position: relative; }
+
+  .qb-cart-box {
+    position: sticky;
+    top: 5rem;
+    background: var(--charcoal);
+    border-radius: 4px;
+    overflow: hidden;
+    color: var(--cream);
+  }
+
+  .qb-cart-title {
+    padding: 1.1rem 1.4rem;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(245, 240, 232, .5);
+    border-bottom: 1px solid rgba(255, 255, 255, .07);
+  }
+
+  .qb-empty-state {
+    padding: 2.5rem 1.4rem;
+    text-align: center;
+    color: rgba(245, 240, 232, .35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .8rem;
+  }
+
+  .qb-empty-state p { font-size: .82rem; line-height: 1.5; }
+
+  .qb-items-list { padding: .5rem 0; }
+
+  .qb-cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: .9rem 1.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    gap: .5rem;
+  }
+
+  .qb-cart-item-name {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: .2rem;
+  }
+
+  .qb-cart-item-desc {
+    font-size: .7rem;
+    color: rgba(245, 240, 232, .45);
+    line-height: 1.4;
+  }
+
+  .qb-cart-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .3rem;
+    flex-shrink: 0;
+  }
+
+  .qb-cart-item-price {
+    font-size: .83rem;
+    font-weight: 700;
+    color: var(--clay);
+    white-space: nowrap;
+  }
+
+  .qb-remove {
+    background: none;
+    border: none;
+    color: rgba(245, 240, 232, .3);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color .15s;
+  }
+
+  .qb-remove:hover { color: #e57373; }
+
+  .qb-totals {
+    padding: 1.1rem 1.4rem;
+    border-top: 1px solid rgba(255, 255, 255, .09);
+  }
+
+  .qb-totals-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .82rem;
+    color: rgba(245, 240, 232, .7);
+    margin-bottom: .6rem;
+  }
+
+  .qb-totals-row strong { color: var(--cream); font-size: .95rem; }
+
+  .qb-totals-advance {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--clay);
+    margin: 0 -1.4rem;
+    padding: .8rem 1.4rem;
+    font-size: .82rem;
+    color: rgba(255, 255, 255, .85);
+    margin-bottom: .8rem;
+  }
+
+  .qb-totals-advance strong { color: #fff; font-size: 1.05rem; font-weight: 700; }
+
+  .qb-totals-note {
+    font-size: .68rem;
+    color: rgba(245, 240, 232, .3);
+    line-height: 1.4;
+    margin-bottom: 1rem;
+  }
+
+  .qb-proceed-btn {
+    display: block;
+    background: var(--clay);
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    padding: .75rem;
+    border-radius: 2px;
+    font-size: .85rem;
+    font-weight: 600;
+    transition: background .18s;
+  }
+
+  .qb-proceed-btn:hover { background: #b0683c; }
+
+  /* ── Checkout Section ── */
+  .qb-checkout {
+    margin-top: 3rem;
+    background: #fff;
+    border: 1.5px solid var(--stone);
+    border-radius: 4px;
+    padding: 2.5rem;
+  }
+
+  .qb-section-label {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    margin-bottom: 1.5rem;
+  }
+
+  .qb-fields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .qb-field {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+
+  .qb-field span {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--warm-gray);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+  }
+
+  .qb-field input {
+    border: 1.5px solid var(--stone);
+    border-radius: 2px;
+    padding: .7rem 1rem;
+    font-size: .9rem;
+    color: var(--charcoal);
+    outline: none;
+    transition: border-color .18s;
+    font-family: inherit;
+  }
+
+  .qb-field input:focus { border-color: var(--clay); }
+  .qb-field input::placeholder { color: rgba(140, 123, 110, .5); }
+
+  /* ── Payment Tabs ── */
+  .qb-pay-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .qb-pay-tab {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: 1rem 1.2rem;
+    border: 1.5px solid var(--stone);
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .18s, background .18s;
+    color: var(--charcoal);
+  }
+
+  .qb-pay-tab:hover { border-color: var(--clay); }
+
+  .qb-pay-tab.active {
+    border-color: var(--charcoal);
+    background: var(--charcoal);
+    color: var(--cream);
+  }
+
+  .qb-pay-tab svg { flex-shrink: 0; opacity: .7; }
+
+  .qb-pay-tab-name { font-size: .88rem; font-weight: 600; }
+  .qb-pay-tab-sub  { font-size: .72rem; opacity: .65; margin-top: .15rem; }
+
+  /* ── Payment Panels ── */
+  .qb-pay-panel { padding-top: .5rem; }
+
+  .qb-pay-desc {
+    font-size: .88rem;
+    color: var(--warm-gray);
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+
+  .qb-pay-desc strong { color: var(--charcoal); }
+
+  .qb-bank-box {
+    background: var(--charcoal);
+    border-radius: 4px;
+    padding: 1.4rem;
+    margin-bottom: 1.4rem;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: .6rem 1rem;
+    align-items: center;
+  }
+
+  .qb-bank-box span {
+    font-size: .75rem;
+    color: rgba(245, 240, 232, .45);
+  }
+
+  .qb-bank-box strong {
+    font-size: .88rem;
+    color: var(--cream);
+  }
+
+  .qb-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    background: var(--clay);
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    padding: .9rem 2rem;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .18s, transform .18s;
+    font-family: inherit;
+  }
+
+  .qb-submit-btn:hover:not(:disabled)  { background: #b0683c; transform: translateY(-1px); }
+  .qb-submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+  .qb-pay-trust {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .72rem;
+    color: rgba(140, 123, 110, .7);
+    margin-top: .8rem;
+  }
+
+  .qb-error-msg {
+    margin-top: 1rem;
+    padding: .8rem 1.1rem;
+    background: #fff5f5;
+    border: 1.5px solid #f5a9a9;
+    border-radius: 3px;
+    color: #c0392b;
+    font-size: .84rem;
+  }
+
+  /* ── Success Panel ── */
+  .qb-success-panel {
+    margin-top: 3rem;
+    background: #fff;
+    border: 1.5px solid #4caf50;
+    border-radius: 4px;
+    padding: 2.5rem;
+  }
+
+  .qb-succ-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    background: #4caf50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    margin-bottom: 1.2rem;
+  }
+
+  .qb-success-panel h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin-bottom: .5rem;
+  }
+
+  .qb-succ-sub {
+    font-size: .9rem;
+    color: var(--warm-gray);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .qb-succ-paid {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    background: #f0fff0;
+    border: 1.5px solid #4caf50;
+    border-radius: 3px;
+    padding: .9rem 1.2rem;
+    font-size: .88rem;
+    font-weight: 600;
+    color: #2e7d32;
+    margin-bottom: 1.5rem;
+  }
+
+  .qb-succ-bank {
+    background: var(--charcoal);
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--cream);
+  }
+
+  .qb-succ-bank-head {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--clay);
+    margin-bottom: .9rem;
+  }
+
+  .qb-succ-bank-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: .5rem 1rem;
+    font-size: .85rem;
+    margin-bottom: 1rem;
+  }
+
+  .qb-succ-bank-grid span { color: rgba(245, 240, 232, .45); }
+  .qb-succ-bank-grid strong { color: var(--cream); }
+
+  .qb-succ-bank p {
+    font-size: .8rem;
+    color: rgba(245, 240, 232, .55);
+    line-height: 1.6;
+    border-top: 1px solid rgba(255, 255, 255, .07);
+    padding-top: .9rem;
+  }
+
+  .qb-succ-bank p a { color: var(--clay); }
+  .qb-succ-bank p strong { color: var(--cream); }
+
+  .qb-succ-steps {
+    background: var(--cream);
+    border-radius: 3px;
+    padding: 1.3rem 1.5rem;
+  }
+
+  .qb-succ-steps-title {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--warm-gray);
+    margin-bottom: .8rem;
+  }
+
+  .qb-succ-steps ol {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: .84rem;
+    color: var(--charcoal);
+    line-height: 2;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .qb { padding: 5rem 2.5rem; }
+    .qb-layout { grid-template-columns: 1fr; }
+    .qb-cart-box { position: static; }
+    .qb-right { order: -1; }
+    .qb-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .qb { padding: 4rem 1.5rem; }
+    .qb-grid { grid-template-columns: 1fr; }
+    .qb-fields { grid-template-columns: 1fr; }
+    .qb-pay-tabs { grid-template-columns: 1fr; }
+    .qb-checkout { padding: 1.5rem; }
+    .qb-bank-box { grid-template-columns: 110px 1fr; }
+    .qb-succ-bank-grid { grid-template-columns: 110px 1fr; }
+    .qb-succ-steps ol { line-height: 1.8; }
+  }
+</style>
