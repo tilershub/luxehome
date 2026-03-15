@@ -71,7 +71,7 @@ function buildCustomerEmail(o: OrderPayload): string {
     <!-- Header -->
     <div style="background:#1e1a17;padding:32px 40px;">
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#f5f0e8;letter-spacing:0.06em;">TILERSHUB</div>
-      <div style="color:rgba(245,240,232,.45);font-size:11px;margin-top:5px;letter-spacing:.14em;text-transform:uppercase;">Bathroom Renovation — Invoice</div>
+      <div style="color:rgba(245,240,232,.45);font-size:11px;margin-top:5px;letter-spacing:.14em;text-transform:uppercase;">Bathroom Construction/Renovation — Invoice</div>
     </div>
 
     <!-- Order ref bar -->
@@ -195,7 +195,7 @@ function buildAdminEmail(o: OrderPayload): string {
 
     <!-- Header -->
     <div style="background:#c4784a;padding:20px 32px;">
-      <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;">New Bathroom Renovation Order</div>
+      <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;">New Bathroom Construction/Renovation Order</div>
       <div style="font-size:20px;font-weight:700;color:#fff;">${o.orderRef}</div>
       <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:4px;">${o.orderDate}</div>
     </div>
@@ -267,8 +267,18 @@ function buildAdminEmail(o: OrderPayload): string {
 </html>`;
 }
 
+export const onRequestOptions: PagesFunction = () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+};
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  // CORS headers for local dev
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -298,7 +308,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'TILERSHUB <orders@tilershub.com>',
+        from: 'TILERSHUB <orders@tilershub.lk>',
         to: data.email,
         subject: `Your TILERSHUB Invoice — ${data.orderRef}`,
         html: buildCustomerEmail(data),
@@ -319,7 +329,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'TILERSHUB Orders <orders@tilershub.com>',
+        from: 'TILERSHUB Orders <orders@tilershub.lk>',
         to: 'tilershub@gmail.com',
         subject: `New Order ${data.orderRef} — ${data.name} — ${fmt(data.total)}`,
         html: buildAdminEmail(data),

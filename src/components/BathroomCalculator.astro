@@ -4,7 +4,7 @@
 <section class="bcalc-section" id="renovation-calculator">
   <div class="bcalc-inner">
     <div class="stag reveal">Instant Estimate</div>
-    <h2 class="reveal">Bathroom Renovation Calculator</h2>
+    <h2 class="reveal">Bathroom Construction/Renovation Calculator</h2>
     <p class="sdesc reveal">
       Build your bathroom renovation — select a package and add-ons to see a live order total.
     </p>
@@ -856,11 +856,13 @@
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(orderData),
       });
-      const json: { success?: boolean; error?: string; note?: string } = await res.json();
+
+      let json: { success?: boolean; error?: string; note?: string } = {};
+      try { json = await res.json(); } catch { /* non-JSON response */ }
 
       if (!res.ok || json.error) {
         showCheckoutState('review');
-        errorEl.textContent  = json.error ?? 'Something went wrong. Please try again or contact us on WhatsApp.';
+        errorEl.textContent  = json.error ?? `Server error (${res.status}). Please contact us on WhatsApp.`;
         errorEl.style.display = 'block';
         return;
       }
