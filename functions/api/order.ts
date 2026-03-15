@@ -267,8 +267,18 @@ function buildAdminEmail(o: OrderPayload): string {
 </html>`;
 }
 
+export const onRequestOptions: PagesFunction = () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+};
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  // CORS headers for local dev
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
