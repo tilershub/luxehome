@@ -308,7 +308,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'TILERSHUB <orders@tilershub.com>',
+        from: 'TILERSHUB <orders@tilershub.lk>',
         to: data.email,
         subject: `Your TILERSHUB Invoice — ${data.orderRef}`,
         html: buildCustomerEmail(data),
@@ -329,7 +329,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'TILERSHUB Orders <orders@tilershub.com>',
+        from: 'TILERSHUB Orders <orders@tilershub.lk>',
         to: 'tilershub@gmail.com',
         subject: `New Order ${data.orderRef} — ${data.name} — ${fmt(data.total)}`,
         html: buildAdminEmail(data),
