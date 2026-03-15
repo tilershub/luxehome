@@ -3,13 +3,19 @@
 
 <section id="materials">
 
-  <!-- Left: animated tile palette visual -->
+  <!-- Left: real tile photo with grid overlay -->
   <div class="mat-visual reveal">
-    <div class="tile-palette">
-      <div class="ts"></div><div class="ts"></div><div class="ts"></div><div class="ts"></div>
-      <div class="ts"></div><div class="ts"></div><div class="ts"></div><div class="ts"></div>
-      <div class="ts"></div><div class="ts"></div><div class="ts"></div><div class="ts"></div>
-      <div class="ts"></div><div class="ts"></div><div class="ts"></div><div class="ts"></div>
+    <div class="mat-photo-wrap">
+      <img
+        class="mat-photo"
+        src="https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
+        alt="Premium tiling materials and craftsmanship"
+        loading="lazy"
+        width="800"
+        height="800"
+      />
+      <!-- Tile grid overlay — matches brand aesthetic -->
+      <div class="mat-grid" aria-hidden="true"></div>
     </div>
     <div class="grade-badge"><strong>5★</strong>Grade<br />Materials<br />Only</div>
   </div>
@@ -43,43 +49,43 @@
     align-items: center;
   }
 
-  /* ── Tile palette visual ── */
+  /* ── Photo visual ── */
 
   .mat-visual {
     position: relative;
   }
 
-  .tile-palette {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+  .mat-photo-wrap {
+    position: relative;
     aspect-ratio: 1;
     border-radius: 4px;
     overflow: hidden;
+    box-shadow: 0 24px 56px rgba(30, 26, 23, .18);
   }
 
-  .ts {
-    aspect-ratio: 1;
-    border-radius: 2px;
-    animation: sf 3s infinite alternate;
+  .mat-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(.88) saturate(.8);
+    transition: transform .6s ease;
   }
 
-  .ts:nth-child(1)  { background: #d4c4b0; animation-delay: 0s;   }
-  .ts:nth-child(2)  { background: #c4a882; animation-delay: .2s;  }
-  .ts:nth-child(3)  { background: #b89870; animation-delay: .4s;  }
-  .ts:nth-child(4)  { background: #e8d9c0; animation-delay: .6s;  }
-  .ts:nth-child(5)  { background: #bea88e; animation-delay: .8s;  }
-  .ts:nth-child(6)  { background: #c4784a; animation-delay: 1s;   }
-  .ts:nth-child(7)  { background: #a85c34; animation-delay: 1.2s; }
-  .ts:nth-child(8)  { background: #d4c4b0; animation-delay: 1.4s; }
-  .ts:nth-child(9)  { background: #e2d2be; animation-delay: 1.6s; }
-  .ts:nth-child(10) { background: #b89870; animation-delay: 1.8s; }
-  .ts:nth-child(11) { background: #c8b498; animation-delay: 2s;   }
-  .ts:nth-child(12) { background: #a85c34; animation-delay: 2.2s; }
-  .ts:nth-child(13) { background: #d8c8a8; animation-delay: 2.4s; }
-  .ts:nth-child(14) { background: #c4784a; animation-delay: 2.6s; }
-  .ts:nth-child(15) { background: #e8d9c0; animation-delay: 2.8s; }
-  .ts:nth-child(16) { background: #b09070; animation-delay: 3s;   }
+  .mat-visual:hover .mat-photo {
+    transform: scale(1.03);
+  }
+
+  /* Tile grid overlay — evokes large-format tile installation */
+  .mat-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(245, 240, 232, .18) 3px, transparent 3px),
+      linear-gradient(90deg, rgba(245, 240, 232, .18) 3px, transparent 3px);
+    background-size: 33.333% 33.333%;
+    pointer-events: none;
+  }
 
   .grade-badge {
     position: absolute;
