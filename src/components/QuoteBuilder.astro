@@ -21,7 +21,7 @@
         <div class="qb-cats" role="tablist" aria-label="Service categories">
           <button class="qb-cat active" data-cat="flooring" role="tab">Flooring</button>
           <button class="qb-cat" data-cat="bathroom" role="tab">Bathroom</button>
-          <button class="qb-cat" data-cat="others" role="tab">Other Services</button>
+          <button class="qb-cat" data-cat="kitchen" role="tab">Kitchen</button>
         </div>
         <div class="qb-grid" id="qb-grid"></div>
       </div>
@@ -167,17 +167,11 @@
     { id:'floor-med',   cat:'flooring', name:'Floor Tiling', tier:'Medium Tiles',   sub:'Router edge · Precision levelling · Large format',          unit:'sq.ft', rate:500,    skirtRate:350 },
     { id:'floor-large', cat:'flooring', name:'Floor Tiling', tier:'Large / Slabs',  sub:'Levelling clips · Expert handling · Seamless finish',        unit:'sq.ft', rate:700,    skirtRate:450 },
     // BATHROOM
-    { id:'bath-tile',   cat:'bathroom', name:'Bathroom Tiling',                      sub:'Floor + walls · Waterproof joints · Swisstek grout',         unit:'sq.ft', rate:500 },
-    { id:'bath-basic',  cat:'bathroom', name:'Bathroom Renovation', tier:'Basic',    sub:'Full scope · Demo to finish · You supply tiles & bathware', unit:'pkg', rate:450000, baseArea:40, overageRate:5000 },
-    { id:'bath-std',    cat:'bathroom', name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Demo to finish · You supply tiles & bathware', unit:'pkg', rate:550000, baseArea:40, overageRate:6000, popular:true },
-    { id:'bath-lux',    cat:'bathroom', name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finish · Demo to finish · You supply tiles & bathware', unit:'pkg', rate:650000, baseArea:40, overageRate:7000 },
-    // OTHERS
-    { id:'staircase',   cat:'others', name:'Staircase Tiling',          sub:'Double nosing · Router edge · Skirting included',               unit:'lin.ft', rate:2400 },
-    { id:'pantry-tile', cat:'others', name:'Kitchen Pantry Tiling',     sub:'Countertop & backsplash · Waterproof joints',                   unit:'lin.ft', rate:5000 },
-    { id:'ceiling',     cat:'others', name:'iPanel Ceiling',            sub:'Plain or decorative PVC panels · Any room',                     unit:'sq.ft',  rate:400 },
-    { id:'railing',     cat:'others', name:'Hand Railing',              sub:'Staircase & balcony · Glass & stainless steel',                 unit:'lin.ft', rate:12500 },
-    { id:'cupboard',    cat:'others', name:'Kitchen Pantry Cupboard',   sub:'Eco board · Melamine · Mcoco accessories · Quartz top',         unit:'lin.ft', rate:40000 },
-    { id:'waterproof',  cat:'others', name:'Waterproofing',             sub:'Balcony · Terrace · Bathroom · Tokyo Super 2K membrane',        unit:'sq.ft',  rate:350 },
+    { id:'bath-basic',  cat:'bathroom', name:'Bathroom Renovation', tier:'Basic',    sub:'Full scope · Demo to finish · You supply tiles, bathware & tapware', unit:'pkg', rate:450000, baseArea:40, overageRate:5000 },
+    { id:'bath-std',    cat:'bathroom', name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Demo to finish · You supply tiles, bathware & tapware', unit:'pkg', rate:550000, baseArea:40, overageRate:6000, popular:true },
+    { id:'bath-lux',    cat:'bathroom', name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finish · Demo to finish · You supply tiles, bathware & tapware', unit:'pkg', rate:650000, baseArea:40, overageRate:7000 },
+    // KITCHEN
+    { id:'kitchen',     cat:'kitchen',  name:'Kitchen',                               sub:'Pantry tiling + Cupboard · Eco board · Melamine · Mcoco · Quartz top', unit:'lin.ft', rate:45000 },
   ];
 
   /* ─── STATE ────────────────────────────────────────────────── */
@@ -651,7 +645,7 @@
   /* ─── INIT ───────────────────────────────────────────────────── */
   renderServices('flooring');
 
-  // Auto-select service from URL hash  (e.g. #book=bathroom)
+  // Auto-select category from URL hash (e.g. #book=bathroom, #book=kitchen, #book=flooring)
   (function() {
     var hash = window.location.hash;
     var m = hash.match(/^#book=(\w+)/);
@@ -660,7 +654,9 @@
     var catBtn = document.querySelector('.qb-cat[data-cat="' + cat + '"]');
     if (!catBtn) return;
     catBtn.click();
-    document.getElementById('quote-builder').scrollIntoView({ behavior:'smooth' });
+    setTimeout(function() {
+      document.getElementById('quote-builder').scrollIntoView({ behavior: 'smooth' });
+    }, 50);
   })();
 
 })();
