@@ -11,17 +11,60 @@
 
   <div class="svc-grid reveal">
 
-    <!-- Floor Tiling -->
-    <a href="/services/floor-tiling" class="sc" aria-label="Floor Tiling — view service details">
+    <!-- Flooring — 3 tiers -->
+    <div class="sc wide flooring" role="region" aria-label="Flooring services">
       <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/1144871/pexels-photo-1144871.jpeg?auto=compress&cs=tinysrgb&w=600&h=340&fit=crop" alt="Floor tiling" loading="lazy" width="600" height="340" />
+        <img src="https://images.pexels.com/photos/1144871/pexels-photo-1144871.jpeg?auto=compress&cs=tinysrgb&w=1200&h=340&fit=crop" alt="Floor tiling" loading="lazy" width="1200" height="340" />
         <span class="sc-badge">Most Popular</span>
       </div>
-      <div class="svc-name">Floor Tiling</div>
-      <div class="svc-tag">Up to 4×2 tile size · Tile leveling system</div>
-      <div class="svc-price">From <strong>Rs. 350</strong> / sq.ft</div>
-      <span class="svc-link">View Details →</span>
-    </a>
+
+      <div class="flooring-head">
+        <div class="svc-name">Flooring</div>
+        <div class="svc-tag">Tile leveling system · Tokyo cement · Swisstek grout</div>
+      </div>
+
+      <div class="flooring-tiers">
+
+        <div class="tier">
+          <div class="tier-name">Up to 4×2 Tiles</div>
+          <div class="tier-row">
+            <span class="tier-label">Floor</span>
+            <span class="tier-price">Rs. 350 <em>/sq.ft</em></span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Skirting</span>
+            <span class="tier-price">Rs. 250 <em>/lin.ft</em></span>
+          </div>
+        </div>
+
+        <div class="tier tier-mid">
+          <div class="tier-name">Medium Tiles</div>
+          <div class="tier-row">
+            <span class="tier-label">Floor</span>
+            <span class="tier-price">Rs. 500 <em>/sq.ft</em></span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Skirting</span>
+            <span class="tier-price">Rs. 350 <em>/lin.ft</em></span>
+          </div>
+        </div>
+
+        <div class="tier">
+          <div class="tier-name">Large Tiles &amp; Slabs</div>
+          <div class="tier-row">
+            <span class="tier-label">Floor</span>
+            <span class="tier-price">Rs. 700 <em>/sq.ft</em></span>
+          </div>
+          <div class="tier-row">
+            <span class="tier-label">Skirting</span>
+            <span class="tier-price">Rs. 450 <em>/lin.ft</em></span>
+          </div>
+        </div>
+
+      </div>
+
+      <a href="/services/floor-tiling" class="svc-link flooring-link">View Full Details →</a>
+    </div>
 
     <!-- Staircase Tiling -->
     <a href="/services/staircase-tiling" class="sc" aria-label="Staircase Tiling — view service details">
@@ -267,6 +310,99 @@
   }
 
   .sc.wide { grid-column: span 3; }
+
+  /* ── Flooring card internals ── */
+
+  .flooring {
+    cursor: default;
+  }
+
+  .flooring-head {
+    margin-bottom: 1.5rem;
+  }
+
+  .flooring-tiers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 1.4rem;
+  }
+
+  .tier {
+    background: rgba(255, 255, 255, .03);
+    padding: 1.4rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+  }
+
+  .tier-mid {
+    background: rgba(196, 120, 74, .07);
+    border-left: 1px solid rgba(196, 120, 74, .18);
+    border-right: 1px solid rgba(196, 120, 74, .18);
+  }
+
+  .tier-name {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--cream);
+    padding-bottom: .6rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  .tier-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: .5rem;
+  }
+
+  .tier-label {
+    font-size: .75rem;
+    color: rgba(245, 240, 232, .5);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 400;
+    flex-shrink: 0;
+  }
+
+  .tier-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--clay);
+    text-align: right;
+  }
+
+  .tier-price em {
+    font-style: normal;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .7rem;
+    font-weight: 300;
+    color: rgba(245, 240, 232, .45);
+    margin-left: .15rem;
+  }
+
+  .flooring-link {
+    margin-top: 0;
+  }
+
+  @media (max-width: 768px) {
+    .flooring-tiers {
+      grid-template-columns: 1fr;
+    }
+    .tier-mid {
+      border-left: none;
+      border-right: none;
+      border-top: 1px solid rgba(196, 120, 74, .18);
+      border-bottom: 1px solid rgba(196, 120, 74, .18);
+    }
+  }
 
   /* ── Responsive ── */
 
