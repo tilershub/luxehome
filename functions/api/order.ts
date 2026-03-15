@@ -25,6 +25,8 @@ interface OrderPayload {
   items: OrderItem[];
   total: number;
   paySchedule: PayScheduleItem[];
+  paymentMethod?: 'payhere' | 'bank-transfer';
+  paymentRef?: string | null;
 }
 
 function fmt(n: number): string {
@@ -84,11 +86,19 @@ function buildCustomerEmail(o: OrderPayload): string {
     <div style="padding:36px 40px;">
 
       <p style="margin:0 0 8px;color:#1e1a17;font-size:16px;font-weight:600;">Dear ${o.name},</p>
-      <p style="margin:0 0 28px;color:#5c5047;font-size:14px;line-height:1.75;">
-        Thank you for your bathroom renovation order with TILERSHUB. Your order summary and invoice are below.
-        To confirm your booking, please transfer the <strong style="color:#c4784a;">10% deposit</strong> via bank transfer
-        using the details in this email, then send payment proof to us.
-      </p>
+      ${o.paymentMethod === 'payhere'
+        ? `<p style="margin:0 0 12px;color:#5c5047;font-size:14px;line-height:1.75;">
+              Thank you for your order with TILERSHUB. Your <strong style="color:#c4784a;">10% advance payment has been received</strong> via PayHere — your booking is confirmed.
+           </p>
+           <div style="background:#f0fff0;border:1.5px solid #4caf50;border-radius:4px;padding:14px 20px;margin-bottom:24px;font-size:13px;color:#2e7d32;font-weight:600;">
+             ✓ Payment confirmed — Reference: ${o.paymentRef || o.orderRef}
+           </div>`
+        : `<p style="margin:0 0 28px;color:#5c5047;font-size:14px;line-height:1.75;">
+              Thank you for your order with TILERSHUB. Your order summary and invoice are below.
+              To confirm your booking, please transfer the <strong style="color:#c4784a;">10% deposit</strong> via bank transfer
+              using the details in this email, then send payment proof to us.
+           </p>`
+      }
 
       <!-- Client details -->
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;border:1px solid #e8e2da;border-radius:4px;overflow:hidden;">
@@ -238,10 +248,17 @@ function buildAdminEmail(o: OrderPayload): string {
       </div>
 
       <!-- Deposit box -->
-      <div style="background:#1e1a17;border:1px solid #c4784a;border-radius:4px;padding:18px 22px;margin-bottom:20px;">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#c4784a;margin-bottom:6px;">10% Deposit Expected from Customer</div>
+      <div style="background:#1e1a17;border:1px solid ${o.paymentMethod === 'payhere' ? '#4caf50' : '#c4784a'};border-radius:4px;padding:18px 22px;margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:${o.paymentMethod === 'payhere' ? '#4caf50' : '#c4784a'};margin-bottom:6px;">
+          ${o.paymentMethod === 'payhere' ? '✓ 10% DEPOSIT PAID ONLINE (PAYHERE)' : '10% Deposit Expected from Customer'}
+        </div>
         <div style="font-size:26px;font-weight:700;color:#fff;margin-bottom:4px;">${fmt(o.paySchedule[0].amount)}</div>
-        <div style="font-size:12px;color:#888;">Customer will bank transfer this amount to confirm the order. Watch for payment proof.</div>
+        <div style="font-size:12px;color:#888;">
+          ${o.paymentMethod === 'payhere'
+            ? `Paid via PayHere · Ref: ${o.paymentRef || 'N/A'} · Booking is confirmed.`
+            : 'Customer will bank transfer this amount to confirm the order. Watch for payment proof.'
+          }
+        </div>
       </div>
 
       <!-- Payment schedule -->
