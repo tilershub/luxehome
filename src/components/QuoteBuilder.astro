@@ -1,7 +1,9 @@
 ---
+interface Props { singleCat?: string; }
+const { singleCat } = Astro.props;
 ---
 
-<section id="quote-builder" class="qb">
+<section id="quote-builder" class="qb" data-single-cat={singleCat ?? ''}>
   <div class="qb-inner">
 
     <div class="qb-head reveal">
@@ -18,11 +20,13 @@
           <span class="qb-step-num">1</span>
           Choose Your Services
         </div>
-        <div class="qb-cats" role="tablist" aria-label="Service categories">
-          <button class="qb-cat active" data-cat="flooring" role="tab">Flooring</button>
-          <button class="qb-cat" data-cat="bathroom" role="tab">Bathroom</button>
-          <button class="qb-cat" data-cat="kitchen" role="tab">Kitchen</button>
-        </div>
+        {!singleCat && (
+          <div class="qb-cats" role="tablist" aria-label="Service categories">
+            <button class="qb-cat active" data-cat="flooring" role="tab">Flooring</button>
+            <button class="qb-cat" data-cat="bathroom" role="tab">Bathroom</button>
+            <button class="qb-cat" data-cat="kitchen" role="tab">Kitchen</button>
+          </div>
+        )}
         <div class="qb-grid" id="qb-grid"></div>
       </div>
 
@@ -166,12 +170,23 @@
     { id:'floor-std',   cat:'flooring', name:'Floor Tiling', tier:'Standard',       sub:'Up to 4×2 tiles · Spacer joint · Swisstek grout',         unit:'sq.ft', rate:350,    skirtRate:250 },
     { id:'floor-med',   cat:'flooring', name:'Floor Tiling', tier:'Medium Tiles',   sub:'Router edge · Precision levelling · Large format',          unit:'sq.ft', rate:500,    skirtRate:350 },
     { id:'floor-large', cat:'flooring', name:'Floor Tiling', tier:'Large / Slabs',  sub:'Levelling clips · Expert handling · Seamless finish',        unit:'sq.ft', rate:700,    skirtRate:450 },
-    // BATHROOM
-    { id:'bath-basic',  cat:'bathroom', name:'Bathroom Renovation', tier:'Basic',    sub:'Full scope · Demo to finish · You supply tiles, bathware & tapware', unit:'pkg', rate:450000, baseArea:40, overageRate:5000 },
-    { id:'bath-std',    cat:'bathroom', name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Demo to finish · You supply tiles, bathware & tapware', unit:'pkg', rate:550000, baseArea:40, overageRate:6000, popular:true },
-    { id:'bath-lux',    cat:'bathroom', name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finish · Demo to finish · You supply tiles, bathware & tapware', unit:'pkg', rate:650000, baseArea:40, overageRate:7000 },
+    // BATHROOM — Renovation packages
+    { id:'bath-basic',  cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Basic',    sub:'Masonry · Waterproofing · Tiling · Plumbing · Electrical · Ceiling',   unit:'pkg',    rate:450000, baseArea:40, overageRate:5000 },
+    { id:'bath-std',    cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Full scope from demolition to handover',                unit:'pkg',    rate:550000, baseArea:40, overageRate:6000, popular:true },
+    { id:'bath-lux',    cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finishes · Full scope from demolition to handover',            unit:'pkg',    rate:650000, baseArea:40, overageRate:7000 },
+    // BATHROOM — Tiles (supply + install, per sq.ft)
+    { id:'tile-60',     cat:'bathroom', group:'tile',     name:'Tiles 60×60',         sub:'Standard format · Floor & walls',      unit:'sq.ft',  rate:600 },
+    { id:'tile-45',     cat:'bathroom', group:'tile',     name:'Tiles 45×90',         sub:'Tall format · Modern look',             unit:'sq.ft',  rate:700 },
+    { id:'tile-120',    cat:'bathroom', group:'tile',     name:'Tiles 120×120',       sub:'Large format · Seamless finish',        unit:'sq.ft',  rate:800 },
+    // BATHROOM — Add-ons
+    { id:'bath-demo',   cat:'bathroom', group:'addon',    name:'Demolition Work',     sub:'Full demolition of existing bathroom · Debris removal', unit:'fixed', rate:25000 },
+    { id:'bath-3d',     cat:'bathroom', group:'addon',    name:'3D Design',           sub:'Full 3D rendering before work begins',  unit:'fixed',  rate:15000 },
+    // BATHROOM — Material packages
+    { id:'mat-a',       cat:'bathroom', group:'material', name:'Package A',           sub:'Swiss Bathware · Tapware · Accessories · SS finish · Ferroli Geyser · Mirror',             unit:'fixed', rate:95000 },
+    { id:'mat-b',       cat:'bathroom', group:'material', name:'Package B',           sub:'Swiss Bathware · Tapware · Accessories · SS finish · Concealed · Ferroli Geyser · Mirror', unit:'fixed', rate:125000, popular:true },
+    { id:'mat-c',       cat:'bathroom', group:'material', name:'Package C',           sub:'Swiss Bathware · Tapware · Accessories · Brush Gold · Ferroli Geyser · Mirror',            unit:'fixed', rate:155000 },
     // KITCHEN
-    { id:'kitchen',     cat:'kitchen',  name:'Kitchen',                               sub:'Pantry tiling + Cupboard · Eco board · Melamine · Mcoco · Quartz top', unit:'lin.ft', rate:45000 },
+    { id:'kitchen',     cat:'kitchen',  name:'Kitchen',   sub:'Pantry tiling + Cupboard · Eco board · Melamine · Mcoco · Quartz top', unit:'lin.ft', rate:45000 },
   ];
 
   /* ─── STATE ────────────────────────────────────────────────── */
@@ -206,74 +221,101 @@
   function getAdvance() { return getTotal() * 0.1; }
 
   /* ─── RENDER SERVICE CARDS ──────────────────────────────────── */
+  function renderCard(s) {
+    var inCart = cart.some(function(c) { return c.id === s.id; });
+    var isPkg   = s.unit === 'pkg';
+    var isFixed = s.unit === 'fixed';
+    var priceLabel = (isPkg || isFixed)
+      ? fmt(s.rate)
+      : (fmt(s.rate) + '\u00a0/\u00a0' + s.unit);
+
+    var addedBadge = [
+      '<div class="qb-svc-added">',
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>',
+        'Added to quote',
+      '</div>',
+    ].join('');
+
+    var fixedBtn = '<button class="qb-add-btn" onclick="qbAddFixed(\'' + s.id + '\')">Add to Quote</button>';
+
+    var pkgForm = [
+      '<div class="qb-qty-form">',
+        '<div class="qb-qty-row">',
+          '<label>Bathroom Area</label>',
+          '<div class="qb-qty-wrap">',
+            '<input type="number" id="qty-' + s.id + '" min="1" placeholder="e.g. 45" class="qb-qty-in qb-pkg-input" data-id="' + s.id + '">',
+            '<span class="qb-qty-unit">sq.ft</span>',
+          '</div>',
+        '</div>',
+        '<div class="qb-pkg-preview" id="preview-' + s.id + '">',
+          'Base: ' + fmt(s.rate) + ' (up to ' + s.baseArea + '\u00a0sq.ft) \u00b7 +' + fmt(s.overageRate) + '/sq.ft over',
+        '</div>',
+        '<button class="qb-add-btn" onclick="qbAddPkg(\'' + s.id + '\')">Add to Quote \u2192</button>',
+      '</div>',
+    ].join('');
+
+    var qtyForm = [
+      '<div class="qb-qty-form">',
+        '<div class="qb-qty-row">',
+          '<label>' + (s.unit === 'sq.ft' ? 'Area' : 'Length') + '</label>',
+          '<div class="qb-qty-wrap">',
+            '<input type="number" id="qty-' + s.id + '" min="1" placeholder="0" class="qb-qty-in">',
+            '<span class="qb-qty-unit">' + s.unit + '</span>',
+          '</div>',
+        '</div>',
+        (s.skirtRate ? [
+          '<div class="qb-qty-row">',
+            '<label>Skirting <span class="qb-opt">(optional)</span></label>',
+            '<div class="qb-qty-wrap">',
+              '<input type="number" id="skirt-' + s.id + '" min="0" placeholder="0" class="qb-qty-in">',
+              '<span class="qb-qty-unit">lin.ft</span>',
+            '</div>',
+          '</div>',
+        ].join('') : ''),
+        '<button class="qb-add-btn" onclick="qbAddQty(\'' + s.id + '\')">Add to Quote \u2192</button>',
+      '</div>',
+    ].join('');
+
+    var control = inCart ? addedBadge : (isPkg ? pkgForm : (isFixed ? fixedBtn : qtyForm));
+
+    return [
+      '<div class="qb-svc-card' + (inCart ? ' in-cart' : '') + '" data-id="' + s.id + '">',
+        (s.popular ? '<div class="qb-popular">Most Popular</div>' : ''),
+        '<div class="qb-svc-name">' + s.name + (s.tier ? '<span class="qb-svc-tier"> \u2014 ' + s.tier + '</span>' : '') + '</div>',
+        '<div class="qb-svc-sub">' + s.sub + '</div>',
+        '<div class="qb-svc-price">' + priceLabel + '</div>',
+        control,
+      '</div>',
+    ].join('');
+  }
+
+  var GROUP_LABELS = { pkg:'Renovation Package', tile:'Tiles', addon:'Add-ons', material:'Material Package' };
+
   function renderServices(cat) {
     var grid = document.getElementById('qb-grid');
     var svcs = SERVICES.filter(function(s) { return s.cat === cat; });
+    var hasGroups = svcs.some(function(s) { return s.group; });
 
-    grid.innerHTML = svcs.map(function(s) {
-      var inCart = cart.some(function(c) { return c.id === s.id; });
-      var isPkg  = s.unit === 'pkg';
-      var isFixed = s.unit === 'fixed';
-      var priceLabel = (isPkg || isFixed)
-        ? ('From\u00a0' + fmt(s.rate))
-        : (fmt(s.rate) + '\u00a0/\u00a0' + s.unit);
+    if (!hasGroups) {
+      grid.innerHTML = svcs.map(renderCard).join('');
+      return;
+    }
 
-      var addedBadge = [
-        '<div class="qb-svc-added">',
-          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>',
-          'Added to quote',
-        '</div>',
-      ].join('');
+    var groupOrder = [];
+    var groupMap   = {};
+    svcs.forEach(function(s) {
+      var g = s.group || 'other';
+      if (!groupMap[g]) { groupMap[g] = []; groupOrder.push(g); }
+      groupMap[g].push(s);
+    });
 
-      var fixedBtn = '<button class="qb-add-btn" onclick="qbAddFixed(\'' + s.id + '\')">Add to Quote</button>';
-
-      var pkgForm = [
-        '<div class="qb-qty-form">',
-          '<div class="qb-qty-row">',
-            '<label>Bathroom Area</label>',
-            '<div class="qb-qty-wrap">',
-              '<input type="number" id="qty-' + s.id + '" min="1" placeholder="e.g. 45" class="qb-qty-in qb-pkg-input" data-id="' + s.id + '">',
-              '<span class="qb-qty-unit">sq.ft</span>',
-            '</div>',
-          '</div>',
-          '<div class="qb-pkg-preview" id="preview-' + s.id + '">',
-            'Base: ' + fmt(s.rate) + ' (up to ' + s.baseArea + '\u00a0sq.ft) · +' + fmt(s.overageRate) + '/sq.ft over',
-          '</div>',
-          '<button class="qb-add-btn" onclick="qbAddPkg(\'' + s.id + '\')">Add to Quote \u2192</button>',
-        '</div>',
-      ].join('');
-
-      var qtyForm = [
-        '<div class="qb-qty-form">',
-          '<div class="qb-qty-row">',
-            '<label>' + (s.unit === 'sq.ft' ? 'Area' : 'Length') + '</label>',
-            '<div class="qb-qty-wrap">',
-              '<input type="number" id="qty-' + s.id + '" min="1" placeholder="0" class="qb-qty-in">',
-              '<span class="qb-qty-unit">' + s.unit + '</span>',
-            '</div>',
-          '</div>',
-          (s.skirtRate ? [
-            '<div class="qb-qty-row">',
-              '<label>Skirting <span class="qb-opt">(optional)</span></label>',
-              '<div class="qb-qty-wrap">',
-                '<input type="number" id="skirt-' + s.id + '" min="0" placeholder="0" class="qb-qty-in">',
-                '<span class="qb-qty-unit">lin.ft</span>',
-              '</div>',
-            '</div>',
-          ].join('') : ''),
-          '<button class="qb-add-btn" onclick="qbAddQty(\'' + s.id + '\')">Add to Quote \u2192</button>',
-        '</div>',
-      ].join('');
-
-      var control = inCart ? addedBadge : (isPkg ? pkgForm : (isFixed ? fixedBtn : qtyForm));
-
+    grid.innerHTML = groupOrder.map(function(g) {
       return [
-        '<div class="qb-svc-card' + (inCart ? ' in-cart' : '') + '" data-id="' + s.id + '">',
-          (s.popular ? '<div class="qb-popular">Most Popular</div>' : ''),
-          '<div class="qb-svc-name">' + s.name + (s.tier ? '<span class="qb-svc-tier"> \u2014 ' + s.tier + '</span>' : '') + '</div>',
-          '<div class="qb-svc-sub">' + s.sub + '</div>',
-          '<div class="qb-svc-price">' + priceLabel + '</div>',
-          control,
+        '<div class="qb-group">',
+          '<div class="qb-group-label">' + (GROUP_LABELS[g] || g) + '</div>',
+          '<div class="qb-group-grid">',
+            groupMap[g].map(renderCard).join(''),
+          '</div>',
         '</div>',
       ].join('');
     }).join('');
@@ -287,7 +329,7 @@
     cart.push({
       id: s.id,
       name: s.name + (s.tier ? ' \u2014 ' + s.tier : ''),
-      desc: 'Package · Fixed price',
+      desc: s.sub || 'Fixed price',
       price: s.rate,
     });
     renderServices(activeCat);
@@ -643,21 +685,26 @@
   });
 
   /* ─── INIT ───────────────────────────────────────────────────── */
-  renderServices('flooring');
-
-  // Auto-select category from URL hash (e.g. #book=bathroom, #book=kitchen, #book=flooring)
-  (function() {
-    var hash = window.location.hash;
-    var m = hash.match(/^#book=(\w+)/);
-    if (!m) return;
-    var cat = m[1];
-    var catBtn = document.querySelector('.qb-cat[data-cat="' + cat + '"]');
-    if (!catBtn) return;
-    catBtn.click();
-    setTimeout(function() {
-      document.getElementById('quote-builder').scrollIntoView({ behavior: 'smooth' });
-    }, 50);
-  })();
+  var singleCat = document.getElementById('quote-builder').dataset.singleCat;
+  if (singleCat) {
+    activeCat = singleCat;
+    renderServices(singleCat);
+  } else {
+    renderServices('flooring');
+    // Auto-select category from URL hash (e.g. #book=bathroom)
+    (function() {
+      var hash = window.location.hash;
+      var m = hash.match(/^#book=(\w+)/);
+      if (!m) return;
+      var cat = m[1];
+      var catBtn = document.querySelector('.qb-cat[data-cat="' + cat + '"]');
+      if (!catBtn) return;
+      catBtn.click();
+      setTimeout(function() {
+        document.getElementById('quote-builder').scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    })();
+  }
 
 })();
 </script>
@@ -763,6 +810,30 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+  }
+
+  /* Grouped categories (bathroom) */
+  .qb-group { grid-column: 1 / -1; }
+
+  .qb-group-label {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    border-bottom: 1.5px solid var(--stone);
+    padding-bottom: .55rem;
+    margin-bottom: .9rem;
+  }
+
+  .qb-group-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: .85rem;
+  }
+
+  @media (max-width: 600px) {
+    .qb-group-grid { grid-template-columns: 1fr; }
   }
 
   .qb-svc-card {
