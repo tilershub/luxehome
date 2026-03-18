@@ -715,36 +715,51 @@ const { singleCat } = Astro.props;
 
 <style>
   .qb {
-    background: var(--cream);
-    padding: 6rem 4rem;
+    background: #faf8f4;
+    padding: 7rem 4rem;
+    position: relative;
+  }
+
+  .qb::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 320px;
+    background: radial-gradient(ellipse at top, rgba(196,120,74,.07) 0%, transparent 70%);
+    pointer-events: none;
   }
 
   .qb-inner {
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
   }
 
   /* ── Head ── */
   .qb-head {
     text-align: center;
-    margin-bottom: 3.5rem;
+    margin-bottom: 4rem;
   }
 
   .qb-head h2 {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 800;
     color: var(--charcoal);
-    margin-bottom: .6rem;
+    margin-bottom: .65rem;
+    letter-spacing: -.02em;
   }
 
   .qb-sub {
     color: var(--warm-gray);
     font-size: .95rem;
     font-weight: 300;
-    max-width: 56ch;
+    max-width: 52ch;
     margin: 0 auto;
-    line-height: 1.7;
+    line-height: 1.78;
   }
 
   /* ── Layout ── */
@@ -759,25 +774,27 @@ const { singleCat } = Astro.props;
   .qb-step-label {
     display: flex;
     align-items: center;
-    gap: .7rem;
-    font-size: .8rem;
+    gap: .75rem;
+    font-size: .72rem;
     font-weight: 700;
-    letter-spacing: .1em;
+    letter-spacing: .14em;
     text-transform: uppercase;
     color: var(--warm-gray);
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.4rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(196,120,74,.18);
   }
 
   .qb-step-num {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.6rem;
-    height: 1.6rem;
-    background: var(--clay);
+    width: 1.7rem;
+    height: 1.7rem;
+    background: var(--charcoal);
     color: #fff;
     border-radius: 50%;
-    font-size: .75rem;
+    font-size: .72rem;
     font-weight: 700;
     flex-shrink: 0;
   }
@@ -785,28 +802,34 @@ const { singleCat } = Astro.props;
   /* ── Category Tabs ── */
   .qb-cats {
     display: flex;
-    gap: .5rem;
-    margin-bottom: 1.5rem;
+    gap: .3rem;
+    margin-bottom: 1.6rem;
+    background: rgba(196,120,74,.06);
+    border: 1px solid rgba(196,120,74,.15);
+    border-radius: 8px;
+    padding: .35rem;
     flex-wrap: wrap;
   }
 
   .qb-cat {
-    padding: .5rem 1.2rem;
-    border: 1.5px solid var(--stone);
-    background: #fff;
+    flex: 1;
+    padding: .52rem 1rem;
+    border: none;
+    background: transparent;
     color: var(--warm-gray);
     font-size: .82rem;
     font-weight: 500;
-    border-radius: 2px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all .18s;
+    transition: all .2s;
+    white-space: nowrap;
   }
 
-  .qb-cat:hover { border-color: var(--clay); color: var(--clay); }
+  .qb-cat:hover { color: var(--clay); }
   .qb-cat.active {
     background: var(--charcoal);
-    border-color: var(--charcoal);
     color: var(--cream);
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
   }
 
   /* ── Service Grid ── */
@@ -822,18 +845,18 @@ const { singleCat } = Astro.props;
   .qb-group-label {
     font-size: .68rem;
     font-weight: 700;
-    letter-spacing: .12em;
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--warm-gray);
-    border-bottom: 1.5px solid var(--stone);
+    color: var(--clay);
+    border-bottom: 1.5px solid rgba(196,120,74,.2);
     padding-bottom: .55rem;
-    margin-bottom: .9rem;
+    margin-bottom: 1rem;
   }
 
   .qb-group-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: .85rem;
+    gap: .9rem;
   }
 
   @media (max-width: 600px) {
@@ -842,42 +865,45 @@ const { singleCat } = Astro.props;
 
   .qb-svc-card {
     background: #fff;
-    border: 1.5px solid var(--stone);
-    border-radius: 4px;
-    padding: 1.4rem;
+    border: 1.5px solid rgba(212,201,188,.65);
+    border-radius: 10px;
+    padding: 1.5rem;
     position: relative;
-    transition: border-color .18s, box-shadow .18s;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
   }
 
   .qb-svc-card:hover {
-    border-color: var(--clay);
-    box-shadow: 0 4px 16px rgba(196, 120, 74, .1);
+    border-color: rgba(196,120,74,.4);
+    box-shadow: 0 8px 32px rgba(196,120,74,.1);
+    transform: translateY(-2px);
   }
 
   .qb-svc-card.in-cart {
-    border-color: #4caf50;
-    background: #f8fff8;
+    border-color: var(--clay);
+    background: #fef9f4;
+    box-shadow: 0 4px 20px rgba(196,120,74,.12);
   }
 
   .qb-popular {
     position: absolute;
-    top: -.7rem;
+    top: -.75rem;
     right: 1rem;
     background: var(--clay);
     color: #fff;
-    font-size: .68rem;
+    font-size: .65rem;
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
-    padding: .2rem .7rem;
+    padding: .22rem .75rem;
     border-radius: 20px;
   }
 
   .qb-svc-name {
-    font-size: .9rem;
+    font-size: .92rem;
     font-weight: 700;
     color: var(--charcoal);
-    margin-bottom: .3rem;
+    margin-bottom: .28rem;
     line-height: 1.3;
   }
 
@@ -887,17 +913,18 @@ const { singleCat } = Astro.props;
   }
 
   .qb-svc-sub {
-    font-size: .75rem;
+    font-size: .73rem;
     color: var(--warm-gray);
-    line-height: 1.5;
-    margin-bottom: .7rem;
+    line-height: 1.55;
+    margin-bottom: .75rem;
   }
 
   .qb-svc-price {
-    font-size: .88rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--charcoal);
-    margin-bottom: .9rem;
+    margin-bottom: .95rem;
   }
 
   /* Quantity form */
@@ -928,16 +955,20 @@ const { singleCat } = Astro.props;
 
   .qb-qty-in {
     width: 70px;
-    border: 1.5px solid var(--stone);
-    border-radius: 2px;
-    padding: .4rem .5rem;
+    border: 1.5px solid rgba(212,201,188,.7);
+    border-radius: 5px;
+    padding: .42rem .5rem;
     font-size: .82rem;
     color: var(--charcoal);
+    background: #fdfcf9;
     outline: none;
-    transition: border-color .18s;
+    transition: border-color .18s, box-shadow .18s;
   }
 
-  .qb-qty-in:focus { border-color: var(--clay); }
+  .qb-qty-in:focus {
+    border-color: var(--clay);
+    box-shadow: 0 0 0 2px rgba(196,120,74,.1);
+  }
 
   .qb-qty-unit {
     font-size: .72rem;
@@ -966,27 +997,31 @@ const { singleCat } = Astro.props;
   /* Add button */
   .qb-add-btn {
     width: 100%;
-    margin-top: .4rem;
-    padding: .55rem .8rem;
+    margin-top: .5rem;
+    padding: .58rem .8rem;
     background: var(--charcoal);
     color: var(--cream);
     border: none;
-    border-radius: 2px;
-    font-size: .8rem;
+    border-radius: 6px;
+    font-size: .78rem;
     font-weight: 600;
+    letter-spacing: .04em;
     cursor: pointer;
-    transition: background .18s;
+    transition: background .2s, transform .15s;
   }
 
-  .qb-add-btn:hover { background: var(--clay); }
+  .qb-add-btn:hover { background: var(--clay); transform: translateY(-1px); }
 
   .qb-svc-added {
     display: flex;
     align-items: center;
-    gap: .4rem;
-    color: #4caf50;
+    gap: .45rem;
+    color: var(--clay);
     font-size: .8rem;
     font-weight: 600;
+    background: rgba(196,120,74,.08);
+    border-radius: 5px;
+    padding: .45rem .7rem;
   }
 
   /* ── Cart Box ── */
@@ -996,41 +1031,42 @@ const { singleCat } = Astro.props;
     position: sticky;
     top: 5rem;
     background: var(--charcoal);
-    border-radius: 4px;
+    border-radius: 12px;
     overflow: hidden;
     color: var(--cream);
+    box-shadow: 0 16px 48px rgba(30,26,23,.22);
   }
 
   .qb-cart-title {
-    padding: 1.1rem 1.4rem;
-    font-size: .75rem;
+    padding: 1.2rem 1.6rem;
+    font-size: .7rem;
     font-weight: 700;
-    letter-spacing: .12em;
+    letter-spacing: .16em;
     text-transform: uppercase;
-    color: rgba(245, 240, 232, .5);
-    border-bottom: 1px solid rgba(255, 255, 255, .07);
+    color: rgba(245,240,232,.4);
+    border-bottom: 1px solid rgba(255,255,255,.06);
   }
 
   .qb-empty-state {
-    padding: 2.5rem 1.4rem;
+    padding: 2.8rem 1.6rem;
     text-align: center;
-    color: rgba(245, 240, 232, .35);
+    color: rgba(245,240,232,.3);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: .8rem;
+    gap: .85rem;
   }
 
-  .qb-empty-state p { font-size: .82rem; line-height: 1.5; }
+  .qb-empty-state p { font-size: .82rem; line-height: 1.55; }
 
-  .qb-items-list { padding: .5rem 0; }
+  .qb-items-list { padding: .4rem 0; }
 
   .qb-cart-item {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: .9rem 1.4rem;
-    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    padding: 1rem 1.6rem;
+    border-bottom: 1px solid rgba(255,255,255,.055);
     gap: .5rem;
   }
 
@@ -1038,13 +1074,13 @@ const { singleCat } = Astro.props;
     font-size: .8rem;
     font-weight: 600;
     color: var(--cream);
-    margin-bottom: .2rem;
+    margin-bottom: .22rem;
   }
 
   .qb-cart-item-desc {
-    font-size: .7rem;
-    color: rgba(245, 240, 232, .45);
-    line-height: 1.4;
+    font-size: .68rem;
+    color: rgba(245,240,232,.4);
+    line-height: 1.45;
   }
 
   .qb-cart-item-right {
@@ -1056,7 +1092,8 @@ const { singleCat } = Astro.props;
   }
 
   .qb-cart-item-price {
-    font-size: .83rem;
+    font-family: 'Playfair Display', serif;
+    font-size: .88rem;
     font-weight: 700;
     color: var(--clay);
     white-space: nowrap;
@@ -1065,7 +1102,7 @@ const { singleCat } = Astro.props;
   .qb-remove {
     background: none;
     border: none;
-    color: rgba(245, 240, 232, .3);
+    color: rgba(245,240,232,.25);
     font-size: 1.1rem;
     cursor: pointer;
     padding: 0;
@@ -1073,11 +1110,11 @@ const { singleCat } = Astro.props;
     transition: color .15s;
   }
 
-  .qb-remove:hover { color: #e57373; }
+  .qb-remove:hover { color: rgba(229,115,115,.8); }
 
   .qb-totals {
-    padding: 1.1rem 1.4rem;
-    border-top: 1px solid rgba(255, 255, 255, .09);
+    padding: 1.2rem 1.6rem;
+    border-top: 1px solid rgba(255,255,255,.08);
   }
 
   .qb-totals-row {
@@ -1085,31 +1122,40 @@ const { singleCat } = Astro.props;
     justify-content: space-between;
     align-items: center;
     font-size: .82rem;
-    color: rgba(245, 240, 232, .7);
-    margin-bottom: .6rem;
+    color: rgba(245,240,232,.65);
+    margin-bottom: .7rem;
   }
 
-  .qb-totals-row strong { color: var(--cream); font-size: .95rem; }
+  .qb-totals-row strong {
+    font-family: 'Playfair Display', serif;
+    color: var(--cream);
+    font-size: 1rem;
+  }
 
   .qb-totals-advance {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: var(--clay);
-    margin: 0 -1.4rem;
-    padding: .8rem 1.4rem;
+    margin: 0 -1.6rem;
+    padding: .9rem 1.6rem;
     font-size: .82rem;
-    color: rgba(255, 255, 255, .85);
-    margin-bottom: .8rem;
+    color: rgba(255,255,255,.88);
+    margin-bottom: .9rem;
   }
 
-  .qb-totals-advance strong { color: #fff; font-size: 1.05rem; font-weight: 700; }
+  .qb-totals-advance strong {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
 
   .qb-totals-note {
-    font-size: .68rem;
-    color: rgba(245, 240, 232, .3);
-    line-height: 1.4;
-    margin-bottom: 1rem;
+    font-size: .66rem;
+    color: rgba(245,240,232,.28);
+    line-height: 1.45;
+    margin-bottom: 1.1rem;
   }
 
   .qb-proceed-btn {
@@ -1118,40 +1164,48 @@ const { singleCat } = Astro.props;
     color: #fff;
     text-decoration: none;
     text-align: center;
-    padding: .75rem;
-    border-radius: 2px;
+    padding: .85rem;
+    border-radius: 7px;
     font-size: .85rem;
     font-weight: 600;
-    transition: background .18s;
+    letter-spacing: .04em;
+    transition: background .2s, transform .15s, box-shadow .2s;
   }
 
-  .qb-proceed-btn:hover { background: #b0683c; }
+  .qb-proceed-btn:hover {
+    background: #b0683c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(196,120,74,.28);
+  }
 
   /* ── Checkout Section ── */
   .qb-checkout {
     margin-top: 3rem;
     background: #fff;
-    border: 1.5px solid var(--stone);
-    border-radius: 4px;
-    padding: 2.5rem;
+    border: 1px solid rgba(212,201,188,.5);
+    border-radius: 12px;
+    padding: 2.8rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,.05);
   }
 
   .qb-section-label {
     display: flex;
     align-items: center;
-    gap: .7rem;
-    font-size: .8rem;
+    gap: .75rem;
+    font-size: .72rem;
     font-weight: 700;
-    letter-spacing: .1em;
+    letter-spacing: .14em;
     text-transform: uppercase;
     color: var(--warm-gray);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.6rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(196,120,74,.15);
   }
 
   .qb-fields {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 1.1rem;
   }
 
   .qb-field {
@@ -1169,25 +1223,29 @@ const { singleCat } = Astro.props;
   }
 
   .qb-field input {
-    border: 1.5px solid var(--stone);
-    border-radius: 2px;
-    padding: .7rem 1rem;
+    border: 1.5px solid rgba(212,201,188,.7);
+    border-radius: 7px;
+    padding: .8rem 1rem;
     font-size: .9rem;
     color: var(--charcoal);
     outline: none;
-    transition: border-color .18s;
+    background: #fdfcf9;
+    transition: border-color .18s, box-shadow .18s;
     font-family: inherit;
   }
 
-  .qb-field input:focus { border-color: var(--clay); }
-  .qb-field input::placeholder { color: rgba(140, 123, 110, .5); }
+  .qb-field input:focus {
+    border-color: var(--clay);
+    box-shadow: 0 0 0 3px rgba(196,120,74,.1);
+  }
+  .qb-field input::placeholder { color: rgba(140,123,110,.45); }
 
   /* ── Payment Tabs ── */
   .qb-pay-tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: .8rem;
-    margin-bottom: 1.5rem;
+    gap: .75rem;
+    margin-bottom: 1.6rem;
   }
 
   .qb-pay-tab {
@@ -1195,21 +1253,25 @@ const { singleCat } = Astro.props;
     align-items: center;
     gap: .9rem;
     padding: 1rem 1.2rem;
-    border: 1.5px solid var(--stone);
-    border-radius: 4px;
-    background: #fff;
+    border: 1.5px solid rgba(212,201,188,.65);
+    border-radius: 9px;
+    background: #fdfcf9;
     cursor: pointer;
     text-align: left;
-    transition: border-color .18s, background .18s;
+    transition: border-color .2s, background .2s, box-shadow .2s;
     color: var(--charcoal);
   }
 
-  .qb-pay-tab:hover { border-color: var(--clay); }
+  .qb-pay-tab:hover {
+    border-color: rgba(196,120,74,.4);
+    box-shadow: 0 4px 12px rgba(196,120,74,.08);
+  }
 
   .qb-pay-tab.active {
     border-color: var(--charcoal);
     background: var(--charcoal);
     color: var(--cream);
+    box-shadow: 0 4px 16px rgba(30,26,23,.15);
   }
 
   .qb-pay-tab svg { flex-shrink: 0; opacity: .7; }
@@ -1223,15 +1285,16 @@ const { singleCat } = Astro.props;
   .qb-pay-desc {
     font-size: .88rem;
     color: var(--warm-gray);
-    line-height: 1.7;
+    line-height: 1.72;
     margin-bottom: 1.2rem;
   }
 
   .qb-pay-desc strong { color: var(--charcoal); }
 
   .qb-bank-box {
-    background: var(--charcoal);
-    border-radius: 4px;
+    background: #faf8f4;
+    border: 1px solid rgba(212,201,188,.6);
+    border-radius: 9px;
     padding: 1.4rem;
     margin-bottom: 1.4rem;
     display: grid;
@@ -1242,12 +1305,13 @@ const { singleCat } = Astro.props;
 
   .qb-bank-box span {
     font-size: .75rem;
-    color: rgba(245, 240, 232, .45);
+    color: var(--warm-gray);
   }
 
   .qb-bank-box strong {
     font-size: .88rem;
-    color: var(--cream);
+    color: var(--charcoal);
+    font-weight: 600;
   }
 
   .qb-submit-btn {
@@ -1257,16 +1321,21 @@ const { singleCat } = Astro.props;
     background: var(--clay);
     color: #fff;
     border: none;
-    border-radius: 2px;
-    padding: .9rem 2rem;
+    border-radius: 7px;
+    padding: .9rem 2.2rem;
     font-size: .9rem;
     font-weight: 600;
+    letter-spacing: .03em;
     cursor: pointer;
-    transition: background .18s, transform .18s;
+    transition: background .2s, transform .2s, box-shadow .2s;
     font-family: inherit;
   }
 
-  .qb-submit-btn:hover:not(:disabled)  { background: #b0683c; transform: translateY(-1px); }
+  .qb-submit-btn:hover:not(:disabled) {
+    background: #b0683c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(196,120,74,.28);
+  }
   .qb-submit-btn:disabled { opacity: .6; cursor: not-allowed; }
 
   .qb-pay-trust {
@@ -1274,16 +1343,16 @@ const { singleCat } = Astro.props;
     align-items: center;
     gap: .4rem;
     font-size: .72rem;
-    color: rgba(140, 123, 110, .7);
-    margin-top: .8rem;
+    color: rgba(140,123,110,.65);
+    margin-top: .85rem;
   }
 
   .qb-error-msg {
     margin-top: 1rem;
-    padding: .8rem 1.1rem;
-    background: #fff5f5;
-    border: 1.5px solid #f5a9a9;
-    border-radius: 3px;
+    padding: .85rem 1.1rem;
+    background: #fff8f6;
+    border: 1.5px solid rgba(192,57,43,.25);
+    border-radius: 7px;
     color: #c0392b;
     font-size: .84rem;
   }
@@ -1292,21 +1361,23 @@ const { singleCat } = Astro.props;
   .qb-success-panel {
     margin-top: 3rem;
     background: #fff;
-    border: 1.5px solid #4caf50;
-    border-radius: 4px;
-    padding: 2.5rem;
+    border: 1px solid rgba(212,201,188,.45);
+    border-radius: 12px;
+    padding: 2.8rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,.05);
   }
 
   .qb-succ-icon {
     width: 3.5rem;
     height: 3.5rem;
-    background: #4caf50;
+    background: var(--clay);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     margin-bottom: 1.2rem;
+    box-shadow: 0 4px 16px rgba(196,120,74,.3);
   }
 
   .qb-success-panel h3 {
@@ -1328,29 +1399,29 @@ const { singleCat } = Astro.props;
     display: flex;
     align-items: center;
     gap: .6rem;
-    background: #f0fff0;
-    border: 1.5px solid #4caf50;
-    border-radius: 3px;
+    background: rgba(196,120,74,.08);
+    border: 1.5px solid rgba(196,120,74,.28);
+    border-radius: 7px;
     padding: .9rem 1.2rem;
     font-size: .88rem;
     font-weight: 600;
-    color: #2e7d32;
+    color: var(--clay);
     margin-bottom: 1.5rem;
   }
 
   .qb-succ-bank {
     background: var(--charcoal);
-    border-radius: 4px;
+    border-radius: 10px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     color: var(--cream);
   }
 
   .qb-succ-bank-head {
-    font-size: .75rem;
+    font-size: .72rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .1em;
+    letter-spacing: .14em;
     color: var(--clay);
     margin-bottom: .9rem;
   }
@@ -1363,14 +1434,14 @@ const { singleCat } = Astro.props;
     margin-bottom: 1rem;
   }
 
-  .qb-succ-bank-grid span { color: rgba(245, 240, 232, .45); }
+  .qb-succ-bank-grid span { color: rgba(245,240,232,.4); }
   .qb-succ-bank-grid strong { color: var(--cream); }
 
   .qb-succ-bank p {
     font-size: .8rem;
-    color: rgba(245, 240, 232, .55);
-    line-height: 1.6;
-    border-top: 1px solid rgba(255, 255, 255, .07);
+    color: rgba(245,240,232,.5);
+    line-height: 1.65;
+    border-top: 1px solid rgba(255,255,255,.07);
     padding-top: .9rem;
   }
 
@@ -1378,8 +1449,8 @@ const { singleCat } = Astro.props;
   .qb-succ-bank p strong { color: var(--cream); }
 
   .qb-succ-steps {
-    background: var(--cream);
-    border-radius: 3px;
+    background: #faf8f4;
+    border-radius: 7px;
     padding: 1.3rem 1.5rem;
   }
 
