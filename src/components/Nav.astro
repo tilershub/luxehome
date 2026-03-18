@@ -3,42 +3,52 @@
 
 <nav aria-label="Main navigation">
   <a href="/" class="logo" aria-label="TILERSHUB — Home">TILERS<span>HUB</span></a>
+
   <ul id="nav-menu" role="list">
-    <li><a href="/#services">Services</a></li>
-    <li><a href="/#materials">Materials</a></li>
+    <li><a href="/services/flooring">Flooring</a></li>
     <li><a href="/services/bathroom">Bathroom</a></li>
-    <li><a href="/blog">Blog</a></li>
-    <li>
-      <a
-        href="/contact"
-        class="nav-cta"
-      >Get a Quote</a>
-    </li>
+    <li><a href="/services/kitchen">Kitchen</a></li>
+    <li><a href="/blog">Journal</a></li>
   </ul>
-  <button
-    class="menu-toggle"
-    id="menu-toggle"
-    aria-label="Open navigation menu"
-    aria-expanded="false"
-    aria-controls="nav-menu"
-  >
-    <span class="bar"></span>
-    <span class="bar"></span>
-    <span class="bar"></span>
-  </button>
+
+  <div class="nav-end">
+    <a href="#quote-builder" class="nav-bag" id="nav-bag-btn" aria-label="View your quote">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+      <span class="bag-count" id="bag-count">0</span>
+    </a>
+    <a href="#quote-builder" class="nav-cta">Book Now</a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+  </div>
 </nav>
 
 <script>
-  const nav = document.querySelector('nav');
-  const toggle = document.getElementById('menu-toggle');
-  const menu = document.getElementById('nav-menu');
+  const nav      = document.querySelector('nav');
+  const toggle   = document.getElementById('menu-toggle');
+  const menu     = document.getElementById('nav-menu');
+  const bagCount = document.getElementById('bag-count');
 
-  // Shrink nav on scroll
   window.addEventListener('scroll', () => {
-    nav.style.padding = window.scrollY > 60 ? '.8rem 4rem' : '1.2rem 4rem';
+    const scrolled = window.scrollY > 60;
+    nav.style.padding = scrolled
+      ? (window.innerWidth > 1100 ? '.75rem 4rem' : '.75rem 2.5rem')
+      : '';
+    nav.style.boxShadow = scrolled ? '0 1px 24px rgba(30,26,23,.08)' : '';
   });
 
-  // Mobile menu toggle
+  document.addEventListener('qb-cart-update', (e) => {
+    const count = e.detail.count;
+    bagCount.textContent = count;
+    bagCount.classList.toggle('visible', count > 0);
+  });
+
   toggle.addEventListener('click', () => {
     const isOpen = menu.classList.toggle('open');
     toggle.setAttribute('aria-expanded', String(isOpen));
@@ -46,7 +56,6 @@
     toggle.classList.toggle('active', isOpen);
   });
 
-  // Close menu on link click
   menu.querySelectorAll('a').forEach(link => {
     link.addEventListener('click', () => {
       menu.classList.remove('open');
@@ -56,7 +65,6 @@
     });
   });
 
-  // Close menu on outside click
   document.addEventListener('click', (e) => {
     if (!nav.contains(e.target) && menu.classList.contains('open')) {
       menu.classList.remove('open');
@@ -70,52 +78,119 @@
 <style>
   nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     z-index: 100;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1.2rem 4rem;
-    background: rgba(245, 240, 232, .93);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--stone);
-    transition: padding .3s;
+    background: rgba(250, 247, 242, .94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(212, 196, 176, .45);
+    transition: padding .3s ease, box-shadow .3s ease;
   }
 
   ul {
     display: flex;
-    gap: 2rem;
+    gap: 2.4rem;
     list-style: none;
   }
 
   ul a {
     text-decoration: none;
-    font-size: .78rem;
+    font-size: .74rem;
     font-weight: 500;
-    letter-spacing: .09em;
+    letter-spacing: .11em;
     text-transform: uppercase;
     color: var(--warm-gray);
     transition: color .2s;
+    position: relative;
+    padding-bottom: .2rem;
   }
 
-  ul a:hover {
+  ul a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1.5px;
+    background: var(--clay);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .28s ease;
+  }
+
+  ul a:hover { color: var(--charcoal); }
+  ul a:hover::after { transform: scaleX(1); }
+
+  .nav-end {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  /* Shopping bag icon */
+  .nav-bag {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--charcoal);
+    text-decoration: none;
+    border-radius: 50%;
+    transition: background .2s, color .2s;
+    flex-shrink: 0;
+  }
+
+  .nav-bag:hover {
+    background: rgba(196, 120, 74, .1);
     color: var(--clay);
   }
 
+  .bag-count {
+    position: absolute;
+    top: .1rem; right: .1rem;
+    background: var(--clay);
+    color: #fff;
+    font-size: .58rem;
+    font-weight: 700;
+    min-width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 .2rem;
+    line-height: 1;
+    opacity: 0;
+    transform: scale(.5);
+    transition: opacity .2s, transform .25s cubic-bezier(.34, 1.56, .64, 1);
+    pointer-events: none;
+  }
+
+  .bag-count.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
   .nav-cta {
-    background: var(--charcoal) !important;
+    background: var(--charcoal);
     color: var(--cream) !important;
-    padding: .5rem 1.2rem;
+    text-decoration: none;
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    padding: .58rem 1.3rem;
     border-radius: 2px;
+    transition: background .2s;
+    white-space: nowrap;
   }
 
-  .nav-cta:hover {
-    background: var(--clay) !important;
-  }
-
-  /* ── Hamburger button ── */
+  .nav-cta:hover { background: var(--clay) !important; }
+  .nav-cta::after { display: none !important; }
 
   .menu-toggle {
     display: none;
@@ -130,90 +205,58 @@
     padding: .25rem;
     border-radius: 3px;
     transition: background .2s;
+    margin-left: .3rem;
   }
 
-  .menu-toggle:hover {
-    background: rgba(196, 120, 74, .1);
-  }
+  .menu-toggle:hover { background: rgba(196, 120, 74, .1); }
 
   .bar {
     display: block;
     width: 100%;
-    height: 2px;
+    height: 1.5px;
     background: var(--charcoal);
     border-radius: 2px;
     transition: transform .3s, opacity .3s;
     transform-origin: center;
   }
 
-  .menu-toggle.active .bar:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-  }
-
-  .menu-toggle.active .bar:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-
-  .menu-toggle.active .bar:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-  }
+  .menu-toggle.active .bar:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .menu-toggle.active .bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .menu-toggle.active .bar:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
   @media (max-width: 1100px) {
-    nav {
-      padding: 1rem 2.5rem;
-    }
+    nav { padding: 1rem 2.5rem; }
   }
 
   @media (max-width: 768px) {
-    nav {
-      padding: 1rem 1.5rem;
-    }
-
-    .menu-toggle {
-      display: flex;
-    }
+    nav { padding: 1rem 1.5rem; }
+    .menu-toggle { display: flex; }
 
     ul {
       display: none;
       position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
+      top: 100%; left: 0; right: 0;
       flex-direction: column;
       gap: 0;
-      background: rgba(245, 240, 232, .97);
-      backdrop-filter: blur(14px);
+      background: rgba(250, 247, 242, .98);
+      backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--stone);
-      padding: .5rem 0;
-      box-shadow: 0 8px 24px rgba(30, 26, 23, .12);
+      box-shadow: 0 8px 24px rgba(30, 26, 23, .1);
+      padding: .25rem 0;
     }
 
-    ul.open {
-      display: flex;
-    }
-
-    ul li {
-      width: 100%;
-    }
+    ul.open { display: flex; }
 
     ul a {
       display: block;
-      padding: .85rem 1.5rem;
-      font-size: .82rem;
-      border-bottom: 1px solid rgba(196, 120, 74, .08);
+      padding: .9rem 1.5rem;
+      font-size: .8rem;
+      border-bottom: 1px solid rgba(212, 196, 176, .25);
     }
 
-    ul li:last-child a {
-      border-bottom: none;
-    }
+    ul a::after { display: none; }
+    ul li:last-child a { border-bottom: none; }
 
-    .nav-cta {
-      margin: .5rem 1.5rem .75rem !important;
-      display: block !important;
-      text-align: center !important;
-      padding: .7rem 1.2rem !important;
-      border-radius: 2px !important;
-    }
+    .nav-cta { padding: .5rem 1rem; font-size: .7rem; }
   }
 </style>
