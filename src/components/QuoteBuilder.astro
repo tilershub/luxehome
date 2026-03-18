@@ -429,6 +429,7 @@ const { singleCat } = Astro.props;
       itemsList.style.display  = 'none';
       totals.style.display     = 'none';
       checkout.style.display   = 'none';
+      document.dispatchEvent(new CustomEvent('qb-cart-update', { detail: { count: 0 } }));
       return;
     }
 
@@ -457,6 +458,8 @@ const { singleCat } = Astro.props;
     document.getElementById('qb-ph-advance').textContent   = fmt(advance);
     document.getElementById('qb-ph-btn-amt').textContent   = fmt(advance);
     document.getElementById('qb-bank-advance').textContent = fmt(advance);
+
+    document.dispatchEvent(new CustomEvent('qb-cart-update', { detail: { count: cart.length } }));
   }
 
   /* ─── VALIDATION ─────────────────────────────────────────────── */
