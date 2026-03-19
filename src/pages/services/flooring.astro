@@ -5,8 +5,8 @@ import Footer from '../../components/Footer.astro';
 ---
 
 <Layout
-  title="Flooring — Tile & Slab Installation — TILERSHUB Sri Lanka"
-  description="Professional floor tiling across Sri Lanka. Three packages from Rs. 350/sq.ft — Standard, Medium, and Large Format / Slabs. Tile leveling system, Tokyo cement, Swisstek grout."
+  title="Floor Tiling — 4 Packages by Tile Size — TILERSHUB Sri Lanka"
+  description="Professional floor tiling across Sri Lanka. Four packages by tile size from Rs. 350/sq.ft — Small, Medium, Large & Plank. Tile leveling system, Tokyo cement, Swisstek grout. You supply tiles."
 >
   <Nav />
 
@@ -15,34 +15,34 @@ import Footer from '../../components/Footer.astro';
       <div class="breadcrumb">
         <a href="/">Home</a>
         <span>›</span>
-        <a href="/#services">Services</a>
+        <a href="/#shop">Services</a>
         <span>›</span>
-        <span>Flooring</span>
+        <span>Floor</span>
       </div>
-      <h1 class="reveal">Flooring</h1>
+      <h1 class="reveal">Floor Tiling</h1>
       <p class="hero-desc reveal">
-        Precision tile installation with a leveling system, Tokyo HP cement, and Swisstek grout —
-        three packages to match any tile size and budget.
+        Precision installation with a leveling system, Tokyo HP cement, and Swisstek grout —
+        four packages priced by tile size. You supply the tiles, we handle everything else.
       </p>
       <div class="hero-cta reveal">
-        <a href="/contact" class="btn-primary">Get an Instant Price →</a>
+        <a href="/contact" class="btn-primary">Get a Quote →</a>
         <a href="tel:+94774503744" class="btn-ghost">0774 503 744</a>
       </div>
     </div>
   </section>
 
-  <!-- Pricing overview -->
+  <!-- Pricing -->
   <section class="pricing-section">
     <div class="pricing-inner">
       <div class="stag reveal">Transparent Pricing</div>
-      <h2 class="reveal">Three Packages, One Standard of Work</h2>
-      <p class="sdesc reveal">All packages include tile leveling system, Tokyo Super HP cement, Swisstek grout, and a clean finished edge. You supply the tiles — we handle everything else.</p>
+      <h2 class="reveal">Four Packages, One Standard of Work</h2>
+      <p class="sdesc reveal">Rate depends on tile size — larger tiles require more precision, specialist adhesive, and leveling. All packages include tile leveling system, Tokyo Super HP cement, and Swisstek grout.</p>
 
       <div class="pkg-grid reveal">
 
         <div class="pkg-card">
-          <div class="pkg-name">Standard</div>
-          <div class="pkg-sub">Up to 4×2 tiles · Spacer joints</div>
+          <div class="pkg-name">Small Tiles</div>
+          <div class="pkg-sub">≤ 1 sq.m per tile</div>
           <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 350 <em>/sq.ft</em></span></div>
           <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 250 <em>/lin.ft</em></span></div>
         </div>
@@ -50,18 +50,29 @@ import Footer from '../../components/Footer.astro';
         <div class="pkg-card pkg-card--mid">
           <div class="pkg-badge">Most Popular</div>
           <div class="pkg-name">Medium Tiles</div>
-          <div class="pkg-sub">Router edge · Precision levelling · Large format</div>
+          <div class="pkg-sub">1 – 2 sq.m per tile</div>
           <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 500 <em>/sq.ft</em></span></div>
+          <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 300 <em>/lin.ft</em></span></div>
+        </div>
+
+        <div class="pkg-card">
+          <div class="pkg-name">Large Tiles</div>
+          <div class="pkg-sub">&gt; 2 sq.m per tile</div>
+          <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 700 <em>/sq.ft</em></span></div>
           <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 350 <em>/lin.ft</em></span></div>
         </div>
 
         <div class="pkg-card">
-          <div class="pkg-name">Large Tiles & Slabs</div>
-          <div class="pkg-sub">Levelling clips · Expert handling · Seamless finish</div>
-          <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 700 <em>/sq.ft</em></span></div>
-          <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 450 <em>/lin.ft</em></span></div>
+          <div class="pkg-name">Plank Tiles</div>
+          <div class="pkg-sub">Any length · Long-format planks</div>
+          <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 500 <em>/sq.ft</em></span></div>
+          <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 250 <em>/lin.ft</em></span></div>
         </div>
 
+      </div>
+
+      <div class="not-included reveal">
+        <strong>Not included:</strong> Tiles and tile accessories — you source your preferred tiles from any supplier. All adhesive, leveling clips, and grout are supplied by us.
       </div>
     </div>
   </section>
@@ -104,6 +115,7 @@ import Footer from '../../components/Footer.astro';
     text-transform: uppercase;
     color: rgba(245,240,232,.55);
     margin-bottom: 1.2rem;
+    flex-wrap: wrap;
   }
   .breadcrumb a { color: rgba(245,240,232,.55); text-decoration: none; transition: color .2s; }
   .breadcrumb a:hover { color: var(--clay); }
@@ -130,7 +142,6 @@ import Footer from '../../components/Footer.astro';
   .btn-primary {
     display: inline-flex;
     align-items: center;
-    gap: .5rem;
     background: var(--clay);
     color: #fff;
     padding: .75rem 1.6rem;
@@ -140,9 +151,10 @@ import Footer from '../../components/Footer.astro';
     letter-spacing: .06em;
     text-transform: uppercase;
     text-decoration: none;
-    transition: background .2s, transform .2s;
+    min-height: 44px;
+    transition: background .2s;
   }
-  .btn-primary:hover { background: #b5673c; transform: translateY(-2px); }
+  .btn-primary:hover { background: #b5673c; }
 
   .btn-ghost {
     display: inline-flex;
@@ -157,11 +169,11 @@ import Footer from '../../components/Footer.astro';
     letter-spacing: .06em;
     text-transform: uppercase;
     text-decoration: none;
+    min-height: 44px;
     transition: border-color .2s, color .2s;
   }
   .btn-ghost:hover { border-color: var(--clay); color: var(--clay); }
 
-  /* Pricing section */
   .pricing-section {
     background: var(--charcoal);
     padding: 5rem 4rem;
@@ -200,12 +212,13 @@ import Footer from '../../components/Footer.astro';
 
   .pkg-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1px;
     background: rgba(255,255,255,.08);
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 3px;
     overflow: hidden;
+    margin-bottom: 1.6rem;
   }
 
   .pkg-card {
@@ -227,70 +240,86 @@ import Footer from '../../components/Footer.astro';
     display: inline-block;
     background: var(--clay);
     color: #fff;
-    font-size: .65rem;
+    font-size: .62rem;
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
-    padding: .2rem .6rem;
+    padding: .18rem .6rem;
     border-radius: 20px;
     width: fit-content;
-    margin-bottom: .3rem;
+    margin-bottom: .2rem;
   }
 
   .pkg-name {
     font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--cream);
   }
 
   .pkg-sub {
-    font-size: .75rem;
-    color: rgba(245,240,232,.5);
+    font-size: .72rem;
+    color: rgba(245,240,232,.45);
     line-height: 1.5;
     border-bottom: 1px solid rgba(255,255,255,.07);
-    padding-bottom: .8rem;
-    margin-bottom: .3rem;
+    padding-bottom: .75rem;
+    margin-bottom: .2rem;
   }
 
   .pkg-price-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    gap: .4rem;
   }
 
   .pkg-label {
-    font-size: .72rem;
-    color: rgba(245,240,232,.45);
+    font-size: .7rem;
+    color: rgba(245,240,232,.42);
     text-transform: uppercase;
     letter-spacing: .08em;
+    flex-shrink: 0;
   }
 
   .pkg-price {
     font-family: 'Playfair Display', serif;
-    font-size: 1rem;
+    font-size: .95rem;
     font-weight: 700;
     color: var(--clay);
+    text-align: right;
   }
 
   .pkg-price em {
     font-style: normal;
     font-family: 'DM Sans', sans-serif;
-    font-size: .7rem;
+    font-size: .65rem;
     font-weight: 300;
-    color: rgba(245,240,232,.4);
+    color: rgba(245,240,232,.38);
     margin-left: .1rem;
   }
+
+  .not-included {
+    font-size: .8rem;
+    color: rgba(245,240,232,.5);
+    padding: 1rem 1.2rem;
+    background: rgba(196,120,74,.05);
+    border-left: 3px solid rgba(196,120,74,.4);
+    border-radius: 0 3px 3px 0;
+    line-height: 1.65;
+  }
+
+  .not-included strong { color: rgba(245,240,232,.7); }
 
   @media (max-width: 1100px) {
     .page-hero { padding: 0 2.5rem 3.5rem; }
     .pricing-section { padding: 4.5rem 2.5rem; }
-    .pkg-grid { grid-template-columns: 1fr; }
-    .pkg-card--mid { border-left: none; border-right: none; border-top: 1px solid rgba(196,120,74,.18); border-bottom: 1px solid rgba(196,120,74,.18); }
+    .pkg-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
   @media (max-width: 768px) {
     .page-hero { padding: 0 1.5rem 3rem; min-height: 60vh; }
     .pricing-section { padding: 4rem 1.5rem; }
+    .pkg-grid { grid-template-columns: 1fr; }
+    .pkg-card--mid { border-left: none; border-right: none; border-top: 1px solid rgba(196,120,74,.18); border-bottom: 1px solid rgba(196,120,74,.18); }
   }
 </style>
