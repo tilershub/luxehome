@@ -1,6 +1,26 @@
 ---
 ---
 
+<!-- Area input modal -->
+<div id="bath-modal" class="bath-modal" role="dialog" aria-modal="true" aria-labelledby="bath-modal-title" hidden>
+  <div class="bath-modal-box">
+    <button class="bath-modal-close" aria-label="Close" onclick="document.getElementById('bath-modal').hidden=true;document.body.style.overflow=''">✕</button>
+    <div class="bath-modal-icon">📐</div>
+    <h3 id="bath-modal-title">What's your bathroom floor area?</h3>
+    <p class="bath-modal-sub">Enter the floor area in sq.ft to see your exact price.</p>
+    <div class="bath-modal-input-row">
+      <input type="number" id="bathAreaModal" min="1" max="999" placeholder="e.g. 45" inputmode="decimal" />
+      <span class="bath-modal-unit">sq.ft</span>
+    </div>
+    <div class="bath-modal-result" id="bathModalResult" hidden>
+      <div class="bmr-pkg" id="bmrPkg"></div>
+      <div class="bmr-price" id="bmrPrice"></div>
+      <div class="bmr-addons" id="bmrAddons"></div>
+    </div>
+    <a href="/contact" class="bath-modal-cta" id="bathModalCta">Book This Package →</a>
+  </div>
+</div>
+
 <section id="shop">
   <div class="stag reveal">What We Do</div>
   <h2 class="reveal">Services for Every<br />Space & Budget</h2>
@@ -22,11 +42,23 @@
         <div class="svc-tag">Full renovation · You supply tiles, bathware &amp; tapware</div>
       </div>
 
+      <!-- Area input inline -->
+      <div class="bath-area-row">
+        <label class="bath-area-label" for="bathAreaInline">Enter your floor area to see full price</label>
+        <div class="bath-area-field">
+          <input type="number" id="bathAreaInline" class="bath-area-input" min="1" max="999" placeholder="sq.ft" inputmode="decimal" aria-label="Bathroom floor area in sq.ft" />
+          <span class="bath-area-unit">sq.ft</span>
+        </div>
+      </div>
+
       <div class="flooring-tiers">
+        <!-- Essential Bath -->
         <div class="tier">
           <div class="tier-name">Essential Bath</div>
-          <div class="tier-row"><span class="tier-label">Up to 40 sq.ft</span><span class="tier-price">Rs. 450,000</span></div>
-          <div class="tier-row"><span class="tier-label">Over 40 sq.ft</span><span class="tier-price">+Rs. 5,000 <em>/sq.ft</em></span></div>
+          <div class="tier-price-wrap">
+            <span class="tier-price bath-price" data-base="450000" data-rate="5000">Rs. 4,50,000</span>
+            <span class="bath-price-note">up to 40 sq.ft</span>
+          </div>
           <ul class="tier-includes">
             <li>Wall Niches</li>
             <li>Plumbing</li>
@@ -37,11 +69,16 @@
             <li>Lighting</li>
             <li>Shower Cubicle</li>
           </ul>
+          <button class="tier-book-btn" data-pkg="Essential Bath" data-base="450000" data-rate="5000">Get a Quote →</button>
         </div>
+
+        <!-- Comfort Bath -->
         <div class="tier tier-mid">
           <div class="tier-name">Comfort Bath</div>
-          <div class="tier-row"><span class="tier-label">Up to 40 sq.ft</span><span class="tier-price">Rs. 550,000</span></div>
-          <div class="tier-row"><span class="tier-label">Over 40 sq.ft</span><span class="tier-price">+Rs. 6,000 <em>/sq.ft</em></span></div>
+          <div class="tier-price-wrap">
+            <span class="tier-price bath-price" data-base="550000" data-rate="6000">Rs. 5,50,000</span>
+            <span class="bath-price-note">up to 40 sq.ft</span>
+          </div>
           <ul class="tier-includes">
             <li>Wall Niches</li>
             <li>Plumbing</li>
@@ -53,11 +90,16 @@
             <li>Plain Ceiling</li>
             <li>Shower Cubicle</li>
           </ul>
+          <button class="tier-book-btn" data-pkg="Comfort Bath" data-base="550000" data-rate="6000">Get a Quote →</button>
         </div>
+
+        <!-- Signature Bath -->
         <div class="tier">
           <div class="tier-name">Signature Bath</div>
-          <div class="tier-row"><span class="tier-label">Up to 40 sq.ft</span><span class="tier-price">Rs. 650,000</span></div>
-          <div class="tier-row"><span class="tier-label">Over 40 sq.ft</span><span class="tier-price">+Rs. 6,000 <em>/sq.ft</em></span></div>
+          <div class="tier-price-wrap">
+            <span class="tier-price bath-price" data-base="650000" data-rate="7000">Rs. 6,50,000</span>
+            <span class="bath-price-note">up to 40 sq.ft</span>
+          </div>
           <ul class="tier-includes">
             <li>Wall Niches</li>
             <li>Plumbing</li>
@@ -70,10 +112,30 @@
             <li>Shower Cubicle</li>
             <li>Vanity Cupboard</li>
           </ul>
+          <button class="tier-book-btn" data-pkg="Signature Bath" data-base="650000" data-rate="7000">Get a Quote →</button>
         </div>
       </div>
 
-      <a href="/services/bathroom" class="svc-link flooring-link">View Packages &amp; Book →</a>
+      <!-- Add-ons -->
+      <div class="bath-addons">
+        <div class="addons-head">Optional Add-ons</div>
+        <div class="addons-grid">
+          <div class="addon-card">
+            <div class="addon-name">Demolition Works</div>
+            <div class="addon-price addon-calc" data-rate="1000">Rs. 1,000 <em>/sq.ft</em></div>
+          </div>
+          <div class="addon-card">
+            <div class="addon-name">Wall Plastering</div>
+            <div class="addon-price addon-calc" data-rate="700">Rs. 700 <em>/sq.ft</em></div>
+          </div>
+          <div class="addon-card addon-flat-card">
+            <div class="addon-name">3D Design</div>
+            <div class="addon-price">Rs. 25,000 <em>/bathroom</em></div>
+          </div>
+        </div>
+      </div>
+
+      <a href="/contact" class="svc-link flooring-link">View Full Packages &amp; Book →</a>
     </div>
 
     <!-- Floor — 4 tile-size packages -->
@@ -169,7 +231,430 @@
   </div>
 </section>
 
+<script is:inline>
+(function () {
+  function formatRs(n) {
+    return 'Rs.\u00a0' + Math.round(n).toLocaleString('en-IN');
+  }
+
+  function calcBathPrice(base, rate, area) {
+    if (!area || area <= 0) return base;
+    var extra = Math.max(0, area - 40);
+    return base + extra * rate;
+  }
+
+  function updatePrices(area) {
+    // Package prices
+    document.querySelectorAll('.bath-price').forEach(function (el) {
+      var base = parseInt(el.dataset.base, 10);
+      var rate = parseInt(el.dataset.rate, 10);
+      el.textContent = formatRs(calcBathPrice(base, rate, area));
+    });
+
+    // Price notes
+    document.querySelectorAll('.bath-price-note').forEach(function (el) {
+      el.textContent = area > 0 ? area + ' sq.ft total' : 'up to 40 sq.ft';
+    });
+
+    // Addon prices (per-sqft ones)
+    document.querySelectorAll('.addon-calc').forEach(function (el) {
+      var rate = parseInt(el.dataset.rate, 10);
+      if (area > 0) {
+        el.innerHTML = formatRs(area * rate);
+      } else {
+        el.innerHTML = formatRs(rate) + ' <em>/sq.ft</em>';
+      }
+    });
+  }
+
+  // Inline area input
+  var inlineInput = document.getElementById('bathAreaInline');
+  if (inlineInput) {
+    inlineInput.addEventListener('input', function () {
+      updatePrices(parseFloat(this.value) || 0);
+    });
+  }
+
+  // "Get a Quote" buttons → open modal
+  document.querySelectorAll('.tier-book-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pkg = btn.dataset.pkg;
+      var base = parseInt(btn.dataset.base, 10);
+      var rate = parseInt(btn.dataset.rate, 10);
+      var inlineVal = parseFloat((inlineInput && inlineInput.value) || 0);
+
+      var modal = document.getElementById('bath-modal');
+      var modalInput = document.getElementById('bathAreaModal');
+      var result = document.getElementById('bathModalResult');
+
+      // Pre-fill from inline input
+      if (inlineVal > 0) modalInput.value = inlineVal;
+      else modalInput.value = '';
+
+      result.hidden = true;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      setTimeout(function () { modalInput.focus(); }, 80);
+
+      function renderResult() {
+        var area = parseFloat(modalInput.value) || 0;
+        if (area <= 0) { result.hidden = true; return; }
+
+        var pkgTotal = calcBathPrice(base, rate, area);
+        var demolition = area * 1000;
+        var plastering = area * 700;
+
+        document.getElementById('bmrPkg').textContent = pkg;
+        document.getElementById('bmrPrice').textContent = formatRs(pkgTotal);
+        document.getElementById('bmrAddons').innerHTML =
+          '<div class="bmr-addon-row"><span>Demolition Works</span><span>' + formatRs(demolition) + '</span></div>' +
+          '<div class="bmr-addon-row"><span>Wall Plastering</span><span>' + formatRs(plastering) + '</span></div>' +
+          '<div class="bmr-addon-row"><span>3D Design</span><span>Rs.\u00a025,000</span></div>';
+
+        result.hidden = false;
+
+        // Also sync inline input
+        if (inlineInput) { inlineInput.value = area; updatePrices(area); }
+      }
+
+      modalInput.addEventListener('input', renderResult);
+      if (inlineVal > 0) renderResult();
+
+      // Store ref to clean up later
+      modal._renderFn = renderResult;
+      modal._modalInput = modalInput;
+    });
+  });
+
+  // Close modal on backdrop click
+  var modal = document.getElementById('bath-modal');
+  if (modal) {
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+      }
+    });
+  }
+})();
+</script>
+
 <style>
+  /* ── Modal ── */
+
+  .bath-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .72);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .bath-modal[hidden] { display: none; }
+
+  .bath-modal-box {
+    background: #1e1a17;
+    border: 1px solid rgba(196, 120, 74, .25);
+    border-radius: 6px;
+    padding: 2.4rem 2rem;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  }
+
+  .bath-modal-close {
+    position: absolute;
+    top: .9rem;
+    right: .9rem;
+    background: none;
+    border: none;
+    color: rgba(245,240,232,.45);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: .3rem .5rem;
+    line-height: 1;
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bath-modal-icon {
+    font-size: 2rem;
+    margin-bottom: .75rem;
+  }
+
+  .bath-modal-box h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--cream);
+    font-size: 1.25rem;
+    margin: 0 0 .5rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .bath-modal-sub {
+    font-size: .8rem;
+    color: rgba(245,240,232,.5);
+    margin: 0 0 1.4rem;
+    line-height: 1.55;
+  }
+
+  .bath-modal-input-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    justify-content: center;
+    margin-bottom: 1.4rem;
+  }
+
+  #bathAreaModal {
+    width: 120px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(196, 120, 74, .35);
+    border-radius: 4px;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.2rem;
+    padding: .55rem .75rem;
+    text-align: center;
+    outline: none;
+  }
+
+  #bathAreaModal:focus {
+    border-color: var(--clay);
+    background: rgba(196,120,74,.08);
+  }
+
+  .bath-modal-unit {
+    font-size: .8rem;
+    color: rgba(245,240,232,.45);
+  }
+
+  .bath-modal-result {
+    background: rgba(196,120,74,.07);
+    border: 1px solid rgba(196,120,74,.18);
+    border-radius: 4px;
+    padding: 1.1rem 1.2rem;
+    text-align: left;
+    margin-bottom: 1.2rem;
+  }
+
+  .bmr-pkg {
+    font-size: .72rem;
+    color: var(--clay);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-weight: 600;
+    margin-bottom: .4rem;
+  }
+
+  .bmr-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: .8rem;
+  }
+
+  .bmr-addon-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: .75rem;
+    color: rgba(245,240,232,.5);
+    padding: .3rem 0;
+    border-top: 1px solid rgba(255,255,255,.06);
+    gap: .5rem;
+  }
+
+  .bmr-addon-row span:last-child {
+    color: rgba(245,240,232,.75);
+    font-weight: 500;
+    text-align: right;
+  }
+
+  .bath-modal-cta {
+    display: block;
+    background: var(--clay);
+    color: var(--cream);
+    text-decoration: none;
+    padding: .85rem 1.5rem;
+    border-radius: 3px;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: background .2s;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bath-modal-cta:hover { background: #b8673e; }
+
+  /* ── Inline area input ── */
+
+  .bath-area-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(196,120,74,.06);
+    border: 1px solid rgba(196,120,74,.2);
+    border-radius: 4px;
+    padding: .75rem 1rem;
+    margin-bottom: 1.4rem;
+    flex-wrap: wrap;
+    gap: .6rem;
+  }
+
+  .bath-area-label {
+    font-size: .72rem;
+    color: rgba(245,240,232,.5);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 500;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .bath-area-field {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+
+  .bath-area-input {
+    width: 80px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(196,120,74,.3);
+    border-radius: 3px;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    padding: .4rem .6rem;
+    text-align: center;
+    outline: none;
+    min-height: 38px;
+  }
+
+  .bath-area-input:focus {
+    border-color: var(--clay);
+  }
+
+  .bath-area-unit {
+    font-size: .75rem;
+    color: rgba(245,240,232,.4);
+  }
+
+  /* ── Package price display ── */
+
+  .tier-price-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .bath-price-note {
+    font-size: .65rem;
+    color: rgba(245,240,232,.35);
+    font-weight: 300;
+  }
+
+  /* ── Book button ── */
+
+  .tier-book-btn {
+    margin-top: auto;
+    background: none;
+    border: 1px solid rgba(196,120,74,.35);
+    color: var(--clay);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .55rem 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .tier-book-btn:hover {
+    background: rgba(196,120,74,.12);
+    border-color: var(--clay);
+  }
+
+  /* ── Add-ons ── */
+
+  .bath-addons {
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 4px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .addons-head {
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-weight: 600;
+    color: rgba(245,240,232,.35);
+    margin-bottom: .9rem;
+  }
+
+  .addons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .8rem;
+  }
+
+  .addon-card {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 3px;
+    padding: .85rem .9rem;
+  }
+
+  .addon-name {
+    font-size: .7rem;
+    color: rgba(245,240,232,.5);
+    font-weight: 400;
+    margin-bottom: .4rem;
+    line-height: 1.4;
+  }
+
+  .addon-price {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--clay);
+    transition: all .2s;
+  }
+
+  .addon-price em {
+    font-style: normal;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .65rem;
+    font-weight: 300;
+    color: rgba(245,240,232,.38);
+    margin-left: .1rem;
+  }
+
+  /* ── Section ── */
+
   section {
     background: var(--charcoal);
     padding: 5.5rem 4rem;
@@ -428,6 +913,7 @@
     flex-direction: column;
     gap: .3rem;
     margin-top: .2rem;
+    flex: 1;
   }
 
   .tier-includes li {
@@ -455,6 +941,7 @@
     .svc-grid { grid-template-columns: repeat(2, 1fr); }
     .sc.wide { grid-column: span 2; }
     .floor-tiers-4 { grid-template-columns: repeat(2, 1fr); }
+    .addons-grid { grid-template-columns: repeat(3, 1fr); }
   }
 
   @media (max-width: 768px) {
@@ -472,6 +959,8 @@
       border-top: 1px solid rgba(196, 120, 74, .18);
       border-bottom: 1px solid rgba(196, 120, 74, .18);
     }
+    .addons-grid { grid-template-columns: 1fr; }
+    .bath-modal-box { padding: 2rem 1.4rem; }
   }
 
   @media (max-width: 480px) {
@@ -491,5 +980,8 @@
       padding: .7rem 0;
       display: block;
     }
+
+    .bath-area-row { flex-direction: column; align-items: flex-start; }
+    .addons-grid { grid-template-columns: 1fr; }
   }
 </style>
