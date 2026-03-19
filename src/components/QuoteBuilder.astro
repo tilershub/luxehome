@@ -1489,5 +1489,16 @@ const { singleCat } = Astro.props;
     .qb-bank-box { grid-template-columns: 110px 1fr; }
     .qb-succ-bank-grid { grid-template-columns: 110px 1fr; }
     .qb-succ-steps ol { line-height: 1.8; }
+
+    /* Prevent iOS Safari from auto-zooming on input focus */
+    .qb-qty-in,
+    .qb-field input {
+      font-size: 1rem;
+    }
+
+    .qb-submit-btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>

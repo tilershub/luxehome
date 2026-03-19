@@ -19,6 +19,12 @@
   padding: 0;
 }
 
+/* Prevent tap highlight on interactive elements */
+a, button, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 /* Design Tokens */
 :root {
   --cream: #f5f0e8;
@@ -35,6 +41,12 @@
 html {
   scroll-behavior: smooth;
   font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (max-width: 480px) {
+  html { font-size: 15px; }
 }
 
 body {
@@ -174,4 +186,21 @@ h2 {
 @keyframes sf {
   0%   { opacity: .65; }
   100% { opacity: 1; }
+}
+
+/* ── Reduced Motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
