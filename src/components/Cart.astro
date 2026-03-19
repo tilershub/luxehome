@@ -16,24 +16,34 @@
 <div id="cartDrawer" class="cart-drawer" hidden aria-label="Quote cart">
 
   <div class="cart-head">
-    <div class="cart-head-title">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+    <div class="cart-head-left">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
         <line x1="3" y1="6" x2="21" y2="6"/>
         <path d="M16 10a4 4 0 01-8 0"/>
       </svg>
-      Your Quote Cart
+      <span>Quote Cart</span>
     </div>
-    <button id="cartClose" class="cart-close" aria-label="Close cart">✕</button>
+    <button id="cartClose" class="cart-close" aria-label="Close cart">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
   </div>
 
   <div class="cart-body">
 
     <!-- Empty state -->
     <div id="cartEmpty" class="cart-empty">
-      <div class="cart-empty-icon">🛒</div>
-      <p>No services added yet.</p>
-      <span>Browse our services and add them here to get your quote.</span>
+      <div class="cart-empty-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+      </div>
+      <p class="cart-empty-title">Cart is empty</p>
+      <span class="cart-empty-sub">Add services from any page to build your quote.</span>
     </div>
 
     <!-- Items list -->
@@ -47,19 +57,16 @@
           <span>Subtotal</span>
           <span id="cartSubtotal"></span>
         </div>
-        <div class="totals-row totals-deposit">
-          <span>10% Booking Deposit</span>
-          <span id="cartDeposit"></span>
+        <div class="totals-deposit">
+          <span class="deposit-label">10% Booking Deposit</span>
+          <span id="cartDeposit" class="deposit-amt"></span>
         </div>
       </div>
 
       <div class="payment-box">
         <div class="payment-head">Pay via Bank Transfer</div>
-        <div class="payment-detail-row">
-          <span>Bank</span><span>Contact us for details</span>
-        </div>
         <div class="payment-note">
-          After transferring your 10% deposit, WhatsApp the payment screenshot to confirm your booking.
+          Transfer your 10% deposit, then WhatsApp the screenshot to confirm.
         </div>
       </div>
 
@@ -68,7 +75,7 @@
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
           <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
         </svg>
-        Send Receipt — 0774 503 744
+        Confirm Booking — 0774 503 744
       </a>
 
       <button id="cartClear" class="cart-clear-btn">Remove all items</button>
@@ -118,7 +125,6 @@
     countBadge.hidden = count === 0;
     btn.setAttribute('aria-label', 'View cart (' + count + ' item' + (count !== 1 ? 's' : '') + ')');
 
-    // Empty / items
     if (count === 0) {
       emptyEl.hidden = false;
       itemsList.hidden = true;
@@ -130,24 +136,27 @@
     itemsList.hidden = false;
     footer.hidden = false;
 
-    // Build items HTML
+    // Build items HTML — classes styled via :global() to avoid Astro scoping
     var html = '';
     items.forEach(function (item) {
-      html += '<li class="cart-item" data-uid="' + item.uid + '">' +
-        '<div class="ci-info">' +
-          '<div class="ci-name">' + item.name + '</div>' +
-          (item.details ? '<div class="ci-details">' + item.details + '</div>' : '') +
-        '</div>' +
-        '<div class="ci-right">' +
-          '<div class="ci-price">' + fmtRs(item.price) + '</div>' +
-          '<button class="ci-remove" data-uid="' + item.uid + '" aria-label="Remove ' + item.name + '">✕</button>' +
-        '</div>' +
-      '</li>';
+      html +=
+        '<li class="ci">' +
+          '<div class="ci-body">' +
+            '<div class="ci-name">' + item.name + '</div>' +
+            (item.details ? '<div class="ci-details">' + item.details + '</div>' : '') +
+          '</div>' +
+          '<div class="ci-meta">' +
+            '<div class="ci-price">' + fmtRs(item.price) + '</div>' +
+            '<button class="ci-rm" data-uid="' + item.uid + '" aria-label="Remove ' + item.name + '">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</li>';
     });
     itemsList.innerHTML = html;
 
     // Remove buttons
-    itemsList.querySelectorAll('.ci-remove').forEach(function (b) {
+    itemsList.querySelectorAll('.ci-rm').forEach(function (b) {
       b.addEventListener('click', function () {
         removeItem(b.dataset.uid);
       });
@@ -201,7 +210,7 @@
       drawer.hidden = true;
       overlay.hidden = true;
       document.body.style.overflow = '';
-    }, 320);
+    }, 340);
   }
 
   btn.addEventListener('click', openCart);
@@ -212,7 +221,6 @@
   /* ── Pulse animation on cart button to confirm add ── */
   function pulseCart() {
     btn.classList.remove('cart-pulse');
-    // Force reflow so re-adding the class triggers the animation again
     void btn.offsetWidth;
     btn.classList.add('cart-pulse');
   }
@@ -220,7 +228,6 @@
   /* ── Global API for service pages ── */
   window.LHCart = {
     add: function (item) {
-      // item: { name, details, price }
       var items = loadItems();
       var entry = {
         uid: Date.now() + '-' + Math.random().toString(36).slice(2),
@@ -231,11 +238,10 @@
       items.push(entry);
       saveItems(items);
       render();
-      pulseCart(); // Animate button — do NOT auto-open drawer
+      pulseCart();
     }
   };
 
-  // Init
   render();
 })();
 </script>
@@ -246,9 +252,9 @@
   .cart-btn {
     position: fixed;
     bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
-    right: max(1.5rem, env(safe-area-inset-right, 1.5rem));
-    width: 52px;
-    height: 52px;
+    right: max(1.25rem, env(safe-area-inset-right, 1.25rem));
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
     background: var(--clay);
     color: #fff;
@@ -257,41 +263,42 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    box-shadow: 0 6px 24px rgba(196,120,74,.45), 0 2px 8px rgba(0,0,0,.25);
     z-index: 8000;
-    transition: background .2s, transform .2s;
+    transition: background .2s, transform .2s, box-shadow .2s;
     touch-action: manipulation;
   }
 
   .cart-btn:hover { background: #b5673c; transform: scale(1.07); }
-  .cart-btn:active { transform: scale(.96); }
+  .cart-btn:active { transform: scale(.94); }
 
   @keyframes cartPop {
     0%   { transform: scale(1); }
-    35%  { transform: scale(1.22); }
-    65%  { transform: scale(.93); }
+    35%  { transform: scale(1.25); }
+    65%  { transform: scale(.91); }
     100% { transform: scale(1); }
   }
 
-  .cart-pulse { animation: cartPop .38s cubic-bezier(.36,.07,.19,.97) both; }
+  .cart-pulse { animation: cartPop .4s cubic-bezier(.36,.07,.19,.97) both; }
 
   .cart-count {
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -3px;
+    right: -3px;
     background: #e94040;
     color: #fff;
-    font-size: .65rem;
-    font-weight: 700;
+    font-size: .6rem;
+    font-weight: 800;
     line-height: 1;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 9px;
+    min-width: 19px;
+    height: 19px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 4px;
     border: 2px solid #fff;
+    font-family: 'DM Sans', sans-serif;
   }
 
   /* ── Overlay ── */
@@ -299,11 +306,12 @@
   .cart-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.55);
+    background: rgba(10,8,6,.6);
     z-index: 8500;
     opacity: 0;
-    transition: opacity .32s;
-    backdrop-filter: blur(2px);
+    transition: opacity .34s;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
   }
 
   .cart-overlay.open { opacity: 1; }
@@ -315,14 +323,15 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(420px, 100vw);
-    background: #faf7f2;
+    width: min(440px, 100vw);
+    background: #f9f6f1;
     z-index: 9000;
     display: flex;
     flex-direction: column;
     transform: translateX(100%);
-    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    transition: transform .34s cubic-bezier(.32,0,.18,1);
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: -8px 0 40px rgba(0,0,0,.18);
   }
 
   .cart-drawer.open { transform: translateX(0); }
@@ -333,39 +342,43 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.2rem 1.4rem;
-    border-bottom: 1px solid rgba(196,120,74,.18);
-    background: var(--charcoal);
+    padding: 1rem 1.25rem;
+    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+    background: #1e1a17;
     flex-shrink: 0;
+    border-bottom: 1px solid rgba(196,120,74,.15);
   }
 
-  .cart-head-title {
+  .cart-head-left {
     display: flex;
     align-items: center;
     gap: .55rem;
     font-family: 'Playfair Display', serif;
-    font-size: 1rem;
+    font-size: .95rem;
     font-weight: 700;
-    color: var(--cream);
+    color: #f5f0e8;
+    letter-spacing: .01em;
   }
 
+  .cart-head-left svg { color: var(--clay); flex-shrink: 0; }
+
   .cart-close {
-    background: none;
-    border: none;
-    color: rgba(245,240,232,.5);
-    font-size: 1rem;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.1);
+    color: rgba(245,240,232,.65);
     cursor: pointer;
-    padding: .3rem .5rem;
-    min-width: 44px;
-    min-height: 44px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     touch-action: manipulation;
-    transition: color .2s;
+    transition: background .2s, color .2s;
+    flex-shrink: 0;
   }
 
-  .cart-close:hover { color: var(--cream); }
+  .cart-close:hover { background: rgba(255,255,255,.15); color: #f5f0e8; }
 
   /* ── Body ── */
 
@@ -375,6 +388,7 @@
     display: flex;
     flex-direction: column;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   /* ── Empty state ── */
@@ -387,115 +401,65 @@
     justify-content: center;
     padding: 3rem 2rem;
     text-align: center;
-    gap: .6rem;
+    gap: .7rem;
   }
 
-  .cart-empty-icon { font-size: 2.8rem; margin-bottom: .4rem; }
+  .cart-empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(196,120,74,.08);
+    border: 1px solid rgba(196,120,74,.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(196,120,74,.5);
+    margin-bottom: .4rem;
+  }
 
-  .cart-empty p {
+  .cart-empty-title {
     font-family: 'Playfair Display', serif;
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: var(--charcoal);
+    color: #1e1a17;
   }
 
-  .cart-empty span {
+  .cart-empty-sub {
     font-size: .8rem;
-    color: var(--warm-gray);
-    line-height: 1.6;
-    max-width: 24ch;
+    color: #6b5f54;
+    line-height: 1.65;
+    max-width: 26ch;
   }
 
   /* ── Items list ── */
 
   .cart-items {
     list-style: none;
-    padding: 0;
+    padding: .75rem .9rem;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: .5rem;
+    flex: 1;
   }
-
-  .cart-item {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: .8rem;
-    padding: 1rem 1.4rem;
-    border-bottom: 1px solid rgba(196,120,74,.12);
-    background: #fff;
-  }
-
-  .cart-item:first-child { border-top: 1px solid rgba(196,120,74,.12); }
-
-  .ci-info { flex: 1; min-width: 0; }
-
-  .ci-name {
-    font-size: .88rem;
-    font-weight: 600;
-    color: var(--charcoal);
-    line-height: 1.3;
-    margin-bottom: .2rem;
-  }
-
-  .ci-details {
-    font-size: .72rem;
-    color: var(--warm-gray);
-    line-height: 1.5;
-  }
-
-  .ci-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: .4rem;
-    flex-shrink: 0;
-  }
-
-  .ci-price {
-    font-family: 'Playfair Display', serif;
-    font-size: .95rem;
-    font-weight: 700;
-    color: var(--clay);
-    white-space: nowrap;
-  }
-
-  .ci-remove {
-    background: none;
-    border: none;
-    color: rgba(0,0,0,.25);
-    font-size: .75rem;
-    cursor: pointer;
-    padding: .2rem .3rem;
-    min-width: 32px;
-    min-height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 3px;
-    touch-action: manipulation;
-    transition: color .2s, background .2s;
-  }
-
-  .ci-remove:hover { color: #e94040; background: rgba(233,64,64,.08); }
 
   /* ── Footer ── */
 
   .cart-footer {
-    padding: 1.2rem 1.4rem;
+    padding: 1rem 1.25rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    border-top: 1px solid rgba(196,120,74,.18);
-    background: #faf7f2;
+    gap: .85rem;
+    border-top: 1px solid rgba(196,120,74,.14);
+    background: #f9f6f1;
     flex-shrink: 0;
   }
 
   .cart-totals {
     display: flex;
     flex-direction: column;
-    gap: .4rem;
+    gap: .5rem;
   }
 
   .totals-row {
@@ -503,7 +467,7 @@
     justify-content: space-between;
     align-items: baseline;
     font-size: .82rem;
-    color: var(--warm-gray);
+    color: #6b5f54;
     gap: .5rem;
   }
 
@@ -511,61 +475,61 @@
     font-family: 'Playfair Display', serif;
     font-size: .95rem;
     font-weight: 700;
-    color: var(--charcoal);
+    color: #1e1a17;
     text-align: right;
   }
 
   .totals-deposit {
-    background: rgba(196,120,74,.07);
-    border: 1px solid rgba(196,120,74,.2);
-    border-radius: 4px;
-    padding: .6rem .8rem;
-    margin-top: .2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e1a17;
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    gap: .5rem;
   }
 
-  .totals-deposit span:first-child { color: var(--charcoal); font-weight: 500; }
+  .deposit-label {
+    font-size: .78rem;
+    color: rgba(245,240,232,.6);
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+  }
 
-  .totals-deposit span:last-child {
-    font-size: 1.1rem;
+  .deposit-amt {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 800;
     color: var(--clay);
+    text-align: right;
+    flex-shrink: 0;
   }
 
   /* ── Payment box ── */
 
   .payment-box {
-    background: rgba(196,120,74,.05);
+    background: rgba(196,120,74,.06);
     border: 1px solid rgba(196,120,74,.18);
-    border-radius: 4px;
-    padding: 1rem;
+    border-radius: 8px;
+    padding: .85rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: .35rem;
   }
 
   .payment-head {
-    font-size: .72rem;
+    font-size: .7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .1em;
     color: var(--clay);
   }
 
-  .payment-detail-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: .76rem;
-    color: var(--warm-gray);
-    gap: .5rem;
-  }
-
-  .payment-detail-row span:last-child { color: var(--charcoal); font-weight: 500; }
-
   .payment-note {
-    font-size: .72rem;
-    color: var(--warm-gray);
+    font-size: .75rem;
+    color: #6b5f54;
     line-height: 1.55;
-    padding-top: .4rem;
-    border-top: 1px solid rgba(196,120,74,.12);
   }
 
   /* ── WhatsApp CTA ── */
@@ -574,35 +538,114 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: .55rem;
+    gap: .6rem;
     background: #25d366;
     color: #fff;
     text-decoration: none;
     padding: .9rem 1.2rem;
-    border-radius: 4px;
-    font-size: .82rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .84rem;
     font-weight: 700;
-    letter-spacing: .04em;
+    letter-spacing: .02em;
     min-height: 52px;
-    transition: background .2s;
+    transition: background .2s, transform .15s;
     touch-action: manipulation;
+    box-shadow: 0 4px 16px rgba(37,211,102,.3);
   }
 
-  .cart-wa-btn:hover { background: #1ebe5d; }
+  .cart-wa-btn:hover { background: #1ebe5d; transform: translateY(-1px); }
+  .cart-wa-btn:active { transform: scale(.98); }
 
   /* ── Clear button ── */
 
   .cart-clear-btn {
     background: none;
     border: none;
-    color: rgba(0,0,0,.3);
+    color: rgba(107,95,84,.45);
+    font-family: 'DM Sans', sans-serif;
     font-size: .72rem;
     cursor: pointer;
     text-align: center;
-    padding: .3rem;
+    padding: .2rem;
     touch-action: manipulation;
     transition: color .2s;
   }
 
   .cart-clear-btn:hover { color: #e94040; }
+</style>
+
+<!-- :global styles for JS-injected cart item elements -->
+<style is:global>
+  .ci {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+    background: #fff;
+    border-radius: 10px;
+    padding: .9rem 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 0 0 1px rgba(196,120,74,.1);
+    transition: box-shadow .2s;
+  }
+
+  .ci:hover { box-shadow: 0 3px 12px rgba(0,0,0,.09), 0 0 0 1px rgba(196,120,74,.18); }
+
+  .ci-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .22rem;
+  }
+
+  .ci-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    color: #1e1a17;
+    line-height: 1.3;
+  }
+
+  .ci-details {
+    font-size: .73rem;
+    color: #6b5f54;
+    line-height: 1.45;
+  }
+
+  .ci-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .35rem;
+    flex-shrink: 0;
+  }
+
+  .ci-price {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: #c4784a;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+
+  .ci-rm {
+    background: rgba(107,95,84,.08);
+    border: none;
+    color: rgba(107,95,84,.5);
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    transition: background .2s, color .2s;
+    flex-shrink: 0;
+    padding: 0;
+  }
+
+  .ci-rm:hover { background: rgba(233,64,64,.12); color: #e94040; }
 </style>
