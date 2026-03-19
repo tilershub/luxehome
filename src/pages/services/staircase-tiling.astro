@@ -158,7 +158,7 @@ import Footer from '../../components/Footer.astro';
             <div class="cr-row"><span>Step length</span><span id="dispStepLen"></span></div>
             <div class="cr-total"><span>Tiling Total</span><span id="stairTotal"></span></div>
           </div>
-          <a href="/contact" class="calc-cta">Book Staircase Tiling →</a>
+          <button class="calc-cta" id="stairAtcBtn">Add to Cart</button>
         </div>
 
         <!-- Railing Calculator -->
@@ -177,7 +177,7 @@ import Footer from '../../components/Footer.astro';
           <div class="calc-result" id="railResult" hidden>
             <div class="cr-total"><span>Railing Total</span><span id="railTotal"></span></div>
           </div>
-          <a href="/contact" class="calc-cta">Book Railing →</a>
+          <button class="calc-cta" id="railAtcBtn">Add to Cart</button>
         </div>
 
       </div>
@@ -310,6 +310,27 @@ import Footer from '../../components/Footer.astro';
     if (len <= 0) { railResult.hidden = true; return; }
     document.getElementById('railTotal').textContent = fmt(len * 12500);
     railResult.hidden = false;
+  });
+
+  // Cart buttons
+  document.getElementById('stairAtcBtn').addEventListener('click', function () {
+    var stepLen = parseFloat(stepLenIn.value) || 0;
+    var steps = parseInt(numStepsIn.value) || 0;
+    if (stepLen <= 0 || steps <= 0) {
+      stepLenIn.focus();
+      return;
+    }
+    var landings = parseInt(numLandingsIn.value) || 0;
+    var effSteps = steps + landings * 2;
+    var total = effSteps * stepLen * 2400;
+    var details = effSteps + ' steps × ' + stepLen + ' lin.ft';
+    window.LHCart.add({ name: 'Staircase Tiling', details: details, price: total });
+  });
+
+  document.getElementById('railAtcBtn').addEventListener('click', function () {
+    var len = parseFloat(railLenIn.value) || 0;
+    if (len <= 0) { railLenIn.focus(); return; }
+    window.LHCart.add({ name: 'Staircase Railing', details: len + ' ft', price: len * 12500 });
   });
 })();
 </script>
