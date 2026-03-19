@@ -167,33 +167,41 @@ const { singleCat } = Astro.props;
   /* ─── SERVICE DATA ─────────────────────────────────────────── */
   var SERVICES = [
     // FLOORING
-    { id:'floor-std',   cat:'flooring', name:'Floor Tiling', tier:'Standard',       sub:'Up to 4×2 tiles · Spacer joint · Swisstek grout',         unit:'sq.ft', rate:350,    skirtRate:250 },
-    { id:'floor-med',   cat:'flooring', name:'Floor Tiling', tier:'Medium Tiles',   sub:'Router edge · Precision levelling · Large format',          unit:'sq.ft', rate:500,    skirtRate:350 },
-    { id:'floor-large', cat:'flooring', name:'Floor Tiling', tier:'Large / Slabs',  sub:'Levelling clips · Expert handling · Seamless finish',        unit:'sq.ft', rate:700,    skirtRate:450 },
+    { id:'floor-std',    cat:'flooring', name:'Floor Tiling', tier:'Standard',      sub:'Up to 4×2 tiles · Spacer joint · Swisstek grout',      unit:'sq.ft', rate:350, skirtRate:250 },
+    { id:'floor-med',    cat:'flooring', name:'Floor Tiling', tier:'Medium Tiles',  sub:'Router edge · Precision levelling · Large format',      unit:'sq.ft', rate:500, skirtRate:350 },
+    { id:'floor-large',  cat:'flooring', name:'Floor Tiling', tier:'Large / Slabs', sub:'Levelling clips · Expert handling · Seamless finish',   unit:'sq.ft', rate:700, skirtRate:450 },
     // BATHROOM — Renovation packages
-    { id:'bath-basic',  cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Basic',    sub:'Masonry · Waterproofing · Tiling · Plumbing · Electrical · Ceiling',   unit:'pkg',    rate:450000, baseArea:40, overageRate:5000 },
-    { id:'bath-std',    cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Full scope from demolition to handover',                unit:'pkg',    rate:550000, baseArea:40, overageRate:6000, popular:true },
-    { id:'bath-lux',    cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finishes · Full scope from demolition to handover',            unit:'pkg',    rate:650000, baseArea:40, overageRate:7000 },
-    // BATHROOM — Tiles (supply + install, per sq.ft)
-    { id:'tile-60',     cat:'bathroom', group:'tile',     name:'Tiles 60×60',         sub:'Standard format · Floor & walls',      unit:'sq.ft',  rate:600 },
-    { id:'tile-45',     cat:'bathroom', group:'tile',     name:'Tiles 45×90',         sub:'Tall format · Modern look',             unit:'sq.ft',  rate:700 },
-    { id:'tile-120',    cat:'bathroom', group:'tile',     name:'Tiles 120×120',       sub:'Large format · Seamless finish',        unit:'sq.ft',  rate:800 },
-    // BATHROOM — Add-ons
-    { id:'bath-demo',   cat:'bathroom', group:'addon',    name:'Demolition Work',     sub:'Full demolition of existing bathroom · Debris removal', unit:'sq.ft', rate:1000 },
-    { id:'bath-plaster',cat:'bathroom', group:'addon',    name:'Wall Plastering',     sub:'Skim coat · Level finish · Ready for tiling',           unit:'sq.ft', rate:1000 },
-    { id:'bath-3d',     cat:'bathroom', group:'addon',    name:'3D Design',           sub:'Full 3D rendering before work begins',                  unit:'fixed', rate:25000 },
-    // BATHROOM — Material packages
-    { id:'mat-a',       cat:'bathroom', group:'material', name:'Package A',           sub:'Swiss Bathware · Swiss Tapware · Swiss Accessories · SS finish · Ferroli Geyser · Mirror',             unit:'fixed', rate:300000 },
-    { id:'mat-b',       cat:'bathroom', group:'material', name:'Package B',           sub:'Swiss Bathware · Swiss Tapware · Swiss Accessories · SS finish · Concealed · Ferroli Geyser · Mirror', unit:'fixed', rate:350000, popular:true },
-    { id:'mat-c',       cat:'bathroom', group:'material', name:'Package C',           sub:'Swiss Bathware · Swiss Tapware · Swiss Accessories · Brush Gold · Ferroli Geyser · Mirror',            unit:'fixed', rate:400000 },
+    { id:'bath-basic',   cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Basic',    sub:'Masonry · Waterproofing · Tiling · Plumbing · Electrical · Ceiling', unit:'pkg', rate:450000, baseArea:40, overageRate:5000 },
+    { id:'bath-std',     cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Standard', sub:'Most popular · Full scope from demolition to handover',               unit:'pkg', rate:550000, baseArea:40, overageRate:6000, popular:true },
+    { id:'bath-lux',     cat:'bathroom', group:'pkg',      name:'Bathroom Renovation', tier:'Luxury',   sub:'Premium finishes · Full scope from demolition to handover',           unit:'pkg', rate:650000, baseArea:40, overageRate:7000 },
+    // BATHROOM — Tiles (combined floor + wall area)
+    { id:'tile-60',      cat:'bathroom', group:'tile', name:'Tiles 60×60',   sub:'Standard format · Floor & wall',  unit:'sq.ft', rate:600, areaLabel:'Total area (floor + wall)' },
+    { id:'tile-45',      cat:'bathroom', group:'tile', name:'Tiles 45×90',   sub:'Tall format · Modern look',       unit:'sq.ft', rate:700, areaLabel:'Total area (floor + wall)' },
+    { id:'tile-120',     cat:'bathroom', group:'tile', name:'Tiles 120×120', sub:'Large format · Seamless finish',  unit:'sq.ft', rate:800, areaLabel:'Total area (floor + wall)' },
+    // BATHROOM — Add-ons (demo & plastering auto-calculated from pkg area)
+    { id:'bath-demo',    cat:'bathroom', group:'addon', name:'Demolition Work', sub:'Full demolition of existing bathroom · Debris removal', unit:'sq.ft', rate:1000, autoCalc:true },
+    { id:'bath-plaster', cat:'bathroom', group:'addon', name:'Wall Plastering', sub:'Skim coat · Level finish · Ready for tiling',           unit:'sq.ft', rate:1000, autoCalc:true },
+    { id:'bath-3d',      cat:'bathroom', group:'addon', name:'3D Design',       sub:'Full 3D rendering before work begins',                  unit:'fixed', rate:25000 },
+    // BATHROOM — Fixtures (3 options)
+    { id:'fix-a', cat:'bathroom', group:'fixtures', name:'Fixtures Package A', sub:'Swiss Bathware · Swiss Tapware · Accessories · SS finish · Mirror',            unit:'fixed', rate:300000 },
+    { id:'fix-b', cat:'bathroom', group:'fixtures', name:'Fixtures Package B', sub:'Swiss Bathware · Swiss Tapware · Accessories · Concealed fittings · Mirror',   unit:'fixed', rate:350000, popular:true },
+    { id:'fix-c', cat:'bathroom', group:'fixtures', name:'Fixtures Package C', sub:'Swiss Bathware · Swiss Tapware · Accessories · Brush Gold finish · Mirror',    unit:'fixed', rate:400000 },
+    // BATHROOM — Geyser (3 options)
+    { id:'geyser-std', cat:'bathroom', group:'geyser', name:'Ferroli Geyser',      tier:'15L Electric', sub:'15L capacity · Wall-mounted · Includes installation', unit:'fixed', rate:32000 },
+    { id:'geyser-mid', cat:'bathroom', group:'geyser', name:'Ferroli Geyser',      tier:'25L Electric', sub:'25L capacity · Most popular · Includes installation', unit:'fixed', rate:45000, popular:true },
+    { id:'geyser-ins', cat:'bathroom', group:'geyser', name:'Instant Water Heater',tier:'Tankless',     sub:'On-demand hot water · Space-saving · Includes installation', unit:'fixed', rate:62000 },
+    // BATHROOM — Shower Cubicle & Vanity Cupboard (standalone)
+    { id:'shower', cat:'bathroom', group:'extras', name:'Shower Cubicle',   sub:'Tempered glass · Aluminium frame · 90×90 cm · Includes installation',   unit:'fixed',  rate:85000 },
+    { id:'vanity', cat:'bathroom', group:'extras', name:'Vanity Cupboard',  sub:'PVC board · Mirror cabinet · Standard fitting · Includes installation',  unit:'lin.ft', rate:18000 },
     // KITCHEN
-    { id:'kitchen',     cat:'kitchen',  name:'Kitchen',   sub:'Pantry tiling + Cupboard · Eco board · Melamine · Mcoco · Quartz top', unit:'lin.ft', rate:45000 },
+    { id:'kitchen', cat:'kitchen', name:'Kitchen', sub:'Pantry tiling + Cupboard · Eco board · Melamine · Mcoco · Quartz top', unit:'lin.ft', rate:45000 },
   ];
 
   /* ─── STATE ────────────────────────────────────────────────── */
   var cart = [];
   var activeCat = 'flooring';
   var payMethod = 'payhere';
+  var pkgArea   = 0; // bathroom floor area from renovation package — drives auto-calc pricing
 
   /* ─── UTILS ─────────────────────────────────────────────────── */
   function fmt(n) {
@@ -223,12 +231,21 @@ const { singleCat } = Astro.props;
 
   /* ─── RENDER SERVICE CARDS ──────────────────────────────────── */
   function renderCard(s) {
-    var inCart = cart.some(function(c) { return c.id === s.id; });
-    var isPkg   = s.unit === 'pkg';
-    var isFixed = s.unit === 'fixed';
-    var priceLabel = (isPkg || isFixed)
-      ? fmt(s.rate)
-      : (fmt(s.rate) + '\u00a0/\u00a0' + s.unit);
+    var inCart     = cart.some(function(c) { return c.id === s.id; });
+    var isPkg      = s.unit === 'pkg';
+    var isFixed    = s.unit === 'fixed';
+    var isAutoCalc = !!s.autoCalc;
+
+    var priceLabel;
+    if (isAutoCalc) {
+      priceLabel = pkgArea > 0
+        ? fmt(pkgArea * s.rate) + ' (' + pkgArea + '\u00a0sq.ft)'
+        : 'Calculated from renovation area';
+    } else if (isPkg || isFixed) {
+      priceLabel = fmt(s.rate);
+    } else {
+      priceLabel = fmt(s.rate) + '\u00a0/\u00a0' + s.unit;
+    }
 
     var addedBadge = [
       '<div class="qb-svc-added">',
@@ -237,7 +254,11 @@ const { singleCat } = Astro.props;
       '</div>',
     ].join('');
 
-    var fixedBtn = '<button class="qb-add-btn" onclick="qbAddFixed(\'' + s.id + '\')">Add to Quote</button>';
+    var fixedBtn = '<button class="qb-add-btn" onclick="qbAddFixed(\'' + s.id + '\')">Add</button>';
+
+    var autoCalcControl = pkgArea > 0
+      ? '<button class="qb-add-btn" onclick="qbAddAutoCalc(\'' + s.id + '\')">Add</button>'
+      : '<div class="qb-auto-hint">Add a renovation package above to enable</div>';
 
     var pkgForm = [
       '<div class="qb-qty-form">',
@@ -251,14 +272,15 @@ const { singleCat } = Astro.props;
         '<div class="qb-pkg-preview" id="preview-' + s.id + '">',
           'Base: ' + fmt(s.rate) + ' (up to ' + s.baseArea + '\u00a0sq.ft) \u00b7 +' + fmt(s.overageRate) + '/sq.ft over',
         '</div>',
-        '<button class="qb-add-btn" onclick="qbAddPkg(\'' + s.id + '\')">Add to Quote \u2192</button>',
+        '<button class="qb-add-btn" onclick="qbAddPkg(\'' + s.id + '\')">Add to Quote</button>',
       '</div>',
     ].join('');
 
+    var areaLabel = s.areaLabel || (s.unit === 'sq.ft' ? 'Area' : 'Length');
     var qtyForm = [
       '<div class="qb-qty-form">',
         '<div class="qb-qty-row">',
-          '<label>' + (s.unit === 'sq.ft' ? 'Area' : 'Length') + '</label>',
+          '<label>' + areaLabel + '</label>',
           '<div class="qb-qty-wrap">',
             '<input type="number" id="qty-' + s.id + '" min="1" placeholder="0" class="qb-qty-in">',
             '<span class="qb-qty-unit">' + s.unit + '</span>',
@@ -273,24 +295,32 @@ const { singleCat } = Astro.props;
             '</div>',
           '</div>',
         ].join('') : ''),
-        '<button class="qb-add-btn" onclick="qbAddQty(\'' + s.id + '\')">Add to Quote \u2192</button>',
+        '<button class="qb-add-btn" onclick="qbAddQty(\'' + s.id + '\')">Add</button>',
       '</div>',
     ].join('');
 
-    var control = inCart ? addedBadge : (isPkg ? pkgForm : (isFixed ? fixedBtn : qtyForm));
+    var control;
+    if (inCart)          { control = addedBadge; }
+    else if (isAutoCalc) { control = autoCalcControl; }
+    else if (isPkg)      { control = pkgForm; }
+    else if (isFixed)    { control = fixedBtn; }
+    else                 { control = qtyForm; }
 
     return [
       '<div class="qb-svc-card' + (inCart ? ' in-cart' : '') + '" data-id="' + s.id + '">',
         (s.popular ? '<div class="qb-popular">Most Popular</div>' : ''),
         '<div class="qb-svc-name">' + s.name + (s.tier ? '<span class="qb-svc-tier"> \u2014 ' + s.tier + '</span>' : '') + '</div>',
         '<div class="qb-svc-sub">' + s.sub + '</div>',
-        '<div class="qb-svc-price">' + priceLabel + '</div>',
+        '<div class="qb-svc-price' + (isAutoCalc && pkgArea === 0 ? ' qb-svc-price--dim' : '') + '">' + priceLabel + '</div>',
         control,
       '</div>',
     ].join('');
   }
 
-  var GROUP_LABELS = { pkg:'Renovation Package', tile:'Tiles', addon:'Add-ons', material:'Material Package' };
+  var GROUP_LABELS = {
+    pkg:'Renovation Package', tile:'Tiles', addon:'Add-ons',
+    fixtures:'Bathroom Fixtures', geyser:'Geyser', extras:'Shower Cubicle & Vanity Cupboard',
+  };
 
   function renderServices(cat) {
     var grid = document.getElementById('qb-grid');
@@ -359,7 +389,7 @@ const { singleCat } = Astro.props;
     renderCart();
   };
 
-  /* Package (bathroom reno) — area-based pricing */
+  /* Package (bathroom reno) — area-based pricing; sets pkgArea for auto-calc items */
   window.qbAddPkg = function(id) {
     var s = SERVICES.find(function(x) { return x.id === id; });
     if (!s) return;
@@ -367,17 +397,45 @@ const { singleCat } = Astro.props;
     var area = parseFloat((qtyEl && qtyEl.value) || '0');
     if (!area || area <= 0) { if (qtyEl) qtyEl.focus(); return; }
 
-    var extraArea  = Math.max(0, area - s.baseArea);
+    // Only one renovation package at a time — replace existing if any
+    cart = cart.filter(function(c) {
+      var cs = SERVICES.find(function(x) { return x.id === c.id; });
+      return !cs || cs.unit !== 'pkg';
+    });
+
+    pkgArea = area;
+
+    // Update any auto-calc items already in cart
+    cart = cart.map(function(c) {
+      var cs = SERVICES.find(function(x) { return x.id === c.id; });
+      if (cs && cs.autoCalc) {
+        return { id:c.id, name:c.name, desc:pkgArea + ' sq.ft \u00d7 ' + fmt(cs.rate) + '/sq.ft', price:pkgArea * cs.rate };
+      }
+      return c;
+    });
+
+    var extraArea   = Math.max(0, area - s.baseArea);
     var extraCharge = extraArea * s.overageRate;
-    var totalPrice = s.rate + extraCharge;
+    var totalPrice  = s.rate + extraCharge;
 
     var desc = area + '\u00a0sq.ft \u00b7 Package ' + fmt(s.rate) + ' (up to ' + s.baseArea + '\u00a0sq.ft)';
     if (extraArea > 0) {
       desc += ' + ' + extraArea + '\u00a0sq.ft overage \u00d7 ' + fmt(s.overageRate) + '/sq.ft';
     }
 
-    var item = { id: s.id, name: s.name + (s.tier ? ' \u2014 ' + s.tier : ''), desc: desc, price: totalPrice };
-    var idx = cart.findIndex(function(c) { return c.id === id; });
+    cart.push({ id: s.id, name: s.name + (s.tier ? ' \u2014 ' + s.tier : ''), desc: desc, price: totalPrice });
+    renderServices(activeCat);
+    renderCart();
+  };
+
+  /* Auto-calc items (demolition, plastering) — price derived from pkgArea */
+  window.qbAddAutoCalc = function(id) {
+    var s = SERVICES.find(function(x) { return x.id === id; });
+    if (!s || pkgArea <= 0) return;
+    var price = pkgArea * s.rate;
+    var desc  = pkgArea + ' sq.ft \u00d7 ' + fmt(s.rate) + '/sq.ft';
+    var item  = { id: s.id, name: s.name, desc: desc, price: price };
+    var idx   = cart.findIndex(function(c) { return c.id === id; });
     if (idx >= 0) { cart[idx] = item; } else { cart.push(item); }
     renderServices(activeCat);
     renderCart();
@@ -411,7 +469,25 @@ const { singleCat } = Astro.props;
   });
 
   window.qbRemove = function(id) {
+    var removedSvc = SERVICES.find(function(x) { return x.id === id; });
     cart = cart.filter(function(c) { return c.id !== id; });
+
+    // If a renovation package was removed and no other pkg remains, clear pkgArea
+    // and drop any auto-calc items (their price no longer makes sense)
+    if (removedSvc && removedSvc.unit === 'pkg') {
+      var hasPkg = cart.some(function(c) {
+        var cs = SERVICES.find(function(x) { return x.id === c.id; });
+        return cs && cs.unit === 'pkg';
+      });
+      if (!hasPkg) {
+        pkgArea = 0;
+        cart = cart.filter(function(c) {
+          var cs = SERVICES.find(function(x) { return x.id === c.id; });
+          return !cs || !cs.autoCalc;
+        });
+      }
+    }
+
     renderServices(activeCat);
     renderCart();
   };
@@ -1011,6 +1087,25 @@ const { singleCat } = Astro.props;
   }
 
   .qb-add-btn:hover { background: var(--clay); transform: translateY(-1px); }
+
+  .qb-svc-price--dim {
+    color: rgba(140,123,110,.5);
+    font-style: italic;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    font-weight: 400;
+  }
+
+  .qb-auto-hint {
+    font-size: .73rem;
+    color: rgba(140,123,110,.6);
+    background: rgba(196,120,74,.05);
+    border: 1px dashed rgba(196,120,74,.25);
+    border-radius: 5px;
+    padding: .5rem .7rem;
+    text-align: center;
+    line-height: 1.45;
+  }
 
   .qb-svc-added {
     display: flex;
