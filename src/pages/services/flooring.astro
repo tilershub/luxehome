@@ -623,4 +623,24 @@ import Footer from '../../components/Footer.astro';
       border-bottom: 1px solid rgba(196,120,74,.18);
     }
   }
+
+  @media (max-width: 480px) {
+    .page-hero {
+      padding: 0 1rem 2rem;
+      min-height: auto;
+    }
+    .hero-inner {
+      padding-top: calc(5rem + env(safe-area-inset-top, 0px));
+    }
+    .pricing-section { padding: 2.5rem 1rem; }
+
+    h1 { font-size: clamp(2rem, 8vw, 2.4rem); margin-bottom: .8rem; }
+    .hero-desc { font-size: .88rem; margin-bottom: 1.4rem; }
+
+    .hero-cta { flex-direction: column; gap: .7rem; }
+    .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+
+    .pkg-card { padding: 1.2rem 1rem; }
+    .area-in { min-height: 44px; font-size: 1rem; }
+  }
 </style>
