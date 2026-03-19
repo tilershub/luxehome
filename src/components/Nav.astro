@@ -12,14 +12,6 @@
   </ul>
 
   <div class="nav-end">
-    <a href="#quote-builder" class="nav-bag" id="nav-bag-btn" aria-label="View your quote">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-      <span class="bag-count" id="bag-count">0</span>
-    </a>
     <a href="#quote-builder" class="nav-cta">Book Now</a>
     <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-menu">
       <span class="bar"></span>
@@ -30,10 +22,9 @@
 </nav>
 
 <script>
-  const nav      = document.querySelector('nav');
-  const toggle   = document.getElementById('menu-toggle');
-  const menu     = document.getElementById('nav-menu');
-  const bagCount = document.getElementById('bag-count');
+  const nav    = document.querySelector('nav');
+  const toggle = document.getElementById('menu-toggle');
+  const menu   = document.getElementById('nav-menu');
 
   window.addEventListener('scroll', () => {
     const scrolled = window.scrollY > 60;
@@ -41,12 +32,6 @@
       ? (window.innerWidth > 1100 ? '.75rem 4rem' : '.75rem 2.5rem')
       : '';
     nav.style.boxShadow = scrolled ? '0 1px 24px rgba(30,26,23,.08)' : '';
-  });
-
-  document.addEventListener('qb-cart-update', (e) => {
-    const count = e.detail.count;
-    bagCount.textContent = count;
-    bagCount.classList.toggle('visible', count > 0);
   });
 
   function closeMenu() {
@@ -130,52 +115,6 @@
     display: flex;
     align-items: center;
     gap: .5rem;
-  }
-
-  /* Shopping bag icon */
-  .nav-bag {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    color: var(--charcoal);
-    text-decoration: none;
-    border-radius: 50%;
-    transition: background .2s, color .2s;
-    flex-shrink: 0;
-  }
-
-  .nav-bag:hover {
-    background: rgba(196, 120, 74, .1);
-    color: var(--clay);
-  }
-
-  .bag-count {
-    position: absolute;
-    top: .1rem; right: .1rem;
-    background: var(--clay);
-    color: #fff;
-    font-size: .58rem;
-    font-weight: 700;
-    min-width: 1.05rem;
-    height: 1.05rem;
-    border-radius: 99px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 .2rem;
-    line-height: 1;
-    opacity: 0;
-    transform: scale(.5);
-    transition: opacity .2s, transform .25s cubic-bezier(.34, 1.56, .64, 1);
-    pointer-events: none;
-  }
-
-  .bag-count.visible {
-    opacity: 1;
-    transform: scale(1);
   }
 
   .nav-cta {
