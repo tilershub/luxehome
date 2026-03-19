@@ -121,14 +121,30 @@ import Footer from '../../components/Footer.astro';
         </div>
       </div>
       <div class="col-aside">
-        <div class="aside-card">
-          <div class="aside-label">Rate</div>
-          <div class="aside-value">Rs. 5,000</div>
-          <p>Per linear foot — covers the full countertop width and backsplash height in one run.</p>
+
+        <!-- Pantry Calculator -->
+        <div class="calc-card">
+          <div class="calc-title">Top &amp; Backsplash</div>
+          <div class="calc-rate">Rs. 5,000 / lin.ft</div>
+          <div class="calc-fields">
+            <div class="calc-row">
+              <label for="pantryLen">Pantry length</label>
+              <div class="calc-input-wrap">
+                <input type="number" id="pantryLen" min="1" placeholder="e.g. 8" inputmode="decimal" />
+                <span>lin.ft</span>
+              </div>
+            </div>
+          </div>
+          <div class="calc-result" id="pantryResult" hidden>
+            <div class="cr-row"><span>Length</span><span id="pantryLenDisp"></span></div>
+            <div class="cr-total"><span>Total</span><span id="pantryTotal"></span></div>
+          </div>
+          <a href="/contact" class="calc-cta">Book Pantry Tiling →</a>
         </div>
+
         <div class="aside-card">
           <div class="aside-label">Scope</div>
-          <div class="aside-value">Top & Backsplash</div>
+          <div class="aside-value">Top &amp; Backsplash</div>
           <p>Countertop surface and wall backsplash tiled together, joints perfectly aligned across both planes.</p>
         </div>
         <div class="aside-card">
@@ -225,10 +241,25 @@ import Footer from '../../components/Footer.astro';
     </div>
   </section>
 
-  <QuoteForm phone="94774503744" service="Kitchen Pantry" />
-  <CTA />
   <Footer />
 </Layout>
+
+<script is:inline>
+(function () {
+  function fmt(n) {
+    return 'Rs.\u00a0' + Math.round(n).toLocaleString('en-IN');
+  }
+  var pantryLenIn = document.getElementById('pantryLen');
+  var pantryResult = document.getElementById('pantryResult');
+  pantryLenIn.addEventListener('input', function () {
+    var len = parseFloat(this.value) || 0;
+    if (len <= 0) { pantryResult.hidden = true; return; }
+    document.getElementById('pantryLenDisp').textContent = len + ' lin.ft';
+    document.getElementById('pantryTotal').textContent = fmt(len * 5000);
+    pantryResult.hidden = false;
+  });
+})();
+</script>
 
 <style>
   .page-hero {
@@ -514,6 +545,125 @@ import Footer from '../../components/Footer.astro';
     color: var(--warm-gray);
     line-height: 1.75;
   }
+
+  /* ── Calculator card ── */
+
+  .calc-card {
+    background: var(--cream);
+    border: 1px solid var(--stone);
+    border-radius: 4px;
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+  }
+
+  .calc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--charcoal);
+  }
+
+  .calc-rate {
+    font-size: .72rem;
+    color: var(--clay);
+    font-weight: 600;
+    letter-spacing: .05em;
+    margin-top: -.5rem;
+  }
+
+  .calc-fields { display: flex; flex-direction: column; gap: .65rem; }
+
+  .calc-row { display: flex; flex-direction: column; gap: .25rem; }
+
+  .calc-row label {
+    font-size: .68rem;
+    color: var(--warm-gray);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 500;
+  }
+
+  .calc-input-wrap { display: flex; align-items: center; gap: .4rem; }
+
+  .calc-input-wrap input {
+    flex: 1;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid var(--stone);
+    border-radius: 3px;
+    color: var(--charcoal);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    padding: .4rem .6rem;
+    outline: none;
+    min-height: 40px;
+    -webkit-appearance: none;
+    transition: border-color .2s;
+  }
+
+  .calc-input-wrap input:focus { border-color: var(--clay); }
+  .calc-input-wrap span { font-size: .7rem; color: var(--warm-gray); flex-shrink: 0; }
+
+  .calc-result {
+    background: rgba(196,120,74,.06);
+    border: 1px solid rgba(196,120,74,.2);
+    border-radius: 3px;
+    padding: .8rem .9rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+  }
+
+  .cr-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: .72rem;
+    color: var(--warm-gray);
+    gap: .5rem;
+  }
+
+  .cr-row span:last-child { color: var(--charcoal); font-weight: 500; text-align: right; }
+
+  .cr-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: .72rem;
+    color: var(--warm-gray);
+    border-top: 1px solid rgba(196,120,74,.2);
+    padding-top: .35rem;
+    margin-top: .1rem;
+    gap: .5rem;
+  }
+
+  .cr-total span:last-child {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--clay);
+    text-align: right;
+  }
+
+  .calc-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--clay);
+    color: #fff;
+    text-decoration: none;
+    padding: .65rem 1rem;
+    border-radius: 3px;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    min-height: 44px;
+    transition: background .2s;
+  }
+
+  .calc-cta:hover { background: #b5673c; }
 
   @media (max-width: 1100px) {
     .page-hero,
