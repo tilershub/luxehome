@@ -15,7 +15,7 @@
         "priceRange": "Rs. 350 – Rs. 40,000",
         "sameAs": []
       }
-    </script><!-- Google Analytics — loaded after page is interactive, never blocks render --><script type="module">const s=new IntersectionObserver(t=>{t.forEach(e=>{e.isIntersecting&&(e.target.classList.add("visible"),s.unobserve(e.target))})},{threshold:.1});document.querySelectorAll(".reveal").forEach(t=>{const e=t.getBoundingClientRect();e.top<window.innerHeight&&e.bottom>0?t.classList.add("visible"):s.observe(t)});</script><link rel="stylesheet" href="/_astro/_slug_.7rdWvYDF.css">
+    </script><!-- Google Analytics — loaded after page is interactive, never blocks render --><script type="module">const s=new IntersectionObserver(t=>{t.forEach(e=>{e.isIntersecting&&(e.target.classList.add("visible"),s.unobserve(e.target))})},{threshold:.1});document.querySelectorAll(".reveal").forEach(t=>{const e=t.getBoundingClientRect();e.top<window.innerHeight&&e.bottom>0?t.classList.add("visible"):s.observe(t)});</script><link rel="stylesheet" href="/_astro/_slug_.C4UjdNxw.css">
 <link rel="stylesheet" href="/_astro/index.Czde5yh5.css"></head> <body> <main id="main-content">  <nav aria-label="Main navigation" data-astro-cid-dmqpwcec> <a href="/" class="logo" aria-label="TILERSHUB — Home" data-astro-cid-dmqpwcec>TILERS<span data-astro-cid-dmqpwcec>HUB</span></a> <ul id="nav-menu" role="list" data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec><a href="/services/flooring" data-astro-cid-dmqpwcec>Flooring</a></li> <li data-astro-cid-dmqpwcec><a href="/services/bathroom" data-astro-cid-dmqpwcec>Bathroom</a></li> <li data-astro-cid-dmqpwcec><a href="/services/kitchen" data-astro-cid-dmqpwcec>Kitchen</a></li> <li data-astro-cid-dmqpwcec><a href="/blog" data-astro-cid-dmqpwcec>Journal</a></li> </ul> <div class="nav-end" data-astro-cid-dmqpwcec> <a href="/contact" class="nav-cta" data-astro-cid-dmqpwcec>Book Now</a> <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-menu" data-astro-cid-dmqpwcec> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> <span class="bar" data-astro-cid-dmqpwcec></span> </button> </div> </nav> <script type="module">const o=document.querySelector("nav"),t=document.getElementById("menu-toggle"),n=document.getElementById("nav-menu");window.addEventListener("scroll",()=>{const e=window.scrollY>60;o.style.padding=e?window.innerWidth>1100?".75rem 4rem":".75rem 2.5rem":"",o.style.boxShadow=e?"0 1px 24px rgba(30,26,23,.08)":""});function a(){n.classList.remove("open"),t.setAttribute("aria-expanded","false"),t.setAttribute("aria-label","Open navigation menu"),t.classList.remove("active"),document.body.style.overflow=""}t.addEventListener("click",()=>{const e=n.classList.toggle("open");t.setAttribute("aria-expanded",String(e)),t.setAttribute("aria-label",e?"Close navigation menu":"Open navigation menu"),t.classList.toggle("active",e),document.body.style.overflow=e?"hidden":""});n.querySelectorAll("a").forEach(e=>{e.addEventListener("click",a)});document.addEventListener("click",e=>{!o.contains(e.target)&&n.classList.contains("open")&&a()});</script>  <section class="hero" id="home" data-astro-cid-bbe6dxrz> <div class="hero-split" data-astro-cid-bbe6dxrz> <!-- Left: text --> <div class="hero-left" data-astro-cid-bbe6dxrz> <div class="eyebrow" data-astro-cid-bbe6dxrz>Sri Lanka's Premium Tiling Service</div> <h1 data-astro-cid-bbe6dxrz>Your Home,<br data-astro-cid-bbe6dxrz><em data-astro-cid-bbe6dxrz>Beautifully</em><br data-astro-cid-bbe6dxrz>Finished.</h1> <p class="hero-desc" data-astro-cid-bbe6dxrz>
 Flooring, bathrooms, and kitchens — built with premium materials,
         transparent pricing, and online booking.
@@ -179,6 +179,14 @@ Send Receipt — 0774 503 744
   overlay.addEventListener('click', closeCart);
   clearBtn.addEventListener('click', clearAll);
 
+  /* ── Pulse animation on cart button to confirm add ── */
+  function pulseCart() {
+    btn.classList.remove('cart-pulse');
+    // Force reflow so re-adding the class triggers the animation again
+    void btn.offsetWidth;
+    btn.classList.add('cart-pulse');
+  }
+
   /* ── Global API for service pages ── */
   window.LHCart = {
     add: function (item) {
@@ -193,7 +201,7 @@ Send Receipt — 0774 503 744
       items.push(entry);
       saveItems(items);
       render();
-      openCart();
+      pulseCart(); // Animate button — do NOT auto-open drawer
     }
   };
 

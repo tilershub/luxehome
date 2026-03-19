@@ -659,4 +659,31 @@ import Footer from '../../components/Footer.astro';
     .area-input-row { flex-direction: column; align-items: flex-start; gap: .6rem; }
     .area-hint { margin-left: 0; }
   }
+
+  @media (max-width: 480px) {
+    .page-hero {
+      padding: 0 1rem 2rem;
+      min-height: auto;
+    }
+    .hero-inner {
+      padding-top: calc(5rem + env(safe-area-inset-top, 0px));
+    }
+    .pricing-section { padding: 2.5rem 1rem; }
+
+    h1 { font-size: clamp(2rem, 8vw, 2.4rem); margin-bottom: .8rem; }
+    .hero-desc { font-size: .88rem; margin-bottom: 1.4rem; }
+
+    .hero-cta { flex-direction: column; gap: .7rem; }
+    .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+
+    .area-input-row { padding: .65rem .9rem; }
+    .area-input { min-height: 44px; width: 80px; font-size: 1.1rem; }
+
+    .pkg-card { padding: 1.4rem 1.1rem; }
+    .pkg-price { font-size: 1.45rem; }
+
+    .addons-section { padding: 1.2rem; }
+    .addon-card { padding: 1rem 1rem; }
+    .addon-atc { min-height: 44px; }
+  }
 </style>

@@ -209,6 +209,14 @@
   overlay.addEventListener('click', closeCart);
   clearBtn.addEventListener('click', clearAll);
 
+  /* ── Pulse animation on cart button to confirm add ── */
+  function pulseCart() {
+    btn.classList.remove('cart-pulse');
+    // Force reflow so re-adding the class triggers the animation again
+    void btn.offsetWidth;
+    btn.classList.add('cart-pulse');
+  }
+
   /* ── Global API for service pages ── */
   window.LHCart = {
     add: function (item) {
@@ -223,7 +231,7 @@
       items.push(entry);
       saveItems(items);
       render();
-      openCart();
+      pulseCart(); // Animate button — do NOT auto-open drawer
     }
   };
 
@@ -257,6 +265,15 @@
 
   .cart-btn:hover { background: #b5673c; transform: scale(1.07); }
   .cart-btn:active { transform: scale(.96); }
+
+  @keyframes cartPop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.22); }
+    65%  { transform: scale(.93); }
+    100% { transform: scale(1); }
+  }
+
+  .cart-pulse { animation: cartPop .38s cubic-bezier(.36,.07,.19,.97) both; }
 
   .cart-count {
     position: absolute;
