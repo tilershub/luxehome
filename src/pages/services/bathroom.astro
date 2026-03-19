@@ -65,7 +65,7 @@ import Footer from '../../components/Footer.astro';
             <li>Lighting</li>
             <li>Shower Cubicle</li>
           </ul>
-          <a href="/contact" class="pkg-btn">Book Essential →</a>
+          <button class="pkg-btn atc-pkg" data-pkg-name="Essential Bath" data-base="450000" data-rate="5000">Add to Cart</button>
         </div>
 
         <!-- Comfort Bath -->
@@ -85,7 +85,7 @@ import Footer from '../../components/Footer.astro';
             <li>Plain Ceiling</li>
             <li>Shower Cubicle</li>
           </ul>
-          <a href="/contact" class="pkg-btn">Book Comfort →</a>
+          <button class="pkg-btn atc-pkg" data-pkg-name="Comfort Bath" data-base="550000" data-rate="6000">Add to Cart</button>
         </div>
 
         <!-- Signature Bath -->
@@ -105,7 +105,7 @@ import Footer from '../../components/Footer.astro';
             <li>Shower Cubicle</li>
             <li>Vanity Cupboard</li>
           </ul>
-          <a href="/contact" class="pkg-btn">Book Signature →</a>
+          <button class="pkg-btn atc-pkg" data-pkg-name="Signature Bath" data-base="650000" data-rate="7000">Add to Cart</button>
         </div>
 
       </div>
@@ -118,16 +118,19 @@ import Footer from '../../components/Footer.astro';
             <div class="addon-name">Demolition Works</div>
             <div class="addon-price addon-calc" data-rate="1000">Rs. 1,000 <em>/sq.ft</em></div>
             <div class="addon-desc">Full bathroom strip-out — walls, floor, fixtures</div>
+            <button class="addon-atc atc-addon" data-addon-name="Demolition Works" data-rate="1000">Add to Cart</button>
           </div>
           <div class="addon-card">
             <div class="addon-name">Wall Plastering</div>
             <div class="addon-price addon-calc" data-rate="700">Rs. 700 <em>/sq.ft</em></div>
             <div class="addon-desc">Smooth plaster finish on all wall surfaces</div>
+            <button class="addon-atc atc-addon" data-addon-name="Wall Plastering" data-rate="700">Add to Cart</button>
           </div>
           <div class="addon-card">
             <div class="addon-name">3D Design</div>
             <div class="addon-price addon-flat">Rs. 25,000</div>
             <div class="addon-desc">Detailed 3D render before any work begins</div>
+            <button class="addon-atc atc-addon-flat" data-addon-name="3D Design" data-price="25000">Add to Cart</button>
           </div>
         </div>
       </div>
@@ -153,32 +156,70 @@ import Footer from '../../components/Footer.astro';
     return base + Math.max(0, area - 40) * rate;
   }
 
-  document.getElementById('bathArea').addEventListener('input', function () {
-    var area = parseFloat(this.value) || 0;
+  var areaInput = document.getElementById('bathArea');
 
-    // Package prices
+  function getArea() { return parseFloat(areaInput.value) || 0; }
+
+  areaInput.addEventListener('input', function () {
+    var area = getArea();
+
     document.querySelectorAll('.bath-price').forEach(function (el) {
       el.textContent = formatRs(calcPrice(parseInt(el.dataset.base, 10), parseInt(el.dataset.rate, 10), area));
     });
 
-    // Price notes
     document.querySelectorAll('.bath-note').forEach(function (el) {
       el.textContent = area > 0 ? area + ' sq.ft total' : 'up to 40 sq.ft';
     });
 
-    // Addon prices (area-based)
     document.querySelectorAll('.addon-calc').forEach(function (el) {
       var rate = parseInt(el.dataset.rate, 10);
-      if (area > 0) {
-        el.innerHTML = formatRs(area * rate);
-      } else {
-        el.innerHTML = 'Rs.\u00a0' + rate.toLocaleString('en-IN') + ' <em>/sq.ft</em>';
-      }
+      el.innerHTML = area > 0 ? formatRs(area * rate) : 'Rs.\u00a0' + rate.toLocaleString('en-IN') + ' <em>/sq.ft</em>';
     });
 
-    // Hint
     var hint = document.getElementById('areaHint');
     if (hint) hint.textContent = area > 0 ? 'Showing price for ' + area + ' sq.ft' : '';
+  });
+
+  /* ── Add to Cart: packages ── */
+  document.querySelectorAll('.atc-pkg').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var base = parseInt(btn.dataset.base, 10);
+      var rate = parseInt(btn.dataset.rate, 10);
+      var area = getArea();
+      var price = calcPrice(base, rate, area);
+      var details = area > 0 ? area + ' sq.ft' : 'up to 40 sq.ft (base price)';
+      window.LHCart.add({ name: btn.dataset.pkgName, details: details, price: price });
+    });
+  });
+
+  /* ── Add to Cart: area-based addons ── */
+  document.querySelectorAll('.atc-addon').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var area = getArea();
+      if (area <= 0) {
+        areaInput.focus();
+        areaInput.style.borderColor = 'var(--clay)';
+        setTimeout(function () { areaInput.style.borderColor = ''; }, 1500);
+        return;
+      }
+      var rate = parseInt(btn.dataset.rate, 10);
+      window.LHCart.add({
+        name: btn.dataset.addonName,
+        details: area + ' sq.ft',
+        price: area * rate
+      });
+    });
+  });
+
+  /* ── Add to Cart: flat addons ── */
+  document.querySelectorAll('.atc-addon-flat').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      window.LHCart.add({
+        name: btn.dataset.addonName,
+        details: 'Per bathroom',
+        price: parseInt(btn.dataset.price, 10)
+      });
+    });
   });
 })();
 </script>
@@ -473,9 +514,9 @@ import Footer from '../../components/Footer.astro';
     align-items: center;
     justify-content: center;
     margin-top: .8rem;
-    background: none;
-    border: 1px solid rgba(196,120,74,.35);
-    color: var(--clay);
+    background: var(--clay);
+    border: none;
+    color: #fff;
     font-family: 'DM Sans', sans-serif;
     font-size: .72rem;
     font-weight: 600;
@@ -483,15 +524,13 @@ import Footer from '../../components/Footer.astro';
     text-transform: uppercase;
     padding: .6rem 1rem;
     border-radius: 3px;
-    text-decoration: none;
+    cursor: pointer;
+    width: 100%;
     min-height: 44px;
-    transition: background .2s, border-color .2s;
+    transition: background .2s;
   }
 
-  .pkg-btn:hover {
-    background: rgba(196,120,74,.12);
-    border-color: var(--clay);
-  }
+  .pkg-btn:hover { background: #b5673c; }
 
   /* ── Add-ons ── */
 
@@ -559,6 +598,30 @@ import Footer from '../../components/Footer.astro';
     font-size: .7rem;
     color: rgba(245,240,232,.38);
     line-height: 1.5;
+    margin-bottom: .2rem;
+  }
+
+  .addon-atc {
+    margin-top: .4rem;
+    background: none;
+    border: 1px solid rgba(196,120,74,.35);
+    color: var(--clay);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .67rem;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: .4rem .7rem;
+    border-radius: 3px;
+    cursor: pointer;
+    width: 100%;
+    min-height: 38px;
+    transition: background .2s, border-color .2s;
+  }
+
+  .addon-atc:hover {
+    background: rgba(196,120,74,.1);
+    border-color: var(--clay);
   }
 
   /* ── Not included notice ── */

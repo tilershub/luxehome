@@ -69,7 +69,7 @@ import Footer from '../../components/Footer.astro';
             <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 350 <em>/sq.ft</em></span></div>
             <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 250 <em>/lin.ft</em></span></div>
           </div>
-          <a href="/contact" class="pkg-btn">Book This Package →</a>
+          <button class="pkg-btn atc-tile-btn">Add to Cart</button>
         </div>
 
         <!-- Medium Tiles -->
@@ -102,7 +102,7 @@ import Footer from '../../components/Footer.astro';
             <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 500 <em>/sq.ft</em></span></div>
             <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 300 <em>/lin.ft</em></span></div>
           </div>
-          <a href="/contact" class="pkg-btn">Book This Package →</a>
+          <button class="pkg-btn atc-tile-btn">Add to Cart</button>
         </div>
 
         <!-- Large Tiles -->
@@ -134,7 +134,7 @@ import Footer from '../../components/Footer.astro';
             <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 700 <em>/sq.ft</em></span></div>
             <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 350 <em>/lin.ft</em></span></div>
           </div>
-          <a href="/contact" class="pkg-btn">Book This Package →</a>
+          <button class="pkg-btn atc-tile-btn">Add to Cart</button>
         </div>
 
         <!-- Plank Tiles -->
@@ -166,7 +166,7 @@ import Footer from '../../components/Footer.astro';
             <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 500 <em>/sq.ft</em></span></div>
             <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 250 <em>/lin.ft</em></span></div>
           </div>
-          <a href="/contact" class="pkg-btn">Book This Package →</a>
+          <button class="pkg-btn atc-tile-btn">Add to Cart</button>
         </div>
 
       </div>
@@ -192,28 +192,40 @@ import Footer from '../../components/Footer.astro';
     var floorIn = card.querySelector('.floor-in');
     var skirtingIn = card.querySelector('.skirting-in');
     var result = card.querySelector('.pkg-result');
+    var atcBtn = card.querySelector('.atc-tile-btn');
+    var pkgName = card.querySelector('.pkg-name').textContent.trim();
 
-    function update() {
+    function calcTotal() {
       var floor = parseFloat(floorIn.value) || 0;
       var skirting = parseFloat(skirtingIn.value) || 0;
+      return { floor: floor, skirting: skirting, total: floor * floorRate + skirting * skirtingRate };
+    }
 
-      if (floor <= 0 && skirting <= 0) {
-        result.hidden = true;
-        return;
-      }
-
-      var floorCost = floor * floorRate;
-      var skirtingCost = skirting * skirtingRate;
-      var total = floorCost + skirtingCost;
-
-      card.querySelector('.floor-total').textContent = floor > 0 ? fmt(floorCost) : '—';
-      card.querySelector('.skirting-total').textContent = skirting > 0 ? fmt(skirtingCost) : '—';
-      card.querySelector('.grand-total').textContent = fmt(total);
+    function update() {
+      var v = calcTotal();
+      if (v.floor <= 0 && v.skirting <= 0) { result.hidden = true; return; }
+      card.querySelector('.floor-total').textContent = v.floor > 0 ? fmt(v.floor * floorRate) : '—';
+      card.querySelector('.skirting-total').textContent = v.skirting > 0 ? fmt(v.skirting * skirtingRate) : '—';
+      card.querySelector('.grand-total').textContent = fmt(v.total);
       result.hidden = false;
     }
 
     floorIn.addEventListener('input', update);
     skirtingIn.addEventListener('input', update);
+
+    atcBtn.addEventListener('click', function () {
+      var v = calcTotal();
+      if (v.total <= 0) {
+        floorIn.focus();
+        floorIn.style.borderColor = 'var(--clay)';
+        setTimeout(function () { floorIn.style.borderColor = ''; }, 1500);
+        return;
+      }
+      var parts = [];
+      if (v.floor > 0) parts.push(v.floor + ' sq.ft floor');
+      if (v.skirting > 0) parts.push(v.skirting + ' lin.ft skirting');
+      window.LHCart.add({ name: pkgName, details: parts.join(', '), price: v.total });
+    });
   });
 })();
 </script>
@@ -559,9 +571,9 @@ import Footer from '../../components/Footer.astro';
     display: flex;
     align-items: center;
     justify-content: center;
-    background: none;
-    border: 1px solid rgba(196,120,74,.3);
-    color: var(--clay);
+    background: var(--clay);
+    border: none;
+    color: #fff;
     font-family: 'DM Sans', sans-serif;
     font-size: .7rem;
     font-weight: 600;
@@ -569,16 +581,14 @@ import Footer from '../../components/Footer.astro';
     text-transform: uppercase;
     padding: .55rem 1rem;
     border-radius: 3px;
-    text-decoration: none;
+    cursor: pointer;
+    width: 100%;
     min-height: 44px;
     margin-top: auto;
-    transition: background .2s, border-color .2s;
+    transition: background .2s;
   }
 
-  .pkg-btn:hover {
-    background: rgba(196,120,74,.1);
-    border-color: var(--clay);
-  }
+  .pkg-btn:hover { background: #b5673c; }
 
   /* ── Not included ── */
 

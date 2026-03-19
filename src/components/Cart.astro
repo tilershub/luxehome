@@ -1,0 +1,591 @@
+---
+---
+
+<!-- Cart toggle button -->
+<button id="cartBtn" class="cart-btn" aria-label="View cart (0 items)">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <path d="M16 10a4 4 0 01-8 0"/>
+  </svg>
+  <span id="cartCount" class="cart-count" hidden>0</span>
+</button>
+
+<!-- Cart drawer -->
+<div id="cartOverlay" class="cart-overlay" hidden></div>
+<div id="cartDrawer" class="cart-drawer" hidden aria-label="Quote cart">
+
+  <div class="cart-head">
+    <div class="cart-head-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      Your Quote Cart
+    </div>
+    <button id="cartClose" class="cart-close" aria-label="Close cart">✕</button>
+  </div>
+
+  <div class="cart-body">
+
+    <!-- Empty state -->
+    <div id="cartEmpty" class="cart-empty">
+      <div class="cart-empty-icon">🛒</div>
+      <p>No services added yet.</p>
+      <span>Browse our services and add them here to get your quote.</span>
+    </div>
+
+    <!-- Items list -->
+    <ul id="cartItems" class="cart-items" hidden></ul>
+
+    <!-- Footer: totals + payment -->
+    <div id="cartFooter" class="cart-footer" hidden>
+
+      <div class="cart-totals">
+        <div class="totals-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal"></span>
+        </div>
+        <div class="totals-row totals-deposit">
+          <span>10% Booking Deposit</span>
+          <span id="cartDeposit"></span>
+        </div>
+      </div>
+
+      <div class="payment-box">
+        <div class="payment-head">Pay via Bank Transfer</div>
+        <div class="payment-detail-row">
+          <span>Bank</span><span>Contact us for details</span>
+        </div>
+        <div class="payment-note">
+          After transferring your 10% deposit, WhatsApp the payment screenshot to confirm your booking.
+        </div>
+      </div>
+
+      <a id="cartWA" href="#" target="_blank" rel="noopener noreferrer" class="cart-wa-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/>
+        </svg>
+        Send Receipt — 0774 503 744
+      </a>
+
+      <button id="cartClear" class="cart-clear-btn">Remove all items</button>
+    </div>
+
+  </div>
+</div>
+
+<script is:inline>
+(function () {
+  /* ── Cart state ── */
+  var STORE_KEY = 'lh_cart_v1';
+
+  function loadItems() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch (e) { return []; }
+  }
+
+  function saveItems(items) {
+    localStorage.setItem(STORE_KEY, JSON.stringify(items));
+  }
+
+  function fmtRs(n) {
+    return 'Rs.\u00a0' + Math.round(n).toLocaleString('en-IN');
+  }
+
+  /* ── DOM refs ── */
+  var btn       = document.getElementById('cartBtn');
+  var overlay   = document.getElementById('cartOverlay');
+  var drawer    = document.getElementById('cartDrawer');
+  var closeBtn  = document.getElementById('cartClose');
+  var countBadge= document.getElementById('cartCount');
+  var emptyEl   = document.getElementById('cartEmpty');
+  var itemsList = document.getElementById('cartItems');
+  var footer    = document.getElementById('cartFooter');
+  var subtotalEl= document.getElementById('cartSubtotal');
+  var depositEl = document.getElementById('cartDeposit');
+  var waBtn     = document.getElementById('cartWA');
+  var clearBtn  = document.getElementById('cartClear');
+
+  /* ── Render ── */
+  function render() {
+    var items = loadItems();
+    var count = items.length;
+
+    // Badge
+    countBadge.textContent = count;
+    countBadge.hidden = count === 0;
+    btn.setAttribute('aria-label', 'View cart (' + count + ' item' + (count !== 1 ? 's' : '') + ')');
+
+    // Empty / items
+    if (count === 0) {
+      emptyEl.hidden = false;
+      itemsList.hidden = true;
+      footer.hidden = true;
+      return;
+    }
+
+    emptyEl.hidden = true;
+    itemsList.hidden = false;
+    footer.hidden = false;
+
+    // Build items HTML
+    var html = '';
+    items.forEach(function (item) {
+      html += '<li class="cart-item" data-uid="' + item.uid + '">' +
+        '<div class="ci-info">' +
+          '<div class="ci-name">' + item.name + '</div>' +
+          (item.details ? '<div class="ci-details">' + item.details + '</div>' : '') +
+        '</div>' +
+        '<div class="ci-right">' +
+          '<div class="ci-price">' + fmtRs(item.price) + '</div>' +
+          '<button class="ci-remove" data-uid="' + item.uid + '" aria-label="Remove ' + item.name + '">✕</button>' +
+        '</div>' +
+      '</li>';
+    });
+    itemsList.innerHTML = html;
+
+    // Remove buttons
+    itemsList.querySelectorAll('.ci-remove').forEach(function (b) {
+      b.addEventListener('click', function () {
+        removeItem(b.dataset.uid);
+      });
+    });
+
+    // Totals
+    var subtotal = items.reduce(function (s, i) { return s + i.price; }, 0);
+    var deposit  = Math.ceil(subtotal * 0.1);
+    subtotalEl.textContent = fmtRs(subtotal);
+    depositEl.textContent  = fmtRs(deposit);
+
+    // WhatsApp message
+    var msg = 'Hi TILERSHUB! I\u2019d like to book the following services:\n\n';
+    items.forEach(function (item, idx) {
+      msg += (idx + 1) + '. ' + item.name;
+      if (item.details) msg += ' (' + item.details + ')';
+      msg += ' \u2014 ' + fmtRs(item.price) + '\n';
+    });
+    msg += '\nSubtotal: ' + fmtRs(subtotal);
+    msg += '\n10% Deposit: ' + fmtRs(deposit);
+    msg += '\n\nI\u2019ll send the bank transfer receipt shortly.';
+    waBtn.href = 'https://wa.me/94774503744?text=' + encodeURIComponent(msg);
+  }
+
+  function removeItem(uid) {
+    var items = loadItems().filter(function (i) { return String(i.uid) !== String(uid); });
+    saveItems(items);
+    render();
+  }
+
+  function clearAll() {
+    saveItems([]);
+    render();
+  }
+
+  /* ── Open / close ── */
+  function openCart() {
+    drawer.hidden = false;
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () {
+      drawer.classList.add('open');
+      overlay.classList.add('open');
+    }, 10);
+  }
+
+  function closeCart() {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    setTimeout(function () {
+      drawer.hidden = true;
+      overlay.hidden = true;
+      document.body.style.overflow = '';
+    }, 320);
+  }
+
+  btn.addEventListener('click', openCart);
+  closeBtn.addEventListener('click', closeCart);
+  overlay.addEventListener('click', closeCart);
+  clearBtn.addEventListener('click', clearAll);
+
+  /* ── Global API for service pages ── */
+  window.LHCart = {
+    add: function (item) {
+      // item: { name, details, price }
+      var items = loadItems();
+      var entry = {
+        uid: Date.now() + '-' + Math.random().toString(36).slice(2),
+        name: item.name,
+        details: item.details || '',
+        price: Math.round(item.price)
+      };
+      items.push(entry);
+      saveItems(items);
+      render();
+      openCart();
+    }
+  };
+
+  // Init
+  render();
+})();
+</script>
+
+<style>
+  /* ── Cart button ── */
+
+  .cart-btn {
+    position: fixed;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    right: max(1.5rem, env(safe-area-inset-right, 1.5rem));
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--clay);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    z-index: 8000;
+    transition: background .2s, transform .2s;
+    touch-action: manipulation;
+  }
+
+  .cart-btn:hover { background: #b5673c; transform: scale(1.07); }
+  .cart-btn:active { transform: scale(.96); }
+
+  .cart-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #e94040;
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid #fff;
+  }
+
+  /* ── Overlay ── */
+
+  .cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    z-index: 8500;
+    opacity: 0;
+    transition: opacity .32s;
+    backdrop-filter: blur(2px);
+  }
+
+  .cart-overlay.open { opacity: 1; }
+
+  /* ── Drawer ── */
+
+  .cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(420px, 100vw);
+    background: #faf7f2;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .cart-drawer.open { transform: translateX(0); }
+
+  /* ── Header ── */
+
+  .cart-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.4rem;
+    border-bottom: 1px solid rgba(196,120,74,.18);
+    background: var(--charcoal);
+    flex-shrink: 0;
+  }
+
+  .cart-head-title {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  .cart-close {
+    background: none;
+    border: none;
+    color: rgba(245,240,232,.5);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: .3rem .5rem;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    transition: color .2s;
+  }
+
+  .cart-close:hover { color: var(--cream); }
+
+  /* ── Body ── */
+
+  .cart-body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Empty state ── */
+
+  .cart-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    gap: .6rem;
+  }
+
+  .cart-empty-icon { font-size: 2.8rem; margin-bottom: .4rem; }
+
+  .cart-empty p {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--charcoal);
+  }
+
+  .cart-empty span {
+    font-size: .8rem;
+    color: var(--warm-gray);
+    line-height: 1.6;
+    max-width: 24ch;
+  }
+
+  /* ── Items list ── */
+
+  .cart-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .cart-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid rgba(196,120,74,.12);
+    background: #fff;
+  }
+
+  .cart-item:first-child { border-top: 1px solid rgba(196,120,74,.12); }
+
+  .ci-info { flex: 1; min-width: 0; }
+
+  .ci-name {
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    line-height: 1.3;
+    margin-bottom: .2rem;
+  }
+
+  .ci-details {
+    font-size: .72rem;
+    color: var(--warm-gray);
+    line-height: 1.5;
+  }
+
+  .ci-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .4rem;
+    flex-shrink: 0;
+  }
+
+  .ci-price {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--clay);
+    white-space: nowrap;
+  }
+
+  .ci-remove {
+    background: none;
+    border: none;
+    color: rgba(0,0,0,.25);
+    font-size: .75rem;
+    cursor: pointer;
+    padding: .2rem .3rem;
+    min-width: 32px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    touch-action: manipulation;
+    transition: color .2s, background .2s;
+  }
+
+  .ci-remove:hover { color: #e94040; background: rgba(233,64,64,.08); }
+
+  /* ── Footer ── */
+
+  .cart-footer {
+    padding: 1.2rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-top: 1px solid rgba(196,120,74,.18);
+    background: #faf7f2;
+    flex-shrink: 0;
+  }
+
+  .cart-totals {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: .82rem;
+    color: var(--warm-gray);
+    gap: .5rem;
+  }
+
+  .totals-row span:last-child {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    text-align: right;
+  }
+
+  .totals-deposit {
+    background: rgba(196,120,74,.07);
+    border: 1px solid rgba(196,120,74,.2);
+    border-radius: 4px;
+    padding: .6rem .8rem;
+    margin-top: .2rem;
+  }
+
+  .totals-deposit span:first-child { color: var(--charcoal); font-weight: 500; }
+
+  .totals-deposit span:last-child {
+    font-size: 1.1rem;
+    color: var(--clay);
+  }
+
+  /* ── Payment box ── */
+
+  .payment-box {
+    background: rgba(196,120,74,.05);
+    border: 1px solid rgba(196,120,74,.18);
+    border-radius: 4px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  .payment-head {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--clay);
+  }
+
+  .payment-detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: .76rem;
+    color: var(--warm-gray);
+    gap: .5rem;
+  }
+
+  .payment-detail-row span:last-child { color: var(--charcoal); font-weight: 500; }
+
+  .payment-note {
+    font-size: .72rem;
+    color: var(--warm-gray);
+    line-height: 1.55;
+    padding-top: .4rem;
+    border-top: 1px solid rgba(196,120,74,.12);
+  }
+
+  /* ── WhatsApp CTA ── */
+
+  .cart-wa-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    background: #25d366;
+    color: #fff;
+    text-decoration: none;
+    padding: .9rem 1.2rem;
+    border-radius: 4px;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    min-height: 52px;
+    transition: background .2s;
+    touch-action: manipulation;
+  }
+
+  .cart-wa-btn:hover { background: #1ebe5d; }
+
+  /* ── Clear button ── */
+
+  .cart-clear-btn {
+    background: none;
+    border: none;
+    color: rgba(0,0,0,.3);
+    font-size: .72rem;
+    cursor: pointer;
+    text-align: center;
+    padding: .3rem;
+    touch-action: manipulation;
+    transition: color .2s;
+  }
+
+  .cart-clear-btn:hover { color: #e94040; }
+</style>

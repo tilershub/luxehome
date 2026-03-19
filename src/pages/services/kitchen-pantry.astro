@@ -139,7 +139,7 @@ import Footer from '../../components/Footer.astro';
             <div class="cr-row"><span>Length</span><span id="pantryLenDisp"></span></div>
             <div class="cr-total"><span>Total</span><span id="pantryTotal"></span></div>
           </div>
-          <a href="/contact" class="calc-cta">Book Pantry Tiling →</a>
+          <button class="calc-cta" id="pantryAtcBtn">Add to Cart</button>
         </div>
 
         <div class="aside-card">
@@ -257,6 +257,12 @@ import Footer from '../../components/Footer.astro';
     document.getElementById('pantryLenDisp').textContent = len + ' lin.ft';
     document.getElementById('pantryTotal').textContent = fmt(len * 5000);
     pantryResult.hidden = false;
+  });
+
+  document.getElementById('pantryAtcBtn').addEventListener('click', function () {
+    var len = parseFloat(pantryLenIn.value) || 0;
+    if (len <= 0) { pantryLenIn.focus(); return; }
+    window.LHCart.add({ name: 'Pantry Top & Backsplash', details: len + ' lin.ft', price: len * 5000 });
   });
 })();
 </script>
