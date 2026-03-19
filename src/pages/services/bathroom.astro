@@ -5,8 +5,8 @@ import Footer from '../../components/Footer.astro';
 ---
 
 <Layout
-  title="Bathroom Renovation — Full Scope Packages — TILERSHUB Sri Lanka"
-  description="Complete bathroom renovation across Sri Lanka. Three packages from Rs. 450,000 — masonry, waterproofing, tiling, plumbing, electrical, and ceiling. Optional tiles, demolition, 3D design, and material packages."
+  title="Bathroom Renovation — Essential, Comfort & Signature Packages — TILERSHUB Sri Lanka"
+  description="Complete bathroom renovation across Sri Lanka. Three packages from Rs. 4,50,000 — Wall Niches, Plumbing, Wiring, Waterproofing, Tiling, Fixtures, Lighting. Optional Demolition, Wall Plastering, and 3D Design."
 >
   <Nav />
 
@@ -15,14 +15,14 @@ import Footer from '../../components/Footer.astro';
       <div class="breadcrumb">
         <a href="/">Home</a>
         <span>›</span>
-        <a href="/#services">Services</a>
+        <a href="/#shop">Services</a>
         <span>›</span>
         <span>Bathroom</span>
       </div>
       <h1 class="reveal">Bathroom Renovation</h1>
       <p class="hero-desc reveal">
-        Full scope, demolition to handover — three renovation packages plus optional tiles,
-        demolition, 3D design, and material packages.
+        Full scope renovation — demolition to handover. Three packages to match your budget,
+        each covering the complete bathroom. You supply tiles, bathware &amp; tapware.
       </p>
       <div class="hero-cta reveal">
         <a href="/contact" class="btn-primary">Get a Quote →</a>
@@ -31,66 +31,109 @@ import Footer from '../../components/Footer.astro';
     </div>
   </section>
 
-  <!-- What's included -->
+  <!-- Packages + Calculator -->
   <section class="pricing-section">
     <div class="pricing-inner">
-      <div class="stag reveal">What's Included</div>
-      <h2 class="reveal">Every Package Covers the Full Scope</h2>
-      <p class="sdesc reveal">Waterproofing is included in every package. Packages are based on a 40 sq.ft bathroom — overage is charged per sq.ft above that.</p>
+      <div class="stag reveal">Packages</div>
+      <h2 class="reveal">Three Packages, Full Scope on Every One</h2>
+      <p class="sdesc reveal">Packages are based on a 40 sq.ft bathroom. Enter your floor area below to see your exact price.</p>
+
+      <!-- Area calculator -->
+      <div class="area-input-row reveal">
+        <label class="area-label" for="bathArea">Your bathroom floor area</label>
+        <div class="area-field">
+          <input type="number" id="bathArea" class="area-input" min="1" max="999" placeholder="e.g. 45" inputmode="decimal" aria-label="Bathroom floor area in sq.ft" />
+          <span class="area-unit">sq.ft</span>
+        </div>
+        <span class="area-hint" id="areaHint"></span>
+      </div>
 
       <div class="pkg-grid reveal">
 
+        <!-- Essential Bath -->
         <div class="pkg-card">
-          <div class="pkg-name">Basic</div>
-          <div class="pkg-price-main">Rs. 450,000</div>
-          <div class="pkg-overage">+Rs. 5,000 / sq.ft over 40 sq.ft</div>
+          <div class="pkg-name">Essential Bath</div>
+          <div class="pkg-price bath-price" data-base="450000" data-rate="5000">Rs. 4,50,000</div>
+          <div class="pkg-price-note bath-note">up to 40 sq.ft</div>
           <ul class="pkg-includes">
-            <li>✓ Masonry & waterproofing</li>
-            <li>✓ Full tiling (walls & floor)</li>
-            <li>✓ Plumbing & electrical</li>
-            <li>✓ iPanel ceiling</li>
+            <li>Wall Niches</li>
+            <li>Plumbing</li>
+            <li>Wiring</li>
+            <li>Waterproofing</li>
+            <li>Tiling</li>
+            <li>Install Fixtures</li>
+            <li>Lighting</li>
+            <li>Shower Cubicle</li>
           </ul>
+          <a href="/contact" class="pkg-btn">Book Essential →</a>
         </div>
 
+        <!-- Comfort Bath -->
         <div class="pkg-card pkg-card--mid">
           <div class="pkg-badge">Most Popular</div>
-          <div class="pkg-name">Standard</div>
-          <div class="pkg-price-main">Rs. 550,000</div>
-          <div class="pkg-overage">+Rs. 6,000 / sq.ft over 40 sq.ft</div>
+          <div class="pkg-name">Comfort Bath</div>
+          <div class="pkg-price bath-price" data-base="550000" data-rate="6000">Rs. 5,50,000</div>
+          <div class="pkg-price-note bath-note">up to 40 sq.ft</div>
           <ul class="pkg-includes">
-            <li>✓ Masonry & waterproofing</li>
-            <li>✓ Full tiling (walls & floor)</li>
-            <li>✓ Plumbing & electrical</li>
-            <li>✓ iPanel ceiling</li>
-            <li>✓ Enhanced finish quality</li>
+            <li>Wall Niches</li>
+            <li>Plumbing</li>
+            <li>Wiring</li>
+            <li>Waterproofing</li>
+            <li>Tiling</li>
+            <li>Install Fixtures</li>
+            <li>Lighting</li>
+            <li>Plain Ceiling</li>
+            <li>Shower Cubicle</li>
           </ul>
+          <a href="/contact" class="pkg-btn">Book Comfort →</a>
         </div>
 
+        <!-- Signature Bath -->
         <div class="pkg-card">
-          <div class="pkg-name">Luxury</div>
-          <div class="pkg-price-main">Rs. 650,000</div>
-          <div class="pkg-overage">+Rs. 7,000 / sq.ft over 40 sq.ft</div>
+          <div class="pkg-name">Signature Bath</div>
+          <div class="pkg-price bath-price" data-base="650000" data-rate="7000">Rs. 6,50,000</div>
+          <div class="pkg-price-note bath-note">up to 40 sq.ft</div>
           <ul class="pkg-includes">
-            <li>✓ Masonry & waterproofing</li>
-            <li>✓ Full tiling (walls & floor)</li>
-            <li>✓ Plumbing & electrical</li>
-            <li>✓ iPanel ceiling</li>
-            <li>✓ Premium finishes throughout</li>
+            <li>Wall Niches</li>
+            <li>Plumbing</li>
+            <li>Wiring</li>
+            <li>Waterproofing</li>
+            <li>Tiling</li>
+            <li>Install Fixtures</li>
+            <li>Ambience Lighting</li>
+            <li>Design Ceiling</li>
+            <li>Shower Cubicle</li>
+            <li>Vanity Cupboard</li>
           </ul>
+          <a href="/contact" class="pkg-btn">Book Signature →</a>
         </div>
 
       </div>
 
-      <!-- Addons overview -->
-      <div class="addons-row reveal">
-        <div class="addon-tag">+ Add-ons available</div>
-        <div class="addon-items">
-          <span>Demolition work · Rs. 1,000/sq.ft</span>
-          <span>Wall Plastering · Rs. 1,000/sq.ft</span>
-          <span>3D Design</span>
-          <span>Tiles (60×60 · 45×90 · 120×120)</span>
-          <span>Material Package A / B / C</span>
+      <!-- Add-ons -->
+      <div class="addons-section reveal">
+        <div class="addons-head">Optional Add-ons</div>
+        <div class="addons-grid">
+          <div class="addon-card">
+            <div class="addon-name">Demolition Works</div>
+            <div class="addon-price addon-calc" data-rate="1000">Rs. 1,000 <em>/sq.ft</em></div>
+            <div class="addon-desc">Full bathroom strip-out — walls, floor, fixtures</div>
+          </div>
+          <div class="addon-card">
+            <div class="addon-name">Wall Plastering</div>
+            <div class="addon-price addon-calc" data-rate="700">Rs. 700 <em>/sq.ft</em></div>
+            <div class="addon-desc">Smooth plaster finish on all wall surfaces</div>
+          </div>
+          <div class="addon-card">
+            <div class="addon-name">3D Design</div>
+            <div class="addon-price addon-flat">Rs. 25,000</div>
+            <div class="addon-desc">Detailed 3D render before any work begins</div>
+          </div>
         </div>
+      </div>
+
+      <div class="not-included reveal">
+        <strong>Not included:</strong> Tiles, bathware, tapware, geyser, mirrors — you source your preferred products. Our team handles all installation and finishing.
       </div>
 
     </div>
@@ -98,6 +141,47 @@ import Footer from '../../components/Footer.astro';
 
   <Footer />
 </Layout>
+
+<script is:inline>
+(function () {
+  function formatRs(n) {
+    return 'Rs.\u00a0' + Math.round(n).toLocaleString('en-IN');
+  }
+
+  function calcPrice(base, rate, area) {
+    if (!area || area <= 0) return base;
+    return base + Math.max(0, area - 40) * rate;
+  }
+
+  document.getElementById('bathArea').addEventListener('input', function () {
+    var area = parseFloat(this.value) || 0;
+
+    // Package prices
+    document.querySelectorAll('.bath-price').forEach(function (el) {
+      el.textContent = formatRs(calcPrice(parseInt(el.dataset.base, 10), parseInt(el.dataset.rate, 10), area));
+    });
+
+    // Price notes
+    document.querySelectorAll('.bath-note').forEach(function (el) {
+      el.textContent = area > 0 ? area + ' sq.ft total' : 'up to 40 sq.ft';
+    });
+
+    // Addon prices (area-based)
+    document.querySelectorAll('.addon-calc').forEach(function (el) {
+      var rate = parseInt(el.dataset.rate, 10);
+      if (area > 0) {
+        el.innerHTML = formatRs(area * rate);
+      } else {
+        el.innerHTML = 'Rs.\u00a0' + rate.toLocaleString('en-IN') + ' <em>/sq.ft</em>';
+      }
+    });
+
+    // Hint
+    var hint = document.getElementById('areaHint');
+    if (hint) hint.textContent = area > 0 ? 'Showing price for ' + area + ' sq.ft' : '';
+  });
+})();
+</script>
 
 <style>
   .page-hero {
@@ -134,6 +218,7 @@ import Footer from '../../components/Footer.astro';
     text-transform: uppercase;
     color: rgba(245,240,232,.55);
     margin-bottom: 1.2rem;
+    flex-wrap: wrap;
   }
   .breadcrumb a { color: rgba(245,240,232,.55); text-decoration: none; transition: color .2s; }
   .breadcrumb a:hover { color: var(--clay); }
@@ -160,7 +245,6 @@ import Footer from '../../components/Footer.astro';
   .btn-primary {
     display: inline-flex;
     align-items: center;
-    gap: .5rem;
     background: var(--clay);
     color: #fff;
     padding: .75rem 1.6rem;
@@ -170,9 +254,10 @@ import Footer from '../../components/Footer.astro';
     letter-spacing: .06em;
     text-transform: uppercase;
     text-decoration: none;
-    transition: background .2s, transform .2s;
+    min-height: 44px;
+    transition: background .2s;
   }
-  .btn-primary:hover { background: #b5673c; transform: translateY(-2px); }
+  .btn-primary:hover { background: #b5673c; }
 
   .btn-ghost {
     display: inline-flex;
@@ -187,11 +272,13 @@ import Footer from '../../components/Footer.astro';
     letter-spacing: .06em;
     text-transform: uppercase;
     text-decoration: none;
+    min-height: 44px;
     transition: border-color .2s, color .2s;
   }
   .btn-ghost:hover { border-color: var(--clay); color: var(--clay); }
 
-  /* Pricing section */
+  /* ── Pricing section ── */
+
   .pricing-section {
     background: var(--charcoal);
     padding: 5rem 4rem;
@@ -225,8 +312,69 @@ import Footer from '../../components/Footer.astro';
     color: rgba(245,240,232,.6);
     line-height: 1.72;
     max-width: 60ch;
-    margin-bottom: 2.8rem;
+    margin-bottom: 2rem;
   }
+
+  /* ── Area input ── */
+
+  .area-input-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(196,120,74,.06);
+    border: 1px solid rgba(196,120,74,.22);
+    border-radius: 4px;
+    padding: .85rem 1.2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .area-label {
+    font-size: .72rem;
+    color: rgba(245,240,232,.5);
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    font-weight: 500;
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .area-field {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+  }
+
+  .area-input {
+    width: 90px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(196,120,74,.35);
+    border-radius: 3px;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    padding: .42rem .65rem;
+    text-align: center;
+    outline: none;
+    min-height: 40px;
+    -webkit-appearance: none;
+  }
+
+  .area-input:focus { border-color: var(--clay); }
+
+  .area-unit {
+    font-size: .75rem;
+    color: rgba(245,240,232,.4);
+  }
+
+  .area-hint {
+    font-size: .72rem;
+    color: var(--clay);
+    font-style: italic;
+    margin-left: auto;
+  }
+
+  /* ── Package grid ── */
 
   .pkg-grid {
     display: grid;
@@ -258,14 +406,14 @@ import Footer from '../../components/Footer.astro';
     display: inline-block;
     background: var(--clay);
     color: #fff;
-    font-size: .65rem;
+    font-size: .62rem;
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
-    padding: .2rem .6rem;
+    padding: .18rem .6rem;
     border-radius: 20px;
     width: fit-content;
-    margin-bottom: .3rem;
+    margin-bottom: .2rem;
   }
 
   .pkg-name {
@@ -275,21 +423,23 @@ import Footer from '../../components/Footer.astro';
     color: var(--cream);
   }
 
-  .pkg-price-main {
+  .pkg-price {
     font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     font-weight: 800;
     color: var(--clay);
     line-height: 1;
-    margin-top: .3rem;
+    margin-top: .2rem;
+    transition: all .15s;
   }
 
-  .pkg-overage {
-    font-size: .72rem;
-    color: rgba(245,240,232,.4);
+  .pkg-price-note {
+    font-size: .68rem;
+    color: rgba(245,240,232,.38);
+    font-weight: 300;
     border-bottom: 1px solid rgba(255,255,255,.07);
-    padding-bottom: .8rem;
-    margin-bottom: .3rem;
+    padding-bottom: .75rem;
+    margin-bottom: .2rem;
   }
 
   .pkg-includes {
@@ -298,60 +448,152 @@ import Footer from '../../components/Footer.astro';
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: .35rem;
+    gap: .3rem;
+    flex: 1;
   }
 
   .pkg-includes li {
-    font-size: .78rem;
+    font-size: .75rem;
     color: rgba(245,240,232,.6);
-    line-height: 1.4;
-  }
-
-  /* Addons strip */
-  .addons-row {
     display: flex;
     align-items: center;
-    gap: 1.2rem;
-    flex-wrap: wrap;
-    background: rgba(196,120,74,.06);
-    border: 1px solid rgba(196,120,74,.2);
-    border-radius: 3px;
-    padding: 1rem 1.4rem;
+    gap: .5rem;
+    line-height: 1.3;
   }
 
-  .addon-tag {
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
+  .pkg-includes li::before {
+    content: '◆';
+    font-size: .28rem;
     color: var(--clay);
-    white-space: nowrap;
+    flex-shrink: 0;
   }
 
-  .addon-items {
+  .pkg-btn {
     display: flex;
-    gap: .7rem;
-    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-top: .8rem;
+    background: none;
+    border: 1px solid rgba(196,120,74,.35);
+    color: var(--clay);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .6rem 1rem;
+    border-radius: 3px;
+    text-decoration: none;
+    min-height: 44px;
+    transition: background .2s, border-color .2s;
   }
 
-  .addon-items span {
-    font-size: .78rem;
-    color: rgba(245,240,232,.6);
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.1);
-    padding: .25rem .65rem;
-    border-radius: 20px;
+  .pkg-btn:hover {
+    background: rgba(196,120,74,.12);
+    border-color: var(--clay);
   }
+
+  /* ── Add-ons ── */
+
+  .addons-section {
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 4px;
+    padding: 1.6rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .addons-head {
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-weight: 600;
+    color: rgba(245,240,232,.35);
+    margin-bottom: 1rem;
+  }
+
+  .addons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .addon-card {
+    background: rgba(255,255,255,.03);
+    padding: 1.2rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+  }
+
+  .addon-name {
+    font-size: .72rem;
+    color: rgba(245,240,232,.5);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+  }
+
+  .addon-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--clay);
+    transition: all .15s;
+  }
+
+  .addon-price em {
+    font-style: normal;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .65rem;
+    font-weight: 300;
+    color: rgba(245,240,232,.38);
+    margin-left: .1rem;
+  }
+
+  .addon-desc {
+    font-size: .7rem;
+    color: rgba(245,240,232,.38);
+    line-height: 1.5;
+  }
+
+  /* ── Not included notice ── */
+
+  .not-included {
+    font-size: .8rem;
+    color: rgba(245,240,232,.5);
+    padding: 1rem 1.2rem;
+    background: rgba(196,120,74,.05);
+    border-left: 3px solid rgba(196,120,74,.4);
+    border-radius: 0 3px 3px 0;
+    line-height: 1.65;
+  }
+
+  .not-included strong { color: rgba(245,240,232,.7); }
+
+  /* ── Responsive ── */
 
   @media (max-width: 1100px) {
     .page-hero { padding: 0 2.5rem 3.5rem; }
     .pricing-section { padding: 4.5rem 2.5rem; }
     .pkg-grid { grid-template-columns: 1fr; }
-    .pkg-card--mid { border-left: none; border-right: none; border-top: 1px solid rgba(196,120,74,.18); border-bottom: 1px solid rgba(196,120,74,.18); }
+    .pkg-card--mid {
+      border-left: none;
+      border-right: none;
+      border-top: 1px solid rgba(196,120,74,.18);
+      border-bottom: 1px solid rgba(196,120,74,.18);
+    }
+    .addons-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 768px) {
     .page-hero { padding: 0 1.5rem 3rem; min-height: 60vh; }
     .pricing-section { padding: 4rem 1.5rem; }
+    .area-input-row { flex-direction: column; align-items: flex-start; gap: .6rem; }
+    .area-hint { margin-left: 0; }
   }
 </style>

@@ -1,26 +1,6 @@
 ---
 ---
 
-<!-- Area input modal -->
-<div id="bath-modal" class="bath-modal" role="dialog" aria-modal="true" aria-labelledby="bath-modal-title" hidden>
-  <div class="bath-modal-box">
-    <button class="bath-modal-close" aria-label="Close" onclick="document.getElementById('bath-modal').hidden=true;document.body.style.overflow=''">✕</button>
-    <div class="bath-modal-icon">📐</div>
-    <h3 id="bath-modal-title">What's your bathroom floor area?</h3>
-    <p class="bath-modal-sub">Enter the floor area in sq.ft to see your exact price.</p>
-    <div class="bath-modal-input-row">
-      <input type="number" id="bathAreaModal" min="1" max="999" placeholder="e.g. 45" inputmode="decimal" />
-      <span class="bath-modal-unit">sq.ft</span>
-    </div>
-    <div class="bath-modal-result" id="bathModalResult" hidden>
-      <div class="bmr-pkg" id="bmrPkg"></div>
-      <div class="bmr-price" id="bmrPrice"></div>
-      <div class="bmr-addons" id="bmrAddons"></div>
-    </div>
-    <a href="/contact" class="bath-modal-cta" id="bathModalCta">Book This Package →</a>
-  </div>
-</div>
-
 <section id="shop">
   <div class="stag reveal">What We Do</div>
   <h2 class="reveal">Services for Every<br />Space & Budget</h2>
@@ -29,632 +9,87 @@
     job, every time.
   </p>
 
-  <div class="svc-grid reveal">
+  <div class="svc-list reveal">
 
-    <!-- Bathroom — 3 named packages -->
-    <div class="sc wide" role="region" aria-label="Bathroom renovation services">
-      <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/16249146/pexels-photo-16249146.jpeg?auto=compress&cs=tinysrgb&w=1200&h=340&fit=crop" alt="Bathroom renovation" loading="lazy" width="1200" height="340" />
+    <a class="svc-card" href="/services/bathroom">
+      <div class="svc-img">
+        <img src="https://images.pexels.com/photos/16249146/pexels-photo-16249146.jpeg?auto=compress&cs=tinysrgb&w=900&h=500&fit=crop" alt="Bathroom renovation" loading="lazy" width="900" height="500" />
       </div>
-
-      <div class="flooring-head">
-        <div class="svc-name">Bathroom</div>
-        <div class="svc-tag">Full renovation · You supply tiles, bathware &amp; tapware</div>
-      </div>
-
-      <!-- Area input inline -->
-      <div class="bath-area-row">
-        <label class="bath-area-label" for="bathAreaInline">Enter your floor area to see full price</label>
-        <div class="bath-area-field">
-          <input type="number" id="bathAreaInline" class="bath-area-input" min="1" max="999" placeholder="sq.ft" inputmode="decimal" aria-label="Bathroom floor area in sq.ft" />
-          <span class="bath-area-unit">sq.ft</span>
+      <div class="svc-body">
+        <div class="svc-meta">
+          <div class="svc-name">Bathroom</div>
+          <div class="svc-tag">Full renovation · You supply tiles, bathware &amp; tapware</div>
         </div>
-      </div>
-
-      <div class="flooring-tiers">
-        <!-- Essential Bath -->
-        <div class="tier">
-          <div class="tier-name">Essential Bath</div>
-          <div class="tier-price-wrap">
-            <span class="tier-price bath-price" data-base="450000" data-rate="5000">Rs. 4,50,000</span>
-            <span class="bath-price-note">up to 40 sq.ft</span>
-          </div>
-          <ul class="tier-includes">
-            <li>Wall Niches</li>
-            <li>Plumbing</li>
-            <li>Wiring</li>
-            <li>Waterproofing</li>
-            <li>Tiling</li>
-            <li>Install Fixtures</li>
-            <li>Lighting</li>
-            <li>Shower Cubicle</li>
-          </ul>
-          <button class="tier-book-btn" data-pkg="Essential Bath" data-base="450000" data-rate="5000">Get a Quote →</button>
+        <div class="svc-chips">
+          <span>Essential Bath</span>
+          <span>Comfort Bath</span>
+          <span>Signature Bath</span>
         </div>
+        <div class="svc-from">From Rs. 4,50,000</div>
+        <div class="svc-link">View Packages →</div>
+      </div>
+    </a>
 
-        <!-- Comfort Bath -->
-        <div class="tier tier-mid">
-          <div class="tier-name">Comfort Bath</div>
-          <div class="tier-price-wrap">
-            <span class="tier-price bath-price" data-base="550000" data-rate="6000">Rs. 5,50,000</span>
-            <span class="bath-price-note">up to 40 sq.ft</span>
-          </div>
-          <ul class="tier-includes">
-            <li>Wall Niches</li>
-            <li>Plumbing</li>
-            <li>Wiring</li>
-            <li>Waterproofing</li>
-            <li>Tiling</li>
-            <li>Install Fixtures</li>
-            <li>Lighting</li>
-            <li>Plain Ceiling</li>
-            <li>Shower Cubicle</li>
-          </ul>
-          <button class="tier-book-btn" data-pkg="Comfort Bath" data-base="550000" data-rate="6000">Get a Quote →</button>
+    <a class="svc-card" href="/services/flooring">
+      <div class="svc-img">
+        <img src="https://images.pexels.com/photos/1144871/pexels-photo-1144871.jpeg?auto=compress&cs=tinysrgb&w=900&h=500&fit=crop" alt="Floor tiling" loading="lazy" width="900" height="500" />
+        <span class="svc-badge">Most Popular</span>
+      </div>
+      <div class="svc-body">
+        <div class="svc-meta">
+          <div class="svc-name">Floor</div>
+          <div class="svc-tag">Tile leveling system · Tokyo cement · Swisstek grout · You supply tiles</div>
         </div>
-
-        <!-- Signature Bath -->
-        <div class="tier">
-          <div class="tier-name">Signature Bath</div>
-          <div class="tier-price-wrap">
-            <span class="tier-price bath-price" data-base="650000" data-rate="7000">Rs. 6,50,000</span>
-            <span class="bath-price-note">up to 40 sq.ft</span>
-          </div>
-          <ul class="tier-includes">
-            <li>Wall Niches</li>
-            <li>Plumbing</li>
-            <li>Wiring</li>
-            <li>Waterproofing</li>
-            <li>Tiling</li>
-            <li>Install Fixtures</li>
-            <li>Ambience Lighting</li>
-            <li>Design Ceiling</li>
-            <li>Shower Cubicle</li>
-            <li>Vanity Cupboard</li>
-          </ul>
-          <button class="tier-book-btn" data-pkg="Signature Bath" data-base="650000" data-rate="7000">Get a Quote →</button>
+        <div class="svc-chips">
+          <span>Small ≤1 sq.m</span>
+          <span>Medium 1–2 sq.m</span>
+          <span>Large &gt;2 sq.m</span>
+          <span>Plank</span>
         </div>
+        <div class="svc-from">From Rs. 350 /sq.ft</div>
+        <div class="svc-link">View Pricing →</div>
       </div>
+    </a>
 
-      <!-- Add-ons -->
-      <div class="bath-addons">
-        <div class="addons-head">Optional Add-ons</div>
-        <div class="addons-grid">
-          <div class="addon-card">
-            <div class="addon-name">Demolition Works</div>
-            <div class="addon-price addon-calc" data-rate="1000">Rs. 1,000 <em>/sq.ft</em></div>
-          </div>
-          <div class="addon-card">
-            <div class="addon-name">Wall Plastering</div>
-            <div class="addon-price addon-calc" data-rate="700">Rs. 700 <em>/sq.ft</em></div>
-          </div>
-          <div class="addon-card addon-flat-card">
-            <div class="addon-name">3D Design</div>
-            <div class="addon-price">Rs. 25,000 <em>/bathroom</em></div>
-          </div>
+    <a class="svc-card" href="/services/staircase-tiling">
+      <div class="svc-img">
+        <img src="https://images.pexels.com/photos/10991408/pexels-photo-10991408.jpeg?auto=compress&cs=tinysrgb&w=900&h=500&fit=crop" alt="Staircase tiling" loading="lazy" width="900" height="500" />
+      </div>
+      <div class="svc-body">
+        <div class="svc-meta">
+          <div class="svc-name">Staircase</div>
+          <div class="svc-tag">Double nosing &amp; router edges · Landing counts as 2 steps · You supply tiles</div>
         </div>
-      </div>
-
-      <a href="/contact" class="svc-link flooring-link">View Full Packages &amp; Book →</a>
-    </div>
-
-    <!-- Floor — 4 tile-size packages -->
-    <div class="sc wide flooring" role="region" aria-label="Flooring services">
-      <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/1144871/pexels-photo-1144871.jpeg?auto=compress&cs=tinysrgb&w=1200&h=340&fit=crop" alt="Floor tiling" loading="lazy" width="1200" height="340" />
-        <span class="sc-badge">Most Popular</span>
-      </div>
-
-      <div class="flooring-head">
-        <div class="svc-name">Floor</div>
-        <div class="svc-tag">Tile leveling system · Tokyo cement · Swisstek grout · You supply tiles</div>
-      </div>
-
-      <div class="flooring-tiers floor-tiers-4">
-        <div class="tier">
-          <div class="tier-name">Small Tiles</div>
-          <div class="tier-size">≤ 1 sq.m</div>
-          <div class="tier-row"><span class="tier-label">Floor</span><span class="tier-price">Rs. 350 <em>/sq.ft</em></span></div>
-          <div class="tier-row"><span class="tier-label">Skirting</span><span class="tier-price">Rs. 250 <em>/lin.ft</em></span></div>
+        <div class="svc-chips">
+          <span>Staircase Tiling</span>
+          <span>Hand Railing</span>
         </div>
-        <div class="tier tier-mid">
-          <div class="tier-name">Medium Tiles</div>
-          <div class="tier-size">1 – 2 sq.m</div>
-          <div class="tier-row"><span class="tier-label">Floor</span><span class="tier-price">Rs. 500 <em>/sq.ft</em></span></div>
-          <div class="tier-row"><span class="tier-label">Skirting</span><span class="tier-price">Rs. 300 <em>/lin.ft</em></span></div>
+        <div class="svc-from">From Rs. 2,400 /lin.ft</div>
+        <div class="svc-link">View Service →</div>
+      </div>
+    </a>
+
+    <a class="svc-card" href="/services/kitchen-pantry">
+      <div class="svc-img">
+        <img src="https://images.pexels.com/photos/6283970/pexels-photo-6283970.jpeg?auto=compress&cs=tinysrgb&w=900&h=500&fit=crop" alt="Pantry tiling" loading="lazy" width="900" height="500" />
+      </div>
+      <div class="svc-body">
+        <div class="svc-meta">
+          <div class="svc-name">Pantry</div>
+          <div class="svc-tag">Top &amp; backsplash tiling · You supply tiles</div>
         </div>
-        <div class="tier">
-          <div class="tier-name">Large Tiles</div>
-          <div class="tier-size">&gt; 2 sq.m</div>
-          <div class="tier-row"><span class="tier-label">Floor</span><span class="tier-price">Rs. 700 <em>/sq.ft</em></span></div>
-          <div class="tier-row"><span class="tier-label">Skirting</span><span class="tier-price">Rs. 350 <em>/lin.ft</em></span></div>
+        <div class="svc-chips">
+          <span>Top &amp; Backsplash</span>
         </div>
-        <div class="tier">
-          <div class="tier-name">Plank Tiles</div>
-          <div class="tier-size">Any length</div>
-          <div class="tier-row"><span class="tier-label">Floor</span><span class="tier-price">Rs. 500 <em>/sq.ft</em></span></div>
-          <div class="tier-row"><span class="tier-label">Skirting</span><span class="tier-price">Rs. 250 <em>/lin.ft</em></span></div>
-        </div>
+        <div class="svc-from">Rs. 5,000 /lin.ft</div>
+        <div class="svc-link">View Service →</div>
       </div>
-
-      <a href="/services/flooring" class="svc-link flooring-link">Get a Price &amp; Book →</a>
-    </div>
-
-    <!-- Staircase -->
-    <div class="sc wide" role="region" aria-label="Staircase services">
-      <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/10991408/pexels-photo-10991408.jpeg?auto=compress&cs=tinysrgb&w=1200&h=340&fit=crop" alt="Staircase tiling" loading="lazy" width="1200" height="340" />
-      </div>
-
-      <div class="flooring-head">
-        <div class="svc-name">Staircase</div>
-        <div class="svc-tag">Double nosing &amp; router edges · Landing counts as 2 steps · You supply tiles</div>
-      </div>
-
-      <div class="flooring-tiers stair-tiers">
-        <div class="tier">
-          <div class="tier-name">Staircase Tiling</div>
-          <div class="tier-row"><span class="tier-label">Per Step</span><span class="tier-price">Rs. 2,400 <em>/lin.ft</em></span></div>
-          <div class="tier-row"><span class="tier-label">Landing</span><span class="tier-price">2 steps rate</span></div>
-          <div class="tier-note">Double nosing &amp; router edges included</div>
-        </div>
-        <div class="tier tier-mid">
-          <div class="tier-name">Hand Railing</div>
-          <div class="tier-row"><span class="tier-label">Rate</span><span class="tier-price">Rs. 12,500 <em>/ft</em></span></div>
-        </div>
-      </div>
-
-      <a href="/contact" class="svc-link flooring-link">Get a Quote →</a>
-    </div>
-
-    <!-- Pantry -->
-    <div class="sc wide" role="region" aria-label="Pantry services">
-      <div class="sc-thumb">
-        <img src="https://images.pexels.com/photos/6283970/pexels-photo-6283970.jpeg?auto=compress&cs=tinysrgb&w=1200&h=340&fit=crop" alt="Pantry tiling" loading="lazy" width="1200" height="340" />
-      </div>
-
-      <div class="flooring-head">
-        <div class="svc-name">Pantry</div>
-        <div class="svc-tag">Top &amp; backsplash tiling · You supply tiles</div>
-      </div>
-
-      <div class="flooring-tiers flooring-tiers--single">
-        <div class="tier tier-mid">
-          <div class="tier-name">Top &amp; Backsplash</div>
-          <div class="tier-row"><span class="tier-label">Tiling</span><span class="tier-price">Rs. 5,000 <em>/lin.ft</em></span></div>
-        </div>
-      </div>
-
-      <a href="/contact" class="svc-link flooring-link">Get a Quote →</a>
-    </div>
+    </a>
 
   </div>
 </section>
 
-<script is:inline>
-(function () {
-  function formatRs(n) {
-    return 'Rs.\u00a0' + Math.round(n).toLocaleString('en-IN');
-  }
-
-  function calcBathPrice(base, rate, area) {
-    if (!area || area <= 0) return base;
-    var extra = Math.max(0, area - 40);
-    return base + extra * rate;
-  }
-
-  function updatePrices(area) {
-    // Package prices
-    document.querySelectorAll('.bath-price').forEach(function (el) {
-      var base = parseInt(el.dataset.base, 10);
-      var rate = parseInt(el.dataset.rate, 10);
-      el.textContent = formatRs(calcBathPrice(base, rate, area));
-    });
-
-    // Price notes
-    document.querySelectorAll('.bath-price-note').forEach(function (el) {
-      el.textContent = area > 0 ? area + ' sq.ft total' : 'up to 40 sq.ft';
-    });
-
-    // Addon prices (per-sqft ones)
-    document.querySelectorAll('.addon-calc').forEach(function (el) {
-      var rate = parseInt(el.dataset.rate, 10);
-      if (area > 0) {
-        el.innerHTML = formatRs(area * rate);
-      } else {
-        el.innerHTML = formatRs(rate) + ' <em>/sq.ft</em>';
-      }
-    });
-  }
-
-  // Inline area input
-  var inlineInput = document.getElementById('bathAreaInline');
-  if (inlineInput) {
-    inlineInput.addEventListener('input', function () {
-      updatePrices(parseFloat(this.value) || 0);
-    });
-  }
-
-  // "Get a Quote" buttons → open modal
-  document.querySelectorAll('.tier-book-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var pkg = btn.dataset.pkg;
-      var base = parseInt(btn.dataset.base, 10);
-      var rate = parseInt(btn.dataset.rate, 10);
-      var inlineVal = parseFloat((inlineInput && inlineInput.value) || 0);
-
-      var modal = document.getElementById('bath-modal');
-      var modalInput = document.getElementById('bathAreaModal');
-      var result = document.getElementById('bathModalResult');
-
-      // Pre-fill from inline input
-      if (inlineVal > 0) modalInput.value = inlineVal;
-      else modalInput.value = '';
-
-      result.hidden = true;
-      modal.hidden = false;
-      document.body.style.overflow = 'hidden';
-      setTimeout(function () { modalInput.focus(); }, 80);
-
-      function renderResult() {
-        var area = parseFloat(modalInput.value) || 0;
-        if (area <= 0) { result.hidden = true; return; }
-
-        var pkgTotal = calcBathPrice(base, rate, area);
-        var demolition = area * 1000;
-        var plastering = area * 700;
-
-        document.getElementById('bmrPkg').textContent = pkg;
-        document.getElementById('bmrPrice').textContent = formatRs(pkgTotal);
-        document.getElementById('bmrAddons').innerHTML =
-          '<div class="bmr-addon-row"><span>Demolition Works</span><span>' + formatRs(demolition) + '</span></div>' +
-          '<div class="bmr-addon-row"><span>Wall Plastering</span><span>' + formatRs(plastering) + '</span></div>' +
-          '<div class="bmr-addon-row"><span>3D Design</span><span>Rs.\u00a025,000</span></div>';
-
-        result.hidden = false;
-
-        // Also sync inline input
-        if (inlineInput) { inlineInput.value = area; updatePrices(area); }
-      }
-
-      modalInput.addEventListener('input', renderResult);
-      if (inlineVal > 0) renderResult();
-
-      // Store ref to clean up later
-      modal._renderFn = renderResult;
-      modal._modalInput = modalInput;
-    });
-  });
-
-  // Close modal on backdrop click
-  var modal = document.getElementById('bath-modal');
-  if (modal) {
-    modal.addEventListener('click', function (e) {
-      if (e.target === modal) {
-        modal.hidden = true;
-        document.body.style.overflow = '';
-      }
-    });
-  }
-})();
-</script>
-
 <style>
-  /* ── Modal ── */
-
-  .bath-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, .72);
-    z-index: 9000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    backdrop-filter: blur(4px);
-  }
-
-  .bath-modal[hidden] { display: none; }
-
-  .bath-modal-box {
-    background: #1e1a17;
-    border: 1px solid rgba(196, 120, 74, .25);
-    border-radius: 6px;
-    padding: 2.4rem 2rem;
-    max-width: 420px;
-    width: 100%;
-    position: relative;
-    text-align: center;
-    box-shadow: 0 24px 60px rgba(0,0,0,.5);
-  }
-
-  .bath-modal-close {
-    position: absolute;
-    top: .9rem;
-    right: .9rem;
-    background: none;
-    border: none;
-    color: rgba(245,240,232,.45);
-    font-size: 1rem;
-    cursor: pointer;
-    padding: .3rem .5rem;
-    line-height: 1;
-    min-height: 44px;
-    min-width: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .bath-modal-icon {
-    font-size: 2rem;
-    margin-bottom: .75rem;
-  }
-
-  .bath-modal-box h3 {
-    font-family: 'Playfair Display', serif;
-    color: var(--cream);
-    font-size: 1.25rem;
-    margin: 0 0 .5rem;
-    font-weight: 700;
-    line-height: 1.3;
-  }
-
-  .bath-modal-sub {
-    font-size: .8rem;
-    color: rgba(245,240,232,.5);
-    margin: 0 0 1.4rem;
-    line-height: 1.55;
-  }
-
-  .bath-modal-input-row {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    justify-content: center;
-    margin-bottom: 1.4rem;
-  }
-
-  #bathAreaModal {
-    width: 120px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(196, 120, 74, .35);
-    border-radius: 4px;
-    color: var(--cream);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1.2rem;
-    padding: .55rem .75rem;
-    text-align: center;
-    outline: none;
-  }
-
-  #bathAreaModal:focus {
-    border-color: var(--clay);
-    background: rgba(196,120,74,.08);
-  }
-
-  .bath-modal-unit {
-    font-size: .8rem;
-    color: rgba(245,240,232,.45);
-  }
-
-  .bath-modal-result {
-    background: rgba(196,120,74,.07);
-    border: 1px solid rgba(196,120,74,.18);
-    border-radius: 4px;
-    padding: 1.1rem 1.2rem;
-    text-align: left;
-    margin-bottom: 1.2rem;
-  }
-
-  .bmr-pkg {
-    font-size: .72rem;
-    color: var(--clay);
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    font-weight: 600;
-    margin-bottom: .4rem;
-  }
-
-  .bmr-price {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--cream);
-    margin-bottom: .8rem;
-  }
-
-  .bmr-addon-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    font-size: .75rem;
-    color: rgba(245,240,232,.5);
-    padding: .3rem 0;
-    border-top: 1px solid rgba(255,255,255,.06);
-    gap: .5rem;
-  }
-
-  .bmr-addon-row span:last-child {
-    color: rgba(245,240,232,.75);
-    font-weight: 500;
-    text-align: right;
-  }
-
-  .bath-modal-cta {
-    display: block;
-    background: var(--clay);
-    color: var(--cream);
-    text-decoration: none;
-    padding: .85rem 1.5rem;
-    border-radius: 3px;
-    font-size: .82rem;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    transition: background .2s;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .bath-modal-cta:hover { background: #b8673e; }
-
-  /* ── Inline area input ── */
-
-  .bath-area-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: rgba(196,120,74,.06);
-    border: 1px solid rgba(196,120,74,.2);
-    border-radius: 4px;
-    padding: .75rem 1rem;
-    margin-bottom: 1.4rem;
-    flex-wrap: wrap;
-    gap: .6rem;
-  }
-
-  .bath-area-label {
-    font-size: .72rem;
-    color: rgba(245,240,232,.5);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    font-weight: 500;
-    flex: 1;
-    min-width: 160px;
-  }
-
-  .bath-area-field {
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-  }
-
-  .bath-area-input {
-    width: 80px;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(196,120,74,.3);
-    border-radius: 3px;
-    color: var(--cream);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1rem;
-    padding: .4rem .6rem;
-    text-align: center;
-    outline: none;
-    min-height: 38px;
-  }
-
-  .bath-area-input:focus {
-    border-color: var(--clay);
-  }
-
-  .bath-area-unit {
-    font-size: .75rem;
-    color: rgba(245,240,232,.4);
-  }
-
-  /* ── Package price display ── */
-
-  .tier-price-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: .15rem;
-    padding-bottom: .6rem;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-  }
-
-  .bath-price-note {
-    font-size: .65rem;
-    color: rgba(245,240,232,.35);
-    font-weight: 300;
-  }
-
-  /* ── Book button ── */
-
-  .tier-book-btn {
-    margin-top: auto;
-    background: none;
-    border: 1px solid rgba(196,120,74,.35);
-    color: var(--clay);
-    font-family: 'DM Sans', sans-serif;
-    font-size: .72rem;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    padding: .55rem 1rem;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: background .2s, border-color .2s;
-    min-height: 44px;
-    width: 100%;
-  }
-
-  .tier-book-btn:hover {
-    background: rgba(196,120,74,.12);
-    border-color: var(--clay);
-  }
-
-  /* ── Add-ons ── */
-
-  .bath-addons {
-    background: rgba(255,255,255,.025);
-    border: 1px solid rgba(255,255,255,.07);
-    border-radius: 4px;
-    padding: 1.2rem 1.4rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .addons-head {
-    font-size: .65rem;
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    font-weight: 600;
-    color: rgba(245,240,232,.35);
-    margin-bottom: .9rem;
-  }
-
-  .addons-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: .8rem;
-  }
-
-  .addon-card {
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.07);
-    border-radius: 3px;
-    padding: .85rem .9rem;
-  }
-
-  .addon-name {
-    font-size: .7rem;
-    color: rgba(245,240,232,.5);
-    font-weight: 400;
-    margin-bottom: .4rem;
-    line-height: 1.4;
-  }
-
-  .addon-price {
-    font-family: 'Playfair Display', serif;
-    font-size: .95rem;
-    font-weight: 700;
-    color: var(--clay);
-    transition: all .2s;
-  }
-
-  .addon-price em {
-    font-style: normal;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .65rem;
-    font-weight: 300;
-    color: rgba(245,240,232,.38);
-    margin-left: .1rem;
-  }
-
-  /* ── Section ── */
-
   section {
     background: var(--charcoal);
     padding: 5.5rem 4rem;
@@ -667,321 +102,194 @@
     position: absolute;
     inset: 0;
     background:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 60px,
-        rgba(255, 255, 255, .01) 60px,
-        rgba(255, 255, 255, .01) 61px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 60px,
-        rgba(255, 255, 255, .01) 60px,
-        rgba(255, 255, 255, .01) 61px
-      );
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,.01) 60px, rgba(255,255,255,.01) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.01) 60px, rgba(255,255,255,.01) 61px);
   }
 
   h2 { color: var(--cream); }
-
   .stag { color: var(--clay); }
+  .sdesc { color: rgba(245,240,232,.65); }
 
-  .sdesc { color: rgba(245, 240, 232, .65); }
+  /* ── Service list ── */
 
-  /* ── Service grid ── */
-
-  .svc-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+  .svc-list {
+    display: flex;
+    flex-direction: column;
     gap: 1.5px;
-    background: rgba(255, 255, 255, .07);
-    border: 1.5px solid rgba(255, 255, 255, .07);
+    background: rgba(255,255,255,.07);
+    border: 1.5px solid rgba(255,255,255,.07);
     position: relative;
     z-index: 1;
   }
 
-  .sc {
+  .svc-card {
+    display: grid;
+    grid-template-columns: 380px 1fr;
     background: #211c18;
-    padding: 2rem;
     text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
+    transition: background .25s;
     position: relative;
     overflow: hidden;
-    transition: background .25s;
+    min-height: 200px;
   }
 
-  .sc:hover { background: #28211a; }
+  .svc-card:hover { background: #28211a; }
 
-  .sc::after {
+  .svc-card::after {
     content: '';
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
-    right: 0;
-    height: 2px;
+    bottom: 0;
+    width: 3px;
     background: var(--clay);
-    transform: scaleX(0);
-    transform-origin: left;
+    transform: scaleY(0);
+    transform-origin: top;
     transition: transform .35s;
   }
 
-  .sc:hover::after { transform: scaleX(1); }
+  .svc-card:hover::after { transform: scaleY(1); }
 
-  /* ── Card thumbnail ── */
+  /* ── Image column ── */
 
-  .sc-thumb {
-    margin: -2rem -2rem 1.2rem;
-    height: 185px;
+  .svc-img {
+    position: relative;
     overflow: hidden;
     flex-shrink: 0;
-    position: relative;
   }
 
-  .sc-badge {
-    position: absolute;
-    top: .85rem;
-    left: .85rem;
-    background: var(--clay);
-    color: var(--cream);
-    font-size: .68rem;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding: .28rem .75rem;
-    border-radius: 2px;
-    z-index: 2;
-  }
-
-  .sc-thumb img {
+  .svc-img img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    filter: brightness(.65) saturate(.75);
+    filter: brightness(.6) saturate(.75);
     transition: transform .45s ease, filter .4s ease;
   }
 
-  .sc:hover .sc-thumb img {
+  .svc-card:hover .svc-img img {
     transform: scale(1.06);
-    filter: brightness(.78) saturate(.9);
+    filter: brightness(.75) saturate(.9);
+  }
+
+  .svc-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: var(--clay);
+    color: var(--cream);
+    font-size: .65rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .25rem .7rem;
+    border-radius: 2px;
+    z-index: 2;
+  }
+
+  /* ── Body column ── */
+
+  .svc-body {
+    padding: 2rem 2.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    justify-content: center;
   }
 
   .svc-name {
     font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
+    font-size: 1.45rem;
     font-weight: 700;
     color: var(--cream);
-    line-height: 1.2;
+    line-height: 1.15;
+    margin-bottom: .1rem;
   }
 
   .svc-tag {
     font-size: .75rem;
     font-weight: 300;
-    color: rgba(245, 240, 232, .6);
-    line-height: 1.55;
+    color: rgba(245,240,232,.5);
+    line-height: 1.6;
+  }
+
+  .svc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+  }
+
+  .svc-chips span {
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: .06em;
+    color: rgba(245,240,232,.55);
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    padding: .22rem .65rem;
+    border-radius: 20px;
+  }
+
+  .svc-from {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--clay);
   }
 
   .svc-link {
-    display: inline-block;
     font-size: .75rem;
-    font-weight: 500;
-    letter-spacing: .05em;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
     color: var(--clay);
-    border-bottom: 1px solid rgba(196, 120, 74, .3);
+    border-bottom: 1px solid rgba(196,120,74,.3);
     padding-bottom: .1rem;
     width: fit-content;
-    transition: border-color .2s, color .2s;
-    margin-top: .3rem;
+    transition: border-color .2s;
   }
 
-  .sc:hover .svc-link {
+  .svc-card:hover .svc-link {
     border-color: var(--clay);
-    color: #e08c5a;
   }
-
-  .sc.wide { grid-column: span 3; }
-
-  .flooring { cursor: default; }
-
-  .flooring-head { margin-bottom: 1.5rem; }
-
-  /* ── Tier grid ── */
-
-  .flooring-tiers {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: rgba(255, 255, 255, .08);
-    border: 1px solid rgba(255, 255, 255, .08);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 1.4rem;
-  }
-
-  .flooring-tiers--single {
-    grid-template-columns: minmax(0, 420px) !important;
-    justify-content: center;
-  }
-
-  .floor-tiers-4 {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .stair-tiers {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .tier {
-    background: rgba(255, 255, 255, .03);
-    padding: 1.4rem 1.6rem;
-    display: flex;
-    flex-direction: column;
-    gap: .7rem;
-  }
-
-  .tier-mid {
-    background: rgba(196, 120, 74, .07);
-    border-left: 1px solid rgba(196, 120, 74, .18);
-    border-right: 1px solid rgba(196, 120, 74, .18);
-  }
-
-  .tier-name {
-    font-family: 'Playfair Display', serif;
-    font-size: .95rem;
-    font-weight: 700;
-    color: var(--cream);
-    padding-bottom: .6rem;
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
-  }
-
-  .tier-size {
-    font-size: .68rem;
-    color: rgba(245, 240, 232, .38);
-    font-weight: 300;
-    margin-top: -.45rem;
-  }
-
-  .tier-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: .5rem;
-  }
-
-  .tier-label {
-    font-size: .75rem;
-    color: rgba(245, 240, 232, .5);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    font-weight: 400;
-    flex-shrink: 0;
-  }
-
-  .tier-price {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--clay);
-    text-align: right;
-  }
-
-  .tier-price em {
-    font-style: normal;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .7rem;
-    font-weight: 300;
-    color: rgba(245, 240, 232, .45);
-    margin-left: .15rem;
-  }
-
-  .tier-note {
-    font-size: .68rem;
-    color: rgba(245, 240, 232, .38);
-    font-style: italic;
-    line-height: 1.45;
-    margin-top: -.2rem;
-  }
-
-  /* ── Bathroom package includes list ── */
-
-  .tier-includes {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: .3rem;
-    margin-top: .2rem;
-    flex: 1;
-  }
-
-  .tier-includes li {
-    font-size: .72rem;
-    color: rgba(245, 240, 232, .55);
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    line-height: 1.3;
-  }
-
-  .tier-includes li::before {
-    content: '◆';
-    font-size: .3rem;
-    color: var(--clay);
-    flex-shrink: 0;
-  }
-
-  .flooring-link { margin-top: 0; }
 
   /* ── Responsive ── */
 
   @media (max-width: 1100px) {
     section { padding-left: 2.5rem; padding-right: 2.5rem; }
-    .svc-grid { grid-template-columns: repeat(2, 1fr); }
-    .sc.wide { grid-column: span 2; }
-    .floor-tiers-4 { grid-template-columns: repeat(2, 1fr); }
-    .addons-grid { grid-template-columns: repeat(3, 1fr); }
+    .svc-card { grid-template-columns: 280px 1fr; }
   }
 
   @media (max-width: 768px) {
     section { padding: 4rem 1.5rem; }
-    .svc-grid { grid-template-columns: 1fr; }
-    .sc.wide { grid-column: span 1; }
-    .flooring-tiers,
-    .floor-tiers-4,
-    .stair-tiers {
+
+    .svc-card {
       grid-template-columns: 1fr;
+      min-height: auto;
     }
-    .tier-mid {
-      border-left: none;
-      border-right: none;
-      border-top: 1px solid rgba(196, 120, 74, .18);
-      border-bottom: 1px solid rgba(196, 120, 74, .18);
+
+    .svc-img {
+      height: 200px;
     }
-    .addons-grid { grid-template-columns: 1fr; }
-    .bath-modal-box { padding: 2rem 1.4rem; }
+
+    .svc-card::after {
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: auto;
+      height: 3px;
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+
+    .svc-card:hover::after { transform: scaleX(1); }
+
+    .svc-body { padding: 1.6rem; }
   }
 
   @media (max-width: 480px) {
     section { padding: 3.5rem 1.2rem; }
-
-    .tier { padding: 1.1rem 1.2rem; }
-
-    .tier-row {
-      flex-direction: column;
-      gap: .2rem;
-    }
-
-    .tier-price { font-size: .9rem; }
-
-    .svc-link {
-      font-size: .82rem;
-      padding: .7rem 0;
-      display: block;
-    }
-
-    .bath-area-row { flex-direction: column; align-items: flex-start; }
-    .addons-grid { grid-template-columns: 1fr; }
+    .svc-name { font-size: 1.25rem; }
   }
 </style>
