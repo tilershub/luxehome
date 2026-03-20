@@ -299,6 +299,9 @@ const { service: defaultService = '' } = Astro.props;
 </div>
 
 <script>
+  import { supabase } from '../lib/supabase';
+  import type { LeadInsert } from '../lib/supabase';
+
   const form      = document.getElementById('quote-form') as HTMLFormElement;
   const success   = document.getElementById('form-success') as HTMLElement;
   const btnSubmit = document.getElementById('btn-submit') as HTMLButtonElement;
@@ -368,6 +371,43 @@ const { service: defaultService = '' } = Astro.props;
     return ok;
   }
 
+  // ── Extract service-specific details for Supabase ──
+  function buildServiceDetails(data: FormData, svc: string): Record<string, string> {
+    const d: Record<string, string> = {};
+    const set = (k: string, v: string | null | undefined) => { if (v?.toString().trim()) d[k] = v.toString().trim(); };
+    if (svc === 'Floor Tiling') {
+      set('floor_area', data.get('sf_floor_area')?.toString());
+      set('skirting', data.get('sf_skirting')?.toString());
+      set('tile_size', data.get('sf_tile_size')?.toString());
+    } else if (svc === 'Staircase Tiling') {
+      set('stair_length', data.get('sf_stair_length')?.toString());
+    } else if (svc === 'Bathroom Tiling') {
+      set('tiling_area', data.get('sf_bt_area')?.toString());
+      set('niches', data.get('sf_niches')?.toString());
+    } else if (svc === 'Bathroom Construction/Renovation') {
+      set('length', data.get('sf_br_length')?.toString());
+      set('width', data.get('sf_br_width')?.toString());
+      set('height', data.get('sf_br_height')?.toString());
+      const scope = data.getAll('sf_br_scope').map(v => v.toString());
+      if (scope.length) d['scope'] = scope.join(', ');
+    } else if (svc === 'iPanel Ceiling') {
+      set('ceiling_area', data.get('sf_ceil_area')?.toString());
+      set('finish_type', data.get('sf_ceil_type')?.toString());
+    } else if (svc === 'Shower Cubicle') {
+      set('cubicle_shape', data.get('sf_cub_shape')?.toString());
+      set('cubicle_size', data.get('sf_cub_size')?.toString());
+    } else if (svc === 'Hand Railing') {
+      set('rail_length', data.get('sf_rail_length')?.toString());
+    } else if (svc === 'Waterproofing') {
+      set('wp_area', data.get('sf_wp_area')?.toString());
+    } else if (svc === 'Kitchen Pantry') {
+      set('pantry_length', data.get('sf_kp_length')?.toString());
+    } else if (svc === 'Pantry Cupboard') {
+      set('cupboard_length', data.get('sf_pc_length')?.toString());
+    }
+    return d;
+  }
+
   // ── Build WhatsApp message ──
   function buildMessage(data: FormData, svc: string): string {
     const lines: string[] = [
@@ -379,7 +419,6 @@ const { service: defaultService = '' } = Astro.props;
       `Location: ${data.get('location')?.toString().trim()}`,
     ];
 
-    // Service-specific details
     const add = (label: string, val: string | null | undefined) => {
       if (val?.toString().trim()) lines.push(`${label}: ${val.toString().trim()}`);
     };
@@ -431,7 +470,7 @@ const { service: defaultService = '' } = Astro.props;
   }
 
   // ── Submit ──
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = new FormData(form);
     if (data.get('botcheck')) return;
@@ -445,6 +484,24 @@ const { service: defaultService = '' } = Astro.props;
     btnText.hidden = true;
     btnLoad.hidden = false;
 
+    // ── Save lead to Supabase (before opening WhatsApp so no lead is lost) ──
+    if (supabase) {
+      const lead: LeadInsert = {
+        name:            data.get('name')?.toString().trim() ?? '',
+        phone:           data.get('phone')?.toString().trim() ?? '',
+        service:         svc,
+        location:        data.get('location')?.toString().trim() ?? '',
+        service_details: buildServiceDetails(data, svc),
+        notes:           data.get('message')?.toString().trim() || null,
+        source_url:      window.location.href,
+      };
+      // Fire and forget — WhatsApp opens regardless of Supabase result
+      supabase.from('leads').insert(lead).then(({ error }) => {
+        if (error) console.warn('[TILERSHUB] Lead save failed:', error.message);
+      });
+    }
+
+    // ── Open WhatsApp ──
     const SERVICE_NUMBERS: Record<string, string> = {
       'Shower Cubicle': '94710111506',
       'Hand Railing':   '94710111506',
