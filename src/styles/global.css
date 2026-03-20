@@ -19,6 +19,9 @@
   padding: 0;
 }
 
+/* Ensure [hidden] always wins over component display styles */
+[hidden] { display: none !important; }
+
 /* Prevent tap highlight on interactive elements */
 a, button, [role="button"] {
   -webkit-tap-highlight-color: transparent;
