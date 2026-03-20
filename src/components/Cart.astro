@@ -1,4 +1,6 @@
 ---
+const sbUrl  = import.meta.env.PUBLIC_SUPABASE_URL  ?? '';
+const sbKey  = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
 ---
 
 <!-- Cart toggle button -->
@@ -84,7 +86,7 @@
   </div>
 </div>
 
-<script is:inline>
+<script is:inline define:vars={{ sbUrl, sbKey }}>
 (function () {
   /* ── Cart state ── */
   var STORE_KEY = 'lh_cart_v1';
@@ -225,6 +227,37 @@
     btn.classList.add('cart-pulse');
   }
 
+  /* ── Supabase cart event (fire-and-forget via raw fetch) ── */
+  function getSessionId() {
+    var k = 'lh_sid';
+    var sid = localStorage.getItem(k);
+    if (!sid) {
+      sid = Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem(k, sid);
+    }
+    return sid;
+  }
+
+  function logCartEvent(item) {
+    if (!sbUrl || !sbKey) return;
+    fetch(sbUrl + '/rest/v1/cart_events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': sbKey,
+        'Authorization': 'Bearer ' + sbKey,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        session_id:   getSessionId(),
+        service_name: item.name,
+        price:        Math.round(item.price),
+        details:      item.details || '',
+        page_url:     window.location.pathname
+      })
+    }).catch(function () { /* silent — never block UX */ });
+  }
+
   /* ── Global API for service pages ── */
   window.LHCart = {
     add: function (item) {
@@ -239,6 +272,7 @@
       saveItems(items);
       render();
       pulseCart();
+      logCartEvent(item);
     }
   };
 

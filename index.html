@@ -45,7 +45,9 @@ Premium tiling and bathroom renovation specialists across Sri Lanka.
 Transfer your 10% deposit, then WhatsApp the screenshot to confirm.
 </div> </div> <a id="cartWA" href="#" target="_blank" rel="noopener noreferrer" class="cart-wa-btn" data-astro-cid-atha5qgx> <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-astro-cid-atha5qgx> <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" data-astro-cid-atha5qgx></path> <path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z" data-astro-cid-atha5qgx></path> </svg>
 Confirm Booking — 0774 503 744
-</a> <button id="cartClear" class="cart-clear-btn" data-astro-cid-atha5qgx>Remove all items</button> </div> </div> </div> <script>
+</a> <button id="cartClear" class="cart-clear-btn" data-astro-cid-atha5qgx>Remove all items</button> </div> </div> </div> <script>(function(){const sbUrl = "";
+const sbKey = "";
+
 (function () {
   /* ── Cart state ── */
   var STORE_KEY = 'lh_cart_v1';
@@ -186,6 +188,37 @@ Confirm Booking — 0774 503 744
     btn.classList.add('cart-pulse');
   }
 
+  /* ── Supabase cart event (fire-and-forget via raw fetch) ── */
+  function getSessionId() {
+    var k = 'lh_sid';
+    var sid = localStorage.getItem(k);
+    if (!sid) {
+      sid = Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem(k, sid);
+    }
+    return sid;
+  }
+
+  function logCartEvent(item) {
+    if (!sbUrl || !sbKey) return;
+    fetch(sbUrl + '/rest/v1/cart_events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': sbKey,
+        'Authorization': 'Bearer ' + sbKey,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        session_id:   getSessionId(),
+        service_name: item.name,
+        price:        Math.round(item.price),
+        details:      item.details || '',
+        page_url:     window.location.pathname
+      })
+    }).catch(function () { /* silent — never block UX */ });
+  }
+
   /* ── Global API for service pages ── */
   window.LHCart = {
     add: function (item) {
@@ -200,11 +233,12 @@ Confirm Booking — 0774 503 744
       saveItems(items);
       render();
       pulseCart();
+      logCartEvent(item);
     }
   };
 
   render();
 })();
-</script>  <!-- :global styles for JS-injected cart item elements -->  <!-- Scroll-reveal: activates .reveal elements as they enter the viewport.
+})();</script>  <!-- :global styles for JS-injected cart item elements -->  <!-- Scroll-reveal: activates .reveal elements as they enter the viewport.
          Elements already visible on load are activated immediately (no delay)
          so the LCP element is never held at opacity:0. --> <script type="module">window.addEventListener("load",function(){var a=document.createElement("script");a.src="https://www.googletagmanager.com/gtag/js?id=G-DLJDBQZ8N2",a.async=!0,document.head.appendChild(a),a.onload=function(){window.dataLayer=window.dataLayer||[];function n(){dataLayer.push(arguments)}n("js",new Date),n("config","G-DLJDBQZ8N2")}});</script> </body> </html>
