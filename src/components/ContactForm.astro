@@ -10,10 +10,10 @@ const { service: defaultService = '' } = Astro.props;
   <!-- Success state -->
   <div class="form-success" id="form-success" aria-live="polite" hidden>
     <div class="success-icon" aria-hidden="true">✓</div>
-    <h3>WhatsApp is opening!</h3>
+    <h3>Booking Request Sent!</h3>
     <p>
-      Your details have been pre-filled in WhatsApp — just hit Send and we'll
-      get back to you shortly.
+      Your details are pre-filled in WhatsApp — just hit Send and we'll confirm
+      your inspection date shortly.
     </p>
   </div>
 
@@ -289,11 +289,11 @@ const { service: defaultService = '' } = Astro.props;
     </div>
 
     <button type="submit" id="btn-submit" class="btn-submit">
-      <span class="btn-text">Request Quote via WhatsApp</span>
-      <span class="btn-loading" hidden aria-hidden="true">Sending…</span>
+      <span class="btn-text">Book Inspection via WhatsApp</span>
+      <span class="btn-loading" hidden aria-hidden="true">Opening WhatsApp…</span>
     </button>
 
-    <p class="form-note">No spam — your details are only used to prepare your quote.</p>
+    <p class="form-note">We'll confirm your inspection date via WhatsApp — usually within a few hours.</p>
 
   </form>
 </div>
@@ -371,7 +371,7 @@ const { service: defaultService = '' } = Astro.props;
   // ── Build WhatsApp message ──
   function buildMessage(data: FormData, svc: string): string {
     const lines: string[] = [
-      'New Quote Request — TILERSHUB',
+      'Site Inspection Request — TILERSHUB',
       '',
       `Name: ${data.get('name')?.toString().trim()}`,
       `Phone: ${data.get('phone')?.toString().trim()}`,
