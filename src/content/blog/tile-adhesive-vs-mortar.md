@@ -2,7 +2,7 @@
 title: "Tile Adhesive vs Mortar Bed: Which Should You Use?"
 description: "The debate between tile adhesive and traditional mortar bed explained. Learn which method suits which surfaces, and why modern adhesive has become the standard for most tiling work in Sri Lanka."
 pubDate: 2025-02-10
-author: "TILERSHUB Team"
+author: "LUXEHOME Team"
 category: "Tiling Guide"
 readingTime: "5 min read"
 ---
@@ -77,7 +77,7 @@ Not all adhesives are equal. EN 12004 classifies tile adhesives:
 
 For bathroom floors, large-format tiles, and any exterior application, C2 or better is the correct specification. Using C1 adhesive on a 600×600mm floor tile in a wet area is a guarantee of future failure.
 
-At TILERSHUB, we use C2 polymer-modified adhesive as standard on all floor tiling projects. We reserve mortar bed for shower floors where drainage gradients must be created.
+At LUXEHOME, we use C2 polymer-modified adhesive as standard on all floor tiling projects. We reserve mortar bed for shower floors where drainage gradients must be created.
 
 ## The Hidden Factor: Surface Preparation
 

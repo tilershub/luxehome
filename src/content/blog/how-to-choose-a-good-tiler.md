@@ -2,7 +2,7 @@
 title: "How to Choose a Good Tiler in Sri Lanka (A Guide for Overseas Sri Lankans)"
 description: "Renovating your Sri Lanka home from abroad? This guide helps overseas Sri Lankans identify a trustworthy, skilled tiler — what to ask, what red flags to watch for, and how to manage the job remotely."
 pubDate: 2025-03-01
-author: "TILERSHUB Team"
+author: "LUXEHOME Team"
 category: "Hiring Guide"
 readingTime: "6 min read"
 ---
@@ -115,6 +115,6 @@ A contractor who has successfully managed remote-client projects understands the
 
 ## A Note on Coordinating From Abroad
 
-At TILERSHUB, a significant portion of our clients are overseas Sri Lankans renovating family homes or investment properties. We are experienced in remote project management: daily site updates, video call check-ins at key stages, itemised quotes before work begins, and transparent communication throughout.
+At LUXEHOME, a significant portion of our clients are overseas Sri Lankans renovating family homes or investment properties. We are experienced in remote project management: daily site updates, video call check-ins at key stages, itemised quotes before work begins, and transparent communication throughout.
 
 We work across Sri Lanka and provide free site visits before any commitment. If you are planning a renovation from overseas, [WhatsApp us](https://wa.me/94774503744?text=Hello%2C%20I%20am%20overseas%20and%20would%20like%20to%20discuss%20a%20renovation.) — we will give you an honest assessment of your project, a detailed quote, and a communication plan that keeps you in control of the job from wherever you are.

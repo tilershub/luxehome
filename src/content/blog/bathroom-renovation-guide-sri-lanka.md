@@ -2,7 +2,7 @@
 title: "Complete Bathroom Renovation Guide for Sri Lanka Homes (2025)"
 description: "Planning a bathroom renovation in Sri Lanka? This step-by-step guide covers layout planning, tile selection, waterproofing, fittings, costs, and how to avoid the most common mistakes."
 pubDate: 2025-02-01
-author: "TILERSHUB Team"
+author: "LUXEHOME Team"
 category: "Bathroom Renovation"
 readingTime: "7 min read"
 ---
@@ -40,7 +40,7 @@ This is where most DIY renovations and cheap jobs fail.
 
 Bathroom floors and wet walls need a continuous waterproof membrane before any tile is laid. Water travels through grout and adhesive over time. If there is no membrane, it reaches the screed, the concrete, and eventually the wall cavity or the ceiling below.
 
-At TILERSHUB, we apply Sika waterproofing membrane to all wet areas:
+At LUXEHOME, we apply Sika waterproofing membrane to all wet areas:
 
 - Full floor coverage extending 300mm up every wall
 - Full shower wall coverage to ceiling height in enclosed showers

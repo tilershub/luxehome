@@ -8,7 +8,7 @@ interface Props {
 }
 
 const {
-  title = 'TILERSHUB — Premium Tiling & Renovation Sri Lanka',
+  title = 'LUXEHOME — Premium Tiling & Renovation Sri Lanka',
   description = 'Premium tiling and bathroom renovation specialists across Sri Lanka. Craft, quality, and clean finishes — every time.',
 } = Astro.props;
 
@@ -39,7 +39,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:site_name" content="TILERSHUB" />
+    <meta property="og:site_name" content="LUXEHOME" />
     <meta property="og:url" content={canonicalURL} />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
@@ -50,11 +50,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "name": "TILERSHUB",
+        "name": "LUXEHOME",
         "description": "Premium tiling and bathroom renovation specialists across Sri Lanka.",
-        "url": "https://tilershub.com",
+        "url": "https://luxehome.com",
         "telephone": "+94774503744",
-        "email": "tilershub@gmail.com",
+        "email": "luxehome@gmail.com",
         "address": {
           "@type": "PostalAddress",
           "addressCountry": "LK"
