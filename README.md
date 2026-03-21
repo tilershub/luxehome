@@ -1,6 +1,6 @@
-# TILERSHUB — Astro Website
+# LUXEHOME — Astro Website
 
-Premium tiling & bathroom renovation website for TILERSHUB, Sri Lanka.
+Premium tiling & bathroom renovation website for LUXEHOME, Sri Lanka.
 
 ## 🚀 Getting Started
 
@@ -40,7 +40,7 @@ src/
 
 ## 📞 Contact Details (update in components)
 - WhatsApp: +94 77 450 3744
-- Email: tilershub@gmail.com
+- Email: luxehome@gmail.com
 - GA ID: G-DLJDBQZ8N2
 
 ## 🌐 Deploy to Cloudflare Pages

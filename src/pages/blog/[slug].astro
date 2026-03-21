@@ -37,14 +37,14 @@ const jsonLd = JSON.stringify({
   datePublished: pubDateISO,
   publisher: {
     '@type': 'Organization',
-    name: 'TILERSHUB',
-    url: 'https://tilershub.com',
+    name: 'LUXEHOME',
+    url: 'https://luxehome.com',
   },
   mainEntityOfPage: canonical.href,
 });
 ---
 
-<Layout title={`${post.data.title} | TILERSHUB Blog`} description={post.data.description}>
+<Layout title={`${post.data.title} | LUXEHOME Blog`} description={post.data.description}>
   <script type="application/ld+json" set:html={jsonLd} slot="head" />
 
   <Nav />

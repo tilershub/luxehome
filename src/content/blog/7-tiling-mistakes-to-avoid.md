@@ -2,7 +2,7 @@
 title: "7 Tiling Mistakes That Ruin a Good Job"
 description: "From skipping waterproofing to buying the wrong grout, these are the tiling mistakes we see most often — and how to avoid every one of them. Practical advice from professional tilers in Sri Lanka."
 pubDate: 2025-02-20
-author: "TILERSHUB Team"
+author: "LUXEHOME Team"
 category: "Tiling Guide"
 readingTime: "5 min read"
 ---
@@ -85,7 +85,7 @@ Lippage is caused by two things: substrate unevenness and inconsistent adhesive 
 2. Full-coverage adhesive application — both the floor and the back of each tile
 3. A tile leveling system (wedge-and-clip or screw-type) that holds tiles perfectly co-planar while the adhesive cures
 
-At TILERSHUB, we use a tile leveling system on every floor installation as standard. There is no other reliable way to guarantee zero lippage on large-format tiles.
+At LUXEHOME, we use a tile leveling system on every floor installation as standard. There is no other reliable way to guarantee zero lippage on large-format tiles.
 
 ---
 

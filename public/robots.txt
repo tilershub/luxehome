@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://tilershub.com/sitemap-index.xml
+Sitemap: https://luxehome.com/sitemap-index.xml

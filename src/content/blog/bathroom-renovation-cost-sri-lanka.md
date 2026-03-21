@@ -2,7 +2,7 @@
 title: "Bathroom Renovation Costs in Sri Lanka (2025)"
 description: "A realistic breakdown of bathroom renovation costs in Sri Lanka for 2025. Tiling, waterproofing, fittings, labour — what each element costs and how to budget correctly."
 pubDate: 2025-02-15
-author: "TILERSHUB Team"
+author: "LUXEHOME Team"
 category: "Bathroom Renovation"
 readingTime: "6 min read"
 ---

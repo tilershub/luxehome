@@ -6,7 +6,7 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    author: z.string().default('TILERSHUB Team'),
+    author: z.string().default('LUXEHOME Team'),
     category: z.string(),
     readingTime: z.string(),
   }),

@@ -1,5 +1,5 @@
 -- ============================================================
--- TILERSHUB — Supabase Setup
+-- LUXEHOME — Supabase Setup
 -- Run this in: Supabase Dashboard → SQL Editor → New Query
 -- ============================================================
 
