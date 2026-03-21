@@ -1,7 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" fill="#1e1a17"/>
-  <rect x="3"  y="3"  width="12" height="12" rx="1.5" fill="#c4784a"/>
-  <rect x="17" y="3"  width="12" height="12" rx="1.5" fill="#c4784a" opacity=".55"/>
-  <rect x="3"  y="17" width="12" height="12" rx="1.5" fill="#c4784a" opacity=".55"/>
-  <rect x="17" y="17" width="12" height="12" rx="1.5" fill="#c4784a"/>
+  <!-- Background -->
+  <rect width="32" height="32" rx="5" fill="#1e1a17"/>
+  <!-- Roof -->
+  <polygon points="4,17 16,4 28,17" fill="#c4784a"/>
+  <!-- Wall body -->
+  <rect x="6" y="16" width="20" height="12" fill="#c4784a"/>
+  <!-- Roof/wall overlap clean edge -->
+  <rect x="6" y="16" width="20" height="2" fill="#c4784a"/>
+  <!-- Arched door cutout -->
+  <path d="M13,28 L13,23 A3,3 0 0 1 19,23 L19,28 Z" fill="#1e1a17"/>
+  <!-- Window left -->
+  <rect x="8" y="19" width="4" height="4" rx="0.5" fill="#1e1a17" opacity="0.6"/>
+  <!-- Window right -->
+  <rect x="20" y="19" width="4" height="4" rx="0.5" fill="#1e1a17" opacity="0.6"/>
 </svg>
