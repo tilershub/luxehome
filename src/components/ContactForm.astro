@@ -411,7 +411,7 @@ const { service: defaultService = '' } = Astro.props;
   // ── Build WhatsApp message ──
   function buildMessage(data: FormData, svc: string): string {
     const lines: string[] = [
-      'Site Inspection Request — LUXEHOME',
+      'Site Inspection Request — LUXEhome',
       '',
       `Name: ${data.get('name')?.toString().trim()}`,
       `Phone: ${data.get('phone')?.toString().trim()}`,
@@ -497,7 +497,7 @@ const { service: defaultService = '' } = Astro.props;
       };
       // Fire and forget — WhatsApp opens regardless of Supabase result
       supabase.from('leads').insert(lead).then(({ error }) => {
-        if (error) console.warn('[LUXEHOME] Lead save failed:', error.message);
+        if (error) console.warn('[LUXEhome] Lead save failed:', error.message);
       });
     }
 

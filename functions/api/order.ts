@@ -65,14 +65,14 @@ function buildCustomerEmail(o: OrderPayload): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>LUXEHOME Invoice — ${o.orderRef}</title>
+  <title>LUXEhome Invoice — ${o.orderRef}</title>
 </head>
 <body style="margin:0;padding:20px 0;background:#f0ebe3;font-family:Arial,Helvetica,sans-serif;">
   <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:6px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);">
 
     <!-- Header -->
     <div style="background:#1e1a17;padding:32px 40px;">
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#f5f0e8;letter-spacing:0.06em;">LUXEHOME</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#f5f0e8;letter-spacing:0.06em;">LUXEhome</div>
       <div style="color:rgba(245,240,232,.45);font-size:11px;margin-top:5px;letter-spacing:.14em;text-transform:uppercase;">Bathroom Construction/Renovation — Invoice</div>
     </div>
 
@@ -88,13 +88,13 @@ function buildCustomerEmail(o: OrderPayload): string {
       <p style="margin:0 0 8px;color:#1e1a17;font-size:16px;font-weight:600;">Dear ${o.name},</p>
       ${o.paymentMethod === 'payhere'
         ? `<p style="margin:0 0 12px;color:#5c5047;font-size:14px;line-height:1.75;">
-              Thank you for your order with LUXEHOME. Your <strong style="color:#c4784a;">10% advance payment has been received</strong> via PayHere — your booking is confirmed.
+              Thank you for your order with LUXEhome. Your <strong style="color:#c4784a;">10% advance payment has been received</strong> via PayHere — your booking is confirmed.
            </p>
            <div style="background:#f0fff0;border:1.5px solid #4caf50;border-radius:4px;padding:14px 20px;margin-bottom:24px;font-size:13px;color:#2e7d32;font-weight:600;">
              ✓ Payment confirmed — Reference: ${o.paymentRef || o.orderRef}
            </div>`
         : `<p style="margin:0 0 28px;color:#5c5047;font-size:14px;line-height:1.75;">
-              Thank you for your order with LUXEHOME. Your order summary and invoice are below.
+              Thank you for your order with LUXEhome. Your order summary and invoice are below.
               To confirm your booking, please transfer the <strong style="color:#c4784a;">10% deposit</strong> via bank transfer
               using the details in this email, then send payment proof to us.
            </p>`
@@ -144,7 +144,7 @@ function buildCustomerEmail(o: OrderPayload): string {
           </tr>
           <tr>
             <td style="padding:6px 0;font-size:12px;color:rgba(245,240,232,.45);">Account Name</td>
-            <td style="padding:6px 0;font-size:13px;color:#f5f0e8;font-weight:600;">LUXEHOME (Pvt) Ltd</td>
+            <td style="padding:6px 0;font-size:13px;color:#f5f0e8;font-weight:600;">LUXEhome (Pvt) Ltd</td>
           </tr>
           <tr>
             <td style="padding:6px 0;font-size:12px;color:rgba(245,240,232,.45);">Account Number</td>
@@ -178,7 +178,7 @@ function buildCustomerEmail(o: OrderPayload): string {
 
     <!-- Footer -->
     <div style="background:#f5f0e8;padding:24px 40px;border-top:1px solid #e8e2da;text-align:center;">
-      <div style="font-family:Georgia,serif;font-size:16px;font-weight:700;color:#1e1a17;margin-bottom:5px;">LUXEHOME</div>
+      <div style="font-family:Georgia,serif;font-size:16px;font-weight:700;color:#1e1a17;margin-bottom:5px;">LUXEhome</div>
       <div style="font-size:12px;color:#8c7b6e;">luxehome.lk &nbsp;·&nbsp; +94 774 503 744 &nbsp;·&nbsp; luxehome@gmail.com</div>
       <div style="font-size:11px;color:#b5a89a;margin-top:6px;">Sri Lanka's trusted bathroom renovation specialists</div>
     </div>
@@ -276,7 +276,7 @@ function buildAdminEmail(o: OrderPayload): string {
     </div>
 
     <div style="padding:16px 32px;border-top:1px solid #2e2e2e;font-size:11px;color:#555;text-align:center;">
-      LUXEHOME &nbsp;·&nbsp; luxehome.lk &nbsp;·&nbsp; Auto-generated order notification
+      LUXEhome &nbsp;·&nbsp; luxehome.lk &nbsp;·&nbsp; Auto-generated order notification
     </div>
 
   </div>
@@ -325,9 +325,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'LUXEHOME <orders@luxehome.lk>',
+        from: 'LUXEhome <orders@luxehome.lk>',
         to: data.email,
-        subject: `Your LUXEHOME Invoice — ${data.orderRef}`,
+        subject: `Your LUXEhome Invoice — ${data.orderRef}`,
         html: buildCustomerEmail(data),
       }),
     });
@@ -346,7 +346,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'LUXEHOME Orders <orders@luxehome.lk>',
+        from: 'LUXEhome Orders <orders@luxehome.lk>',
         to: 'luxehome@gmail.com',
         subject: `New Order ${data.orderRef} — ${data.name} — ${fmt(data.total)}`,
         html: buildAdminEmail(data),

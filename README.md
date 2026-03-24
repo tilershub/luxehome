@@ -1,6 +1,6 @@
-# LUXEHOME — Astro Website
+# LUXEhome — Astro Website
 
-Premium tiling & bathroom renovation website for LUXEHOME, Sri Lanka.
+Premium tiling & bathroom renovation website for LUXEhome, Sri Lanka.
 
 ## 🚀 Getting Started
 

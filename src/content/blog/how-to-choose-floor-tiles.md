@@ -2,7 +2,7 @@
 title: "How to Choose the Right Floor Tiles for Your Home"
 description: "Size, material, finish, grout — everything you need to know before choosing floor tiles for your home or office in Sri Lanka. A practical guide from professional tilers."
 pubDate: 2025-01-15
-author: "LUXEHOME Team"
+author: "LUXEhome Team"
 category: "Tiling Guide"
 readingTime: "5 min read"
 ---
@@ -27,7 +27,7 @@ Before looking at samples, think about where the tiles are going and what that s
 
 Tile size affects both the visual result and the demands placed on installation.
 
-Large-format tiles — 600×600mm, 800×800mm, and larger — create a seamless, premium look and make rooms feel more spacious. But they require a floor that is genuinely level. Any dip or rise shows immediately on a large tile. At LUXEHOME, we apply a tile leveling system on every floor job to ensure zero lippage regardless of tile size.
+Large-format tiles — 600×600mm, 800×800mm, and larger — create a seamless, premium look and make rooms feel more spacious. But they require a floor that is genuinely level. Any dip or rise shows immediately on a large tile. At LUXEhome, we apply a tile leveling system on every floor job to ensure zero lippage regardless of tile size.
 
 For most Sri Lankan homes, a practical size guide:
 

@@ -55,7 +55,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'LUXEHOME Orders <orders@luxehome.lk>',
+          from: 'LUXEhome Orders <orders@luxehome.lk>',
           to: 'luxehome@gmail.com',
           subject: `Payment Received — ${orderId} — ${payhereCurrency} ${payhereAmount}`,
           html: `<p>PayHere payment confirmed for order <strong>${orderId}</strong>.</p>
