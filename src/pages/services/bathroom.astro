@@ -36,14 +36,21 @@ import Footer from '../../components/Footer.astro';
     <div class="pricing-inner">
       <div class="stag reveal">Packages</div>
       <h2 class="reveal">Three Packages, Full Scope on Every One</h2>
-      <p class="sdesc reveal">Packages are based on a 40 sq.ft bathroom. Enter your floor area below to see your exact price.</p>
+      <p class="sdesc reveal">Packages are based on a 40 sq.ft bathroom. Enter your bathroom dimensions below to see your exact price.</p>
 
       <!-- Area calculator -->
       <div class="area-input-row reveal">
-        <label class="area-label" for="bathArea">Your bathroom floor area</label>
-        <div class="area-field">
-          <input type="number" id="bathArea" class="area-input" min="1" max="999" placeholder="e.g. 45" inputmode="decimal" aria-label="Bathroom floor area in sq.ft" />
-          <span class="area-unit">sq.ft</span>
+        <label class="area-label">Bathroom Size</label>
+        <div class="area-fields">
+          <div class="area-field">
+            <input type="number" id="bathLength" class="area-input" min="0.1" max="999" placeholder="Length" inputmode="decimal" aria-label="Bathroom length in feet" />
+            <span class="area-unit">ft</span>
+          </div>
+          <span class="area-multiply">×</span>
+          <div class="area-field">
+            <input type="number" id="bathWidth" class="area-input" min="0.1" max="999" placeholder="Width" inputmode="decimal" aria-label="Bathroom width in feet" />
+            <span class="area-unit">ft</span>
+          </div>
         </div>
         <span class="area-hint" id="areaHint"></span>
       </div>
@@ -155,12 +162,19 @@ import Footer from '../../components/Footer.astro';
     return base + Math.max(0, area - 40) * rate;
   }
 
-  var areaInput = document.getElementById('bathArea');
+  var lengthInput = document.getElementById('bathLength');
+  var widthInput  = document.getElementById('bathWidth');
 
-  function getArea() { return parseFloat(areaInput.value) || 0; }
+  function getArea() {
+    var l = parseFloat(lengthInput.value) || 0;
+    var w = parseFloat(widthInput.value)  || 0;
+    return parseFloat((l * w).toFixed(2));
+  }
 
-  areaInput.addEventListener('input', function () {
+  function onDimensionChange() {
     var area = getArea();
+    var l    = parseFloat(lengthInput.value) || 0;
+    var w    = parseFloat(widthInput.value)  || 0;
 
     document.querySelectorAll('.bath-price').forEach(function (el) {
       el.textContent = formatRs(calcPrice(parseInt(el.dataset.base, 10), parseInt(el.dataset.rate, 10), area));
@@ -176,8 +190,17 @@ import Footer from '../../components/Footer.astro';
     });
 
     var hint = document.getElementById('areaHint');
-    if (hint) hint.textContent = area > 0 ? 'Showing price for ' + area + ' sq.ft' : '';
-  });
+    if (hint) {
+      if (l > 0 && w > 0) {
+        hint.textContent = 'Floor area: ' + area + ' sq.ft';
+      } else {
+        hint.textContent = '';
+      }
+    }
+  }
+
+  lengthInput.addEventListener('input', onDimensionChange);
+  widthInput.addEventListener('input',  onDimensionChange);
 
   /* ── Add to Cart: packages ── */
   document.querySelectorAll('.atc-pkg').forEach(function (btn) {
@@ -361,8 +384,8 @@ import Footer from '../../components/Footer.astro';
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: rgba(196,120,74,.06);
-    border: 1px solid rgba(196,120,74,.22);
+    background: rgba(61,79,66,.08);
+    border: 1px solid rgba(61,79,66,.25);
     border-radius: 4px;
     padding: .85rem 1.2rem;
     margin-bottom: 2rem;
@@ -375,8 +398,19 @@ import Footer from '../../components/Footer.astro';
     text-transform: uppercase;
     letter-spacing: .09em;
     font-weight: 500;
-    flex: 1;
-    min-width: 140px;
+    min-width: 120px;
+  }
+
+  .area-fields {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+  }
+
+  .area-multiply {
+    color: rgba(245,240,232,.4);
+    font-size: 1rem;
   }
 
   .area-field {
@@ -388,7 +422,7 @@ import Footer from '../../components/Footer.astro';
   .area-input {
     width: 90px;
     background: rgba(255,255,255,.08);
-    border: 1px solid rgba(196,120,74,.35);
+    border: 1px solid rgba(61,79,66,.35);
     border-radius: 3px;
     color: var(--cream);
     font-family: 'DM Sans', sans-serif;
@@ -437,9 +471,9 @@ import Footer from '../../components/Footer.astro';
   }
 
   .pkg-card--mid {
-    background: rgba(196,120,74,.07);
-    border-left: 1px solid rgba(196,120,74,.18);
-    border-right: 1px solid rgba(196,120,74,.18);
+    background: rgba(61,79,66,.07);
+    border-left: 1px solid rgba(61,79,66,.18);
+    border-right: 1px solid rgba(61,79,66,.18);
   }
 
   .pkg-badge {
@@ -603,7 +637,7 @@ import Footer from '../../components/Footer.astro';
   .addon-atc {
     margin-top: .4rem;
     background: none;
-    border: 1px solid rgba(196,120,74,.35);
+    border: 1px solid rgba(61,79,66,.35);
     color: var(--clay);
     font-family: 'DM Sans', sans-serif;
     font-size: .67rem;
@@ -619,7 +653,7 @@ import Footer from '../../components/Footer.astro';
   }
 
   .addon-atc:hover {
-    background: rgba(196,120,74,.1);
+    background: rgba(61,79,66,.1);
     border-color: var(--clay);
   }
 
@@ -629,8 +663,8 @@ import Footer from '../../components/Footer.astro';
     font-size: .8rem;
     color: rgba(245,240,232,.5);
     padding: 1rem 1.2rem;
-    background: rgba(196,120,74,.05);
-    border-left: 3px solid rgba(196,120,74,.4);
+    background: rgba(61,79,66,.05);
+    border-left: 3px solid rgba(61,79,66,.4);
     border-radius: 0 3px 3px 0;
     line-height: 1.65;
   }
@@ -646,8 +680,8 @@ import Footer from '../../components/Footer.astro';
     .pkg-card--mid {
       border-left: none;
       border-right: none;
-      border-top: 1px solid rgba(196,120,74,.18);
-      border-bottom: 1px solid rgba(196,120,74,.18);
+      border-top: 1px solid rgba(61,79,66,.18);
+      border-bottom: 1px solid rgba(61,79,66,.18);
     }
     .addons-grid { grid-template-columns: 1fr; }
   }
