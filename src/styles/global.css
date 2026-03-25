@@ -36,13 +36,13 @@ a, button, [role="button"] {
   --gold:        #b8945a;   /* warm gold accent */
   --sand:        #e4ddd0;   /* warm sand / light border */
   --charcoal:    #1e2820;   /* near-black with green tint */
-  --warm-gray:   #5a6b60;   /* body / secondary text */
+  --warm-gray:   #7a8c82;   /* body / secondary text — readable on both light & dark */
   --stone:       #cfc9bc;   /* dividers / muted borders */
   --off-white:   #faf8f3;   /* page background */
 
-  /* Aliases — all existing var(--clay) references get forest green */
-  --clay:        #3d4f42;
-  --terracotta:  #2d3d32;
+  /* clay = gold accent so var(--clay) is visible on any background */
+  --clay:        #b8945a;
+  --terracotta:  #9a7840;   /* gold hover / pressed */
 }
 
 /* Base */
@@ -85,7 +85,7 @@ h2 {
   font-weight: 500;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--forest-deep); /* WCAG AA-compliant on all light backgrounds (≥12:1) */
+  color: var(--forest);      /* WCAG AA-compliant on light backgrounds */
   margin-bottom: .8rem;
 }
 
@@ -125,7 +125,7 @@ h2 {
 .logo em {
   font-style: italic;
   font-weight: 400;
-  color: var(--forest);
+  color: var(--gold);
 }
 
 /* ── Shared Buttons ──────────────────────────────────────── */
