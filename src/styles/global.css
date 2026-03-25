@@ -30,14 +30,19 @@ a, button, [role="button"] {
 
 /* Design Tokens */
 :root {
-  --cream: #f5f0e8;
-  --clay: #c4784a;
-  --terracotta: #a85c34;
-  --sand: #e8d9c0;
-  --charcoal: #1e1a17;
-  --warm-gray: #6b5f54;
-  --stone: #d4c4b0;
-  --off-white: #faf7f2;
+  --cream:       #f0ece0;   /* warm ivory */
+  --forest:      #3d4f42;   /* brand primary — forest green */
+  --forest-deep: #2d3d32;   /* hover / dark state */
+  --gold:        #b8945a;   /* warm gold accent */
+  --sand:        #e4ddd0;   /* warm sand / light border */
+  --charcoal:    #1e2820;   /* near-black with green tint */
+  --warm-gray:   #5a6b60;   /* body / secondary text */
+  --stone:       #cfc9bc;   /* dividers / muted borders */
+  --off-white:   #faf8f3;   /* page background */
+
+  /* Aliases — all existing var(--clay) references get forest green */
+  --clay:        #3d4f42;
+  --terracotta:  #2d3d32;
 }
 
 /* Base */
@@ -80,7 +85,7 @@ h2 {
   font-weight: 500;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: #894428; /* WCAG AA-compliant on all light backgrounds (≥5.4:1) */
+  color: var(--forest-deep); /* WCAG AA-compliant on all light backgrounds (≥12:1) */
   margin-bottom: .8rem;
 }
 
@@ -115,6 +120,12 @@ h2 {
 
 .logo span {
   color: var(--clay);
+}
+
+.logo em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--forest);
 }
 
 /* ── Shared Buttons ──────────────────────────────────────── */
