@@ -5,9 +5,30 @@
   <a href="/" class="logo" aria-label="LUXEHOME — Home">LUXE<em>home</em></a>
 
   <ul id="nav-menu" role="list">
-    <li><a href="/services/flooring">Flooring</a></li>
     <li><a href="/services/bathroom">Bathroom</a></li>
-    <li><a href="/services/kitchen">Kitchen</a></li>
+
+    <li class="has-dropdown">
+      <a href="/services/flooring" class="nav-parent">
+        Floor
+        <svg class="chevron" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <ul class="dropdown" role="list">
+        <li><a href="/services/floor-tiling">Tiling</a></li>
+      </ul>
+    </li>
+
+    <li><a href="/services/staircase-tiling">Staircase</a></li>
+
+    <li class="has-dropdown">
+      <a href="/services/kitchen" class="nav-parent">
+        Kitchen
+        <svg class="chevron" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <ul class="dropdown" role="list">
+        <li><a href="/services/kitchen-pantry">Pantry</a></li>
+      </ul>
+    </li>
+
     <li><a href="/blog">Journal</a></li>
   </ul>
 
@@ -31,7 +52,7 @@
     nav.style.padding = scrolled
       ? (window.innerWidth > 1100 ? '.75rem 4rem' : '.75rem 2.5rem')
       : '';
-    nav.style.boxShadow = scrolled ? '0 1px 24px rgba(30,26,23,.08)' : '';
+    nav.style.boxShadow = scrolled ? '0 1px 24px rgba(30,40,32,.08)' : '';
   });
 
   function closeMenu() {
@@ -40,6 +61,8 @@
     toggle.setAttribute('aria-label', 'Open navigation menu');
     toggle.classList.remove('active');
     document.body.style.overflow = '';
+    // Close all dropdowns
+    menu.querySelectorAll('.has-dropdown.open').forEach(li => li.classList.remove('open'));
   }
 
   toggle.addEventListener('click', () => {
@@ -50,8 +73,24 @@
     document.body.style.overflow = isOpen ? 'hidden' : '';
   });
 
+  // Mobile: tap parent link toggles dropdown instead of navigating
+  menu.querySelectorAll('.has-dropdown > .nav-parent').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        e.preventDefault();
+        const li = link.closest('.has-dropdown');
+        const wasOpen = li.classList.contains('open');
+        menu.querySelectorAll('.has-dropdown.open').forEach(el => el.classList.remove('open'));
+        if (!wasOpen) li.classList.add('open');
+      }
+    });
+  });
+
+  // Close menu on any sub-link click
   menu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', closeMenu);
+    if (!link.classList.contains('nav-parent')) {
+      link.addEventListener('click', closeMenu);
+    }
   });
 
   document.addEventListener('click', (e) => {
@@ -72,10 +111,10 @@
     padding: 1.2rem 4rem;
     padding-left: max(4rem, env(safe-area-inset-left));
     padding-right: max(4rem, env(safe-area-inset-right));
-    background: rgba(250, 247, 242, .94);
+    background: rgba(250, 248, 243, .94);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border-bottom: 1px solid rgba(212, 196, 176, .45);
+    border-bottom: 1px solid rgba(207, 201, 188, .5);
     transition: padding .3s ease, box-shadow .3s ease;
   }
 
@@ -111,6 +150,70 @@
   ul a:hover { color: var(--charcoal); }
   ul a:hover::after { transform: scaleX(1); }
 
+  /* ── Dropdown parent ── */
+  .has-dropdown { position: relative; }
+
+  .nav-parent {
+    display: flex;
+    align-items: center;
+    gap: .28rem;
+    cursor: pointer;
+  }
+
+  .chevron {
+    width: .55rem;
+    height: .55rem;
+    transition: transform .22s ease;
+    flex-shrink: 0;
+    margin-top: .05em;
+  }
+
+  .has-dropdown:hover .chevron,
+  .has-dropdown.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── Dropdown panel (desktop) ── */
+  .dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + .75rem);
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column;
+    gap: 0;
+    min-width: 9rem;
+    background: var(--off-white);
+    border: 1px solid var(--stone);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(30, 40, 32, .12);
+    padding: .4rem 0;
+    z-index: 200;
+  }
+
+  .has-dropdown:hover .dropdown {
+    display: flex;
+  }
+
+  .dropdown li { list-style: none; }
+
+  .dropdown a {
+    display: block;
+    padding: .55rem 1.1rem;
+    white-space: nowrap;
+    letter-spacing: .09em;
+    font-size: .72rem;
+    border-bottom: none;
+  }
+
+  .dropdown a::after { display: none; }
+
+  .dropdown a:hover {
+    background: rgba(61, 79, 66, .06);
+    color: var(--forest);
+  }
+
+  /* ── Nav end ── */
   .nav-end {
     display: flex;
     align-items: center;
@@ -184,7 +287,7 @@
       top: 100%; left: 0; right: 0;
       flex-direction: column;
       gap: 0;
-      background: rgba(250, 247, 242, .98);
+      background: rgba(250, 248, 243, .98);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--stone);
@@ -195,18 +298,45 @@
 
     ul.open { display: flex; }
 
-    ul a {
-      display: block;
-      padding: .9rem 1.5rem;
-      min-height: 44px;
+    ul > li > a,
+    ul > li > .nav-parent {
       display: flex;
       align-items: center;
+      padding: .9rem 1.5rem;
+      min-height: 44px;
       font-size: .8rem;
-      border-bottom: 1px solid rgba(212, 196, 176, .25);
+      border-bottom: 1px solid rgba(207, 201, 188, .25);
     }
 
+    ul > li:last-child > a { border-bottom: none; }
+
     ul a::after { display: none; }
-    ul li:last-child a { border-bottom: none; }
+
+    /* Mobile dropdown — inline sub-items */
+    .dropdown {
+      display: none;
+      position: static;
+      transform: none;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      background: rgba(61, 79, 66, .05);
+      padding: 0;
+      min-width: unset;
+      flex-direction: column;
+    }
+
+    .has-dropdown.open .dropdown { display: flex; }
+
+    .dropdown a {
+      padding: .75rem 1.5rem .75rem 2.2rem;
+      min-height: 40px;
+      font-size: .76rem;
+      border-bottom: 1px solid rgba(207, 201, 188, .2);
+      color: var(--forest);
+    }
+
+    .dropdown a:hover { background: none; }
 
     .nav-cta {
       padding: .5rem 1rem;
