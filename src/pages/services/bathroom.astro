@@ -36,7 +36,8 @@ import Footer from '../../components/Footer.astro';
     <div class="pricing-inner">
       <div class="stag reveal">Packages</div>
       <h2 class="reveal">Three Packages, Full Scope on Every One</h2>
-      <p class="sdesc reveal">Packages are based on a 40 sq.ft bathroom. Enter your bathroom dimensions below to see your exact price.</p>
+      <p class="sdesc reveal">All packages include up to 40 sq.ft. Enter your dimensions below to see your exact price.</p>
+      <p class="pkg-design-tagline reveal">All packages include complete design support with 3D visualization.</p>
 
       <!-- Area calculator -->
       <div class="area-input-row reveal">
@@ -59,59 +60,74 @@ import Footer from '../../components/Footer.astro';
 
         <!-- Essential Bath -->
         <div class="pkg-card">
+          <div class="pkg-badge pkg-badge--design">Free Design Included</div>
           <div class="pkg-name">Essential Bath</div>
-          <div class="pkg-price bath-price" data-base="450000" data-rate="5000">Rs. 4,50,000</div>
-          <div class="pkg-price-note bath-note">up to 40 sq.ft</div>
+          <div class="pkg-desc">Perfect for modern, functional bathrooms</div>
+          <div class="pkg-price bath-price" data-base="985000" data-rate="7600">LKR 985,000</div>
+          <div class="pkg-price-note bath-note">base price up to 40 sq.ft</div>
           <ul class="pkg-includes">
-            <li>Wall Niches</li>
-            <li>Plumbing</li>
-            <li>Wiring</li>
-            <li>Waterproofing</li>
-            <li>Tiling</li>
-            <li>Install Fixtures</li>
-            <li>Lighting</li>
+            <li>Structural preparation <em>(floor concrete, niche, vanity top)</em></li>
+            <li>Water system installation</li>
+            <li>Advanced waterproofing system</li>
+            <li>Premium surface finishing <em>(tiles included)</em></li>
+            <li>Ambient lighting system</li>
+            <li>Standard bathware collection</li>
+            <li>10L geyser</li>
           </ul>
-          <button class="pkg-btn atc-pkg" data-pkg-name="Essential Bath" data-base="450000" data-rate="5000">Add to Cart</button>
+          <div class="pkg-design">
+            <div class="pkg-design-label">Design Package</div>
+            <div class="pkg-design-items">Civil plan · Plumbing layout · Wiring diagram · 3D visualization</div>
+          </div>
+          <button class="pkg-btn pkg-btn--primary atc-pkg" data-pkg-name="Essential Bath" data-base="985000" data-rate="7600">Get Quotation</button>
+          <a href="/contact" class="pkg-btn pkg-btn--ghost">Book Site Inspection</a>
         </div>
 
         <!-- Comfort Bath -->
         <div class="pkg-card pkg-card--mid">
           <div class="pkg-badge">Most Popular</div>
+          <div class="pkg-badge pkg-badge--design">Free Design Included</div>
           <div class="pkg-name">Comfort Bath</div>
-          <div class="pkg-price bath-price" data-base="550000" data-rate="6000">Rs. 5,50,000</div>
-          <div class="pkg-price-note bath-note">up to 40 sq.ft</div>
+          <div class="pkg-desc">Balanced design with premium upgrades</div>
+          <div class="pkg-price bath-price" data-base="1225000" data-rate="8600">LKR 1,225,000</div>
+          <div class="pkg-price-note bath-note">base price up to 40 sq.ft</div>
           <ul class="pkg-includes">
-            <li>Wall Niches</li>
-            <li>Plumbing</li>
-            <li>Wiring</li>
-            <li>Waterproofing</li>
-            <li>Tiling</li>
-            <li>Install Fixtures</li>
-            <li>Lighting</li>
-            <li>Plain Ceiling</li>
-            <li>3ft Glass Panel</li>
+            <li>Everything in Essential Bath</li>
+            <li>Tempered glass shower panel</li>
+            <li>iPanel ceiling finish</li>
+            <li>Upgraded surface finishing</li>
+            <li>Premium bathware collection <em>(Brushed Gold / Gun Grey)</em></li>
           </ul>
-          <button class="pkg-btn atc-pkg" data-pkg-name="Comfort Bath" data-base="550000" data-rate="6000">Add to Cart</button>
+          <div class="pkg-design">
+            <div class="pkg-design-label">Design Package</div>
+            <div class="pkg-design-items">Civil plan · Plumbing layout · Wiring diagram · 3D visualization</div>
+          </div>
+          <button class="pkg-btn pkg-btn--primary atc-pkg" data-pkg-name="Comfort Bath" data-base="1225000" data-rate="8600">Get Quotation</button>
+          <a href="/contact" class="pkg-btn pkg-btn--ghost">Book Site Inspection</a>
         </div>
 
         <!-- Signature Bath -->
         <div class="pkg-card">
+          <div class="pkg-badge pkg-badge--design">Free Design Included</div>
           <div class="pkg-name">Signature Bath</div>
-          <div class="pkg-price bath-price" data-base="650000" data-rate="7000">Rs. 6,50,000</div>
-          <div class="pkg-price-note bath-note">up to 40 sq.ft</div>
+          <div class="pkg-desc">Luxury hotel-style bathroom experience</div>
+          <div class="pkg-price bath-price" data-base="1570000" data-rate="9600">LKR 1,570,000</div>
+          <div class="pkg-price-note bath-note">base price up to 40 sq.ft</div>
           <ul class="pkg-includes">
-            <li>Wall Niches</li>
-            <li>Plumbing</li>
-            <li>Wiring</li>
-            <li>Waterproofing</li>
-            <li>Tiling</li>
-            <li>Install Fixtures</li>
-            <li>Ambience Lighting</li>
-            <li>Design Ceiling</li>
-            <li>Shower Cubicle</li>
-            <li>Vanity Cupboard</li>
+            <li>Everything in Comfort Bath</li>
+            <li>Premium water system</li>
+            <li>High-end surface finishing</li>
+            <li>Designer ceiling system</li>
+            <li>Glass shower cubicle</li>
+            <li>Vanity cupboard</li>
+            <li>Luxury bathware <em>(wall-mounted WC, concealed mixers)</em></li>
+            <li>15L geyser</li>
           </ul>
-          <button class="pkg-btn atc-pkg" data-pkg-name="Signature Bath" data-base="650000" data-rate="7000">Add to Cart</button>
+          <div class="pkg-design">
+            <div class="pkg-design-label">Design Package</div>
+            <div class="pkg-design-items">Civil plan · Plumbing layout · Wiring diagram · 3D visualization</div>
+          </div>
+          <button class="pkg-btn pkg-btn--primary atc-pkg" data-pkg-name="Signature Bath" data-base="1570000" data-rate="9600">Get Quotation</button>
+          <a href="/contact" class="pkg-btn pkg-btn--ghost">Book Site Inspection</a>
         </div>
 
       </div>
@@ -119,30 +135,24 @@ import Footer from '../../components/Footer.astro';
       <!-- Add-ons -->
       <div class="addons-section reveal">
         <div class="addons-head">Optional Add-ons</div>
-        <div class="addons-grid">
+        <div class="addons-grid addons-grid--single">
           <div class="addon-card">
-            <div class="addon-name">Demolition Works</div>
-            <div class="addon-price addon-calc" data-rate="1000">Rs. 1,000 <em>/sq.ft</em></div>
-            <div class="addon-desc">Full bathroom strip-out — walls, floor, fixtures</div>
-            <button class="addon-atc atc-addon" data-addon-name="Demolition Works" data-rate="1000">Add to Cart</button>
-          </div>
-          <div class="addon-card">
-            <div class="addon-name">Wall Plastering</div>
-            <div class="addon-price addon-calc" data-rate="700">Rs. 700 <em>/sq.ft</em></div>
-            <div class="addon-desc">Smooth plaster finish on all wall surfaces</div>
-            <button class="addon-atc atc-addon" data-addon-name="Wall Plastering" data-rate="700">Add to Cart</button>
-          </div>
-          <div class="addon-card">
-            <div class="addon-name">3D Design</div>
-            <div class="addon-price addon-flat">Rs. 25,000</div>
-            <div class="addon-desc">Detailed 3D render before any work begins</div>
-            <button class="addon-atc atc-addon-flat" data-addon-name="3D Design" data-price="25000">Add to Cart</button>
+            <div class="addon-name">Renovation Preparation Package</div>
+            <div class="addon-sublabel">Demolition + Wall Plastering</div>
+            <div class="addon-price addon-calc-pkg" data-base="100000" data-rate="1500">LKR 100,000</div>
+            <div class="addon-desc">For existing bathrooms requiring demolition and surface preparation</div>
+            <button class="addon-atc atc-addon-pkg" data-addon-name="Renovation Preparation Package" data-base="100000" data-rate="1500">Get Quotation</button>
           </div>
         </div>
       </div>
 
       <div class="not-included reveal">
-        <strong>Not included:</strong> Tiles, bathware, tapware, geyser, mirrors — you source your preferred products. Our team handles all installation and finishing.
+        <strong>Custom Upgrades Available</strong>
+        <ul class="not-included-list">
+          <li>Designer tiles</li>
+          <li>Premium fittings</li>
+          <li>Structural modifications</li>
+        </ul>
       </div>
 
     </div>
@@ -153,8 +163,8 @@ import Footer from '../../components/Footer.astro';
 
 <script is:inline>
 (function () {
-  function formatRs(n) {
-    return 'Rs.\u00a0' + Math.round(n).toLocaleString('en-IN');
+  function formatLKR(n) {
+    return 'LKR\u00a0' + Math.round(n).toLocaleString('en-US');
   }
 
   function calcPrice(base, rate, area) {
@@ -168,6 +178,7 @@ import Footer from '../../components/Footer.astro';
   function getArea() {
     var l = parseFloat(lengthInput.value) || 0;
     var w = parseFloat(widthInput.value)  || 0;
+    if (l <= 0 || w <= 0) return 0;
     return parseFloat((l * w).toFixed(2));
   }
 
@@ -176,71 +187,54 @@ import Footer from '../../components/Footer.astro';
     var l    = parseFloat(lengthInput.value) || 0;
     var w    = parseFloat(widthInput.value)  || 0;
 
+    /* Package prices */
     document.querySelectorAll('.bath-price').forEach(function (el) {
-      el.textContent = formatRs(calcPrice(parseInt(el.dataset.base, 10), parseInt(el.dataset.rate, 10), area));
+      el.textContent = formatLKR(calcPrice(parseInt(el.dataset.base, 10), parseInt(el.dataset.rate, 10), area));
     });
 
+    /* Package price notes */
     document.querySelectorAll('.bath-note').forEach(function (el) {
-      el.textContent = area > 0 ? area + ' sq.ft total' : 'up to 40 sq.ft';
+      el.textContent = area > 0 ? 'Bathroom size: ' + area + ' sq.ft' : 'base price up to 40 sq.ft';
     });
 
-    document.querySelectorAll('.addon-calc').forEach(function (el) {
+    /* Renovation prep add-on — base + surcharge logic */
+    document.querySelectorAll('.addon-calc-pkg').forEach(function (el) {
+      var base = parseInt(el.dataset.base, 10);
       var rate = parseInt(el.dataset.rate, 10);
-      el.innerHTML = area > 0 ? formatRs(area * rate) : 'Rs.\u00a0' + rate.toLocaleString('en-IN') + ' <em>/sq.ft</em>';
+      el.textContent = formatLKR(calcPrice(base, rate, area));
     });
 
+    /* Area hint */
     var hint = document.getElementById('areaHint');
     if (hint) {
-      if (l > 0 && w > 0) {
-        hint.textContent = 'Floor area: ' + area + ' sq.ft';
-      } else {
-        hint.textContent = '';
-      }
+      hint.textContent = (l > 0 && w > 0) ? 'Floor area: ' + area + ' sq.ft' : '';
     }
   }
 
   lengthInput.addEventListener('input', onDimensionChange);
   widthInput.addEventListener('input',  onDimensionChange);
 
-  /* ── Add to Cart: packages ── */
+  /* ── Get Quotation: packages ── */
   document.querySelectorAll('.atc-pkg').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var base = parseInt(btn.dataset.base, 10);
-      var rate = parseInt(btn.dataset.rate, 10);
-      var area = getArea();
+      var base  = parseInt(btn.dataset.base, 10);
+      var rate  = parseInt(btn.dataset.rate, 10);
+      var area  = getArea();
       var price = calcPrice(base, rate, area);
       var details = area > 0 ? area + ' sq.ft' : 'up to 40 sq.ft (base price)';
       window.LHCart.add({ name: btn.dataset.pkgName, details: details, price: price });
     });
   });
 
-  /* ── Add to Cart: area-based addons ── */
-  document.querySelectorAll('.atc-addon').forEach(function (btn) {
+  /* ── Get Quotation: renovation prep add-on ── */
+  document.querySelectorAll('.atc-addon-pkg').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var area = getArea();
-      if (area <= 0) {
-        areaInput.focus();
-        areaInput.style.borderColor = 'var(--clay)';
-        setTimeout(function () { areaInput.style.borderColor = ''; }, 1500);
-        return;
-      }
-      var rate = parseInt(btn.dataset.rate, 10);
-      window.LHCart.add({
-        name: btn.dataset.addonName,
-        details: area + ' sq.ft',
-        price: area * rate
-      });
-    });
-  });
-
-  /* ── Add to Cart: flat addons ── */
-  document.querySelectorAll('.atc-addon-flat').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      window.LHCart.add({
-        name: btn.dataset.addonName,
-        details: 'Per bathroom',
-        price: parseInt(btn.dataset.price, 10)
-      });
+      var base  = parseInt(btn.dataset.base, 10);
+      var rate  = parseInt(btn.dataset.rate, 10);
+      var area  = getArea();
+      var price = calcPrice(base, rate, area);
+      var details = area > 0 ? area + ' sq.ft' : 'base (up to 40 sq.ft)';
+      window.LHCart.add({ name: btn.dataset.addonName, details: details, price: price });
     });
   });
 })();
@@ -507,9 +501,25 @@ import Footer from '../../components/Footer.astro';
     transition: all .15s;
   }
 
+  .pkg-design-tagline {
+    font-size: .82rem;
+    color: rgba(240,236,224,.72);
+    font-style: italic;
+    margin-top: -.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .pkg-desc {
+    font-size: .78rem;
+    color: rgba(240,236,224,.65);
+    font-style: italic;
+    line-height: 1.4;
+    margin-bottom: .2rem;
+  }
+
   .pkg-price-note {
     font-size: .68rem;
-    color: rgba(245,240,232,.38);
+    color: rgba(245,240,232,.65);
     font-weight: 300;
     border-bottom: 1px solid rgba(255,255,255,.07);
     padding-bottom: .75rem;
@@ -563,7 +573,54 @@ import Footer from '../../components/Footer.astro';
     transition: background .2s;
   }
 
-  .pkg-btn:hover { background: #b5673c; }
+  .pkg-btn:hover { background: var(--terracotta); }
+
+  .pkg-btn--primary {
+    background: var(--clay);
+    color: #fff;
+  }
+  .pkg-btn--primary:hover { background: var(--terracotta); }
+
+  .pkg-btn--ghost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid rgba(240,236,224,.2);
+    color: rgba(240,236,224,.75);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .6rem 1rem;
+    border-radius: 3px;
+    text-decoration: none;
+    min-height: 44px;
+    transition: border-color .2s, color .2s;
+    margin-top: 0;
+    cursor: pointer;
+  }
+  .pkg-btn--ghost:hover { border-color: var(--clay); color: var(--clay); }
+
+  .pkg-design {
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding-top: .6rem;
+    margin-top: .2rem;
+  }
+  .pkg-design-label {
+    font-size: .6rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--clay);
+    font-weight: 600;
+    margin-bottom: .3rem;
+  }
+  .pkg-design-items {
+    font-size: .7rem;
+    color: rgba(240,236,224,.72);
+    line-height: 1.6;
+  }
 
   /* ── Add-ons ── */
 
@@ -580,7 +637,7 @@ import Footer from '../../components/Footer.astro';
     text-transform: uppercase;
     letter-spacing: .12em;
     font-weight: 600;
-    color: rgba(245,240,232,.35);
+    color: rgba(245,240,232,.72);
     margin-bottom: 1rem;
   }
 
@@ -592,6 +649,18 @@ import Footer from '../../components/Footer.astro';
     border: 1px solid rgba(255,255,255,.07);
     border-radius: 3px;
     overflow: hidden;
+  }
+
+  .addons-grid--single {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+
+  .addon-sublabel {
+    font-size: .68rem;
+    color: rgba(240,236,224,.55);
+    font-style: italic;
+    margin-top: -.15rem;
   }
 
   .addon-card {
@@ -623,13 +692,13 @@ import Footer from '../../components/Footer.astro';
     font-family: 'DM Sans', sans-serif;
     font-size: .65rem;
     font-weight: 300;
-    color: rgba(245,240,232,.38);
+    color: rgba(245,240,232,.65);
     margin-left: .1rem;
   }
 
   .addon-desc {
     font-size: .7rem;
-    color: rgba(245,240,232,.38);
+    color: rgba(245,240,232,.68);
     line-height: 1.5;
     margin-bottom: .2rem;
   }
@@ -670,6 +739,20 @@ import Footer from '../../components/Footer.astro';
   }
 
   .not-included strong { color: rgba(240,236,224,.90); }
+
+  .not-included-list {
+    margin: .5rem 0 0 1rem;
+    padding: 0;
+    list-style: disc;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+  }
+
+  .not-included-list li {
+    font-size: .78rem;
+    color: rgba(240,236,224,.72);
+  }
 
   /* ── Responsive ── */
 
