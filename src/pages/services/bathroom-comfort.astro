@@ -1,0 +1,126 @@
+---
+import BathroomPkgDetail from '../../components/BathroomPkgDetail.astro';
+---
+
+<BathroomPkgDetail
+  pkgName="Comfort Bath"
+  pkgSlug="comfort"
+  basePrice={1225000}
+  rate={8600}
+  tagline="Premium finishes, curated design"
+  heroDesc="Everything in Essential Bath, elevated. The Comfort package adds a tempered glass shower panel, premium iPanel ceiling, brushed-gold or gun-grey bathware, and upgraded Laticrete SpectraLock grout — for a bathroom that feels as good as it looks."
+  isPopular={true}
+  highlights={[
+    "Tempered glass shower panel",
+    "Laticrete SpectraLock Pro grout",
+    "Brushed Gold or Gun Grey finish",
+    "Premium iPanel ceiling",
+    "Panasonic 15L geyser",
+    "Upgraded Roca bathware collection",
+  ]}
+  includes={[
+    "<strong>Everything in Essential Bath</strong> — full structural, waterproofing, plumbing, electrical, tiling, ceiling, and design package",
+    "<strong>Tempered glass shower panel</strong> — 8mm safety glass with aluminium frame, wall-mounted; keeps water contained while maintaining the open feel",
+    "<strong>Premium iPanel ceiling finish</strong> — upgraded profile with concealed LED strip lighting option; higher-spec aluminium trim",
+    "<strong>Upgraded surface finishing</strong> — additional skim coat on wall niches and vanity top for a finer tile-ready substrate",
+    "<strong>Laticrete SpectraLock Pro grout</strong> — epoxy-based, stain-resistant grout in all joints; permanent color, never requires sealing",
+    "<strong>Premium bathware collection</strong> — Roca wall-hung WC, countertop basin, single-lever mixer, thermostatic shower; available in <em>Brushed Gold or Gun Grey</em> finish",
+    "<strong>Panasonic 15L electric geyser</strong> — suitable for larger families; pressure-rated installation with safety valve",
+    "<strong>Complete design package</strong> — civil plan, plumbing layout, wiring diagram, and 3D visualization; finish swatch selection meeting included",
+  ]}
+  brandCategories={[
+    {
+      label: "Waterproofing",
+      brands: ["Laticrete 9235", "Laticrete HydroBan"],
+    },
+    {
+      label: "Tile Adhesive",
+      brands: ["Laticrete 254 Platinum"],
+    },
+    {
+      label: "Grout",
+      brands: ["Laticrete SpectraLock Pro", "Swisstek (border joints)"],
+    },
+    {
+      label: "Bathroom Fixtures",
+      brands: ["Roca (Brushed Gold)", "Roca (Gun Grey)"],
+    },
+    {
+      label: "Shower Panel",
+      brands: ["8mm Tempered Safety Glass", "Aluminium frame"],
+    },
+    {
+      label: "Geyser",
+      brands: ["Panasonic 15L"],
+    },
+    {
+      label: "Ceiling",
+      brands: ["iPanel Premium PVC", "Concealed LED strip"],
+    },
+  ]}
+  timeline={[
+    {
+      day: "Day 1",
+      title: "Site Inspection & Measurement",
+      desc: "Project manager visits for detailed measurements. Finish preferences discussed — brushed gold or gun grey bathware, grout color selection, glass panel position confirmed.",
+    },
+    {
+      day: "Day 2–3",
+      title: "Design Package & Finish Selections",
+      desc: "Civil plan, plumbing layout, wiring diagram, and 3D visualization delivered. Finish swatch selection meeting held. All approvals confirmed before mobilization.",
+    },
+    {
+      day: "Day 4–6",
+      title: "Civil Preparation",
+      desc: "Floor concrete base, wall niche, and vanity top slab. Additional skim coat applied to substrate walls for upgraded surface quality. Curing time observed.",
+    },
+    {
+      day: "Day 7–9",
+      title: "Multi-Layer Waterproofing (Laticrete 9235)",
+      desc: "Premium Laticrete 9235 membrane applied in three coats to floor and walls up to 600mm. Fabric reinforcement at corners and joints. 48-hour cure and flood test.",
+    },
+    {
+      day: "Day 10",
+      title: "Plumbing Rough-in",
+      desc: "Hot & cold supply lines, drainage, and all fixture points set. Pre-positioned for thermostatic shower. Pressure tested before closing.",
+    },
+    {
+      day: "Day 11",
+      title: "Electrical Rough-in",
+      desc: "Geyser circuit, main lighting, LED strip conduit, and all switch positions roughed in. Shower panel wiring channel cut if required.",
+    },
+    {
+      day: "Day 12–15",
+      title: "Wall & Floor Tiling",
+      desc: "Precision tile laying with Laticrete 254 Platinum adhesive. Leveling clips used throughout. All cuts, corners, niches, and skirting tiles completed. Final alignment check.",
+    },
+    {
+      day: "Day 16",
+      title: "Laticrete SpectraLock Pro Grouting",
+      desc: "Epoxy SpectraLock grout applied to all tile joints. No sealing required — permanent stain resistance from day one. Expansion joints filled with flexible sealant.",
+    },
+    {
+      day: "Day 17",
+      title: "Glass Shower Panel Installation",
+      desc: "8mm tempered glass panel frames measured, drilled, and fitted to wall. All brackets and seals set. Panel tested for alignment and watertightness.",
+    },
+    {
+      day: "Day 18",
+      title: "Fixture Installation",
+      desc: "Premium Roca bathware (brushed gold / gun grey finish) installed: wall-hung WC, basin, mixer tap, thermostatic shower. Panasonic 15L geyser commissioned. All connections leak-tested.",
+    },
+    {
+      day: "Day 19",
+      title: "Premium iPanel Ceiling & Lighting",
+      desc: "Upgraded iPanel ceiling profile installed. Recessed downlights and optional LED strip fitted and wired. Full ceiling sweep and trim checked.",
+    },
+    {
+      day: "Day 20–21",
+      title: "Snagging, Cleaning & Handover",
+      desc: "Complete quality walk-through with client. All snag items addressed same day. Bathroom professionally deep-cleaned. Warranties, material specs, and care notes handed over.",
+    },
+  ]}
+  totalDays="~21 working days"
+  prevPkg={{ name: "Essential Bath", href: "/services/bathroom-essential" }}
+  nextPkg={{ name: "Signature Bath", href: "/services/bathroom-signature" }}
+/>

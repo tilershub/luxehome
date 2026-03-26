@@ -1,0 +1,123 @@
+---
+import BathroomPkgDetail from '../../components/BathroomPkgDetail.astro';
+---
+
+<BathroomPkgDetail
+  pkgName="Essential Bath"
+  pkgSlug="essential"
+  basePrice={985000}
+  rate={7600}
+  tagline="Complete, functional, built to last"
+  heroDesc="A full-scope bathroom renovation that covers everything from structural preparation to final handover — delivered with the quality and precision LUXEHOME is known for. You supply tiles, bathware and tapware; we handle the rest."
+  isPopular={false}
+  highlights={[
+    "Multi-layer Laticrete waterproofing",
+    "Swisstek premium grout",
+    "iPanel PVC ceiling",
+    "Roca / American Standard fixtures",
+    "Heatline 10L geyser",
+    "Free design & 3D visualization",
+  ]}
+  includes={[
+    "<strong>Structural preparation</strong> — floor concrete base leveling, wall niche construction, vanity top slab casting",
+    "<strong>Advanced waterproofing system</strong> — 3-layer Laticrete application with mandatory 48-hour cure between coats; flood-tested before tiling",
+    "<strong>Complete plumbing installation</strong> — hot & cold water supply lines, drainage, WC pan connection, basin waste, shower point",
+    "<strong>Electrical installation</strong> — geyser supply circuit, ambient lighting circuit, switch box fitting, conduit work",
+    "<strong>Wall & floor tiling</strong> — precision laying with leveling clips, tile adhesive (Laticrete / Tokyo Cement), all cuts and edge finishes; <em>you supply tiles</em>",
+    "<strong>Grouting & sealing</strong> — Swisstek premium grout in all joints; expansion joint protection; grout sealer applied",
+    "<strong>Standard bathware collection</strong> — wall-hung WC, countertop or wall-mounted basin, single-lever mixer tap, shower head & arm; <em>Roca / American Standard</em>",
+    "<strong>Heatline 10L electric geyser</strong> — pressure-rated installation with safety valve and copper pipework",
+    "<strong>Ambient lighting system</strong> — recessed downlights or surface LED fitting, waterproof-rated in wet zones",
+    "<strong>iPanel PVC ceiling</strong> — moisture-resistant, fully fitted with aluminium trim",
+    "<strong>Complete design package</strong> — civil plan, plumbing layout, wiring diagram, and 3D visualization delivered within 2 days of site inspection",
+  ]}
+  brandCategories={[
+    {
+      label: "Waterproofing",
+      brands: ["Laticrete", "Tokyo Cement"],
+    },
+    {
+      label: "Tile Adhesive",
+      brands: ["Laticrete 254 Platinum", "Tokyo Cement Adhesive"],
+    },
+    {
+      label: "Grout",
+      brands: ["Swisstek", "Laticrete"],
+    },
+    {
+      label: "Bathroom Fixtures",
+      brands: ["Roca", "American Standard"],
+    },
+    {
+      label: "Geyser",
+      brands: ["Heatline 10L"],
+    },
+    {
+      label: "Ceiling",
+      brands: ["iPanel PVC"],
+    },
+    {
+      label: "Electrical",
+      brands: ["Local LEC-certified components"],
+    },
+  ]}
+  timeline={[
+    {
+      day: "Day 1",
+      title: "Site Inspection & Measurement",
+      desc: "Our project manager visits your site, takes detailed measurements of all walls, floor, ceiling height, existing plumbing points, and electrical positions. Client brief is discussed and documented.",
+    },
+    {
+      day: "Day 2–3",
+      title: "Design Package Delivery",
+      desc: "Civil plan, plumbing layout, wiring diagram, and 3D visualization are prepared and shared with you for approval. Any revisions are incorporated before works begin.",
+    },
+    {
+      day: "Day 4–6",
+      title: "Civil Preparation",
+      desc: "Floor concrete base is cast and leveled. Wall niche is formed with blockwork or concrete. Vanity top slab is cast. Curing time observed before waterproofing.",
+    },
+    {
+      day: "Day 7–9",
+      title: "Multi-Layer Waterproofing",
+      desc: "Three coats of Laticrete waterproofing membrane applied to floor and wet walls up to 600mm above splash zone. Each coat cures 24 hours. Flood test performed before proceeding.",
+    },
+    {
+      day: "Day 10",
+      title: "Plumbing Rough-in",
+      desc: "All water supply (hot & cold) and drainage pipes are set in position and pressure tested. Inlet and outlet points for WC, basin, shower, and geyser are confirmed.",
+    },
+    {
+      day: "Day 11",
+      title: "Electrical Rough-in",
+      desc: "Geyser supply circuit, lighting circuit, and all switch positions are roughed in with conduit. Geyser mounting bracket is installed.",
+    },
+    {
+      day: "Day 12–15",
+      title: "Floor & Wall Tiling",
+      desc: "Precision tile laying using leveling clips and Laticrete / Tokyo Cement adhesive. All cuts, corners, and edge finishes completed. Tile alignment checked at every course.",
+    },
+    {
+      day: "Day 16",
+      title: "Grouting & Sealing",
+      desc: "Swisstek premium grout mixed and applied to all joints after 24-hour adhesive cure. Expansion joints treated with flexible sealant. Grout sealer applied after 24 hours.",
+    },
+    {
+      day: "Day 17",
+      title: "Fixture Installation",
+      desc: "WC, basin, mixer tap, shower head, geyser, and all accessories installed and commissioned. All connections tested for leaks. Hot and cold water confirmed at each point.",
+    },
+    {
+      day: "Day 18",
+      title: "Ceiling & Lighting",
+      desc: "iPanel PVC ceiling installed with aluminium trim. Recessed or surface lighting fitted and wired. Ceiling fan or exhaust point connected if included in scope.",
+    },
+    {
+      day: "Day 19",
+      title: "Final Inspection & Handover",
+      desc: "Full quality walk-through with the client. Snag list compiled and cleared. Space professionally cleaned. All documentation — warranties, material specs — handed over.",
+    },
+  ]}
+  totalDays="~19 working days"
+  nextPkg={{ name: "Comfort Bath", href: "/services/bathroom-comfort" }}
+/>
