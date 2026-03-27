@@ -80,6 +80,7 @@ import Footer from '../../components/Footer.astro';
           </div>
           <button class="pkg-btn pkg-btn--primary atc-pkg" data-pkg-name="Essential Bath" data-base="985000" data-rate="7600">Get Quotation</button>
           <a href="/contact" class="pkg-btn pkg-btn--ghost">Book Site Inspection</a>
+          <a href="/services/bathroom-essential" class="pkg-detail-link">Brands, timeline &amp; full details →</a>
         </div>
 
         <!-- Comfort Bath -->
@@ -103,6 +104,7 @@ import Footer from '../../components/Footer.astro';
           </div>
           <button class="pkg-btn pkg-btn--primary atc-pkg" data-pkg-name="Comfort Bath" data-base="1225000" data-rate="8600">Get Quotation</button>
           <a href="/contact" class="pkg-btn pkg-btn--ghost">Book Site Inspection</a>
+          <a href="/services/bathroom-comfort" class="pkg-detail-link">Brands, timeline &amp; full details →</a>
         </div>
 
         <!-- Signature Bath -->
@@ -128,6 +130,7 @@ import Footer from '../../components/Footer.astro';
           </div>
           <button class="pkg-btn pkg-btn--primary atc-pkg" data-pkg-name="Signature Bath" data-base="1570000" data-rate="9600">Get Quotation</button>
           <a href="/contact" class="pkg-btn pkg-btn--ghost">Book Site Inspection</a>
+          <a href="/services/bathroom-signature" class="pkg-detail-link">Brands, timeline &amp; full details →</a>
         </div>
 
       </div>
@@ -621,6 +624,18 @@ import Footer from '../../components/Footer.astro';
     color: rgba(240,236,224,.72);
     line-height: 1.6;
   }
+
+  .pkg-detail-link {
+    display: block;
+    text-align: center;
+    font-size: .68rem;
+    color: rgba(240,236,224,.52);
+    text-decoration: none;
+    letter-spacing: .04em;
+    padding-top: .2rem;
+    transition: color .2s;
+  }
+  .pkg-detail-link:hover { color: var(--clay); }
 
   /* ── Add-ons ── */
 

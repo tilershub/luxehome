@@ -1,0 +1,706 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from './Nav.astro';
+import Footer from './Footer.astro';
+
+interface BrandCategory {
+  label: string;
+  brands: string[];
+}
+
+interface TimelineStep {
+  day: string;
+  title: string;
+  desc: string;
+}
+
+interface Props {
+  pkgName: string;
+  pkgSlug: 'essential' | 'comfort' | 'signature';
+  basePrice: number;
+  rate: number;
+  tagline: string;
+  heroDesc: string;
+  highlights: string[];
+  isPopular?: boolean;
+  includes: string[];
+  brandCategories: BrandCategory[];
+  timeline: TimelineStep[];
+  totalDays: string;
+  prevPkg?: { name: string; href: string };
+  nextPkg?: { name: string; href: string };
+}
+
+const {
+  pkgName,
+  pkgSlug,
+  basePrice,
+  rate,
+  tagline,
+  heroDesc,
+  highlights,
+  isPopular = false,
+  includes,
+  brandCategories,
+  timeline,
+  totalDays,
+  prevPkg,
+  nextPkg,
+} = Astro.props;
+
+const formattedBase = 'LKR\u00a0' + basePrice.toLocaleString('en-US');
+const pageTitle = `${pkgName} Bathroom Package — LUXEHOME Sri Lanka`;
+const pageDesc = `${tagline}. ${heroDesc}`;
+---
+
+<Layout title={pageTitle} description={pageDesc}>
+<Nav />
+
+<!-- ── Hero ─────────────────────────────────────────────── -->
+<section class={`pkg-hero pkg-hero--${pkgSlug}`}>
+  <div class="pkg-hero-inner">
+    <div class="breadcrumb">
+      <a href="/">Home</a><span>›</span>
+      <a href="/#shop">Services</a><span>›</span>
+      <a href="/services/bathroom">Bathroom</a><span>›</span>
+      <span>{pkgName}</span>
+    </div>
+
+    {isPopular && <div class="hero-badge">Most Popular</div>}
+
+    <h1 class="reveal">{pkgName}</h1>
+    <p class="hero-tagline reveal">{tagline}</p>
+    <p class="hero-desc reveal">{heroDesc}</p>
+
+    <div class="hero-glance reveal">
+      <div class="glance-item">
+        <div class="glance-val" id="heroPrice">{formattedBase}</div>
+        <div class="glance-label">Base price (up to 40 sq.ft)</div>
+      </div>
+      <div class="glance-divider"></div>
+      <div class="glance-item">
+        <div class="glance-val">{totalDays}</div>
+        <div class="glance-label">Estimated working days</div>
+      </div>
+      <div class="glance-divider"></div>
+      <div class="glance-item">
+        <div class="glance-val">Free</div>
+        <div class="glance-label">3D design & civil plan</div>
+      </div>
+    </div>
+
+    <div class="hero-highlights reveal">
+      {highlights.map(h => <span class="hl-chip">{h}</span>)}
+    </div>
+
+    <div class="hero-ctas reveal">
+      <button class="btn-primary atc-hero" data-pkg-name={pkgName} data-base={basePrice} data-rate={rate}>
+        Get Quotation
+      </button>
+      <a href="/contact" class="btn-ghost">Book Site Inspection</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Area calculator ──────────────────────────────────── -->
+<section class="calc-section">
+  <div class="calc-inner">
+    <div class="calc-label">Customise your price — enter your bathroom dimensions</div>
+    <div class="calc-row">
+      <div class="calc-field">
+        <input type="number" id="bathLength" class="dim-input" min="0.1" max="999" placeholder="Length" inputmode="decimal" aria-label="Bathroom length in feet" />
+        <span class="dim-unit">ft</span>
+      </div>
+      <span class="dim-multiply">×</span>
+      <div class="calc-field">
+        <input type="number" id="bathWidth" class="dim-input" min="0.1" max="999" placeholder="Width" inputmode="decimal" aria-label="Bathroom width in feet" />
+        <span class="dim-unit">ft</span>
+      </div>
+      <span class="calc-result" id="calcResult"></span>
+    </div>
+    <p class="calc-note">Base price covers up to 40 sq.ft. LKR {rate.toLocaleString('en-US')}/sq.ft surcharge applies beyond that.</p>
+  </div>
+</section>
+
+<!-- ── What's Included ──────────────────────────────────── -->
+<section class="content-section">
+  <div class="content-inner">
+
+    <div class="section-col section-col--wide">
+      <div class="stag">What's Included</div>
+      <h2>Everything Covered, Nothing Hidden</h2>
+      <ul class="includes-list">
+        {includes.map(item => (
+          <li set:html={item}></li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="section-col section-col--narrow">
+      <div class="sticky-cta">
+        <div class="sticky-pkg-name">{pkgName}</div>
+        <div class="sticky-price" id="stickyPrice">{formattedBase}</div>
+        <div class="sticky-note" id="stickyNote">base price up to 40 sq.ft</div>
+        <button class="btn-primary btn-full atc-sticky" data-pkg-name={pkgName} data-base={basePrice} data-rate={rate}>
+          Get Quotation
+        </button>
+        <a href="/contact" class="btn-ghost btn-full">Book Site Inspection</a>
+        <div class="sticky-design-note">
+          <span class="sdg-label">Free with every package</span>
+          <ul class="sdg-list">
+            <li>Civil plan</li>
+            <li>Plumbing layout</li>
+            <li>Wiring diagram</li>
+            <li>3D visualization</li>
+          </ul>
+        </div>
+        {prevPkg && (
+          <a href={prevPkg.href} class="pkg-nav-link">← {prevPkg.name}</a>
+        )}
+        {nextPkg && (
+          <a href={nextPkg.href} class="pkg-nav-link pkg-nav-link--next">{nextPkg.name} →</a>
+        )}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Brands ────────────────────────────────────────────── -->
+<section class="brands-section">
+  <div class="brands-inner">
+    <div class="stag">Materials & Brands</div>
+    <h2>Premium Products, Trusted Names</h2>
+    <p class="sdesc">We select brands with proven track records in Sri Lanka's climate and building practices.</p>
+    <div class="brands-grid">
+      {brandCategories.map(cat => (
+        <div class="brand-cat">
+          <div class="brand-cat-label">{cat.label}</div>
+          <div class="brand-pills">
+            {cat.brands.map(b => <span class="brand-pill">{b}</span>)}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ── Timeline ──────────────────────────────────────────── -->
+<section class="timeline-section">
+  <div class="timeline-inner">
+    <div class="stag">Project Procedure</div>
+    <h2>Step-by-Step, Start to Handover</h2>
+    <p class="sdesc">Every project follows this structured sequence. Typical completion: {totalDays} working days.</p>
+    <div class="timeline">
+      {timeline.map((step, i) => (
+        <div class="tl-step">
+          <div class="tl-left">
+            <div class="tl-num">{i + 1}</div>
+            <div class="tl-day">{step.day}</div>
+          </div>
+          <div class="tl-right">
+            <div class="tl-title">{step.title}</div>
+            <div class="tl-desc">{step.desc}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ── Add-on ─────────────────────────────────────────────── -->
+<section class="addon-section">
+  <div class="addon-inner">
+    <div class="stag">Optional Add-on</div>
+    <div class="addon-card">
+      <div class="addon-card-body">
+        <div class="addon-card-name">Renovation Preparation Package</div>
+        <div class="addon-card-sub">Demolition + Wall Plastering</div>
+        <p class="addon-card-desc">Required for existing bathrooms. Includes complete demolition of existing fixtures, tiles, and surfaces, plus wall plastering to create a clean substrate ready for waterproofing.</p>
+      </div>
+      <div class="addon-card-side">
+        <div class="addon-card-price addon-calc" id="addonPrice">LKR 100,000</div>
+        <div class="addon-card-note">base price up to 40 sq.ft · LKR 1,500/sq.ft beyond</div>
+        <button class="btn-primary atc-addon" data-addon-name="Renovation Preparation Package" data-base="100000" data-rate="1500">
+          Add to Quotation
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Final CTA ─────────────────────────────────────────── -->
+<section class="final-cta">
+  <div class="final-cta-inner">
+    <div class="stag">Ready to Begin?</div>
+    <h2>{pkgName} — Starting {formattedBase}</h2>
+    <p>Book a free site inspection. Our team visits, measures, and delivers your complete design package within 2 days.</p>
+    <div class="final-cta-btns">
+      <a href="/contact" class="btn-primary">Book Site Inspection — Free</a>
+      <button class="btn-ghost atc-final" data-pkg-name={pkgName} data-base={basePrice} data-rate={rate}>
+        Get Quotation
+      </button>
+    </div>
+    <div class="pkg-switcher">
+      <span>Compare packages:</span>
+      <a href="/services/bathroom-essential" class={pkgSlug === 'essential' ? 'active' : ''}>Essential</a>
+      <a href="/services/bathroom-comfort" class={pkgSlug === 'comfort' ? 'active' : ''}>Comfort</a>
+      <a href="/services/bathroom-signature" class={pkgSlug === 'signature' ? 'active' : ''}>Signature</a>
+      <a href="/services/bathroom">All Packages</a>
+    </div>
+  </div>
+</section>
+
+<Footer />
+
+</Layout>
+
+<script is:inline>
+(function () {
+  function formatLKR(n) {
+    return 'LKR\u00a0' + Math.round(n).toLocaleString('en-US');
+  }
+  function calcPrice(base, rate, area) {
+    if (!area || area <= 0) return base;
+    return base + Math.max(0, area - 40) * rate;
+  }
+
+  var lengthInput = document.getElementById('bathLength');
+  var widthInput  = document.getElementById('bathWidth');
+
+  function getArea() {
+    var l = parseFloat(lengthInput.value) || 0;
+    var w = parseFloat(widthInput.value)  || 0;
+    if (l <= 0 || w <= 0) return 0;
+    return parseFloat((l * w).toFixed(2));
+  }
+
+  function getPkgBase() {
+    var el = document.querySelector('.atc-hero');
+    return el ? parseInt(el.dataset.base, 10) : 0;
+  }
+  function getPkgRate() {
+    var el = document.querySelector('.atc-hero');
+    return el ? parseInt(el.dataset.rate, 10) : 0;
+  }
+
+  function updatePrices() {
+    var area  = getArea();
+    var base  = getPkgBase();
+    var rate  = getPkgRate();
+    var price = calcPrice(base, rate, area);
+    var priceStr = formatLKR(price);
+    var noteStr  = area > 0 ? 'Bathroom size: ' + area + ' sq.ft' : 'base price up to 40 sq.ft';
+
+    var heroPrice   = document.getElementById('heroPrice');
+    var stickyPrice = document.getElementById('stickyPrice');
+    var stickyNote  = document.getElementById('stickyNote');
+    var calcResult  = document.getElementById('calcResult');
+
+    if (heroPrice)   heroPrice.textContent   = priceStr;
+    if (stickyPrice) stickyPrice.textContent = priceStr;
+    if (stickyNote)  stickyNote.textContent  = noteStr;
+    if (calcResult)  calcResult.textContent  = area > 0 ? '= ' + priceStr : '';
+
+    /* Add-on */
+    var addonPrice = document.getElementById('addonPrice');
+    if (addonPrice) {
+      addonPrice.textContent = formatLKR(calcPrice(100000, 1500, area));
+    }
+  }
+
+  if (lengthInput) lengthInput.addEventListener('input', updatePrices);
+  if (widthInput)  widthInput.addEventListener('input',  updatePrices);
+
+  function handleAtc(btn) {
+    btn.addEventListener('click', function () {
+      var base  = parseInt(btn.dataset.base || btn.dataset.pkgBase, 10) || getPkgBase();
+      var rate  = parseInt(btn.dataset.rate || btn.dataset.pkgRate, 10) || getPkgRate();
+      var area  = getArea();
+      var price = calcPrice(base, rate, area);
+      var name  = btn.dataset.pkgName || btn.dataset.addonName;
+      var details = area > 0 ? area + ' sq.ft' : 'up to 40 sq.ft (base price)';
+      if (window.LHCart) window.LHCart.add({ name: name, details: details, price: price });
+    });
+  }
+
+  document.querySelectorAll('.atc-hero, .atc-sticky, .atc-final').forEach(handleAtc);
+  document.querySelectorAll('.atc-addon').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var area  = getArea();
+      var price = calcPrice(100000, 1500, area);
+      var details = area > 0 ? area + ' sq.ft' : 'base (up to 40 sq.ft)';
+      if (window.LHCart) window.LHCart.add({ name: btn.dataset.addonName, details: details, price: price });
+    });
+  });
+})();
+</script>
+
+<style>
+  .breadcrumb {
+    display: flex; gap: .4rem; align-items: center;
+    font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
+    color: rgba(240,236,224,.75); margin-bottom: 1.4rem; flex-wrap: wrap;
+  }
+  .breadcrumb a { color: rgba(240,236,224,.75); text-decoration: none; transition: color .2s; }
+  .breadcrumb a:hover { color: var(--clay); }
+
+  .stag {
+    font-size: .72rem; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--clay); margin-bottom: .7rem;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 700; color: var(--cream); line-height: 1.2; margin-bottom: .9rem;
+  }
+
+  .sdesc {
+    font-size: .95rem; color: rgba(240,236,224,.82); line-height: 1.72; max-width: 60ch; margin-bottom: 2rem;
+  }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--clay); color: #fff; border: none;
+    padding: .8rem 1.8rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
+    min-height: 48px; cursor: pointer; transition: background .2s;
+  }
+  .btn-primary:hover { background: var(--terracotta); }
+  .btn-full { width: 100%; }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; color: rgba(240,236,224,.82);
+    border: 1px solid rgba(240,236,224,.25);
+    padding: .8rem 1.8rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 500;
+    letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
+    min-height: 48px; cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .btn-ghost:hover { border-color: var(--clay); color: var(--clay); }
+  .btn-full { width: 100%; }
+
+  /* ── Hero ── */
+  .pkg-hero {
+    min-height: 68vh; display: flex; align-items: flex-end;
+    padding: 0 4rem 4.5rem; position: relative;
+    background-size: cover; background-position: center;
+  }
+  .pkg-hero--essential {
+    background-image: url('https://images.pexels.com/photos/6585601/pexels-photo-6585601.jpeg?auto=compress&cs=tinysrgb&w=1400&fit=crop');
+  }
+  .pkg-hero--comfort {
+    background-image: url('https://images.pexels.com/photos/1910472/pexels-photo-1910472.jpeg?auto=compress&cs=tinysrgb&w=1400&fit=crop');
+  }
+  .pkg-hero--signature {
+    background-image: url('https://images.pexels.com/photos/2507010/pexels-photo-2507010.jpeg?auto=compress&cs=tinysrgb&w=1400&fit=crop');
+  }
+  .pkg-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(170deg, rgba(20,30,22,.78) 0%, rgba(20,30,22,.5) 55%, rgba(20,30,22,.82) 100%);
+  }
+  .pkg-hero-inner {
+    position: relative; z-index: 1; max-width: 780px; padding-top: 7rem;
+  }
+
+  .hero-badge {
+    display: inline-block; background: var(--clay); color: #fff;
+    font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; padding: .22rem .7rem; border-radius: 20px;
+    margin-bottom: .9rem;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 700; color: var(--cream); line-height: 1.05; margin-bottom: .6rem;
+  }
+
+  .hero-tagline {
+    font-size: 1.05rem; color: var(--clay); font-style: italic;
+    font-family: 'Playfair Display', serif; margin-bottom: .8rem;
+  }
+
+  .hero-desc {
+    font-size: .98rem; color: rgba(240,236,224,.88); line-height: 1.75;
+    max-width: 58ch; margin-bottom: 1.8rem;
+  }
+
+  .hero-glance {
+    display: flex; align-items: stretch; gap: 0;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 3px; overflow: hidden; margin-bottom: 1.5rem;
+  }
+  .glance-item {
+    padding: .9rem 1.6rem; flex: 1;
+  }
+  .glance-val {
+    font-family: 'Playfair Display', serif; font-size: 1.2rem;
+    font-weight: 700; color: var(--clay); margin-bottom: .15rem;
+  }
+  .glance-label {
+    font-size: .68rem; color: rgba(240,236,224,.65);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .glance-divider {
+    width: 1px; background: rgba(255,255,255,.1); flex-shrink: 0;
+  }
+
+  .hero-highlights {
+    display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1.8rem;
+  }
+  .hl-chip {
+    font-size: .72rem; color: rgba(240,236,224,.85);
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    padding: .25rem .75rem; border-radius: 20px;
+  }
+
+  .hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  /* ── Calculator ── */
+  .calc-section {
+    background: var(--forest-deep); border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .calc-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 1.2rem 4rem; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+  }
+  .calc-label {
+    font-size: .72rem; color: rgba(240,236,224,.75);
+    text-transform: uppercase; letter-spacing: .08em; flex-shrink: 0;
+  }
+  .calc-row {
+    display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; flex: 1;
+  }
+  .calc-field { display: flex; align-items: center; gap: .45rem; }
+  .dim-input {
+    width: 88px; background: rgba(255,255,255,.08);
+    border: 1px solid rgba(61,79,66,.4); border-radius: 3px;
+    color: var(--cream); font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; padding: .4rem .65rem; text-align: center;
+    outline: none; min-height: 40px; -webkit-appearance: none;
+  }
+  .dim-input:focus { border-color: var(--clay); }
+  .dim-unit { font-size: .75rem; color: rgba(240,236,224,.65); }
+  .dim-multiply { font-size: 1rem; color: rgba(240,236,224,.55); }
+  .calc-result {
+    font-family: 'Playfair Display', serif; font-size: 1.1rem;
+    font-weight: 700; color: var(--clay); margin-left: .5rem;
+  }
+  .calc-note {
+    font-size: .72rem; color: rgba(240,236,224,.55); width: 100%; margin-top: -.3rem;
+  }
+
+  /* ── Content / Includes ── */
+  .content-section { background: var(--charcoal); padding: 5rem 4rem; }
+  .content-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 320px; gap: 4rem;
+  }
+
+  .includes-list {
+    list-style: none; display: flex; flex-direction: column; gap: .55rem; margin-top: 1.2rem;
+  }
+  .includes-list li {
+    font-size: .88rem; color: rgba(240,236,224,.88); line-height: 1.5;
+    display: flex; align-items: flex-start; gap: .7rem; padding: .55rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .includes-list li::before {
+    content: '◆'; font-size: .3rem; color: var(--clay); flex-shrink: 0; margin-top: .35rem;
+  }
+
+  /* Sticky sidebar */
+  .sticky-cta {
+    position: sticky; top: 5rem;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 4px; padding: 1.6rem;
+    display: flex; flex-direction: column; gap: .8rem;
+  }
+  .sticky-pkg-name {
+    font-family: 'Playfair Display', serif; font-size: .95rem;
+    font-weight: 700; color: var(--cream);
+  }
+  .sticky-price {
+    font-family: 'Playfair Display', serif; font-size: 1.6rem;
+    font-weight: 800; color: var(--clay); line-height: 1;
+  }
+  .sticky-note {
+    font-size: .68rem; color: rgba(240,236,224,.58); margin-top: -.4rem;
+  }
+  .sticky-design-note {
+    border-top: 1px solid rgba(255,255,255,.07); padding-top: .9rem; margin-top: .2rem;
+  }
+  .sdg-label {
+    font-size: .6rem; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--clay); font-weight: 600; display: block; margin-bottom: .4rem;
+  }
+  .sdg-list {
+    list-style: none; display: flex; flex-direction: column; gap: .2rem;
+  }
+  .sdg-list li {
+    font-size: .72rem; color: rgba(240,236,224,.68);
+  }
+  .sdg-list li::before { content: '→ '; color: var(--clay); font-size: .65rem; }
+
+  .pkg-nav-link {
+    font-size: .72rem; color: rgba(240,236,224,.55); text-decoration: none;
+    padding-top: .2rem; transition: color .2s;
+  }
+  .pkg-nav-link:hover { color: var(--clay); }
+  .pkg-nav-link--next { text-align: right; }
+
+  /* ── Brands ── */
+  .brands-section { background: var(--forest-deep); padding: 5rem 4rem; }
+  .brands-inner { max-width: 1100px; margin: 0 auto; }
+
+  .brands-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem;
+  }
+  .brand-cat {
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 3px; padding: 1.2rem 1.4rem;
+  }
+  .brand-cat-label {
+    font-size: .62rem; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--clay); font-weight: 600; margin-bottom: .7rem;
+  }
+  .brand-pills { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .brand-pill {
+    font-size: .72rem; color: rgba(240,236,224,.82);
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    padding: .2rem .65rem; border-radius: 20px;
+  }
+
+  /* ── Timeline ── */
+  .timeline-section { background: var(--charcoal); padding: 5rem 4rem; }
+  .timeline-inner { max-width: 900px; margin: 0 auto; }
+
+  .timeline { display: flex; flex-direction: column; gap: 0; margin-top: 1rem; }
+
+  .tl-step {
+    display: grid; grid-template-columns: 96px 1fr; gap: 1.5rem;
+    position: relative; padding-bottom: 0;
+  }
+  .tl-step:not(:last-child)::after {
+    content: ''; position: absolute; left: 18px; top: 40px; bottom: 0;
+    width: 2px; background: rgba(61,79,66,.3);
+  }
+
+  .tl-left {
+    display: flex; flex-direction: column; align-items: center; padding-top: .2rem; gap: .3rem;
+  }
+  .tl-num {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--clay); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; font-weight: 700; flex-shrink: 0; z-index: 1;
+  }
+  .tl-day {
+    font-size: .62rem; color: rgba(240,236,224,.5);
+    text-align: center; line-height: 1.3; white-space: nowrap;
+  }
+
+  .tl-right {
+    padding: .1rem 0 2.2rem;
+  }
+  .tl-title {
+    font-family: 'Playfair Display', serif; font-size: 1rem;
+    font-weight: 700; color: var(--cream); margin-bottom: .35rem;
+  }
+  .tl-desc {
+    font-size: .82rem; color: rgba(240,236,224,.72); line-height: 1.65;
+  }
+  .tl-step:last-child .tl-right { padding-bottom: 0; }
+
+  /* ── Add-on ── */
+  .addon-section { background: var(--forest-deep); padding: 4rem 4rem; }
+  .addon-inner { max-width: 1100px; margin: 0 auto; }
+
+  .addon-card {
+    display: grid; grid-template-columns: 1fr 260px; gap: 2.5rem;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 4px; padding: 2rem 2.4rem; margin-top: 1.5rem; align-items: start;
+  }
+  .addon-card-name {
+    font-family: 'Playfair Display', serif; font-size: 1.1rem;
+    font-weight: 700; color: var(--cream); margin-bottom: .3rem;
+  }
+  .addon-card-sub {
+    font-size: .75rem; color: var(--clay); font-style: italic; margin-bottom: .7rem;
+  }
+  .addon-card-desc {
+    font-size: .85rem; color: rgba(240,236,224,.75); line-height: 1.65;
+  }
+  .addon-card-side { display: flex; flex-direction: column; gap: .6rem; }
+  .addon-card-price {
+    font-family: 'Playfair Display', serif; font-size: 1.4rem;
+    font-weight: 700; color: var(--clay);
+  }
+  .addon-card-note {
+    font-size: .68rem; color: rgba(240,236,224,.55); line-height: 1.5;
+  }
+
+  /* ── Final CTA ── */
+  .final-cta { background: var(--forest-deep); padding: 5.5rem 4rem; text-align: center; }
+  .final-cta-inner { max-width: 700px; margin: 0 auto; }
+  .final-cta h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 1rem; }
+  .final-cta p {
+    font-size: .95rem; color: rgba(240,236,224,.78); line-height: 1.72; margin-bottom: 2rem;
+  }
+  .final-cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem; }
+
+  .pkg-switcher {
+    display: flex; align-items: center; gap: .7rem; justify-content: center;
+    flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,.08); padding-top: 1.5rem;
+  }
+  .pkg-switcher span {
+    font-size: .7rem; color: rgba(240,236,224,.45);
+    text-transform: uppercase; letter-spacing: .08em;
+  }
+  .pkg-switcher a {
+    font-size: .78rem; color: rgba(240,236,224,.65); text-decoration: none;
+    padding: .3rem .8rem; border: 1px solid rgba(255,255,255,.1);
+    border-radius: 20px; transition: color .2s, border-color .2s;
+  }
+  .pkg-switcher a:hover, .pkg-switcher a.active {
+    color: var(--clay); border-color: var(--clay);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .pkg-hero { padding: 0 2.5rem 3.5rem; }
+    .content-section, .brands-section, .timeline-section,
+    .addon-section, .final-cta { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .calc-inner { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .content-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .sticky-cta { position: static; }
+    .addon-card { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .pkg-hero { padding: 0 1.5rem 3rem; min-height: 72vh; }
+    .content-section, .brands-section, .timeline-section,
+    .addon-section, .final-cta { padding: 4rem 1.5rem; }
+    .calc-inner { padding: 1rem 1.5rem; flex-direction: column; align-items: flex-start; gap: .7rem; }
+    .hero-glance { flex-direction: column; }
+    .glance-divider { width: auto; height: 1px; }
+  }
+
+  @media (max-width: 480px) {
+    .pkg-hero { padding: 0 1rem 2.5rem; }
+    .pkg-hero-inner { padding-top: calc(5rem + env(safe-area-inset-top, 0px)); }
+    h1 { font-size: clamp(2rem, 8vw, 2.4rem); }
+    .content-section, .brands-section, .timeline-section,
+    .addon-section, .final-cta { padding: 3rem 1rem; }
+    .calc-inner { padding: .8rem 1rem; }
+    .tl-step { grid-template-columns: 64px 1fr; gap: 1rem; }
+    .tl-num { width: 32px; height: 32px; font-size: .72rem; }
+    .tl-step:not(:last-child)::after { left: 15px; top: 34px; }
+    .hero-ctas { flex-direction: column; }
+    .btn-primary, .btn-ghost { width: 100%; }
+  }
+</style>

@@ -1,0 +1,137 @@
+---
+import BathroomPkgDetail from '../../components/BathroomPkgDetail.astro';
+---
+
+<BathroomPkgDetail
+  pkgName="Signature Bath"
+  pkgSlug="signature"
+  basePrice={1570000}
+  rate={9600}
+  tagline="Hotel-grade luxury, delivered to your home"
+  heroDesc="The ultimate bathroom transformation. Signature Bath combines concealed plumbing, wall-mounted WC, frameless glass shower cubicle, custom vanity cupboard, and Grohe or Kohler premium fittings — delivering a five-star hotel experience in your own home."
+  isPopular={false}
+  highlights={[
+    "Frameless glass shower cubicle",
+    "Wall-mounted WC (Grohe / Kohler)",
+    "Concealed mixer taps",
+    "Kerakoll Fugabella designer grout",
+    "Custom vanity cupboard & mirror",
+    "Armstrong premium ceiling",
+  ]}
+  includes={[
+    "<strong>Everything in Comfort Bath</strong> — full structural, Laticrete 9235 waterproofing, plumbing, electrical, tiling, and design package",
+    "<strong>Concealed plumbing system</strong> — all supply and waste pipes fully concealed within walls; flush plates and concealed cistern for wall-mounted WC",
+    "<strong>Frameless glass shower cubicle</strong> — 10mm clear tempered safety glass, brushed stainless or matte black hardware, silicon-sealed frameless construction",
+    "<strong>Wall-mounted WC</strong> — Grohe or Kohler rimless wall-hung pan with concealed cistern frame; soft-close seat; height-adjustable during installation",
+    "<strong>Concealed mixer taps</strong> — thermostatic or manual concealed mixer for shower; concealed basin mixer; all trim in matching finish",
+    "<strong>Custom vanity cupboard</strong> — moisture-resistant MDF carcass with lacquer finish, soft-close hinges, and matching mirror panel with ambient lighting",
+    "<strong>Kerakoll Fugabella designer grout</strong> — ultra-fine epoxy grout in 30+ color options; chemical-resistant, permanently stain-free",
+    "<strong>High-end surface finishing</strong> — additional substrate preparation passes for large-format tile application; back-buttering on all tiles",
+    "<strong>Designer ceiling system</strong> — Armstrong mineral fibre or premium PVC coffered ceiling with integrated lighting plan",
+    "<strong>15L premium geyser</strong> — pressure-rated, concealed or surface installation to match bathroom aesthetic",
+    "<strong>Complete design package</strong> — civil plan, plumbing layout, wiring diagram, 3D visualization, material schedule, and dedicated design consultation sessions",
+  ]}
+  brandCategories={[
+    {
+      label: "Waterproofing",
+      brands: ["Laticrete 9235", "Laticrete 254 Platinum", "Laticrete HydroBan"],
+    },
+    {
+      label: "Tile Adhesive",
+      brands: ["Laticrete 254 Platinum", "Kerakoll H40"],
+    },
+    {
+      label: "Grout",
+      brands: ["Kerakoll Fugabella", "Laticrete SpectraLock Pro"],
+    },
+    {
+      label: "Fixtures & Fittings",
+      brands: ["Grohe", "Kohler", "Roca (alternative)"],
+    },
+    {
+      label: "Shower Cubicle",
+      brands: ["10mm Tempered Glass", "Brushed SS / Matte Black hardware"],
+    },
+    {
+      label: "Vanity & Mirror",
+      brands: ["Custom MR-MDF", "Lacquer finish", "LED mirror cabinet"],
+    },
+    {
+      label: "Ceiling",
+      brands: ["Armstrong Mineral Fibre", "Premium PVC coffered"],
+    },
+    {
+      label: "Geyser",
+      brands: ["15L Premium (Panasonic / Heatline)"],
+    },
+  ]}
+  timeline={[
+    {
+      day: "Day 1",
+      title: "Site Inspection & Design Brief",
+      desc: "Detailed site survey including wall thicknesses, structural elements, existing MEP positions. Design brief captured: tile format, finish preferences, fixture brands, vanity style, ceiling concept.",
+    },
+    {
+      day: "Day 2–4",
+      title: "Design Package & Material Schedule",
+      desc: "Civil plan, plumbing layout (concealed), wiring diagram, 3D visualization, and full material schedule prepared. Two review sessions held to finalize every detail before ordering materials.",
+    },
+    {
+      day: "Day 5–7",
+      title: "Civil & Structural Preparation",
+      desc: "Floor concrete base, wall niches, and vanity slab constructed. Wall chasing for concealed plumbing and cistern frame begins. Substrate surfaces prepared with additional skim coats for large-format tiles.",
+    },
+    {
+      day: "Day 8–10",
+      title: "Concealed Plumbing Rough-in",
+      desc: "All water supply and drainage pipes routed within walls. Grohe or Kohler concealed cistern frame installed and set to correct height. Shower concealed valve body installed. All pipes pressure tested before wall closing.",
+    },
+    {
+      day: "Day 11",
+      title: "Electrical Rough-in & LED Layout",
+      desc: "Geyser circuit, all lighting circuits, mirror cabinet power, LED strip conduit, and switch positions set. Ceiling structure for Armstrong panels prepared.",
+    },
+    {
+      day: "Day 12–14",
+      title: "Premium Waterproofing System",
+      desc: "Laticrete 9235 applied in three coats with fabric reinforcement at all transitions. 254 Platinum sealer coat on floor. 48-hour cure per coat. Extended flood test (24 hours) before tiling.",
+    },
+    {
+      day: "Day 15–19",
+      title: "Large-Format Wall & Floor Tiling",
+      desc: "Back-buttered tile installation with Laticrete 254 Platinum / Kerakoll H40 adhesive. Leveling clips, lippage check on every tile. All niches, skirting, and detail cuts completed to precision.",
+    },
+    {
+      day: "Day 20",
+      title: "Kerakoll Fugabella Grouting",
+      desc: "Premium epoxy grout mixed to exact client color specification and applied. Chemical-resistant, permanently color-stable joints. Expansion joints filled with matching Silicone.",
+    },
+    {
+      day: "Day 21–22",
+      title: "Glass Shower Cubicle Installation",
+      desc: "10mm frameless tempered glass panels cut to precise measurements, fitted with drill-through clamps and floor-to-ceiling channels. All silicon beads applied and cured.",
+    },
+    {
+      day: "Day 23",
+      title: "Premium Fixture & Fitting Installation",
+      desc: "Wall-mounted WC pan, concealed cistern trim, Grohe / Kohler mixer trims, shower trim kit, and all accessories fitted. Vanity basin and mixer commissioned. Full water and function test.",
+    },
+    {
+      day: "Day 24",
+      title: "Custom Vanity Cupboard & Mirror",
+      desc: "Moisture-resistant MDF vanity unit and mirror cabinet installed. Soft-close hinges adjusted. LED mirror cabinet wired and commissioned. All storage components checked.",
+    },
+    {
+      day: "Day 25",
+      title: "Armstrong Ceiling & Lighting",
+      desc: "Armstrong mineral fibre or coffered PVC ceiling installed. All recessed downlights, LED strips, and exhaust points fitted and tested.",
+    },
+    {
+      day: "Day 26–27",
+      title: "Snagging, Deep Clean & Handover",
+      desc: "Full quality inspection with client. All snag items resolved the same day. Professional deep clean including glass cubicle and chrome polish. Complete documentation package — warranties, material specs, maintenance guide — handed over.",
+    },
+  ]}
+  totalDays="~27 working days"
+  prevPkg={{ name: "Comfort Bath", href: "/services/bathroom-comfort" }}
+/>
