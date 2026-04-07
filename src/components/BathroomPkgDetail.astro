@@ -27,6 +27,7 @@ interface Props {
   brandCategories: BrandCategory[];
   timeline: TimelineStep[];
   totalDays: string;
+  videoUrl?: string;
   prevPkg?: { name: string; href: string };
   nextPkg?: { name: string; href: string };
 }
@@ -44,9 +45,14 @@ const {
   brandCategories,
   timeline,
   totalDays,
+  videoUrl,
   prevPkg,
   nextPkg,
 } = Astro.props;
+
+const embedUrl = videoUrl
+  ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(videoUrl)}&show_text=false&width=720&height=405&appId`
+  : null;
 
 const formattedBase = 'LKR\u00a0' + basePrice.toLocaleString('en-US');
 const pageTitle = `${pkgName} Bathroom Package — LUXEHOME Sri Lanka`;
@@ -165,6 +171,34 @@ const pageDesc = `${tagline}. ${heroDesc}`;
 
   </div>
 </section>
+
+<!-- ── Video ─────────────────────────────────────────────── -->
+{embedUrl && (
+  <section class="video-section">
+    <div class="video-inner">
+      <div class="stag">See Our Work</div>
+      <h2>Project Showcase — {pkgName}</h2>
+      <p class="sdesc">A real LUXEHOME {pkgName} renovation, from start to handover.</p>
+      <div class="video-wrap">
+        <iframe
+          src={embedUrl}
+          width="720"
+          height="405"
+          style="border:none;overflow:hidden;display:block;width:100%;"
+          scrolling="no"
+          frameborder="0"
+          allowfullscreen={true}
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          loading="lazy"
+        ></iframe>
+      </div>
+      <p class="video-note">
+        Can't see the video?
+        <a href={videoUrl} target="_blank" rel="noopener noreferrer">Watch on Facebook →</a>
+      </p>
+    </div>
+  </section>
+)}
 
 <!-- ── Brands ────────────────────────────────────────────── -->
 <section class="brands-section">
@@ -670,10 +704,43 @@ const pageDesc = `${tagline}. ${heroDesc}`;
     color: var(--clay); border-color: var(--clay);
   }
 
+  /* ── Video ── */
+  .video-section { background: var(--charcoal); padding: 5rem 4rem; }
+  .video-inner { max-width: 900px; margin: 0 auto; }
+
+  .video-wrap {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 */
+    background: rgba(0,0,0,.3);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .video-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    border: none;
+  }
+  .video-note {
+    margin-top: .9rem;
+    font-size: .75rem;
+    color: rgba(240,236,224,.45);
+    text-align: center;
+  }
+  .video-note a {
+    color: var(--clay);
+    text-decoration: none;
+    transition: opacity .2s;
+  }
+  .video-note a:hover { opacity: .75; }
+
   /* ── Responsive ── */
   @media (max-width: 1100px) {
     .pkg-hero { padding: 0 2.5rem 3.5rem; }
-    .content-section, .brands-section, .timeline-section,
+    .content-section, .video-section, .brands-section, .timeline-section,
     .addon-section, .final-cta { padding-left: 2.5rem; padding-right: 2.5rem; }
     .calc-inner { padding-left: 2.5rem; padding-right: 2.5rem; }
     .content-inner { grid-template-columns: 1fr; gap: 2rem; }
@@ -683,7 +750,7 @@ const pageDesc = `${tagline}. ${heroDesc}`;
 
   @media (max-width: 768px) {
     .pkg-hero { padding: 0 1.5rem 3rem; min-height: 72vh; }
-    .content-section, .brands-section, .timeline-section,
+    .content-section, .video-section, .brands-section, .timeline-section,
     .addon-section, .final-cta { padding: 4rem 1.5rem; }
     .calc-inner { padding: 1rem 1.5rem; flex-direction: column; align-items: flex-start; gap: .7rem; }
     .hero-glance { flex-direction: column; }
@@ -694,7 +761,7 @@ const pageDesc = `${tagline}. ${heroDesc}`;
     .pkg-hero { padding: 0 1rem 2.5rem; }
     .pkg-hero-inner { padding-top: calc(5rem + env(safe-area-inset-top, 0px)); }
     h1 { font-size: clamp(2rem, 8vw, 2.4rem); }
-    .content-section, .brands-section, .timeline-section,
+    .content-section, .video-section, .brands-section, .timeline-section,
     .addon-section, .final-cta { padding: 3rem 1rem; }
     .calc-inner { padding: .8rem 1rem; }
     .tl-step { grid-template-columns: 64px 1fr; gap: 1rem; }
