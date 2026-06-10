@@ -5,8 +5,8 @@ import Footer from '../../components/Footer.astro';
 ---
 
 <Layout
-  title="Tiling — 4 Packages by Tile Size — LUXEHOME Sri Lanka"
-  description="Professional tiling across Sri Lanka. Four packages by tile size from Rs. 350/sq.ft — Small, Medium, Large & Plank. Tile leveling system, Tokyo cement, Swisstek grout. You supply tiles."
+  title="Floor Tiling — Mega & Rocell Tiles — LUXEHOME Sri Lanka"
+  description="Professional floor tiling across Sri Lanka. Mega Tiles from Rs. 1,000/sq.ft and Rocell Tiles from Rs. 1,200/sq.ft — up to 4×2 size. Tile leveling system, Tokyo cement, Swisstek grout. You supply tiles."
 >
   <Nav />
 
@@ -22,7 +22,7 @@ import Footer from '../../components/Footer.astro';
       <h1 class="reveal">Tiling</h1>
       <p class="hero-desc reveal">
         Precision installation with a leveling system, Tokyo HP cement, and Swisstek grout —
-        four packages priced by tile size. Enter your measurements below to get an accurate price.
+        two options by tile brand. Up to 4×2 size tiles. Enter your measurements below to get an accurate price.
       </p>
       <div class="hero-cta reveal">
         <a href="/contact" class="btn-primary">Book Site Inspection — Rs. 10,000</a>
@@ -35,15 +35,15 @@ import Footer from '../../components/Footer.astro';
   <section class="pricing-section">
     <div class="pricing-inner">
       <div class="stag reveal">Transparent Pricing</div>
-      <h2 class="reveal">Four Packages, One Standard of Work</h2>
-      <p class="sdesc reveal">Rate depends on tile size — larger tiles require more precision and specialist handling. All packages include tile leveling system, Tokyo Super HP cement, and Swisstek grout.</p>
+      <h2 class="reveal">Two Options, One Standard of Work</h2>
+      <p class="sdesc reveal">Choose your tile brand — both options handle tiles up to 4×2 size and include the same installation standard: leveling system, Tokyo Super HP cement, and Swisstek grout.</p>
 
       <div class="pkg-grid reveal">
 
-        <!-- Small Tiles -->
-        <div class="pkg-card" data-floor-rate="350" data-skirting-rate="250">
-          <div class="pkg-name">Small Tiles</div>
-          <div class="pkg-sub">≤ 1 sq.m per tile</div>
+        <!-- Mega Tiles -->
+        <div class="pkg-card" data-floor-rate="1000">
+          <div class="pkg-name">Mega Tiles</div>
+          <div class="pkg-sub">Up to 4×2 size</div>
           <div class="pkg-inputs">
             <div class="input-row">
               <label>Floor area</label>
@@ -52,31 +52,21 @@ import Footer from '../../components/Footer.astro';
                 <span>sq.ft</span>
               </div>
             </div>
-            <div class="input-row">
-              <label>Skirting length</label>
-              <div class="input-field">
-                <input type="number" class="area-in skirting-in" min="0" placeholder="lin.ft" inputmode="decimal" />
-                <span>lin.ft</span>
-              </div>
-            </div>
           </div>
           <div class="pkg-result" hidden>
-            <div class="result-row"><span>Floor</span><span class="floor-total"></span></div>
-            <div class="result-row"><span>Skirting</span><span class="skirting-total"></span></div>
             <div class="result-total"><span>Total</span><span class="grand-total"></span></div>
           </div>
           <div class="pkg-rates">
-            <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 350 <em>/sq.ft</em></span></div>
-            <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 250 <em>/lin.ft</em></span></div>
+            <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 1,000 <em>/sq.ft</em></span></div>
           </div>
           <button class="pkg-btn atc-tile-btn">Add to Cart</button>
         </div>
 
-        <!-- Medium Tiles -->
-        <div class="pkg-card pkg-card--mid" data-floor-rate="500" data-skirting-rate="300">
-          <div class="pkg-badge">Most Popular</div>
-          <div class="pkg-name">Medium Tiles</div>
-          <div class="pkg-sub">1 – 2 sq.m per tile</div>
+        <!-- Rocell Tiles -->
+        <div class="pkg-card pkg-card--mid" data-floor-rate="1200">
+          <div class="pkg-badge">Premium</div>
+          <div class="pkg-name">Rocell Tiles</div>
+          <div class="pkg-sub">Up to 4×2 size</div>
           <div class="pkg-inputs">
             <div class="input-row">
               <label>Floor area</label>
@@ -85,86 +75,12 @@ import Footer from '../../components/Footer.astro';
                 <span>sq.ft</span>
               </div>
             </div>
-            <div class="input-row">
-              <label>Skirting length</label>
-              <div class="input-field">
-                <input type="number" class="area-in skirting-in" min="0" placeholder="lin.ft" inputmode="decimal" />
-                <span>lin.ft</span>
-              </div>
-            </div>
           </div>
           <div class="pkg-result" hidden>
-            <div class="result-row"><span>Floor</span><span class="floor-total"></span></div>
-            <div class="result-row"><span>Skirting</span><span class="skirting-total"></span></div>
             <div class="result-total"><span>Total</span><span class="grand-total"></span></div>
           </div>
           <div class="pkg-rates">
-            <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 500 <em>/sq.ft</em></span></div>
-            <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 300 <em>/lin.ft</em></span></div>
-          </div>
-          <button class="pkg-btn atc-tile-btn">Add to Cart</button>
-        </div>
-
-        <!-- Large Tiles -->
-        <div class="pkg-card" data-floor-rate="700" data-skirting-rate="350">
-          <div class="pkg-name">Large Tiles</div>
-          <div class="pkg-sub">&gt; 2 sq.m per tile</div>
-          <div class="pkg-inputs">
-            <div class="input-row">
-              <label>Floor area</label>
-              <div class="input-field">
-                <input type="number" class="area-in floor-in" min="1" placeholder="sq.ft" inputmode="decimal" />
-                <span>sq.ft</span>
-              </div>
-            </div>
-            <div class="input-row">
-              <label>Skirting length</label>
-              <div class="input-field">
-                <input type="number" class="area-in skirting-in" min="0" placeholder="lin.ft" inputmode="decimal" />
-                <span>lin.ft</span>
-              </div>
-            </div>
-          </div>
-          <div class="pkg-result" hidden>
-            <div class="result-row"><span>Floor</span><span class="floor-total"></span></div>
-            <div class="result-row"><span>Skirting</span><span class="skirting-total"></span></div>
-            <div class="result-total"><span>Total</span><span class="grand-total"></span></div>
-          </div>
-          <div class="pkg-rates">
-            <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 700 <em>/sq.ft</em></span></div>
-            <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 350 <em>/lin.ft</em></span></div>
-          </div>
-          <button class="pkg-btn atc-tile-btn">Add to Cart</button>
-        </div>
-
-        <!-- Plank Tiles -->
-        <div class="pkg-card" data-floor-rate="500" data-skirting-rate="250">
-          <div class="pkg-name">Plank Tiles</div>
-          <div class="pkg-sub">Any length · Long-format planks</div>
-          <div class="pkg-inputs">
-            <div class="input-row">
-              <label>Floor area</label>
-              <div class="input-field">
-                <input type="number" class="area-in floor-in" min="1" placeholder="sq.ft" inputmode="decimal" />
-                <span>sq.ft</span>
-              </div>
-            </div>
-            <div class="input-row">
-              <label>Skirting length</label>
-              <div class="input-field">
-                <input type="number" class="area-in skirting-in" min="0" placeholder="lin.ft" inputmode="decimal" />
-                <span>lin.ft</span>
-              </div>
-            </div>
-          </div>
-          <div class="pkg-result" hidden>
-            <div class="result-row"><span>Floor</span><span class="floor-total"></span></div>
-            <div class="result-row"><span>Skirting</span><span class="skirting-total"></span></div>
-            <div class="result-total"><span>Total</span><span class="grand-total"></span></div>
-          </div>
-          <div class="pkg-rates">
-            <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 500 <em>/sq.ft</em></span></div>
-            <div class="pkg-price-row"><span class="pkg-label">Skirting</span><span class="pkg-price">Rs. 250 <em>/lin.ft</em></span></div>
+            <div class="pkg-price-row"><span class="pkg-label">Floor</span><span class="pkg-price">Rs. 1,200 <em>/sq.ft</em></span></div>
           </div>
           <button class="pkg-btn atc-tile-btn">Add to Cart</button>
         </div>
@@ -188,30 +104,24 @@ import Footer from '../../components/Footer.astro';
 
   document.querySelectorAll('.pkg-card[data-floor-rate]').forEach(function (card) {
     var floorRate = parseInt(card.dataset.floorRate, 10);
-    var skirtingRate = parseInt(card.dataset.skirtingRate, 10);
     var floorIn = card.querySelector('.floor-in');
-    var skirtingIn = card.querySelector('.skirting-in');
     var result = card.querySelector('.pkg-result');
     var atcBtn = card.querySelector('.atc-tile-btn');
     var pkgName = card.querySelector('.pkg-name').textContent.trim();
 
     function calcTotal() {
       var floor = parseFloat(floorIn.value) || 0;
-      var skirting = parseFloat(skirtingIn.value) || 0;
-      return { floor: floor, skirting: skirting, total: floor * floorRate + skirting * skirtingRate };
+      return { floor: floor, total: floor * floorRate };
     }
 
     function update() {
       var v = calcTotal();
-      if (v.floor <= 0 && v.skirting <= 0) { result.hidden = true; return; }
-      card.querySelector('.floor-total').textContent = v.floor > 0 ? fmt(v.floor * floorRate) : '—';
-      card.querySelector('.skirting-total').textContent = v.skirting > 0 ? fmt(v.skirting * skirtingRate) : '—';
+      if (v.floor <= 0) { result.hidden = true; return; }
       card.querySelector('.grand-total').textContent = fmt(v.total);
       result.hidden = false;
     }
 
     floorIn.addEventListener('input', update);
-    skirtingIn.addEventListener('input', update);
 
     atcBtn.addEventListener('click', function () {
       var v = calcTotal();
@@ -221,10 +131,7 @@ import Footer from '../../components/Footer.astro';
         setTimeout(function () { floorIn.style.borderColor = ''; }, 1500);
         return;
       }
-      var parts = [];
-      if (v.floor > 0) parts.push(v.floor + ' sq.ft floor');
-      if (v.skirting > 0) parts.push(v.skirting + ' lin.ft skirting');
-      window.LHCart.add({ name: pkgName, details: parts.join(', '), price: v.total });
+      window.LHCart.add({ name: pkgName, details: v.floor + ' sq.ft floor', price: v.total });
     });
   });
 })();
@@ -364,7 +271,7 @@ import Footer from '../../components/Footer.astro';
 
   .pkg-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1px;
     background: rgba(255,255,255,.08);
     border: 1px solid rgba(255,255,255,.08);
@@ -609,7 +516,7 @@ import Footer from '../../components/Footer.astro';
   @media (max-width: 1100px) {
     .page-hero { padding: 0 2.5rem 3.5rem; }
     .pricing-section { padding: 4.5rem 2.5rem; }
-    .pkg-grid { grid-template-columns: repeat(2, 1fr); }
+    .pkg-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 768px) {
