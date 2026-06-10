@@ -4,10 +4,6 @@
    ============================================================ */
 
 /* Self-hosted fonts — eliminates external render-blocking requests */
-@import '@fontsource/playfair-display/400.css';
-@import '@fontsource/playfair-display/700.css';
-@import '@fontsource/playfair-display/900.css';
-@import '@fontsource/playfair-display/400-italic.css';
 @import '@fontsource/dm-sans/300.css';
 @import '@fontsource/dm-sans/400.css';
 @import '@fontsource/dm-sans/500.css';
@@ -30,19 +26,25 @@ a, button, [role="button"] {
 
 /* Design Tokens */
 :root {
-  --cream:       #f0ece0;   /* warm ivory */
-  --forest:      #3d4f42;   /* brand primary — forest green */
-  --forest-deep: #2d3d32;   /* hover / dark state */
-  --gold:        #b8945a;   /* warm gold accent */
-  --sand:        #e4ddd0;   /* warm sand / light border */
-  --charcoal:    #1e2820;   /* near-black with green tint */
-  --warm-gray:   #7a8c82;   /* body / secondary text — readable on both light & dark */
-  --stone:       #cfc9bc;   /* dividers / muted borders */
-  --off-white:   #faf8f3;   /* page background */
+  --cream:       #ffffff;
+  --forest:      #111111;
+  --forest-deep: #000000;
+  --gold:        #111111;
+  --sand:        #eeeeee;
+  --charcoal:    #111111;
+  --warm-gray:   #6f6f6f;
+  --stone:       #e7e7e7;
+  --off-white:   #fbfbf9;
 
-  /* clay = gold accent so var(--clay) is visible on any background */
-  --clay:        #b8945a;
-  --terracotta:  #9a7840;   /* gold hover / pressed */
+  --clay:        #111111;
+  --terracotta:  #3a3a3a;
+  --surface:     #ffffff;
+  --surface-soft:#f5f5f2;
+  --ink-muted:   #8a8a8a;
+  --radius-sm:   12px;
+  --radius-md:   20px;
+  --radius-lg:   32px;
+  --shadow-min:  0 24px 70px rgba(17, 17, 17, .07);
 }
 
 /* Base */
@@ -67,11 +69,11 @@ body {
 /* ── Shared Typography ────────────────────────────────────── */
 
 h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(2rem, 3.2vw, 3rem);
-  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(2.1rem, 4vw, 4.4rem);
+  font-weight: 500;
   line-height: 1.1;
-  letter-spacing: -.02em;
+  letter-spacing: -.055em;
   color: var(--charcoal);
   margin-bottom: .8rem;
 }
@@ -110,10 +112,11 @@ h2 {
 /* ── Logo — used in Nav and Footer ───────────────────────── */
 
 .logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.45rem;
-  font-weight: 900;
-  letter-spacing: -.02em;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
   color: var(--charcoal);
   text-decoration: none;
 }
@@ -123,9 +126,9 @@ h2 {
 }
 
 .logo em {
-  font-style: italic;
-  font-weight: 400;
-  color: var(--gold);
+  font-style: normal;
+  font-weight: 700;
+  color: var(--warm-gray);
 }
 
 /* ── Shared Buttons ──────────────────────────────────────── */
@@ -140,8 +143,9 @@ h2 {
   font-size: .94rem;
   font-weight: 500;
   padding: .88rem 1.7rem;
-  border-radius: 2px;
-  transition: background .2s, transform .2s;
+  border-radius: 999px;
+  transition: background .2s, transform .2s, box-shadow .2s;
+  box-shadow: none;
 }
 
 .btn-primary:hover {
@@ -158,7 +162,8 @@ h2 {
   font-size: .94rem;
   font-weight: 500;
   padding: .88rem 1rem;
-  border-bottom: 2px solid var(--stone);
+  border: 1px solid var(--stone);
+  border-radius: 999px;
   transition: border-color .2s, color .2s;
 }
 
@@ -217,4 +222,129 @@ h2 {
     transform: none;
     transition: none;
   }
+}
+
+
+/* ── Minimalist refinement layer ───────────────────────────── */
+::selection {
+  background: #111;
+  color: #fff;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(17, 17, 17, .035), transparent 28rem),
+    var(--off-white);
+  color: var(--charcoal);
+}
+
+img { display: block; }
+
+.stag {
+  color: var(--ink-muted);
+  letter-spacing: .22em;
+}
+
+.stag::before {
+  background: var(--charcoal);
+  opacity: .35;
+}
+
+.sdesc {
+  color: var(--warm-gray);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 18px 36px rgba(17, 17, 17, .14);
+}
+
+/* Component-wide minimalist surfaces */
+section:not(.hero) {
+  background: var(--off-white) !important;
+  padding-block: clamp(4.5rem, 8vw, 7.5rem) !important;
+}
+
+section:not(.hero)::before,
+section:not(.hero)::after {
+  opacity: 0 !important;
+}
+
+.section-head {
+  max-width: 760px !important;
+}
+
+.svc-card,
+.project-card,
+.pkg-card,
+.mat-card,
+.cart-panel,
+.quote-card,
+.process-card,
+.value-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--stone) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+.svc-card:hover,
+.project-card:hover,
+.pkg-card:hover,
+.mat-card:hover,
+.process-card:hover,
+.value-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--shadow-min) !important;
+}
+
+.svc-img img,
+.card-media img,
+.project-card img {
+  filter: grayscale(1) contrast(.94) brightness(.92) !important;
+}
+
+.svc-icon,
+.check-icon,
+.step-num,
+.meta-pill,
+.card-type,
+.media-label,
+.after-label {
+  background: var(--surface-soft) !important;
+  border-color: var(--stone) !important;
+  color: var(--charcoal) !important;
+  border-radius: 999px !important;
+}
+
+.projects-grid h3,
+.project-card h3,
+.svc-name,
+.check-text strong,
+.card-body h3 {
+  font-family: 'DM Sans', sans-serif !important;
+  color: var(--charcoal) !important;
+  letter-spacing: -.02em;
+}
+
+.projects-grid p,
+.project-card p,
+.svc-desc,
+.check-text span,
+.card-body p,
+.meta-pill,
+.card-type {
+  color: var(--warm-gray) !important;
+}
+
+.card-btn,
+.svc-cta,
+.projects-footer .btn-ghost {
+  color: var(--charcoal) !important;
+}
+
+footer {
+  background: #111 !important;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  margin-top: 1rem;
 }
