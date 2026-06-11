@@ -6,15 +6,19 @@
   <div class="hero-split">
     <!-- Left: text -->
     <div class="hero-left">
-      <div class="eyebrow">Sri Lanka's Premium Renovation Service</div>
-      <h1>Luxury Bathroom<br /><em>Renovations</em><br />in Sri Lanka.</h1>
+      <div class="eyebrow">Interior Design • Construction • Renovation</div>
+      <h1>Modern Interiors,<br /><em>Built</em><br />Beautifully.</h1>
       <p class="hero-desc">
-        Bathrooms and flooring — built with premium materials,
-        transparent pricing, and expert craftsmanship.
+        LUXEHOME designs, builds and renovates refined spaces across Sri Lanka — specialising in bathrooms, floors and staircases.
       </p>
+      <div class="hero-service-pills" aria-label="Core services">
+        <a href="/services/bathroom">Bathrooms</a>
+        <a href="/services/flooring">Floors</a>
+        <a href="/services/staircase-tiling">Staircases</a>
+      </div>
       <div class="hero-actions">
         <a href="#shop" class="btn-primary">
-          Shop Services
+          Explore Services
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <a href="/contact" class="btn-link">Get a quote →</a>
@@ -33,9 +37,9 @@
       />
       <div class="hero-scrim" aria-hidden="true"></div>
       <div class="hero-price-tag" aria-hidden="true">
-        <span class="tag-label">Flooring from</span>
-        <span class="tag-value">Rs. 1,000</span>
-        <span class="tag-unit">per sq.ft</span>
+        <span class="tag-label">Main services</span>
+        <span class="tag-value">Bath · Floor</span>
+        <span class="tag-unit">Staircase renovation</span>
       </div>
     </div>
   </div>
@@ -53,7 +57,7 @@
     </div>
     <div class="bar-sep" aria-hidden="true"></div>
     <div class="bar-item">
-      <strong>2</strong>
+      <strong>3</strong>
       <span>Core services</span>
     </div>
     <div class="bar-sep" aria-hidden="true"></div>
@@ -70,16 +74,23 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding-top: 4.5rem;
+    padding: 5.25rem 1rem 1rem;
     background: var(--off-white);
   }
 
   /* ── Split ── */
   .hero-split {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
     flex: 1;
     min-height: 0;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+    border: 1px solid var(--stone);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface);
   }
 
   /* ── Left panel ── */
@@ -87,7 +98,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 5rem 3.5rem 4rem 4rem;
+    padding: clamp(3rem, 6vw, 7rem);
   }
 
   .eyebrow {
@@ -114,10 +125,10 @@
   }
 
   h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.8rem, 4.8vw, 5.2rem);
-    font-weight: 900;
-    line-height: 1.03;
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(3.1rem, 6.7vw, 7.8rem);
+    font-weight: 500;
+    line-height: .94;
     letter-spacing: -.03em;
     color: var(--charcoal);
     margin-bottom: 1.5rem;
@@ -126,19 +137,51 @@
   }
 
   h1 em {
-    font-style: italic;
-    color: var(--clay);
+    font-style: normal;
+    color: var(--warm-gray);
   }
 
   .hero-desc {
-    font-size: .97rem;
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
     font-weight: 300;
     line-height: 1.85;
     color: var(--warm-gray);
     max-width: 42ch;
-    margin-bottom: 2.8rem;
+    margin-bottom: 1.5rem;
     opacity: 0;
     animation: fadeUp .8s .48s forwards;
+  }
+
+  .hero-service-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+    margin-bottom: 2.7rem;
+    opacity: 0;
+    animation: fadeUp .8s .56s forwards;
+  }
+
+  .hero-service-pills a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: .48rem .9rem;
+    border: 1px solid rgba(221, 212, 196, .9);
+    border-radius: 999px;
+    background: var(--surface-soft);
+    color: var(--forest);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+
+  .hero-service-pills a:hover {
+    background: var(--surface);
+    border-color: var(--clay);
+    transform: translateY(-1px);
   }
 
   .hero-actions {
@@ -169,7 +212,7 @@
   .hero-right {
     position: relative;
     overflow: hidden;
-    background: var(--charcoal);
+    background: #ececea;
   }
 
   .hero-img {
@@ -178,7 +221,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(.68) saturate(.75);
+    filter: contrast(.96) brightness(.9) saturate(.82);
     transition: filter .4s;
     animation: fadeIn 1.2s .1s both;
   }
@@ -188,9 +231,9 @@
     inset: 0;
     background: linear-gradient(
       135deg,
-      rgba(30, 40, 32, .35) 0%,
-      transparent 50%,
-      rgba(30, 40, 32, .15) 100%
+      rgba(255, 255, 255, .18) 0%,
+      transparent 46%,
+      rgba(17, 17, 17, .18) 100%
     );
   }
 
@@ -199,11 +242,11 @@
     position: absolute;
     bottom: 2.5rem;
     left: 2.5rem;
-    background: rgba(250, 247, 242, .96);
+    background: rgba(255, 255, 255, .9);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(212, 196, 176, .6);
+    border: 1px solid rgba(17, 17, 17, .08);
     padding: 1.1rem 1.6rem;
-    border-radius: 4px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     gap: .15rem;
@@ -220,7 +263,7 @@
   }
 
   .tag-value {
-    font-family: 'Playfair Display', serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 1.65rem;
     font-weight: 800;
     color: var(--clay);
@@ -240,8 +283,13 @@
     justify-content: center;
     gap: 0;
     padding: 1.6rem 4rem;
-    background: var(--cream);
-    border-top: 1px solid var(--stone);
+    background: transparent;
+    border-top: 0;
+    max-width: 1440px;
+    width: calc(100% - 2rem);
+    margin: .9rem auto 0;
+    border: 1px solid var(--stone);
+    border-radius: var(--radius-lg);
     opacity: 0;
     animation: fadeIn .8s 1.4s forwards;
   }
@@ -256,7 +304,7 @@
   }
 
   .bar-item strong {
-    font-family: 'Playfair Display', serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 1.35rem;
     font-weight: 700;
     color: var(--charcoal);
@@ -320,6 +368,16 @@
     .hero-right {
       height: 62vw;
       min-height: 220px;
+    }
+
+    .hero-service-pills {
+      gap: .5rem;
+      margin-bottom: 2rem;
+    }
+
+    .hero-service-pills a {
+      flex: 1 1 100%;
+      justify-content: center;
     }
 
     .hero-actions {
