@@ -1,610 +1,2071 @@
 ---
-// Quotation dashboard — open access, no auth required
+// Quotation Maker — mobile-first SPA, no auth required
 ---
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <title>Quotation Dashboard — LUXEHOME</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Quotation Maker — LUXEHOME</title>
   <style>
-    /* ── Reset & base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     [hidden] { display: none !important; }
     html { font-size: 15px; -webkit-text-size-adjust: 100%; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f4f4f2;
+      background: #f5f5f3;
       color: #111;
-      min-height: 100vh;
+      min-height: 100dvh;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
     /* ── Header ── */
-    .admin-hdr {
+    #app-header {
       background: #111;
+      color: #fff;
       position: sticky; top: 0; z-index: 100;
-      border-bottom: 1px solid #222;
+      padding: 0 16px;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .admin-hdr-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: .85rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+    #app-header h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: .02em; }
+    #header-back {
+      background: none; border: none; color: #fff;
+      font-size: 1.3rem; cursor: pointer; padding: 8px; margin-left: -8px;
+      display: none;
     }
-    .admin-logo {
-      font-size: .94rem; font-weight: 700; letter-spacing: .12em;
-      text-transform: uppercase; color: #fff; text-decoration: none;
+    #header-action {
+      background: none; border: none; color: #c9a96e;
+      font-size: .85rem; font-weight: 600; cursor: pointer; padding: 8px;
+      display: none;
     }
-    .admin-logo span { color: #777; }
-    .admin-logo em {
-      font-style: normal; font-weight: 500; color: #555;
-      margin-left: .5rem; font-size: .78rem; letter-spacing: .06em;
-      text-transform: none;
-    }
-    .hdr-right { display: flex; align-items: center; gap: .8rem; }
-    .btn-refresh-hdr {
-      font-size: .76rem; font-weight: 600; letter-spacing: .05em;
-      background: transparent; color: #999;
-      border: 1px solid #333; border-radius: 5px;
-      padding: .35rem .75rem; cursor: pointer;
-      transition: color .15s, border-color .15s;
-    }
-    .btn-refresh-hdr:hover { color: #fff; border-color: #666; }
 
     /* ── Main ── */
-    .admin-main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1.8rem 1.5rem 4rem;
+    #main {
+      padding: 0;
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
+      min-height: calc(100dvh - 56px);
     }
+    #main.wizard-mode { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
 
-    /* ── No-Supabase banner ── */
-    .no-sb-banner {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 8px;
-      padding: .9rem 1.2rem;
-      font-size: .82rem;
-      color: #92400e;
-      margin-bottom: 1.5rem;
+    /* ── Bottom Nav ── */
+    #bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: #fff;
+      border-top: 1px solid #e5e5e0;
       display: flex;
-      align-items: center;
-      gap: .6rem;
+      max-width: 600px; margin: 0 auto;
+      height: calc(64px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .tab-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 2px;
+      background: none; border: none; cursor: pointer;
+      font-size: .65rem; color: #888; font-weight: 500;
+      padding: 8px 4px;
+      transition: color .15s;
+    }
+    .tab-btn .tab-icon { font-size: 1.35rem; line-height: 1; }
+    .tab-btn.active { color: #111; }
+    .tab-btn.active .tab-icon { filter: none; }
+
+    /* ── Wizard Nav Bar ── */
+    #wizard-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: #fff;
+      border-top: 1px solid #e5e5e0;
+      display: none;
+      max-width: 600px; margin: 0 auto;
+      padding: 10px 16px;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      gap: 12px;
+    }
+    #wizard-nav.visible { display: flex; }
+    #wizard-back-btn, #wizard-next-btn {
+      flex: 1; height: 48px; border-radius: 10px;
+      font-size: 1rem; font-weight: 600; cursor: pointer; border: none;
+    }
+    #wizard-back-btn { background: #f0f0ec; color: #333; }
+    #wizard-next-btn { background: #111; color: #fff; }
+
+    /* ── Progress Bar ── */
+    #wizard-progress {
+      padding: 16px 16px 0;
+      display: none;
+    }
+    #wizard-progress.visible { display: block; }
+    .progress-label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .78rem; color: #666; margin-bottom: 8px;
+    }
+    .progress-track {
+      height: 4px; background: #e0e0da; border-radius: 2px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: #111; border-radius: 2px;
+      transition: width .3s ease;
     }
 
-    /* ── Stats row ── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
+    /* ── Dashboard ── */
+    .dash-section { padding: 16px; }
+    .dash-title { font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: #888; margin-bottom: 12px; }
+    .dash-cta {
+      background: #111; color: #fff; border: none;
+      width: 100%; height: 56px; border-radius: 14px;
+      font-size: 1.05rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 16px;
     }
-    @media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
     .stat-card {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      padding: 1.2rem 1.4rem;
+      background: #fff; border-radius: 12px; padding: 16px;
+      border: 1px solid #e8e8e4;
     }
-    .stat-val { font-size: 2rem; font-weight: 700; color: #111; line-height: 1; margin-bottom: .35rem; }
-    .stat-lbl { font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #999; }
-    .stat-card.s-new .stat-val  { color: #2563eb; }
-    .stat-card.s-wip .stat-val  { color: #d97706; }
-    .stat-card.s-done .stat-val { color: #16a34a; }
+    .stat-val { font-size: 1.6rem; font-weight: 800; }
+    .stat-lbl { font-size: .72rem; color: #666; margin-top: 2px; }
+    .recent-card {
+      background: #fff; border-radius: 12px; padding: 16px;
+      border: 1px solid #e8e8e4; margin-bottom: 10px;
+      cursor: pointer; display: flex; align-items: center; gap: 12px;
+    }
+    .recent-card:active { background: #f8f8f5; }
+    .recent-icon { font-size: 1.4rem; }
+    .recent-body { flex: 1; min-width: 0; }
+    .recent-name { font-size: .9rem; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .recent-sub { font-size: .75rem; color: #888; margin-top: 2px; }
+    .recent-badge {
+      font-size: .65rem; font-weight: 700; padding: 3px 8px;
+      border-radius: 20px; background: #f0f0ec; white-space: nowrap;
+    }
 
-    /* ── Section ── */
-    .admin-section {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 1.5rem;
+    /* ── Section headers ── */
+    .page-header {
+      padding: 20px 16px 12px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .section-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 1.2rem 1.4rem .8rem;
-      flex-wrap: wrap;
+    .page-header h2 { font-size: 1.15rem; font-weight: 800; }
+    .add-btn {
+      background: #111; color: #fff; border: none;
+      width: 36px; height: 36px; border-radius: 50%; font-size: 1.4rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-    .section-title {
-      font-size: 1rem; font-weight: 700; letter-spacing: -.01em; color: #111;
+
+    /* ── List Cards ── */
+    .list-card {
+      background: #fff; margin: 0 16px 10px;
+      border-radius: 12px; border: 1px solid #e8e8e4;
+      padding: 14px 16px; cursor: pointer;
     }
-    .lead-controls { display: flex; align-items: center; gap: .6rem; }
-    .search-input {
-      font-size: .82rem; color: #111;
-      border: 1.5px solid #e5e5e5; border-radius: 6px;
-      padding: .45rem .75rem;
-      outline: none; width: 200px;
-      background: #f8f8f6;
+    .list-card:active { background: #f8f8f5; }
+    .list-card-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .list-card-title { font-size: .9rem; font-weight: 700; }
+    .list-card-sub { font-size: .75rem; color: #666; margin-top: 3px; }
+    .list-card-amount { font-size: .95rem; font-weight: 800; white-space: nowrap; }
+    .status-pill {
+      display: inline-block; font-size: .62rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+      background: #f0f0ec; margin-top: 8px;
+    }
+    .card-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .card-btn {
+      flex: 1; min-width: 80px; height: 36px; border-radius: 8px;
+      font-size: .78rem; font-weight: 600; cursor: pointer; border: none;
+      background: #f0f0ec; color: #333;
+    }
+    .card-btn.primary { background: #111; color: #fff; }
+    .card-btn.danger  { background: #fee2e2; color: #dc2626; }
+
+    /* ── Wizard Steps ── */
+    .step-content { padding: 20px 16px; }
+    .step-q {
+      font-size: 1.15rem; font-weight: 800; line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .step-hint { font-size: .8rem; color: #777; margin-bottom: 20px; line-height: 1.4; }
+
+    .option-grid { display: grid; gap: 10px; }
+    .option-grid.cols2 { grid-template-columns: 1fr 1fr; }
+    .option-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+    .opt-card {
+      border: 2px solid #e0e0da; border-radius: 12px; padding: 14px 12px;
+      cursor: pointer; text-align: center; background: #fff;
+      transition: border-color .15s, background .15s;
+    }
+    .opt-card.selected { border-color: #111; background: #111; color: #fff; }
+    .opt-card .opt-icon { font-size: 1.6rem; margin-bottom: 6px; display: block; }
+    .opt-card .opt-label { font-size: .85rem; font-weight: 700; display: block; }
+    .opt-card .opt-sub { font-size: .7rem; color: #888; margin-top: 3px; display: block; }
+    .opt-card.selected .opt-sub { color: #aaa; }
+
+    /* ── Form fields ── */
+    .field-group { margin-bottom: 16px; }
+    .field-label {
+      display: block; font-size: .78rem; font-weight: 700;
+      color: #444; margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%; height: 48px; border: 1.5px solid #d8d8d2;
+      border-radius: 10px; padding: 0 14px; font-size: .95rem;
+      background: #fff; color: #111; outline: none;
       transition: border-color .15s;
     }
-    .search-input:focus { border-color: #111; }
-    .btn-icon {
-      width: 32px; height: 32px;
-      background: #f4f4f2; border: 1px solid #e5e5e5;
-      border-radius: 6px; cursor: pointer;
-      font-size: 1rem; color: #666;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s;
+    .field-input:focus { border-color: #111; }
+    .field-textarea {
+      width: 100%; min-height: 100px; border: 1.5px solid #d8d8d2;
+      border-radius: 10px; padding: 12px 14px; font-size: .95rem;
+      background: #fff; color: #111; outline: none; resize: vertical;
+      font-family: inherit;
     }
-    .btn-icon:hover { background: #e5e5e5; }
+    .field-textarea:focus { border-color: #111; }
 
-    /* ── Status tabs ── */
-    .status-tabs {
-      display: flex;
-      border-bottom: 1px solid #e5e5e5;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding: 0 1.4rem;
+    /* ── Toggle rows ── */
+    .toggle-row {
+      background: #fff; border-radius: 12px; border: 1.5px solid #e0e0da;
+      padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; cursor: pointer;
     }
-    .status-tabs::-webkit-scrollbar { display: none; }
-    .stab {
-      flex-shrink: 0;
-      padding: .65rem 1rem;
-      font-size: .78rem; font-weight: 600;
-      letter-spacing: .04em; text-transform: uppercase;
-      color: #888; background: none; border: none;
-      border-bottom: 2px solid transparent;
-      cursor: pointer; transition: color .15s, border-color .15s;
-      white-space: nowrap;
+    .toggle-row .toggle-label { font-size: .9rem; font-weight: 600; }
+    .toggle-row .toggle-sub { font-size: .73rem; color: #777; margin-top: 2px; }
+    .toggle-switch {
+      width: 48px; height: 28px; border-radius: 14px;
+      background: #d0d0cc; position: relative;
+      transition: background .2s; flex-shrink: 0;
     }
-    .stab:hover { color: #111; }
-    .stab.active { color: #111; border-bottom-color: #111; }
+    .toggle-switch::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #fff; transition: transform .2s;
+    }
+    .toggle-switch.on { background: #111; }
+    .toggle-switch.on::after { transform: translateX(20px); }
 
-    /* ── Leads table ── */
-    .leads-table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-    thead th {
-      padding: .65rem 1rem;
-      text-align: left;
-      font-size: .68rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: #999;
-      background: #f8f8f6;
-      border-bottom: 1px solid #e5e5e5;
-      white-space: nowrap;
+    /* ── Number stepper ── */
+    .stepper-row {
+      background: #fff; border-radius: 12px; border: 1.5px solid #e0e0da;
+      padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
     }
-    tbody tr { border-bottom: 1px solid #f0f0ee; transition: background .1s; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #fafaf8; }
-    tbody td { padding: .75rem 1rem; color: #333; vertical-align: top; }
-    .td-date { white-space: nowrap; color: #888; font-size: .78rem; }
-    .td-name { font-weight: 600; color: #111; min-width: 120px; }
-    .td-phone a { color: #2563eb; text-decoration: none; }
-    .td-phone a:hover { text-decoration: underline; }
-    .td-location { color: #666; font-size: .8rem; white-space: nowrap; }
-    .td-status select {
-      font-size: .76rem; font-weight: 600;
-      border: 1.5px solid #e5e5e5; border-radius: 5px;
-      padding: .3rem .5rem;
-      cursor: pointer; outline: none;
-      background: #f8f8f6;
-      transition: border-color .15s;
+    .stepper-label { font-size: .9rem; font-weight: 600; }
+    .stepper-sub { font-size: .73rem; color: #777; margin-top: 2px; }
+    .stepper-ctrl { display: flex; align-items: center; gap: 16px; }
+    .stepper-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #f0f0ec; border: none; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #111;
     }
-    .td-status select:focus { border-color: #111; }
-    .td-expand button {
-      font-size: .72rem; color: #888; background: none; border: none; cursor: pointer;
-      padding: .2rem .4rem;
-    }
-    .td-expand button:hover { color: #111; }
+    .stepper-val { font-size: 1.1rem; font-weight: 800; min-width: 30px; text-align: center; }
 
-    /* Expand row */
-    .detail-row td {
-      padding: 0 1rem;
-      background: #f8f8f6;
-      border-bottom: 1px solid #e8e8e4;
+    /* ── Slider ── */
+    .slider-wrap { margin-top: 8px; }
+    .slider-inp {
+      width: 100%; -webkit-appearance: none; appearance: none;
+      height: 6px; border-radius: 3px; background: #e0e0da; outline: none;
     }
-    .detail-inner {
-      padding: .8rem 0 1rem;
-      display: flex; flex-wrap: wrap; gap: .5rem 1.5rem;
+    .slider-inp::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #111; cursor: pointer;
     }
-    .detail-pair { display: flex; flex-direction: column; gap: .15rem; }
-    .detail-key  { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #aaa; }
-    .detail-val  { font-size: .8rem; color: #333; }
-    .detail-notes { margin-top: .4rem; font-size: .8rem; color: #555; font-style: italic; width: 100%; }
-
-    /* Pagination */
-    .pagination {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .9rem 1.4rem;
-      border-top: 1px solid #e5e5e5;
-      font-size: .78rem; color: #888;
-      flex-wrap: wrap; gap: .5rem;
-    }
-    .page-btns { display: flex; gap: .4rem; }
-    .page-btn {
-      padding: .35rem .75rem;
-      border: 1px solid #e5e5e5; border-radius: 5px;
-      background: #f8f8f6; color: #333;
-      font-size: .78rem; cursor: pointer;
-      transition: background .15s;
-    }
-    .page-btn:hover:not(:disabled) { background: #e5e5e5; }
-    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* States */
-    .state-msg {
-      padding: 3rem 1.4rem;
-      text-align: center;
-      color: #aaa; font-size: .88rem;
+    .slider-labels { display: flex; justify-content: space-between;
+      font-size: .7rem; color: #888; margin-top: 6px; }
+    .slider-current {
+      text-align: center; font-size: 1.4rem; font-weight: 800;
+      margin-bottom: 10px;
     }
 
-    /* ── Analytics ── */
-    .analytics-inner {
-      padding: 1.2rem 1.4rem;
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 1.5rem;
+    /* ── Review summary ── */
+    .review-section { margin-bottom: 20px; }
+    .review-sec-title {
+      font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: #888; margin-bottom: 10px;
     }
-    @media (max-width: 800px) { .analytics-inner { grid-template-columns: 1fr; } }
-    .analytics-col-title {
-      font-size: .72rem; font-weight: 700; letter-spacing: .12em;
-      text-transform: uppercase; color: #999;
-      margin-bottom: 1rem;
+    .review-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 10px 0; border-bottom: 1px solid #f0f0ec;
+      gap: 8px;
     }
-    .bar-row { margin-bottom: .65rem; }
-    .bar-label {
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: .78rem; color: #444; margin-bottom: .25rem;
+    .review-row:last-child { border-bottom: none; }
+    .review-key { font-size: .82rem; color: #555; flex: 1; }
+    .review-val { font-size: .82rem; font-weight: 700; text-align: right; }
+    .review-total {
+      background: #111; color: #fff; border-radius: 12px;
+      padding: 16px; margin-top: 12px;
     }
-    .bar-label span:last-child { font-weight: 600; color: #111; }
-    .bar-track { background: #f0f0ee; border-radius: 3px; height: 6px; overflow: hidden; }
-    .bar-fill  { background: #111; border-radius: 3px; height: 6px; transition: width .4s ease; }
-    .analytic-summary { display: flex; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
-    .analytic-card {
-      flex: 1; min-width: 110px;
-      background: #f8f8f6; border: 1px solid #e5e5e5; border-radius: 8px;
-      padding: .8rem 1rem;
+    .review-total-label { font-size: .8rem; opacity: .7; margin-bottom: 4px; }
+    .review-total-amount { font-size: 1.5rem; font-weight: 900; }
+
+    /* ── Invoice detail ── */
+    .invoice-payment {
+      background: #fff; border-radius: 12px; border: 1px solid #e8e8e4;
+      padding: 16px; margin: 0 16px 12px;
     }
-    .analytic-card .aval { font-size: 1.4rem; font-weight: 700; color: #111; }
-    .analytic-card .albl { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: #999; margin-top: .2rem; }
-    .events-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
-    .events-table th {
-      font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-      color: #aaa; padding: .4rem .5rem; text-align: left; border-bottom: 1px solid #e5e5e5;
+    .inv-detail-row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid #f5f5f2;
+      font-size: .85rem;
     }
-    .events-table td { padding: .5rem; color: #444; border-bottom: 1px solid #f0f0ee; }
-    .events-table tr:last-child td { border-bottom: none; }
+    .inv-detail-row:last-child { border-bottom: none; }
+    .inv-detail-key { color: #666; }
+    .inv-detail-val { font-weight: 700; }
+    .payment-entry {
+      background: #f8f8f5; border-radius: 10px; padding: 12px;
+      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .add-payment-form {
+      background: #fff; border-radius: 12px; border: 1px solid #e8e8e4;
+      padding: 16px; margin: 0 16px 12px;
+    }
+
+    /* ── Client detail ── */
+    .client-stat {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .client-chip {
+      background: #f0f0ec; border-radius: 20px; padding: 5px 12px;
+      font-size: .75rem; font-weight: 600;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center; padding: 60px 32px;
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .empty-text { font-size: .85rem; color: #777; line-height: 1.5; }
+
+    /* ── Brands list ── */
+    .brands-container { display: flex; flex-direction: column; gap: 8px; }
+    .brand-row {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; border-radius: 10px; border: 1px solid #e0e0da;
+      padding: 10px 14px;
+    }
+    .brand-row input {
+      flex: 1; border: none; outline: none; font-size: .9rem;
+      background: transparent;
+    }
+    .brand-del { background: none; border: none; color: #dc2626;
+      font-size: 1.2rem; cursor: pointer; padding: 4px; }
+    .brand-add-btn {
+      background: #f0f0ec; border: none; border-radius: 10px;
+      padding: 12px; font-size: .85rem; font-weight: 600;
+      cursor: pointer; width: 100%;
+    }
+
+    /* ── Payment terms ── */
+    .term-row {
+      background: #fff; border-radius: 10px; border: 1px solid #e0e0da;
+      padding: 12px 14px; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .term-row-label { flex: 1; font-size: .85rem; font-weight: 600; }
+    .term-row-pct { font-size: .9rem; font-weight: 800; min-width: 40px; text-align: right; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #111; color: #fff;
+      padding: 12px 20px; border-radius: 10px;
+      font-size: .85rem; font-weight: 600;
+      opacity: 0; transition: opacity .2s, transform .2s;
+      z-index: 500; pointer-events: none; white-space: nowrap;
+      max-width: calc(100vw - 40px);
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Modal ── */
+    #modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 200; display: none; align-items: flex-end;
+    }
+    #modal-overlay.open { display: flex; }
+    #modal-box {
+      background: #fff; width: 100%; max-width: 600px;
+      margin: 0 auto; border-radius: 24px 24px 0 0;
+      padding: 24px 20px;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      max-height: 90dvh; overflow-y: auto;
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-cancel, .modal-confirm {
+      flex: 1; height: 48px; border-radius: 10px; border: none;
+      font-size: .95rem; font-weight: 700; cursor: pointer;
+    }
+    .modal-cancel { background: #f0f0ec; color: #333; }
+    .modal-confirm { background: #111; color: #fff; }
+    .modal-confirm.danger { background: #dc2626; }
+
+    /* ── Util ── */
+    .divider { height: 1px; background: #ebebea; margin: 4px 0; }
+    .gold { color: #c9a96e; }
+    .section-card {
+      background: #fff; border-radius: 12px; border: 1px solid #e8e8e4;
+      margin: 0 16px 12px; overflow: hidden;
+    }
+    .override-section { padding: 16px; }
+    .override-note { font-size: .75rem; color: #888; margin-top: 6px; }
   </style>
 </head>
 <body>
 
-  <header class="admin-hdr">
-    <div class="admin-hdr-inner">
-      <a class="admin-logo" href="/">LUXE<span>HOME</span><em>Quotation</em></a>
-      <div class="hdr-right">
-        <button id="btn-refresh" class="btn-refresh-hdr">↻ Refresh</button>
-      </div>
-    </div>
-  </header>
+<!-- Header -->
+<header id="app-header">
+  <button id="header-back" aria-label="Back">←</button>
+  <h1 id="app-title">LUXEHOME</h1>
+  <button id="header-action"></button>
+</header>
 
-  <main class="admin-main">
+<!-- Progress (wizard only) -->
+<div id="wizard-progress">
+  <div class="progress-label">
+    <span id="step-label">Step 1 of 11</span>
+    <span id="step-name" class="gold"></span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:9%"></div>
+  </div>
+</div>
 
-    <div id="no-sb-banner" class="no-sb-banner" hidden>
-      ⚠ Supabase is not configured — set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY to load live data.
-    </div>
+<!-- Main content -->
+<main id="main"></main>
 
-    <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-val" id="s-total">—</div>
-        <div class="stat-lbl">Total Leads</div>
-      </div>
-      <div class="stat-card s-new">
-        <div class="stat-val" id="s-new">—</div>
-        <div class="stat-lbl">New</div>
-      </div>
-      <div class="stat-card s-wip">
-        <div class="stat-val" id="s-wip">—</div>
-        <div class="stat-lbl">In Progress</div>
-      </div>
-      <div class="stat-card s-done">
-        <div class="stat-val" id="s-done">—</div>
-        <div class="stat-lbl">Completed</div>
-      </div>
-    </div>
+<!-- Bottom nav -->
+<nav id="bottom-nav">
+  <button class="tab-btn active" data-view="dashboard">
+    <span class="tab-icon">🏠</span><span>Home</span>
+  </button>
+  <button class="tab-btn" data-view="quotations">
+    <span class="tab-icon">📋</span><span>Quotes</span>
+  </button>
+  <button class="tab-btn" data-view="invoices">
+    <span class="tab-icon">💳</span><span>Invoices</span>
+  </button>
+  <button class="tab-btn" data-view="clients">
+    <span class="tab-icon">👥</span><span>Clients</span>
+  </button>
+  <button class="tab-btn" data-view="settings">
+    <span class="tab-icon">⚙️</span><span>Settings</span>
+  </button>
+</nav>
 
-    <!-- Leads -->
-    <section class="admin-section">
-      <div class="section-top">
-        <h2 class="section-title">Leads</h2>
-        <div class="lead-controls">
-          <input id="lead-search" type="search" placeholder="Search name or phone…" class="search-input" />
-          <button id="btn-reload" class="btn-icon" title="Reload" aria-label="Reload">↻</button>
-        </div>
-      </div>
+<!-- Wizard nav -->
+<div id="wizard-nav">
+  <button id="wizard-back-btn">Back</button>
+  <button id="wizard-next-btn">Next</button>
+</div>
 
-      <div class="status-tabs" id="status-tabs" role="tablist">
-        <button class="stab active" data-s="all">All</button>
-        <button class="stab" data-s="new">New</button>
-        <button class="stab" data-s="contacted">Contacted</button>
-        <button class="stab" data-s="inspected">Inspected</button>
-        <button class="stab" data-s="booked">Booked</button>
-        <button class="stab" data-s="completed">Completed</button>
-        <button class="stab" data-s="cancelled">Cancelled</button>
-      </div>
+<!-- Toast -->
+<div id="toast"></div>
 
-      <div id="leads-wrap">
-        <div class="state-msg">Loading leads…</div>
-      </div>
-    </section>
-
-    <!-- Cart Analytics -->
-    <section class="admin-section">
-      <div class="section-top" style="padding-bottom:1.2rem">
-        <h2 class="section-title">Cart Analytics</h2>
-      </div>
-      <div id="analytics-wrap">
-        <div class="state-msg">Loading analytics…</div>
-      </div>
-    </section>
-
-  </main>
+<!-- Modal -->
+<div id="modal-overlay">
+  <div id="modal-box"></div>
+</div>
 
 <script>
-import { createClient } from '@supabase/supabase-js';
+import {
+  calculateQuotation, generateScopeOfWork,
+  fmtRs, fmtDate, fmtDateShort, qtnNumber, invNumber,
+  defaultInputs, packageLabel, statusColor,
+  DEFAULT_BRANDS, DEFAULT_PAYMENT_TERMS,
+  RATES,
+} from '../../lib/quotation-calc';
+import type {
+  QuotationInputs, QuotationBreakdown, Quotation, Invoice,
+  PaymentTerm, Payment, PackageType, ProjectType, PlumbingType, ShowerType,
+} from '../../lib/quotation-calc';
 
-const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL as string;
-const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string;
+/* ── Storage ──────────────────────────────────────────────── */
+const KEYS = { qtns: 'lh_qtns', invs: 'lh_invs', ctrs: 'lh_ctrs' };
 
-const sb = SB_URL && SB_KEY ? createClient(SB_URL, SB_KEY) : null;
-
-if (!sb) {
-  document.getElementById('no-sb-banner')!.hidden = false;
+function load<T>(key: string): T[] {
+  try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
+}
+function save<T>(key: string, data: T[]): void {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+function getCounters(): { qtn: number; inv: number } {
+  try { return JSON.parse(localStorage.getItem(KEYS.ctrs) || '{"qtn":0,"inv":0}'); }
+  catch { return { qtn: 0, inv: 0 }; }
+}
+function saveCounters(c: { qtn: number; inv: number }): void {
+  localStorage.setItem(KEYS.ctrs, JSON.stringify(c));
 }
 
-/* ── DOM ── */
-const leadsWrap     = document.getElementById('leads-wrap')     as HTMLElement;
-const analyticsWrap = document.getElementById('analytics-wrap') as HTMLElement;
-const statusTabs    = document.getElementById('status-tabs')    as HTMLElement;
-const searchInput   = document.getElementById('lead-search')    as HTMLInputElement;
+/* ── State ───────────────────────────────────────────────── */
+let currentView = 'dashboard';
+let viewHistory: string[] = [];
+let wizardStep = 1;
+const WIZARD_STEPS = 11;
+let wizardData: QuotationInputs = defaultInputs();
+let editingId: string | null = null;
 
-/* ── State ── */
-let currentFilter = 'all';
-let currentPage   = 0;
-let searchQuery   = '';
-let expandedId: string | null = null;
-const PAGE_SIZE   = 25;
+/* ── DOM refs ────────────────────────────────────────────── */
+const main = document.getElementById('main')!;
+const bottomNav = document.getElementById('bottom-nav')!;
+const wizardNav = document.getElementById('wizard-nav')!;
+const wizardProgress = document.getElementById('wizard-progress')!;
+const headerBack = document.getElementById('header-back') as HTMLButtonElement;
+const headerAction = document.getElementById('header-action') as HTMLButtonElement;
+const appTitle = document.getElementById('app-title')!;
+const progressFill = document.getElementById('progress-fill')!;
+const stepLabel = document.getElementById('step-label')!;
+const stepName = document.getElementById('step-name')!;
 
-/* ── Helpers ── */
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
-}
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-}
-function fmtRs(n: number) {
-  return 'Rs. ' + Math.round(n).toLocaleString('en-IN');
-}
-function esc(s: string) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+/* ── Navigation ──────────────────────────────────────────── */
+function navigate(view: string, pushHistory = true) {
+  if (pushHistory && currentView !== view) viewHistory.push(currentView);
+  currentView = view;
 
-const STATUS_LABELS: Record<string,string> = {
-  new:'New', contacted:'Contacted', inspected:'Inspected',
-  booked:'Booked', completed:'Completed', cancelled:'Cancelled',
-};
+  const inWizard = view === 'wizard';
+  bottomNav.style.display = inWizard ? 'none' : '';
+  wizardNav.classList.toggle('visible', inWizard);
+  wizardProgress.classList.toggle('visible', inWizard);
+  main.classList.toggle('wizard-mode', inWizard);
 
-/* ── Stats ── */
-async function loadStats() {
-  if (!sb) { ['s-total','s-new','s-wip','s-done'].forEach(id => { document.getElementById(id)!.textContent = '0'; }); return; }
-  const { data } = await sb.from('leads').select('status');
-  if (!data) return;
-  const total = data.length;
-  const newC  = data.filter(r => r.status === 'new').length;
-  const wipC  = data.filter(r => ['contacted','inspected','booked'].includes(r.status)).length;
-  const doneC = data.filter(r => r.status === 'completed').length;
-  document.getElementById('s-total')!.textContent = String(total);
-  document.getElementById('s-new')!.textContent   = String(newC);
-  document.getElementById('s-wip')!.textContent   = String(wipC);
-  document.getElementById('s-done')!.textContent  = String(doneC);
-}
+  headerBack.style.display = viewHistory.length > 0 ? '' : 'none';
 
-/* ── Leads ── */
-document.getElementById('btn-refresh')?.addEventListener('click', reload);
-document.getElementById('btn-reload')?.addEventListener('click', reload);
-
-function reload() { currentPage = 0; loadLeads(); loadStats(); }
-
-statusTabs.querySelectorAll<HTMLButtonElement>('.stab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    statusTabs.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.s ?? 'all';
-    currentPage = 0;
-    loadLeads();
+  // Tab active state
+  document.querySelectorAll<HTMLButtonElement>('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === view);
   });
-});
 
-let searchTimer: ReturnType<typeof setTimeout>;
-searchInput.addEventListener('input', () => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    searchQuery = searchInput.value.trim().toLowerCase();
-    currentPage = 0;
-    loadLeads();
-  }, 300);
-});
+  const titles: Record<string, string> = {
+    dashboard: 'LUXEHOME', quotations: 'Quotations', invoices: 'Invoices',
+    clients: 'Clients', settings: 'Settings', wizard: 'New Quotation',
+    qtn_detail: 'Quotation', inv_detail: 'Invoice',
+  };
+  appTitle.textContent = titles[view] || 'LUXEHOME';
 
-async function loadLeads() {
-  if (!sb) {
-    leadsWrap.innerHTML = '<div class="state-msg">Supabase not configured — no data available.</div>';
-    return;
-  }
-  leadsWrap.innerHTML = '<div class="state-msg">Loading…</div>';
-
-  let q = sb.from('leads').select('*', { count: 'exact' }).order('created_at', { ascending: false });
-  if (currentFilter !== 'all') q = q.eq('status', currentFilter);
-  if (searchQuery) q = q.or(`name.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
-  q = q.range(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE - 1);
-
-  const { data, error, count } = await q;
-
-  if (error) { leadsWrap.innerHTML = `<div class="state-msg">Error: ${esc(error.message)}</div>`; return; }
-  if (!data || data.length === 0) { leadsWrap.innerHTML = '<div class="state-msg">No leads found.</div>'; return; }
-
-  renderLeads(data, count ?? 0, Math.ceil((count ?? 0) / PAGE_SIZE));
+  headerAction.style.display = 'none';
+  render();
 }
 
-function renderLeads(leads: any[], total: number, totalPages: number) {
-  const tbody = leads.map(lead => {
-    const details    = lead.service_details as Record<string,string> | null;
-    const hasDetails = details && Object.keys(details).length > 0;
-    const isExp      = expandedId === lead.id;
-    const opts = Object.entries(STATUS_LABELS).map(([v,l]) =>
-      `<option value="${v}"${lead.status===v?' selected':''}>${l}</option>`).join('');
-    const expandBtn = hasDetails
-      ? `<button onclick="toggleDet('${lead.id}')">${isExp ? '▲' : '▼'}</button>` : '';
-
-    const row = `
-      <tr id="lead-${lead.id}" data-status="${esc(lead.status??'new')}">
-        <td class="td-date">${fmtDate(lead.created_at)}<br><span style="color:#bbb;font-size:.72rem">${fmtTime(lead.created_at)}</span></td>
-        <td class="td-name">${esc(lead.name??'')}</td>
-        <td class="td-phone"><a href="tel:${esc(lead.phone??'')}">${esc(lead.phone??'')}</a></td>
-        <td>${esc(lead.service??'')}</td>
-        <td class="td-location">${esc(lead.location??'')}</td>
-        <td class="td-status">
-          <select data-id="${lead.id}" onchange="updateStatus(this)">${opts}</select>
-        </td>
-        <td class="td-expand">${expandBtn}</td>
-      </tr>`;
-
-    const detRow = hasDetails ? (() => {
-      const pairs = Object.entries(details!).map(([k,v]) =>
-        `<div class="detail-pair"><span class="detail-key">${esc(k.replace(/_/g,' '))}</span><span class="detail-val">${esc(String(v))}</span></div>`).join('');
-      const notes = lead.notes ? `<div class="detail-notes">"${esc(lead.notes)}"</div>` : '';
-      return `<tr id="det-${lead.id}" class="detail-row"${isExp?'':' hidden'}><td colspan="7"><div class="detail-inner">${pairs}${notes}</div></td></tr>`;
-    })() : '';
-
-    return row + detRow;
-  }).join('');
-
-  const from = currentPage * PAGE_SIZE + 1;
-  const to   = Math.min((currentPage + 1) * PAGE_SIZE, total);
-
-  leadsWrap.innerHTML = `
-    <div class="leads-table-wrap">
-      <table>
-        <thead><tr>
-          <th>Date</th><th>Name</th><th>Phone</th><th>Service</th><th>Location</th><th>Status</th><th></th>
-        </tr></thead>
-        <tbody>${tbody}</tbody>
-      </table>
-    </div>
-    <div class="pagination">
-      <span>Showing ${from}–${to} of ${total}</span>
-      <div class="page-btns">
-        <button class="page-btn" onclick="changePage(-1)"${currentPage===0?' disabled':''}>← Prev</button>
-        <button class="page-btn" onclick="changePage(1)"${currentPage>=totalPages-1?' disabled':''}>Next →</button>
-      </div>
-    </div>`;
+function goBack() {
+  if (viewHistory.length === 0) return;
+  const prev = viewHistory.pop()!;
+  navigate(prev, false);
 }
 
-(window as any).toggleDet = (id: string) => {
-  const det = document.getElementById(`det-${id}`);
-  if (!det) return;
-  if (expandedId === id) {
-    det.hidden = true; expandedId = null;
-    const btn = document.querySelector<HTMLButtonElement>(`#lead-${id} .td-expand button`);
-    if (btn) btn.textContent = '▼';
-  } else {
-    if (expandedId) {
-      const old = document.getElementById(`det-${expandedId}`);
-      if (old) old.hidden = true;
-      const oldBtn = document.querySelector<HTMLButtonElement>(`#lead-${expandedId} .td-expand button`);
-      if (oldBtn) oldBtn.textContent = '▼';
-    }
-    det.hidden = false; expandedId = id;
-    const btn = document.querySelector<HTMLButtonElement>(`#lead-${id} .td-expand button`);
-    if (btn) btn.textContent = '▲';
+/* ── Render dispatcher ───────────────────────────────────── */
+function render() {
+  switch (currentView) {
+    case 'dashboard':    renderDashboard(); break;
+    case 'quotations':   renderQuotations(); break;
+    case 'invoices':     renderInvoices(); break;
+    case 'clients':      renderClients(); break;
+    case 'settings':     renderSettings(); break;
+    case 'wizard':       renderWizard(); break;
+    case 'qtn_detail':   renderQtnDetail(); break;
+    case 'inv_detail':   renderInvDetail(); break;
+    default:             renderDashboard();
   }
-};
+}
 
-(window as any).updateStatus = async (sel: HTMLSelectElement) => {
-  if (!sb) return;
-  const id = sel.dataset.id; const status = sel.value;
-  const tr = document.getElementById(`lead-${id}`);
-  if (tr) tr.dataset.status = status;
-  const { error } = await sb.from('leads').update({ status }).eq('id', id);
-  if (error) { alert('Failed to update: ' + error.message); loadLeads(); return; }
-  loadStats();
-};
+/* ── DASHBOARD ───────────────────────────────────────────── */
+function renderDashboard() {
+  const qtns: Quotation[] = load(KEYS.qtns);
+  const invs: Invoice[]  = load(KEYS.invs);
+  const totalRevenue = invs.filter(i => i.status === 'paid').reduce((s, i) => s + i.finalAmount, 0);
+  const pending = invs.filter(i => i.status === 'sent' || i.status === 'partially-paid');
 
-(window as any).changePage = (dir: number) => {
-  currentPage = Math.max(0, currentPage + dir);
-  loadLeads();
-  document.querySelector('.admin-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-};
+  const recent = [...qtns].sort((a,b) => b.createdAt.localeCompare(a.createdAt)).slice(0,5);
 
-/* ── Analytics ── */
-async function loadAnalytics() {
-  if (!sb) {
-    analyticsWrap.innerHTML = '<div class="state-msg">Supabase not configured — no analytics available.</div>';
-    return;
-  }
-  const { data, error } = await sb
-    .from('cart_events')
-    .select('service_name, price, created_at')
-    .order('created_at', { ascending: false })
-    .limit(200);
+  main.innerHTML = `
+    <div class="dash-section">
+      <button class="dash-cta" id="dash-new-qtn">
+        ＋ New Quotation
+      </button>
 
-  if (error || !data) { analyticsWrap.innerHTML = '<div class="state-msg">Could not load analytics.</div>'; return; }
-  if (data.length === 0) { analyticsWrap.innerHTML = '<div class="state-msg">No cart events yet.</div>'; return; }
-
-  const svcMap: Record<string,{count:number;total:number}> = {};
-  data.forEach(e => {
-    const k = e.service_name ?? 'Unknown';
-    if (!svcMap[k]) svcMap[k] = { count:0, total:0 };
-    svcMap[k].count++; svcMap[k].total += e.price ?? 0;
-  });
-  const sorted = Object.entries(svcMap).sort((a,b) => b[1].count - a[1].count).slice(0, 8);
-  const maxCount = sorted[0]?.[1].count ?? 1;
-  const totalPot = data.reduce((s,e) => s + (e.price ?? 0), 0);
-
-  const bars = sorted.map(([name,{count}]) => `
-    <div class="bar-row">
-      <div class="bar-label"><span>${esc(name)}</span><span>${count}</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxCount*100)}%"></div></div>
-    </div>`).join('');
-
-  const recentRows = data.slice(0,15).map(e => `
-    <tr>
-      <td>${fmtDate(e.created_at)}</td>
-      <td>${esc(e.service_name??'—')}</td>
-      <td style="text-align:right;font-weight:600">${fmtRs(e.price??0)}</td>
-    </tr>`).join('');
-
-  analyticsWrap.innerHTML = `
-    <div class="analytics-inner">
-      <div>
-        <div class="analytics-col-title">Top Services (add-to-cart)</div>
-        <div class="analytic-summary">
-          <div class="analytic-card"><div class="aval">${data.length}</div><div class="albl">Cart Events</div></div>
-          <div class="analytic-card"><div class="aval">${fmtRs(totalPot)}</div><div class="albl">Revenue Potential</div></div>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-val">${qtns.length}</div>
+          <div class="stat-lbl">Total Quotations</div>
         </div>
-        ${bars}
+        <div class="stat-card">
+          <div class="stat-val">${invs.length}</div>
+          <div class="stat-lbl">Invoices</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val gold">${fmtRs(totalRevenue)}</div>
+          <div class="stat-lbl">Revenue Collected</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:#d97706">${pending.length}</div>
+          <div class="stat-lbl">Pending Invoices</div>
+        </div>
       </div>
-      <div>
-        <div class="analytics-col-title">Recent Activity</div>
-        <table class="events-table">
-          <thead><tr><th>Date</th><th>Service</th><th style="text-align:right">Value</th></tr></thead>
-          <tbody>${recentRows}</tbody>
-        </table>
-      </div>
-    </div>`;
+
+      ${recent.length === 0 ? `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">No quotations yet</div>
+          <div class="empty-text">Tap "New Quotation" to get started.</div>
+        </div>
+      ` : `
+        <div class="dash-title">Recent Quotations</div>
+        ${recent.map(q => `
+          <div class="recent-card" data-qtn="${q.id}">
+            <span class="recent-icon">📋</span>
+            <div class="recent-body">
+              <div class="recent-name">${q.clientName || '(No name)'}</div>
+              <div class="recent-sub">${q.projectName || q.projectLocation || '—'} · ${fmtDateShort(q.quotationDate)}</div>
+            </div>
+            <span class="recent-badge" style="color:${statusColor(q.status)}">${q.status}</span>
+          </div>
+        `).join('')}
+      `}
+    </div>
+  `;
+
+  document.getElementById('dash-new-qtn')!.addEventListener('click', startWizard);
+  document.querySelectorAll<HTMLElement>('[data-qtn]').forEach(el => {
+    el.addEventListener('click', () => openQtnDetail(el.dataset.qtn!));
+  });
 }
 
-/* ── Boot ── */
-loadStats();
-loadLeads();
-loadAnalytics();
-</script>
+/* ── QUOTATIONS LIST ─────────────────────────────────────── */
+function renderQuotations() {
+  const qtns: Quotation[] = load<Quotation>(KEYS.qtns)
+    .sort((a,b) => b.createdAt.localeCompare(a.createdAt));
 
+  main.innerHTML = `
+    <div class="page-header">
+      <h2>Quotations</h2>
+      <button class="add-btn" id="new-qtn-btn">＋</button>
+    </div>
+    ${qtns.length === 0 ? `
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">No quotations</div>
+        <div class="empty-text">Tap ＋ to create your first quotation.</div>
+      </div>
+    ` : qtns.map(q => `
+      <div class="list-card" data-qtn="${q.id}">
+        <div class="list-card-row">
+          <div>
+            <div class="list-card-title">${q.clientName || '(No name)'}</div>
+            <div class="list-card-sub">${q.projectName || q.projectLocation || '—'}</div>
+          </div>
+          <div class="list-card-amount">${fmtRs(q.breakdown.finalAmount)}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+          <span class="status-pill" style="color:${statusColor(q.status)};background:${statusColor(q.status)}18">${q.status.toUpperCase()}</span>
+          <span style="font-size:.72rem;color:#888">${fmtDateShort(q.quotationDate)}</span>
+        </div>
+      </div>
+    `).join('')}
+  `;
+
+  document.getElementById('new-qtn-btn')!.addEventListener('click', startWizard);
+  document.querySelectorAll<HTMLElement>('[data-qtn]').forEach(el => {
+    el.addEventListener('click', () => openQtnDetail(el.dataset.qtn!));
+  });
+}
+
+/* ── INVOICES LIST ───────────────────────────────────────── */
+function renderInvoices() {
+  const invs: Invoice[] = load<Invoice>(KEYS.invs)
+    .sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+
+  main.innerHTML = `
+    <div class="page-header">
+      <h2>Invoices</h2>
+    </div>
+    ${invs.length === 0 ? `
+      <div class="empty-state">
+        <div class="empty-icon">💳</div>
+        <div class="empty-title">No invoices yet</div>
+        <div class="empty-text">Convert a quotation to an invoice from the Quotation detail page.</div>
+      </div>
+    ` : invs.map(i => {
+      const pct = i.finalAmount > 0 ? Math.round(i.paidAmount / i.finalAmount * 100) : 0;
+      return `
+        <div class="list-card" data-inv="${i.id}">
+          <div class="list-card-row">
+            <div>
+              <div class="list-card-title">${i.clientName || '(No name)'}</div>
+              <div class="list-card-sub">${i.quotationRef}</div>
+            </div>
+            <div class="list-card-amount">${fmtRs(i.finalAmount)}</div>
+          </div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+            <span class="status-pill" style="color:${statusColor(i.status)};background:${statusColor(i.status)}18">${i.status.toUpperCase()}</span>
+            <span style="font-size:.72rem;color:#888">${pct}% paid</span>
+          </div>
+        </div>
+      `;
+    }).join('')}
+  `;
+
+  document.querySelectorAll<HTMLElement>('[data-inv]').forEach(el => {
+    el.addEventListener('click', () => openInvDetail(el.dataset.inv!));
+  });
+}
+
+/* ── CLIENTS LIST ────────────────────────────────────────── */
+function renderClients() {
+  const qtns: Quotation[] = load(KEYS.qtns);
+  const clientMap = new Map<string, { phone: string; qtns: number; total: number }>();
+  qtns.forEach(q => {
+    const key = q.clientName?.trim().toLowerCase() || '?';
+    const existing = clientMap.get(key);
+    if (existing) {
+      existing.qtns++;
+      existing.total += q.breakdown.finalAmount;
+    } else {
+      clientMap.set(key, { phone: q.clientPhone, qtns: 1, total: q.breakdown.finalAmount });
+    }
+  });
+
+  const clients = [...clientMap.entries()].sort((a,b) => b[1].total - a[1].total);
+
+  main.innerHTML = `
+    <div class="page-header"><h2>Clients</h2></div>
+    ${clients.length === 0 ? `
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <div class="empty-title">No clients yet</div>
+        <div class="empty-text">Clients are created automatically when you save a quotation.</div>
+      </div>
+    ` : clients.map(([name, data]) => `
+      <div class="list-card">
+        <div class="list-card-row">
+          <div>
+            <div class="list-card-title" style="text-transform:capitalize">${name}</div>
+            <div class="list-card-sub">${data.phone || '—'}</div>
+          </div>
+          <div class="list-card-amount" style="font-size:.85rem;color:#666">${fmtRs(data.total)}</div>
+        </div>
+        <div class="client-stat" style="margin-top:8px">
+          <span class="client-chip">${data.qtns} quotation${data.qtns !== 1 ? 's' : ''}</span>
+          ${data.phone ? `<a href="tel:${data.phone}" class="client-chip" style="text-decoration:none;color:inherit">📞 Call</a>` : ''}
+          ${data.phone ? `<a href="https://wa.me/94${data.phone.replace(/^0/,'')}" target="_blank" class="client-chip" style="text-decoration:none;color:inherit">💬 WhatsApp</a>` : ''}
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ── SETTINGS ────────────────────────────────────────────── */
+function renderSettings() {
+  main.innerHTML = `
+    <div class="page-header"><h2>Settings</h2></div>
+    <div style="padding:0 16px 16px">
+      <div class="dash-title">Data</div>
+      <button class="card-btn" id="export-btn" style="width:100%;margin-bottom:10px;height:44px">📤 Export All Data (JSON)</button>
+      <button class="card-btn danger" id="clear-btn" style="width:100%;height:44px">🗑 Clear All Data</button>
+      <div style="margin-top:24px" class="dash-title">About</div>
+      <div class="section-card" style="margin:0">
+        <div class="inv-detail-row" style="padding:12px 16px">
+          <span class="inv-detail-key">Version</span>
+          <span class="inv-detail-val">1.0</span>
+        </div>
+        <div class="inv-detail-row" style="padding:12px 16px">
+          <span class="inv-detail-key">Storage</span>
+          <span class="inv-detail-val">Local device only</span>
+        </div>
+        <div class="inv-detail-row" style="padding:12px 16px;border-bottom:none">
+          <span class="inv-detail-key">Profit margin</span>
+          <span class="inv-detail-val">${(RATES.profitMargin * 100).toFixed(0)}%</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('export-btn')!.addEventListener('click', () => {
+    const data = {
+      quotations: load(KEYS.qtns),
+      invoices: load(KEYS.invs),
+      counters: getCounters(),
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `luxehome-export-${Date.now()}.json`;
+    a.click(); URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('clear-btn')!.addEventListener('click', () => {
+    showModal('Clear All Data', `
+      <p style="color:#666;font-size:.9rem;line-height:1.5">This will permanently delete all quotations, invoices, and client data from this device. This cannot be undone.</p>
+    `, [
+      { label: 'Cancel', cls: 'modal-cancel', action: closeModal },
+      { label: 'Clear Everything', cls: 'modal-confirm danger', action: () => {
+        [KEYS.qtns, KEYS.invs, KEYS.ctrs].forEach(k => localStorage.removeItem(k));
+        closeModal(); toast('All data cleared'); renderSettings();
+      }},
+    ]);
+  });
+}
+
+/* ── WIZARD ──────────────────────────────────────────────── */
+let _currentQtnId: string | null = null;
+
+function startWizard(qtn?: Quotation) {
+  editingId = qtn?.id || null;
+  wizardData = qtn ? { ...qtn } : defaultInputs();
+  wizardData.brands = [...(qtn?.brands ?? DEFAULT_BRANDS)];
+  wizardData.paymentTerms = (qtn?.paymentTerms ?? DEFAULT_PAYMENT_TERMS).map(t => ({ ...t }));
+  wizardStep = 1;
+  navigate('wizard');
+}
+
+function renderWizard() {
+  progressFill.style.width = `${(wizardStep / WIZARD_STEPS) * 100}%`;
+  stepLabel.textContent = `Step ${wizardStep} of ${WIZARD_STEPS}`;
+
+  const stepNames = [
+    'Client Details', 'Project Type', 'Package', 'Areas', 'Quantities',
+    'Plumbing', 'Shower', 'Extras', 'Difficulty', 'Brands & Terms', 'Review',
+  ];
+  stepName.textContent = stepNames[wizardStep - 1] || '';
+
+  document.getElementById('wizard-back-btn')!.textContent = wizardStep === 1 ? 'Cancel' : '← Back';
+  document.getElementById('wizard-next-btn')!.textContent = wizardStep === WIZARD_STEPS ? '✓ Save' : 'Next →';
+
+  switch (wizardStep) {
+    case 1:  renderStep1(); break;
+    case 2:  renderStep2(); break;
+    case 3:  renderStep3(); break;
+    case 4:  renderStep4(); break;
+    case 5:  renderStep5(); break;
+    case 6:  renderStep6(); break;
+    case 7:  renderStep7(); break;
+    case 8:  renderStep8(); break;
+    case 9:  renderStep9(); break;
+    case 10: renderStep10(); break;
+    case 11: renderStep11(); break;
+  }
+}
+
+/* Step 1 — Client Details */
+function renderStep1() {
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Who is this quote for?</div>
+      <div class="step-hint">Enter the client's details and project info.</div>
+      <div class="field-group">
+        <label class="field-label">Client Name *</label>
+        <input class="field-input" id="f-name" type="text" placeholder="e.g. Kumara Perera" value="${esc(wizardData.clientName)}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Phone Number</label>
+        <input class="field-input" id="f-phone" type="tel" placeholder="07X XXX XXXX" value="${esc(wizardData.clientPhone)}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Project Location *</label>
+        <input class="field-input" id="f-location" type="text" placeholder="e.g. Colombo 5" value="${esc(wizardData.projectLocation)}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Project / Room Name</label>
+        <input class="field-input" id="f-projname" type="text" placeholder="e.g. Master Bathroom" value="${esc(wizardData.projectName)}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Quotation Date</label>
+        <input class="field-input" id="f-date" type="date" value="${wizardData.quotationDate}">
+      </div>
+    </div>
+  `;
+}
+
+function collectStep1(): boolean {
+  const name = (document.getElementById('f-name') as HTMLInputElement).value.trim();
+  const location = (document.getElementById('f-location') as HTMLInputElement).value.trim();
+  if (!name) { toast('Please enter client name'); return false; }
+  if (!location) { toast('Please enter project location'); return false; }
+  wizardData.clientName     = name;
+  wizardData.clientPhone    = (document.getElementById('f-phone') as HTMLInputElement).value.trim();
+  wizardData.projectLocation= location;
+  wizardData.projectName    = (document.getElementById('f-projname') as HTMLInputElement).value.trim();
+  wizardData.quotationDate  = (document.getElementById('f-date') as HTMLInputElement).value || wizardData.quotationDate;
+  return true;
+}
+
+/* Step 2 — Project Type */
+function renderStep2() {
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">What type of project?</div>
+      <div class="step-hint">Renovation includes demolition costs; construction starts fresh.</div>
+      <div class="option-grid cols2">
+        <div class="opt-card ${wizardData.projectType==='renovation'?'selected':''}" data-val="renovation">
+          <span class="opt-icon">🔨</span>
+          <span class="opt-label">Renovation</span>
+          <span class="opt-sub">Existing bathroom</span>
+        </div>
+        <div class="opt-card ${wizardData.projectType==='construction'?'selected':''}" data-val="construction">
+          <span class="opt-icon">🏗️</span>
+          <span class="opt-label">Construction</span>
+          <span class="opt-sub">New build</span>
+        </div>
+      </div>
+    </div>
+  `;
+  setupSingleSelect('.opt-card', 'projectType');
+}
+
+/* Step 3 — Package */
+function renderStep3() {
+  const pkgs: Array<{ val: PackageType; icon: string; label: string; sub: string }> = [
+    { val: 'basic',     icon: '⭐',  label: 'Basic',     sub: 'Rs. 850/sqft tiles' },
+    { val: 'premium',   icon: '⭐⭐', label: 'Premium',   sub: 'Rs. 1,000/sqft tiles' },
+    { val: 'signature', icon: '👑',  label: 'Signature', sub: 'Rs. 1,300/sqft tiles' },
+  ];
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Select a package</div>
+      <div class="step-hint">Affects tiling, fixtures, vanity, mirror, bathware, and fittings.</div>
+      <div class="option-grid">
+        ${pkgs.map(p => `
+          <div class="opt-card ${wizardData.package===p.val?'selected':''}" data-val="${p.val}" style="text-align:left;display:flex;align-items:center;gap:14px">
+            <span style="font-size:1.8rem">${p.icon}</span>
+            <div>
+              <span class="opt-label" style="display:block">${p.label}</span>
+              <span class="opt-sub" style="display:block">${p.sub}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  setupSingleSelect('.opt-card', 'package');
+}
+
+/* Step 4 — Areas */
+function renderStep4() {
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Enter the areas</div>
+      <div class="step-hint">Measure in square feet. The ceiling area is auto-calculated from floor area.</div>
+      <div class="field-group">
+        <label class="field-label">Floor Area (sqft) *</label>
+        <input class="field-input" id="f-floor" type="number" min="0" step="0.5" placeholder="e.g. 40" value="${wizardData.floorArea || ''}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Wall Area (sqft) *</label>
+        <input class="field-input" id="f-wall" type="number" min="0" step="0.5" placeholder="e.g. 180" value="${wizardData.wallArea || ''}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Waterproofing Area (sqft)</label>
+        <input class="field-input" id="f-wp" type="number" min="0" step="0.5" placeholder="Usually = floor area" value="${wizardData.waterproofingArea || ''}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Dummy Wall Area (sqft)</label>
+        <input class="field-input" id="f-dw" type="number" min="0" step="0.5" placeholder="0 if none" value="${wizardData.dummyWallArea || ''}">
+      </div>
+    </div>
+  `;
+}
+
+function collectStep4(): boolean {
+  const floor = parseFloat((document.getElementById('f-floor') as HTMLInputElement).value);
+  const wall  = parseFloat((document.getElementById('f-wall') as HTMLInputElement).value);
+  if (isNaN(floor) || floor <= 0) { toast('Enter a valid floor area'); return false; }
+  if (isNaN(wall)  || wall  <= 0) { toast('Enter a valid wall area');  return false; }
+  wizardData.floorArea         = floor;
+  wizardData.wallArea          = wall;
+  wizardData.waterproofingArea = parseFloat((document.getElementById('f-wp') as HTMLInputElement).value) || 0;
+  wizardData.dummyWallArea     = parseFloat((document.getElementById('f-dw') as HTMLInputElement).value) || 0;
+  return true;
+}
+
+/* Step 5 — Quantities */
+function renderStep5() {
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Quantities & points</div>
+      <div class="step-hint">Tap − / + to adjust each value.</div>
+      ${stepper('Wall Niches', 'Count of wall niche cavities', 'niches', wizardData.wallNiches, 0, 20)}
+      ${stepper('Wiring Points', 'Each light, plug, fan, etc.', 'wiring', wizardData.wiringPoints, 0, 50)}
+    </div>
+  `;
+  setupSteppers({ niches: 'wallNiches', wiring: 'wiringPoints' });
+}
+
+/* Step 6 — Plumbing */
+function renderStep6() {
+  const opts: Array<{ val: PlumbingType; icon: string; label: string; price: string }> = [
+    { val: 'basic',     icon: '🔧', label: 'Basic',     price: fmtRs(RATES.plumbing.basic) },
+    { val: 'premium',   icon: '🚰', label: 'Premium',   price: fmtRs(RATES.plumbing.premium) },
+    { val: 'signature', icon: '💎', label: 'Signature', price: fmtRs(RATES.plumbing.signature) },
+  ];
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Plumbing package</div>
+      <div class="step-hint">Includes all piping, supply lines, and drain works.</div>
+      <div class="option-grid">
+        ${opts.map(o => `
+          <div class="opt-card ${wizardData.plumbing===o.val?'selected':''}" data-val="${o.val}" style="text-align:left;display:flex;align-items:center;gap:14px">
+            <span style="font-size:1.8rem">${o.icon}</span>
+            <div>
+              <span class="opt-label" style="display:block">${o.label}</span>
+              <span class="opt-sub" style="display:block">${o.price}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  setupSingleSelect('.opt-card', 'plumbing');
+}
+
+/* Step 7 — Shower */
+function renderStep7() {
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Shower cubicle?</div>
+      <div class="step-hint">L-Type = corner; P-Type = straight panel.</div>
+      <div class="option-grid cols3" style="margin-bottom:20px">
+        <div class="opt-card ${wizardData.showerCubicle==='none'?'selected':''}" data-val="none">
+          <span class="opt-icon">🚿</span>
+          <span class="opt-label">None</span>
+        </div>
+        <div class="opt-card ${wizardData.showerCubicle==='l-type'?'selected':''}" data-val="l-type">
+          <span class="opt-icon">📐</span>
+          <span class="opt-label">L-Type</span>
+          <span class="opt-sub">${fmtRs(RATES.shower.lType.perLinFt)}/lft</span>
+        </div>
+        <div class="opt-card ${wizardData.showerCubicle==='p-type'?'selected':''}" data-val="p-type">
+          <span class="opt-icon">▬</span>
+          <span class="opt-label">P-Type</span>
+          <span class="opt-sub">${fmtRs(RATES.shower.pType.perLinFt)}/lft</span>
+        </div>
+      </div>
+      <div id="shower-len-wrap" style="${wizardData.showerCubicle==='none'?'display:none':''}">
+        <div class="field-group">
+          <label class="field-label">Shower Length (linear feet)</label>
+          <input class="field-input" id="f-shower-len" type="number" min="0" step="0.5" value="${wizardData.showerLength || ''}">
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll<HTMLElement>('.opt-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.opt-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      (wizardData as any).showerCubicle = card.dataset.val as ShowerType;
+      const wrap = document.getElementById('shower-len-wrap')!;
+      wrap.style.display = card.dataset.val === 'none' ? 'none' : '';
+    });
+  });
+}
+
+function collectStep7(): boolean {
+  const len = parseFloat((document.getElementById('f-shower-len') as HTMLInputElement | null)?.value || '0');
+  wizardData.showerLength = isNaN(len) ? 0 : len;
+  if (wizardData.showerCubicle !== 'none' && wizardData.showerLength <= 0) {
+    toast('Enter shower length'); return false;
+  }
+  return true;
+}
+
+/* Step 8 — Extras */
+function renderStep8() {
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Extra items</div>
+      <div class="step-hint">Toggle what's included in this bathroom.</div>
+      ${toggle('Geyser / Water Heater', fmtRs(RATES.geyser), 'geyser', wizardData.hasGeyser)}
+      ${toggle('Door', `${fmtRs(RATES.door[wizardData.package])} (${packageLabel(wizardData.package)})`, 'door', wizardData.hasDoor)}
+      ${toggle('Window', `${fmtRs(RATES.window[wizardData.package])} (${packageLabel(wizardData.package)})`, 'window', wizardData.hasWindow)}
+    </div>
+  `;
+  setupToggles({ geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow' });
+}
+
+/* Step 9 — Difficulty */
+function renderStep9() {
+  const val = wizardData.difficultyScore;
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Difficulty / complexity</div>
+      <div class="step-hint">Adjust for site challenges. 1.00 = standard. Applied to all costs before profit.</div>
+      <div class="slider-current" id="diff-display">${val.toFixed(2)}×</div>
+      <div class="slider-wrap">
+        <input type="range" class="slider-inp" id="diff-slider"
+          min="0.80" max="1.50" step="0.01" value="${val}">
+        <div class="slider-labels">
+          <span>0.80× Easy</span>
+          <span>1.00× Standard</span>
+          <span>1.50× Complex</span>
+        </div>
+      </div>
+    </div>
+  `;
+  const slider = document.getElementById('diff-slider') as HTMLInputElement;
+  const display = document.getElementById('diff-display')!;
+  slider.addEventListener('input', () => {
+    wizardData.difficultyScore = parseFloat(slider.value);
+    display.textContent = `${parseFloat(slider.value).toFixed(2)}×`;
+  });
+}
+
+/* Step 10 — Brands & Payment Terms */
+function renderStep10() {
+  const brands = wizardData.brands;
+  const terms  = wizardData.paymentTerms;
+  const termsTotal = terms.reduce((s, t) => s + t.percentage, 0);
+
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Brands & Payment Terms</div>
+      <div class="step-hint">These appear on the customer PDF.</div>
+
+      <div class="dash-title" style="margin-bottom:8px">Brands / Materials</div>
+      <div class="brands-container" id="brands-container">
+        ${brands.map((b, i) => `
+          <div class="brand-row">
+            <input type="text" value="${esc(b)}" data-idx="${i}" class="brand-input">
+            <button class="brand-del" data-idx="${i}">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <button class="brand-add-btn" id="add-brand-btn" style="margin-top:8px">+ Add Brand</button>
+
+      <div class="dash-title" style="margin-top:24px;margin-bottom:8px">Payment Schedule</div>
+      <div id="terms-container">
+        ${terms.map((t, i) => `
+          <div class="term-row">
+            <input type="text" class="field-input term-label-inp" style="height:38px;flex:1;margin:0" value="${esc(t.label)}" data-idx="${i}">
+            <div class="stepper-ctrl" style="margin-left:10px">
+              <button class="stepper-btn" data-term="${i}" data-dir="-1">−</button>
+              <span class="stepper-val" id="term-pct-${i}">${t.percentage}%</span>
+              <button class="stepper-btn" data-term="${i}" data-dir="1">+</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div id="terms-total" style="font-size:.8rem;color:${termsTotal===100?'#16a34a':'#dc2626'};margin-top:6px;font-weight:700">
+        Total: ${termsTotal}% ${termsTotal===100?'✓':'(must equal 100%)'}
+      </div>
+
+      <div class="dash-title" style="margin-top:24px;margin-bottom:8px">Final Price Override</div>
+      <div class="override-section" style="padding:0">
+        <input class="field-input" id="f-override" type="number" min="0" step="1000"
+          placeholder="Leave blank to use calculated price"
+          value="${wizardData.finalPriceOverride ?? ''}">
+        <div class="override-note">If set, this replaces the calculated selling price on the PDF.</div>
+      </div>
+    </div>
+  `;
+
+  // Brand edits
+  document.querySelectorAll<HTMLInputElement>('.brand-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      wizardData.brands[parseInt(inp.dataset.idx!)] = inp.value;
+    });
+  });
+  document.querySelectorAll<HTMLButtonElement>('.brand-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wizardData.brands.splice(parseInt(btn.dataset.idx!), 1);
+      renderStep10();
+    });
+  });
+  document.getElementById('add-brand-btn')!.addEventListener('click', () => {
+    wizardData.brands.push('');
+    renderStep10();
+  });
+
+  // Term label edits
+  document.querySelectorAll<HTMLInputElement>('.term-label-inp').forEach(inp => {
+    inp.addEventListener('input', () => {
+      wizardData.paymentTerms[parseInt(inp.dataset.idx!)].label = inp.value;
+    });
+  });
+
+  // Term pct steppers
+  document.querySelectorAll<HTMLButtonElement>('[data-term][data-dir]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.term!);
+      const dir = parseInt(btn.dataset.dir!);
+      const term = wizardData.paymentTerms[idx];
+      term.percentage = Math.max(0, Math.min(100, term.percentage + (dir * 5)));
+      document.getElementById(`term-pct-${idx}`)!.textContent = `${term.percentage}%`;
+      const total = wizardData.paymentTerms.reduce((s, t) => s + t.percentage, 0);
+      const el = document.getElementById('terms-total')!;
+      el.textContent = `Total: ${total}% ${total===100?'✓':'(must equal 100%)'}`;
+      el.style.color = total === 100 ? '#16a34a' : '#dc2626';
+    });
+  });
+}
+
+function collectStep10(): boolean {
+  const total = wizardData.paymentTerms.reduce((s, t) => s + t.percentage, 0);
+  if (total !== 100) { toast('Payment terms must total 100%'); return false; }
+  const ov = parseFloat((document.getElementById('f-override') as HTMLInputElement).value);
+  wizardData.finalPriceOverride = isNaN(ov) || ov <= 0 ? null : ov;
+  return true;
+}
+
+/* Step 11 — Review */
+function renderStep11() {
+  const bd = calculateQuotation(wizardData);
+
+  const rows: Array<[string, string]> = [
+    ['Client',           wizardData.clientName || '—'],
+    ['Phone',            wizardData.clientPhone || '—'],
+    ['Location',         wizardData.projectLocation || '—'],
+    ['Project',          wizardData.projectName || '—'],
+    ['Date',             fmtDate(wizardData.quotationDate)],
+    ['Type',             wizardData.projectType === 'renovation' ? 'Renovation' : 'Construction'],
+    ['Package',          packageLabel(wizardData.package)],
+    ['Floor',            `${wizardData.floorArea} sqft`],
+    ['Wall',             `${wizardData.wallArea} sqft`],
+    ['Tiling Area',      `${bd.totalTilingArea} sqft`],
+    ['Waterproofing',    `${wizardData.waterproofingArea} sqft`],
+    ['Wiring Points',    `${wizardData.wiringPoints}`],
+    ['Wall Niches',      `${wizardData.wallNiches}`],
+    ['Plumbing',         packageLabel(wizardData.plumbing as PackageType)],
+    ['Shower',           wizardData.showerCubicle === 'none' ? 'None' : `${wizardData.showerCubicle} (${wizardData.showerLength} lft)`],
+    ['Geyser',           wizardData.hasGeyser ? 'Yes' : 'No'],
+    ['Door',             wizardData.hasDoor   ? 'Yes' : 'No'],
+    ['Window',           wizardData.hasWindow ? 'Yes' : 'No'],
+    ['Difficulty',       `${wizardData.difficultyScore.toFixed(2)}×`],
+    ['Project Cost',     fmtRs(bd.projectCost)],
+    ['After Difficulty', fmtRs(bd.difficultyAdjusted)],
+    ['Profit (15%)',     fmtRs(bd.profitAmount)],
+  ];
+
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Review & Save</div>
+      <div class="review-section">
+        ${rows.map(([k,v]) => `
+          <div class="review-row">
+            <span class="review-key">${k}</span>
+            <span class="review-val">${v}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="review-total">
+        <div class="review-total-label">
+          ${wizardData.finalPriceOverride != null ? 'Final Price (Override)' : 'Selling Price (incl. profit)'}
+        </div>
+        <div class="review-total-amount">${fmtRs(bd.finalAmount)}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* ── Save quotation ──────────────────────────────────────── */
+function saveQuotation() {
+  const bd = calculateQuotation(wizardData);
+  const qtns: Quotation[] = load(KEYS.qtns);
+  const counters = getCounters();
+
+  if (editingId) {
+    const idx = qtns.findIndex(q => q.id === editingId);
+    if (idx >= 0) {
+      qtns[idx] = {
+        ...qtns[idx], ...wizardData, breakdown: bd,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  } else {
+    counters.qtn++;
+    saveCounters(counters);
+    const newQ: Quotation = {
+      ...wizardData, id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      status: 'draft', breakdown: bd,
+    };
+    (newQ as any).ref = qtnNumber(counters.qtn);
+    qtns.unshift(newQ);
+  }
+
+  save(KEYS.qtns, qtns);
+  toast(editingId ? 'Quotation updated' : 'Quotation saved');
+  editingId = null;
+  viewHistory = [];
+  navigate('quotations');
+}
+
+/* ── QUOTATION DETAIL ────────────────────────────────────── */
+let detailQtnId: string | null = null;
+let detailInvId: string | null = null;
+
+function openQtnDetail(id: string) {
+  detailQtnId = id;
+  navigate('qtn_detail');
+}
+
+function renderQtnDetail() {
+  const qtns: Quotation[] = load(KEYS.qtns);
+  const q = qtns.find(x => x.id === detailQtnId);
+  if (!q) { main.innerHTML = '<div class="empty-state"><div class="empty-title">Not found</div></div>'; return; }
+
+  const bd = q.breakdown;
+  const ref = (q as any).ref || 'LH-QTN';
+
+  const costRows: Array<[string, number]> = [
+    ['Renovation / Demolition', bd.renovationCost],
+    ['Design & Planning', bd.designPlanning],
+    ['Floor Concrete', bd.floorConcreteCost],
+    ['Dummy Wall', bd.dummyWallCost],
+    ['Wall Niches', bd.wallNicheCost],
+    ['Tiling & Grouting', bd.tilingCost],
+    ['Plumbing', bd.plumbingCost],
+    ['Wiring', bd.wiringCost],
+    ['Waterproofing', bd.waterproofingCost],
+    ['Ceiling', bd.ceilingCost],
+    ['Light Fixtures', bd.lightFixtureCost],
+    ['Geyser', bd.geyserCost],
+    ['Vanity', bd.vanityCost],
+    ['Shower Cubicle', bd.showerCost],
+    ['Mirror', bd.mirrorCost],
+    ['Bathware & Tapware', bd.bathwareCost],
+    ['Door', bd.doorCost],
+    ['Window', bd.windowCost],
+  ].filter(([,v]) => v > 0);
+
+  const statuses: Array<{ val: string; label: string }> = [
+    { val: 'draft', label: 'Draft' }, { val: 'sent', label: 'Sent' },
+    { val: 'accepted', label: 'Accepted' }, { val: 'rejected', label: 'Rejected' },
+    { val: 'converted', label: 'Converted' },
+  ];
+
+  main.innerHTML = `
+    <div style="padding:16px 16px 0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+        <div>
+          <div style="font-size:.72rem;color:#888;margin-bottom:2px">${ref}</div>
+          <div style="font-size:1.1rem;font-weight:800">${q.clientName}</div>
+          <div style="font-size:.8rem;color:#666;margin-top:2px">${q.projectLocation} · ${fmtDateShort(q.quotationDate)}</div>
+        </div>
+        <span class="status-pill" style="color:${statusColor(q.status)};background:${statusColor(q.status)}18">${q.status.toUpperCase()}</span>
+      </div>
+
+      <div class="review-total" style="margin-bottom:16px">
+        <div class="review-total-label">Final Amount</div>
+        <div class="review-total-amount">${fmtRs(bd.finalAmount)}</div>
+      </div>
+
+      <!-- Status change -->
+      <div class="dash-title">Status</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        ${statuses.map(s => `
+          <button class="card-btn ${q.status===s.val?'primary':''}" data-setstatus="${s.val}"
+            style="flex:none;min-width:auto;padding:0 14px;font-size:.75rem">${s.label}</button>
+        `).join('')}
+      </div>
+
+      <!-- Cost breakdown (internal) -->
+      <details style="margin-bottom:16px">
+        <summary style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;cursor:pointer;padding:8px 0">
+          Cost Breakdown (internal)
+        </summary>
+        <div class="section-card" style="margin:8px 0 0">
+          ${costRows.map(([k,v]) => `
+            <div class="inv-detail-row" style="padding:8px 16px">
+              <span class="inv-detail-key">${k}</span>
+              <span class="inv-detail-val">${fmtRs(v)}</span>
+            </div>
+          `).join('')}
+          <div class="inv-detail-row" style="padding:8px 16px;border-top:2px solid #e8e8e4">
+            <span class="inv-detail-key">Overhead (hidden)</span>
+            <span class="inv-detail-val">${fmtRs(bd.overhead)}</span>
+          </div>
+          <div class="inv-detail-row" style="padding:8px 16px">
+            <span class="inv-detail-key">Project Cost</span>
+            <span class="inv-detail-val">${fmtRs(bd.projectCost)}</span>
+          </div>
+          <div class="inv-detail-row" style="padding:8px 16px">
+            <span class="inv-detail-key">After Difficulty (${q.difficultyScore}×)</span>
+            <span class="inv-detail-val">${fmtRs(bd.difficultyAdjusted)}</span>
+          </div>
+          <div class="inv-detail-row" style="padding:8px 16px;border-bottom:none">
+            <span class="inv-detail-key">Profit (15%)</span>
+            <span class="inv-detail-val">${fmtRs(bd.profitAmount)}</span>
+          </div>
+        </div>
+      </details>
+
+      <!-- Actions -->
+      <div class="card-actions" style="margin-bottom:16px">
+        <button class="card-btn primary" id="qtn-pdf-btn">📄 PDF</button>
+        <button class="card-btn" id="qtn-wa-btn">💬 WhatsApp</button>
+        <button class="card-btn" id="qtn-edit-btn">✏️ Edit</button>
+        <button class="card-btn" id="qtn-inv-btn">💳 Invoice</button>
+        <button class="card-btn danger" id="qtn-del-btn">🗑</button>
+      </div>
+    </div>
+  `;
+
+  // Status buttons
+  document.querySelectorAll<HTMLButtonElement>('[data-setstatus]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const qtns2: Quotation[] = load(KEYS.qtns);
+      const idx = qtns2.findIndex(x => x.id === detailQtnId);
+      if (idx >= 0) { qtns2[idx].status = btn.dataset.setstatus as any; save(KEYS.qtns, qtns2); }
+      toast(`Status: ${btn.dataset.setstatus}`); renderQtnDetail();
+    });
+  });
+
+  document.getElementById('qtn-pdf-btn')!.addEventListener('click', () => printQuotationPDF(q));
+  document.getElementById('qtn-wa-btn')!.addEventListener('click', () => shareQuotationWA(q));
+  document.getElementById('qtn-edit-btn')!.addEventListener('click', () => startWizard(q));
+  document.getElementById('qtn-inv-btn')!.addEventListener('click', () => convertToInvoice(q));
+  document.getElementById('qtn-del-btn')!.addEventListener('click', () => {
+    showModal('Delete Quotation', `
+      <p style="color:#666;font-size:.9rem">Delete quotation for <strong>${q.clientName}</strong>? This cannot be undone.</p>
+    `, [
+      { label: 'Cancel', cls: 'modal-cancel', action: closeModal },
+      { label: 'Delete', cls: 'modal-confirm danger', action: () => {
+        const qtns2: Quotation[] = load(KEYS.qtns);
+        save(KEYS.qtns, qtns2.filter(x => x.id !== detailQtnId));
+        closeModal(); toast('Quotation deleted');
+        viewHistory = []; navigate('quotations');
+      }},
+    ]);
+  });
+}
+
+/* ── INVOICE DETAIL ──────────────────────────────────────── */
+function openInvDetail(id: string) {
+  detailInvId = id;
+  navigate('inv_detail');
+}
+
+function renderInvDetail() {
+  const invs: Invoice[] = load(KEYS.invs);
+  const inv = invs.find(x => x.id === detailInvId);
+  if (!inv) { main.innerHTML = '<div class="empty-state"><div class="empty-title">Not found</div></div>'; return; }
+
+  const remaining = inv.finalAmount - inv.paidAmount;
+  const pct = inv.finalAmount > 0 ? Math.round(inv.paidAmount / inv.finalAmount * 100) : 0;
+
+  const invStatuses = ['draft','sent','partially-paid','paid','cancelled'];
+
+  main.innerHTML = `
+    <div style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:.72rem;color:#888">${inv.quotationRef}</div>
+          <div style="font-size:1.1rem;font-weight:800">${inv.clientName}</div>
+        </div>
+        <span class="status-pill" style="color:${statusColor(inv.status)};background:${statusColor(inv.status)}18">${inv.status.toUpperCase()}</span>
+      </div>
+
+      <div class="review-total" style="margin-bottom:16px">
+        <div class="review-total-label">Total Amount</div>
+        <div class="review-total-amount">${fmtRs(inv.finalAmount)}</div>
+      </div>
+
+      <div class="section-card" style="margin:0 0 16px">
+        <div class="inv-detail-row" style="padding:10px 16px">
+          <span class="inv-detail-key">Paid</span>
+          <span class="inv-detail-val" style="color:#16a34a">${fmtRs(inv.paidAmount)} (${pct}%)</span>
+        </div>
+        <div class="inv-detail-row" style="padding:10px 16px;border-bottom:none">
+          <span class="inv-detail-key">Remaining</span>
+          <span class="inv-detail-val" style="color:${remaining>0?'#dc2626':'#16a34a'}">${fmtRs(remaining)}</span>
+        </div>
+      </div>
+
+      <!-- Payment terms -->
+      <div class="dash-title">Payment Schedule</div>
+      ${inv.paymentTerms.map(t => `
+        <div class="section-card" style="margin:0 0 8px">
+          <div class="inv-detail-row" style="padding:10px 16px;border-bottom:none">
+            <span class="inv-detail-key">${t.label}</span>
+            <span class="inv-detail-val">${t.percentage}% = ${fmtRs(inv.finalAmount * t.percentage / 100)}</span>
+          </div>
+        </div>
+      `).join('')}
+
+      <!-- Payments recorded -->
+      <div class="dash-title" style="margin-top:16px">Payments Received</div>
+      ${inv.payments.length === 0 ? `<div style="font-size:.85rem;color:#888;margin-bottom:16px">No payments recorded yet.</div>` : ''}
+      ${inv.payments.map((p, pi) => `
+        <div class="payment-entry">
+          <div>
+            <div style="font-size:.85rem;font-weight:700">${fmtRs(p.amount)}</div>
+            <div style="font-size:.72rem;color:#666">${fmtDateShort(p.date)} ${p.note ? '· ' + p.note : ''}</div>
+          </div>
+          <button class="brand-del" data-delpayment="${pi}">×</button>
+        </div>
+      `).join('')}
+
+      <!-- Add payment -->
+      <div class="add-payment-form" style="margin:0 0 16px">
+        <div style="font-size:.8rem;font-weight:700;margin-bottom:10px">Record Payment</div>
+        <div class="field-group" style="margin-bottom:10px">
+          <input class="field-input" id="pay-amount" type="number" placeholder="Amount (Rs.)" min="0">
+        </div>
+        <div class="field-group" style="margin-bottom:10px">
+          <input class="field-input" id="pay-date" type="date" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div class="field-group" style="margin-bottom:10px">
+          <input class="field-input" id="pay-note" type="text" placeholder="Note (optional)">
+        </div>
+        <button class="card-btn primary" id="add-pay-btn" style="width:100%;height:44px">Add Payment</button>
+      </div>
+
+      <!-- Status -->
+      <div class="dash-title">Status</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        ${invStatuses.map(s => `
+          <button class="card-btn ${inv.status===s?'primary':''}" data-invstatus="${s}"
+            style="flex:none;min-width:auto;padding:0 12px;font-size:.73rem">${s}</button>
+        `).join('')}
+      </div>
+
+      <!-- Actions -->
+      <div class="card-actions" style="margin-bottom:16px">
+        <button class="card-btn primary" id="inv-pdf-btn">📄 PDF</button>
+        <button class="card-btn" id="inv-wa-btn">💬 WhatsApp</button>
+        <button class="card-btn danger" id="inv-del-btn">🗑 Delete</button>
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll<HTMLButtonElement>('[data-invstatus]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const invs2: Invoice[] = load(KEYS.invs);
+      const idx = invs2.findIndex(x => x.id === detailInvId);
+      if (idx >= 0) { invs2[idx].status = btn.dataset.invstatus as any; save(KEYS.invs, invs2); }
+      toast(`Status: ${btn.dataset.invstatus}`); renderInvDetail();
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-delpayment]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const invs2: Invoice[] = load(KEYS.invs);
+      const idx = invs2.findIndex(x => x.id === detailInvId);
+      if (idx >= 0) {
+        const pi = parseInt(btn.dataset.delpayment!);
+        invs2[idx].payments.splice(pi, 1);
+        invs2[idx].paidAmount = invs2[idx].payments.reduce((s, p) => s + p.amount, 0);
+        if (invs2[idx].paidAmount <= 0) invs2[idx].status = 'sent';
+        else if (invs2[idx].paidAmount < invs2[idx].finalAmount) invs2[idx].status = 'partially-paid';
+        else invs2[idx].status = 'paid';
+        save(KEYS.invs, invs2);
+      }
+      toast('Payment removed'); renderInvDetail();
+    });
+  });
+
+  document.getElementById('add-pay-btn')!.addEventListener('click', () => {
+    const amount = parseFloat((document.getElementById('pay-amount') as HTMLInputElement).value);
+    if (isNaN(amount) || amount <= 0) { toast('Enter a valid amount'); return; }
+    const date = (document.getElementById('pay-date') as HTMLInputElement).value || new Date().toISOString().split('T')[0];
+    const note = (document.getElementById('pay-note') as HTMLInputElement).value.trim();
+    const invs2: Invoice[] = load(KEYS.invs);
+    const idx = invs2.findIndex(x => x.id === detailInvId);
+    if (idx >= 0) {
+      invs2[idx].payments.push({ date, amount, note });
+      invs2[idx].paidAmount = invs2[idx].payments.reduce((s, p) => s + p.amount, 0);
+      if (invs2[idx].paidAmount >= invs2[idx].finalAmount) invs2[idx].status = 'paid';
+      else invs2[idx].status = 'partially-paid';
+      save(KEYS.invs, invs2);
+    }
+    toast('Payment recorded'); renderInvDetail();
+  });
+
+  document.getElementById('inv-pdf-btn')!.addEventListener('click', () => printInvoicePDF(inv));
+  document.getElementById('inv-wa-btn')!.addEventListener('click', () => shareInvoiceWA(inv));
+  document.getElementById('inv-del-btn')!.addEventListener('click', () => {
+    showModal('Delete Invoice', `<p style="color:#666;font-size:.9rem">Delete this invoice?</p>`, [
+      { label: 'Cancel', cls: 'modal-cancel', action: closeModal },
+      { label: 'Delete', cls: 'modal-confirm danger', action: () => {
+        const invs2: Invoice[] = load(KEYS.invs);
+        save(KEYS.invs, invs2.filter(x => x.id !== detailInvId));
+        closeModal(); toast('Invoice deleted');
+        viewHistory = []; navigate('invoices');
+      }},
+    ]);
+  });
+}
+
+/* ── Convert to invoice ──────────────────────────────────── */
+function convertToInvoice(q: Quotation) {
+  const invs: Invoice[] = load(KEYS.invs);
+  const existing = invs.find(i => i.quotationId === q.id);
+  if (existing) {
+    toast('Invoice already exists'); openInvDetail(existing.id); return;
+  }
+  const counters = getCounters();
+  counters.inv++;
+  saveCounters(counters);
+  const ref = (q as any).ref || qtnNumber(counters.inv);
+  const today = new Date();
+  const due = new Date(today); due.setDate(due.getDate() + 30);
+  const inv: Invoice = {
+    id: crypto.randomUUID(),
+    quotationId: q.id,
+    quotationRef: ref,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'draft',
+    invoiceDate: today.toISOString().split('T')[0],
+    dueDate: due.toISOString().split('T')[0],
+    finalAmount: q.breakdown.finalAmount,
+    paidAmount: 0,
+    payments: [],
+    clientName: q.clientName,
+    clientPhone: q.clientPhone,
+    projectLocation: q.projectLocation,
+    projectName: q.projectName,
+    package: q.package,
+    projectType: q.projectType,
+    paymentTerms: q.paymentTerms,
+  };
+  invs.unshift(inv);
+  save(KEYS.invs, invs);
+
+  // Mark quotation converted
+  const qtns: Quotation[] = load(KEYS.qtns);
+  const idx = qtns.findIndex(x => x.id === q.id);
+  if (idx >= 0) { qtns[idx].status = 'converted'; save(KEYS.qtns, qtns); }
+
+  toast('Invoice created'); openInvDetail(inv.id);
+}
+
+/* ── PDF — Quotation ─────────────────────────────────────── */
+function printQuotationPDF(q: Quotation) {
+  const bd = q.breakdown;
+  const ref = (q as any).ref || 'LH-QTN';
+  const scope = generateScopeOfWork(q);
+
+  const costRows: Array<[string, number]> = [
+    ['Renovation / Demolition Works', bd.renovationCost],
+    ['Bathroom Design & Planning', bd.designPlanning],
+    ['Floor Concrete Works', bd.floorConcreteCost],
+    ['Dummy Wall Construction', bd.dummyWallCost],
+    ['Wall Niche Construction', bd.wallNicheCost],
+    ['Tiling & Grouting', bd.tilingCost],
+    ['Plumbing Works', bd.plumbingCost],
+    ['Electrical Wiring Works', bd.wiringCost],
+    ['Waterproofing', bd.waterproofingCost],
+    ['Ceiling Installation', bd.ceilingCost],
+    ['Light & Plug Fixtures', bd.lightFixtureCost],
+    ['Geyser / Water Heater', bd.geyserCost],
+    ['Vanity Cupboard & Countertop', bd.vanityCost],
+    ['Shower Cubicle', bd.showerCost],
+    ['Mirror', bd.mirrorCost],
+    ['Bathware & Tapware', bd.bathwareCost],
+    ['Door Works', bd.doorCost],
+    ['Window Works', bd.windowCost],
+  ].filter(([,v]) => v > 0);
+
+  const html = `<!DOCTYPE html><html><head>
+  <meta charset="utf-8">
+  <title>${ref} — LUXEHOME Quotation</title>
+  <style>
+    @page { size: A4; margin: 18mm 16mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, 'Times New Roman', serif; color: #111; font-size: 10.5pt; line-height: 1.5; }
+    .logo { font-size: 22pt; font-weight: 900; letter-spacing: .06em; }
+    .gold { color: #b8892a; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12pt; border-bottom: 2pt solid #111; margin-bottom: 16pt; }
+    .ref-block { text-align: right; }
+    .ref-no { font-size: 12pt; font-weight: 700; }
+    .section-title { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #888; margin: 16pt 0 8pt; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; }
+    .info-row { font-size: 10pt; }
+    .info-label { color: #666; font-size: 9pt; }
+    table { width: 100%; border-collapse: collapse; margin-top: 6pt; }
+    th { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .06em; color: #888; text-align: left; padding: 6pt 8pt; border-bottom: 1pt solid #ccc; }
+    th:last-child { text-align: right; }
+    td { padding: 7pt 8pt; border-bottom: .5pt solid #eee; font-size: 10pt; }
+    td:last-child { text-align: right; font-weight: 600; }
+    .total-row td { border-top: 2pt solid #111; border-bottom: none; font-weight: 800; font-size: 12pt; padding-top: 10pt; }
+    .scope-list { columns: 2; gap: 16pt; margin-top: 4pt; }
+    .scope-item { font-size: 9.5pt; padding: 3pt 0; break-inside: avoid; }
+    .scope-item::before { content: "✓  "; color: #b8892a; font-weight: 700; }
+    .brands-list { display: flex; flex-wrap: wrap; gap: 6pt 20pt; margin-top: 4pt; }
+    .brand-item { font-size: 9.5pt; }
+    .brand-item::before { content: "• "; color: #b8892a; }
+    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin-top: 6pt; }
+    .term-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 8pt; text-align: center; }
+    .term-pct { font-size: 16pt; font-weight: 900; }
+    .term-lbl { font-size: 8.5pt; color: #666; margin-top: 2pt; }
+    .term-amt { font-size: 9.5pt; font-weight: 700; color: #b8892a; margin-top: 3pt; }
+    .footer { margin-top: 24pt; padding-top: 10pt; border-top: 1pt solid #ddd; font-size: 8.5pt; color: #888; text-align: center; }
+    .final-box { background: #111; color: #fff; padding: 14pt 16pt; border-radius: 6pt; margin-top: 14pt; display: flex; justify-content: space-between; align-items: center; }
+    .final-label { font-size: 10pt; opacity: .7; }
+    .final-amount { font-size: 18pt; font-weight: 900; }
+    .note { font-size: 9pt; color: #555; font-style: italic; margin-top: 10pt; }
+  </style>
+  </head><body>
+  <div class="header">
+    <div>
+      <div class="logo">LUXE<span class="gold">HOME</span></div>
+      <div style="font-size:9pt;color:#888;margin-top:4pt">Premium Bathroom Renovation</div>
+    </div>
+    <div class="ref-block">
+      <div class="ref-no">${ref}</div>
+      <div style="font-size:9pt;color:#888;margin-top:2pt">${fmtDate(q.quotationDate)}</div>
+      <div style="font-size:9pt;color:#888;margin-top:2pt">${packageLabel(q.package)} Package</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div>
+      <div class="info-label">Prepared For</div>
+      <div class="info-row" style="font-weight:700">${q.clientName}</div>
+      ${q.clientPhone ? `<div class="info-row">${q.clientPhone}</div>` : ''}
+    </div>
+    <div>
+      <div class="info-label">Project</div>
+      <div class="info-row" style="font-weight:700">${q.projectName || q.projectLocation}</div>
+      ${q.projectName ? `<div class="info-row">${q.projectLocation}</div>` : ''}
+    </div>
+  </div>
+
+  <div class="section-title">Scope of Work</div>
+  <div class="scope-list">
+    ${scope.map(s => `<div class="scope-item">${s}</div>`).join('')}
+  </div>
+
+  <div class="section-title">Cost Breakdown</div>
+  <table>
+    <thead><tr><th>Item</th><th>Amount</th></tr></thead>
+    <tbody>
+      ${costRows.map(([k, v]) => `<tr><td>${k}</td><td>${fmtRs(v)}</td></tr>`).join('')}
+    </tbody>
+  </table>
+
+  <div class="final-box">
+    <div>
+      <div class="final-label">${q.finalPriceOverride != null ? 'Special Price' : 'Total Investment'}</div>
+      <div style="font-size:8.5pt;opacity:.6">${packageLabel(q.package)} Package · ${q.projectType === 'renovation' ? 'Renovation' : 'Construction'}</div>
+    </div>
+    <div class="final-amount">${fmtRs(bd.finalAmount)}</div>
+  </div>
+
+  <div class="section-title">Payment Schedule</div>
+  <div class="terms-grid">
+    ${q.paymentTerms.map(t => `
+      <div class="term-box">
+        <div class="term-pct">${t.percentage}%</div>
+        <div class="term-lbl">${t.label}</div>
+        <div class="term-amt">${fmtRs(bd.finalAmount * t.percentage / 100)}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="section-title">Brands & Materials</div>
+  <div class="brands-list">
+    ${q.brands.map(b => `<span class="brand-item">${b}</span>`).join('')}
+  </div>
+
+  <div class="note">This quotation is valid for 30 days from the date above. Prices are subject to change based on site conditions.</div>
+
+  <div class="footer">LUXEHOME · Luxury Bathroom Renovation · Sri Lanka</div>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
+/* ── PDF — Invoice ───────────────────────────────────────── */
+function printInvoicePDF(inv: Invoice) {
+  const remaining = inv.finalAmount - inv.paidAmount;
+  const html = `<!DOCTYPE html><html><head>
+  <meta charset="utf-8">
+  <title>${inv.quotationRef} — LUXEHOME Invoice</title>
+  <style>
+    @page { size: A4; margin: 18mm 16mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, 'Times New Roman', serif; color: #111; font-size: 10.5pt; line-height: 1.5; }
+    .logo { font-size: 22pt; font-weight: 900; letter-spacing: .06em; }
+    .gold { color: #b8892a; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12pt; border-bottom: 2pt solid #111; margin-bottom: 16pt; }
+    .section-title { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #888; margin: 16pt 0 8pt; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; }
+    .info-row { font-size: 10pt; }
+    .info-label { color: #666; font-size: 9pt; }
+    table { width: 100%; border-collapse: collapse; margin-top: 6pt; }
+    th { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .06em; color: #888; text-align: left; padding: 6pt 8pt; border-bottom: 1pt solid #ccc; }
+    th:last-child { text-align: right; }
+    td { padding: 7pt 8pt; border-bottom: .5pt solid #eee; font-size: 10pt; }
+    td:last-child { text-align: right; font-weight: 600; }
+    .final-box { background: #111; color: #fff; padding: 14pt 16pt; border-radius: 6pt; margin-top: 14pt; display: flex; justify-content: space-between; align-items: center; }
+    .final-label { font-size: 10pt; opacity: .7; }
+    .final-amount { font-size: 18pt; font-weight: 900; }
+    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin-top: 6pt; }
+    .term-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 8pt; text-align: center; }
+    .term-pct { font-size: 16pt; font-weight: 900; }
+    .term-lbl { font-size: 8.5pt; color: #666; margin-top: 2pt; }
+    .term-amt { font-size: 9.5pt; font-weight: 700; color: #b8892a; margin-top: 3pt; }
+    .footer { margin-top: 24pt; padding-top: 10pt; border-top: 1pt solid #ddd; font-size: 8.5pt; color: #888; text-align: center; }
+    .status-badge { display:inline-block; padding: 3pt 10pt; border-radius: 20pt; font-size: 9pt; font-weight: 700; border: 1.5pt solid #111; }
+  </style>
+  </head><body>
+  <div class="header">
+    <div>
+      <div class="logo">LUXE<span class="gold">HOME</span></div>
+      <div style="font-size:9pt;color:#888;margin-top:4pt">Premium Bathroom Renovation</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:12pt;font-weight:700">INVOICE</div>
+      <div style="font-size:9pt;color:#888;margin-top:2pt">${inv.quotationRef}</div>
+      <div style="font-size:9pt;color:#888">${fmtDate(inv.invoiceDate)}</div>
+      <div style="margin-top:4pt"><span class="status-badge">${inv.status.toUpperCase()}</span></div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div>
+      <div class="info-label">Billed To</div>
+      <div class="info-row" style="font-weight:700">${inv.clientName}</div>
+      ${inv.clientPhone ? `<div class="info-row">${inv.clientPhone}</div>` : ''}
+    </div>
+    <div>
+      <div class="info-label">Project</div>
+      <div class="info-row" style="font-weight:700">${inv.projectName || inv.projectLocation}</div>
+      ${inv.projectName ? `<div class="info-row">${inv.projectLocation}</div>` : ''}
+      <div class="info-row" style="font-size:9pt;color:#666">Due: ${fmtDate(inv.dueDate)}</div>
+    </div>
+  </div>
+
+  <div class="section-title">Summary</div>
+  <table>
+    <thead><tr><th>Description</th><th>Amount</th></tr></thead>
+    <tbody>
+      <tr><td>${packageLabel(inv.package)} Package — ${inv.projectType === 'renovation' ? 'Renovation' : 'Construction'}</td><td>${fmtRs(inv.finalAmount)}</td></tr>
+      ${inv.payments.map(p => `<tr><td style="color:#16a34a">Payment received — ${fmtDateShort(p.date)}${p.note ? ' (' + p.note + ')' : ''}</td><td style="color:#16a34a">− ${fmtRs(p.amount)}</td></tr>`).join('')}
+    </tbody>
+  </table>
+
+  <div class="final-box">
+    <div>
+      <div class="final-label">${remaining <= 0 ? 'PAID IN FULL' : 'Balance Due'}</div>
+    </div>
+    <div class="final-amount">${fmtRs(Math.max(0, remaining))}</div>
+  </div>
+
+  <div class="section-title">Payment Schedule</div>
+  <div class="terms-grid">
+    ${inv.paymentTerms.map(t => `
+      <div class="term-box">
+        <div class="term-pct">${t.percentage}%</div>
+        <div class="term-lbl">${t.label}</div>
+        <div class="term-amt">${fmtRs(inv.finalAmount * t.percentage / 100)}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="footer">LUXEHOME · Luxury Bathroom Renovation · Sri Lanka</div>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
+/* ── WhatsApp sharing ────────────────────────────────────── */
+function shareQuotationWA(q: Quotation) {
+  const bd = q.breakdown;
+  const ref = (q as any).ref || 'LH-QTN';
+  const text = [
+    `*LUXEHOME Quotation — ${ref}*`,
+    ``,
+    `Client: ${q.clientName}`,
+    `Project: ${q.projectName || q.projectLocation}`,
+    `Date: ${fmtDate(q.quotationDate)}`,
+    `Package: ${packageLabel(q.package)}`,
+    ``,
+    `*Total Investment: ${fmtRs(bd.finalAmount)}*`,
+    ``,
+    `Payment Terms:`,
+    ...q.paymentTerms.map(t => `• ${t.label}: ${t.percentage}% (${fmtRs(bd.finalAmount * t.percentage / 100)})`),
+    ``,
+    `_This quotation is valid for 30 days._`,
+  ].join('\n');
+
+  const phone = q.clientPhone?.replace(/\D/g, '') || '';
+  const waPhone = phone.startsWith('94') ? phone : phone.startsWith('0') ? '94' + phone.slice(1) : '';
+  const url = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+function shareInvoiceWA(inv: Invoice) {
+  const remaining = inv.finalAmount - inv.paidAmount;
+  const text = [
+    `*LUXEHOME Invoice — ${inv.quotationRef}*`,
+    ``,
+    `Client: ${inv.clientName}`,
+    `Project: ${inv.projectName || inv.projectLocation}`,
+    `Invoice Date: ${fmtDate(inv.invoiceDate)}`,
+    `Due Date: ${fmtDate(inv.dueDate)}`,
+    ``,
+    `Total: ${fmtRs(inv.finalAmount)}`,
+    `Paid: ${fmtRs(inv.paidAmount)}`,
+    `*Balance Due: ${fmtRs(Math.max(0, remaining))}*`,
+    ``,
+    `Payment Schedule:`,
+    ...inv.paymentTerms.map(t => `• ${t.label}: ${t.percentage}% (${fmtRs(inv.finalAmount * t.percentage / 100)})`),
+  ].join('\n');
+
+  const phone = inv.clientPhone?.replace(/\D/g, '') || '';
+  const waPhone = phone.startsWith('94') ? phone : phone.startsWith('0') ? '94' + phone.slice(1) : '';
+  const url = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+/* ── Wizard helpers ──────────────────────────────────────── */
+function setupSingleSelect(selector: string, field: keyof QuotationInputs) {
+  document.querySelectorAll<HTMLElement>(selector).forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll(selector).forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      (wizardData as any)[field] = card.dataset.val;
+    });
+  });
+}
+
+function stepper(label: string, sub: string, key: string, val: number, min: number, max: number): string {
+  return `
+    <div class="stepper-row">
+      <div><div class="stepper-label">${label}</div><div class="stepper-sub">${sub}</div></div>
+      <div class="stepper-ctrl">
+        <button class="stepper-btn" data-step="${key}" data-dir="-1" data-min="${min}" data-max="${max}">−</button>
+        <span class="stepper-val" id="step-val-${key}">${val}</span>
+        <button class="stepper-btn" data-step="${key}" data-dir="1" data-min="${min}" data-max="${max}">+</button>
+      </div>
+    </div>
+  `;
+}
+
+function setupSteppers(map: Record<string, keyof QuotationInputs>) {
+  document.querySelectorAll<HTMLButtonElement>('[data-step][data-dir]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.step!;
+      const dir = parseInt(btn.dataset.dir!);
+      const min = parseInt(btn.dataset.min || '0');
+      const max = parseInt(btn.dataset.max || '999');
+      const field = map[key];
+      if (!field) return;
+      const cur = (wizardData[field] as number) || 0;
+      const next = Math.max(min, Math.min(max, cur + dir));
+      (wizardData as any)[field] = next;
+      const el = document.getElementById(`step-val-${key}`);
+      if (el) el.textContent = String(next);
+    });
+  });
+}
+
+function toggle(label: string, sub: string, key: string, val: boolean): string {
+  return `
+    <div class="toggle-row" data-toggle="${key}">
+      <div><div class="toggle-label">${label}</div><div class="toggle-sub">${sub}</div></div>
+      <div class="toggle-switch ${val ? 'on' : ''}" id="sw-${key}"></div>
+    </div>
+  `;
+}
+
+function setupToggles(map: Record<string, keyof QuotationInputs>) {
+  document.querySelectorAll<HTMLElement>('[data-toggle]').forEach(row => {
+    row.addEventListener('click', () => {
+      const key = row.dataset.toggle!;
+      const field = map[key];
+      if (!field) return;
+      const next = !((wizardData as any)[field]);
+      (wizardData as any)[field] = next;
+      const sw = document.getElementById(`sw-${key}`)!;
+      sw.classList.toggle('on', next);
+    });
+  });
+}
+
+/* ── Collect step data ───────────────────────────────────── */
+function collectCurrentStep(): boolean {
+  switch (wizardStep) {
+    case 1:  return collectStep1();
+    case 4:  return collectStep4();
+    case 7:  return collectStep7();
+    case 10: return collectStep10();
+    default: return true;
+  }
+}
+
+/* ── Wizard navigation ───────────────────────────────────── */
+document.getElementById('wizard-back-btn')!.addEventListener('click', () => {
+  if (wizardStep === 1) { viewHistory = []; navigate('quotations'); return; }
+  wizardStep--;
+  renderWizard();
+});
+
+document.getElementById('wizard-next-btn')!.addEventListener('click', () => {
+  if (!collectCurrentStep()) return;
+  if (wizardStep === WIZARD_STEPS) { saveQuotation(); return; }
+  wizardStep++;
+  renderWizard();
+});
+
+/* ── Modal helpers ───────────────────────────────────────── */
+type ModalBtn = { label: string; cls: string; action: () => void };
+function showModal(title: string, body: string, buttons: ModalBtn[]) {
+  const overlay = document.getElementById('modal-overlay')!;
+  const box = document.getElementById('modal-box')!;
+  box.innerHTML = `
+    <div class="modal-title">${title}</div>
+    ${body}
+    <div class="modal-actions">
+      ${buttons.map((b, i) => `<button class="${b.cls}" data-modal-btn="${i}">${b.label}</button>`).join('')}
+    </div>
+  `;
+  overlay.classList.add('open');
+  buttons.forEach((b, i) => {
+    box.querySelector<HTMLButtonElement>(`[data-modal-btn="${i}"]`)!
+      .addEventListener('click', b.action);
+  });
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); }, { once: true });
+}
+function closeModal() {
+  document.getElementById('modal-overlay')!.classList.remove('open');
+}
+
+/* ── Toast ───────────────────────────────────────────────── */
+let _toastTimer: ReturnType<typeof setTimeout>;
+function toast(msg: string) {
+  const el = document.getElementById('toast')!;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ── Escape helper ───────────────────────────────────────── */
+function esc(s: string | null | undefined): string {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Bottom nav clicks ───────────────────────────────────── */
+document.querySelectorAll<HTMLButtonElement>('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    viewHistory = [];
+    navigate(btn.dataset.view || 'dashboard', false);
+  });
+});
+
+/* ── Header back button ──────────────────────────────────── */
+headerBack.addEventListener('click', () => {
+  if (currentView === 'wizard') {
+    if (wizardStep > 1) { wizardStep--; renderWizard(); }
+    else { viewHistory = []; navigate('quotations'); }
+  } else {
+    goBack();
+  }
+});
+
+/* ── Boot ────────────────────────────────────────────────── */
+navigate('dashboard', false);
+</script>
 </body>
 </html>
