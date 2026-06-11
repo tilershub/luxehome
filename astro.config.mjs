@@ -5,7 +5,7 @@ export default defineConfig({
   site: 'https://luxehome.com',
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/admin'),
+      filter: (page) => !page.includes('/admin') && !page.includes('/quotation'),
     }),
   ],
 });
