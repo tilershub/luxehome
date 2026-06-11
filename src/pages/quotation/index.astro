@@ -1,0 +1,610 @@
+---
+// Quotation dashboard — open access, no auth required
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Quotation Dashboard — LUXEHOME</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f4f4f2;
+      color: #111;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .admin-hdr {
+      background: #111;
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid #222;
+    }
+    .admin-hdr-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: .85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .admin-logo {
+      font-size: .94rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: #fff; text-decoration: none;
+    }
+    .admin-logo span { color: #777; }
+    .admin-logo em {
+      font-style: normal; font-weight: 500; color: #555;
+      margin-left: .5rem; font-size: .78rem; letter-spacing: .06em;
+      text-transform: none;
+    }
+    .hdr-right { display: flex; align-items: center; gap: .8rem; }
+    .btn-refresh-hdr {
+      font-size: .76rem; font-weight: 600; letter-spacing: .05em;
+      background: transparent; color: #999;
+      border: 1px solid #333; border-radius: 5px;
+      padding: .35rem .75rem; cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .btn-refresh-hdr:hover { color: #fff; border-color: #666; }
+
+    /* ── Main ── */
+    .admin-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.8rem 1.5rem 4rem;
+    }
+
+    /* ── No-Supabase banner ── */
+    .no-sb-banner {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: .9rem 1.2rem;
+      font-size: .82rem;
+      color: #92400e;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+    }
+    .stat-val { font-size: 2rem; font-weight: 700; color: #111; line-height: 1; margin-bottom: .35rem; }
+    .stat-lbl { font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #999; }
+    .stat-card.s-new .stat-val  { color: #2563eb; }
+    .stat-card.s-wip .stat-val  { color: #d97706; }
+    .stat-card.s-done .stat-val { color: #16a34a; }
+
+    /* ── Section ── */
+    .admin-section {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .section-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.2rem 1.4rem .8rem;
+      flex-wrap: wrap;
+    }
+    .section-title {
+      font-size: 1rem; font-weight: 700; letter-spacing: -.01em; color: #111;
+    }
+    .lead-controls { display: flex; align-items: center; gap: .6rem; }
+    .search-input {
+      font-size: .82rem; color: #111;
+      border: 1.5px solid #e5e5e5; border-radius: 6px;
+      padding: .45rem .75rem;
+      outline: none; width: 200px;
+      background: #f8f8f6;
+      transition: border-color .15s;
+    }
+    .search-input:focus { border-color: #111; }
+    .btn-icon {
+      width: 32px; height: 32px;
+      background: #f4f4f2; border: 1px solid #e5e5e5;
+      border-radius: 6px; cursor: pointer;
+      font-size: 1rem; color: #666;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .btn-icon:hover { background: #e5e5e5; }
+
+    /* ── Status tabs ── */
+    .status-tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e5e5;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0 1.4rem;
+    }
+    .status-tabs::-webkit-scrollbar { display: none; }
+    .stab {
+      flex-shrink: 0;
+      padding: .65rem 1rem;
+      font-size: .78rem; font-weight: 600;
+      letter-spacing: .04em; text-transform: uppercase;
+      color: #888; background: none; border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer; transition: color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .stab:hover { color: #111; }
+    .stab.active { color: #111; border-bottom-color: #111; }
+
+    /* ── Leads table ── */
+    .leads-table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    thead th {
+      padding: .65rem 1rem;
+      text-align: left;
+      font-size: .68rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: #999;
+      background: #f8f8f6;
+      border-bottom: 1px solid #e5e5e5;
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #f0f0ee; transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafaf8; }
+    tbody td { padding: .75rem 1rem; color: #333; vertical-align: top; }
+    .td-date { white-space: nowrap; color: #888; font-size: .78rem; }
+    .td-name { font-weight: 600; color: #111; min-width: 120px; }
+    .td-phone a { color: #2563eb; text-decoration: none; }
+    .td-phone a:hover { text-decoration: underline; }
+    .td-location { color: #666; font-size: .8rem; white-space: nowrap; }
+    .td-status select {
+      font-size: .76rem; font-weight: 600;
+      border: 1.5px solid #e5e5e5; border-radius: 5px;
+      padding: .3rem .5rem;
+      cursor: pointer; outline: none;
+      background: #f8f8f6;
+      transition: border-color .15s;
+    }
+    .td-status select:focus { border-color: #111; }
+    .td-expand button {
+      font-size: .72rem; color: #888; background: none; border: none; cursor: pointer;
+      padding: .2rem .4rem;
+    }
+    .td-expand button:hover { color: #111; }
+
+    /* Expand row */
+    .detail-row td {
+      padding: 0 1rem;
+      background: #f8f8f6;
+      border-bottom: 1px solid #e8e8e4;
+    }
+    .detail-inner {
+      padding: .8rem 0 1rem;
+      display: flex; flex-wrap: wrap; gap: .5rem 1.5rem;
+    }
+    .detail-pair { display: flex; flex-direction: column; gap: .15rem; }
+    .detail-key  { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #aaa; }
+    .detail-val  { font-size: .8rem; color: #333; }
+    .detail-notes { margin-top: .4rem; font-size: .8rem; color: #555; font-style: italic; width: 100%; }
+
+    /* Pagination */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .9rem 1.4rem;
+      border-top: 1px solid #e5e5e5;
+      font-size: .78rem; color: #888;
+      flex-wrap: wrap; gap: .5rem;
+    }
+    .page-btns { display: flex; gap: .4rem; }
+    .page-btn {
+      padding: .35rem .75rem;
+      border: 1px solid #e5e5e5; border-radius: 5px;
+      background: #f8f8f6; color: #333;
+      font-size: .78rem; cursor: pointer;
+      transition: background .15s;
+    }
+    .page-btn:hover:not(:disabled) { background: #e5e5e5; }
+    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* States */
+    .state-msg {
+      padding: 3rem 1.4rem;
+      text-align: center;
+      color: #aaa; font-size: .88rem;
+    }
+
+    /* ── Analytics ── */
+    .analytics-inner {
+      padding: 1.2rem 1.4rem;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 800px) { .analytics-inner { grid-template-columns: 1fr; } }
+    .analytics-col-title {
+      font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: #999;
+      margin-bottom: 1rem;
+    }
+    .bar-row { margin-bottom: .65rem; }
+    .bar-label {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .78rem; color: #444; margin-bottom: .25rem;
+    }
+    .bar-label span:last-child { font-weight: 600; color: #111; }
+    .bar-track { background: #f0f0ee; border-radius: 3px; height: 6px; overflow: hidden; }
+    .bar-fill  { background: #111; border-radius: 3px; height: 6px; transition: width .4s ease; }
+    .analytic-summary { display: flex; gap: .8rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .analytic-card {
+      flex: 1; min-width: 110px;
+      background: #f8f8f6; border: 1px solid #e5e5e5; border-radius: 8px;
+      padding: .8rem 1rem;
+    }
+    .analytic-card .aval { font-size: 1.4rem; font-weight: 700; color: #111; }
+    .analytic-card .albl { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: #999; margin-top: .2rem; }
+    .events-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .events-table th {
+      font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: #aaa; padding: .4rem .5rem; text-align: left; border-bottom: 1px solid #e5e5e5;
+    }
+    .events-table td { padding: .5rem; color: #444; border-bottom: 1px solid #f0f0ee; }
+    .events-table tr:last-child td { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+  <header class="admin-hdr">
+    <div class="admin-hdr-inner">
+      <a class="admin-logo" href="/">LUXE<span>HOME</span><em>Quotation</em></a>
+      <div class="hdr-right">
+        <button id="btn-refresh" class="btn-refresh-hdr">↻ Refresh</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+
+    <div id="no-sb-banner" class="no-sb-banner" hidden>
+      ⚠ Supabase is not configured — set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY to load live data.
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="s-total">—</div>
+        <div class="stat-lbl">Total Leads</div>
+      </div>
+      <div class="stat-card s-new">
+        <div class="stat-val" id="s-new">—</div>
+        <div class="stat-lbl">New</div>
+      </div>
+      <div class="stat-card s-wip">
+        <div class="stat-val" id="s-wip">—</div>
+        <div class="stat-lbl">In Progress</div>
+      </div>
+      <div class="stat-card s-done">
+        <div class="stat-val" id="s-done">—</div>
+        <div class="stat-lbl">Completed</div>
+      </div>
+    </div>
+
+    <!-- Leads -->
+    <section class="admin-section">
+      <div class="section-top">
+        <h2 class="section-title">Leads</h2>
+        <div class="lead-controls">
+          <input id="lead-search" type="search" placeholder="Search name or phone…" class="search-input" />
+          <button id="btn-reload" class="btn-icon" title="Reload" aria-label="Reload">↻</button>
+        </div>
+      </div>
+
+      <div class="status-tabs" id="status-tabs" role="tablist">
+        <button class="stab active" data-s="all">All</button>
+        <button class="stab" data-s="new">New</button>
+        <button class="stab" data-s="contacted">Contacted</button>
+        <button class="stab" data-s="inspected">Inspected</button>
+        <button class="stab" data-s="booked">Booked</button>
+        <button class="stab" data-s="completed">Completed</button>
+        <button class="stab" data-s="cancelled">Cancelled</button>
+      </div>
+
+      <div id="leads-wrap">
+        <div class="state-msg">Loading leads…</div>
+      </div>
+    </section>
+
+    <!-- Cart Analytics -->
+    <section class="admin-section">
+      <div class="section-top" style="padding-bottom:1.2rem">
+        <h2 class="section-title">Cart Analytics</h2>
+      </div>
+      <div id="analytics-wrap">
+        <div class="state-msg">Loading analytics…</div>
+      </div>
+    </section>
+
+  </main>
+
+<script>
+import { createClient } from '@supabase/supabase-js';
+
+const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL as string;
+const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string;
+
+const sb = SB_URL && SB_KEY ? createClient(SB_URL, SB_KEY) : null;
+
+if (!sb) {
+  document.getElementById('no-sb-banner')!.hidden = false;
+}
+
+/* ── DOM ── */
+const leadsWrap     = document.getElementById('leads-wrap')     as HTMLElement;
+const analyticsWrap = document.getElementById('analytics-wrap') as HTMLElement;
+const statusTabs    = document.getElementById('status-tabs')    as HTMLElement;
+const searchInput   = document.getElementById('lead-search')    as HTMLInputElement;
+
+/* ── State ── */
+let currentFilter = 'all';
+let currentPage   = 0;
+let searchQuery   = '';
+let expandedId: string | null = null;
+const PAGE_SIZE   = 25;
+
+/* ── Helpers ── */
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
+}
+function fmtTime(iso: string) {
+  return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+function fmtRs(n: number) {
+  return 'Rs. ' + Math.round(n).toLocaleString('en-IN');
+}
+function esc(s: string) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const STATUS_LABELS: Record<string,string> = {
+  new:'New', contacted:'Contacted', inspected:'Inspected',
+  booked:'Booked', completed:'Completed', cancelled:'Cancelled',
+};
+
+/* ── Stats ── */
+async function loadStats() {
+  if (!sb) { ['s-total','s-new','s-wip','s-done'].forEach(id => { document.getElementById(id)!.textContent = '0'; }); return; }
+  const { data } = await sb.from('leads').select('status');
+  if (!data) return;
+  const total = data.length;
+  const newC  = data.filter(r => r.status === 'new').length;
+  const wipC  = data.filter(r => ['contacted','inspected','booked'].includes(r.status)).length;
+  const doneC = data.filter(r => r.status === 'completed').length;
+  document.getElementById('s-total')!.textContent = String(total);
+  document.getElementById('s-new')!.textContent   = String(newC);
+  document.getElementById('s-wip')!.textContent   = String(wipC);
+  document.getElementById('s-done')!.textContent  = String(doneC);
+}
+
+/* ── Leads ── */
+document.getElementById('btn-refresh')?.addEventListener('click', reload);
+document.getElementById('btn-reload')?.addEventListener('click', reload);
+
+function reload() { currentPage = 0; loadLeads(); loadStats(); }
+
+statusTabs.querySelectorAll<HTMLButtonElement>('.stab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    statusTabs.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.s ?? 'all';
+    currentPage = 0;
+    loadLeads();
+  });
+});
+
+let searchTimer: ReturnType<typeof setTimeout>;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    currentPage = 0;
+    loadLeads();
+  }, 300);
+});
+
+async function loadLeads() {
+  if (!sb) {
+    leadsWrap.innerHTML = '<div class="state-msg">Supabase not configured — no data available.</div>';
+    return;
+  }
+  leadsWrap.innerHTML = '<div class="state-msg">Loading…</div>';
+
+  let q = sb.from('leads').select('*', { count: 'exact' }).order('created_at', { ascending: false });
+  if (currentFilter !== 'all') q = q.eq('status', currentFilter);
+  if (searchQuery) q = q.or(`name.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
+  q = q.range(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE - 1);
+
+  const { data, error, count } = await q;
+
+  if (error) { leadsWrap.innerHTML = `<div class="state-msg">Error: ${esc(error.message)}</div>`; return; }
+  if (!data || data.length === 0) { leadsWrap.innerHTML = '<div class="state-msg">No leads found.</div>'; return; }
+
+  renderLeads(data, count ?? 0, Math.ceil((count ?? 0) / PAGE_SIZE));
+}
+
+function renderLeads(leads: any[], total: number, totalPages: number) {
+  const tbody = leads.map(lead => {
+    const details    = lead.service_details as Record<string,string> | null;
+    const hasDetails = details && Object.keys(details).length > 0;
+    const isExp      = expandedId === lead.id;
+    const opts = Object.entries(STATUS_LABELS).map(([v,l]) =>
+      `<option value="${v}"${lead.status===v?' selected':''}>${l}</option>`).join('');
+    const expandBtn = hasDetails
+      ? `<button onclick="toggleDet('${lead.id}')">${isExp ? '▲' : '▼'}</button>` : '';
+
+    const row = `
+      <tr id="lead-${lead.id}" data-status="${esc(lead.status??'new')}">
+        <td class="td-date">${fmtDate(lead.created_at)}<br><span style="color:#bbb;font-size:.72rem">${fmtTime(lead.created_at)}</span></td>
+        <td class="td-name">${esc(lead.name??'')}</td>
+        <td class="td-phone"><a href="tel:${esc(lead.phone??'')}">${esc(lead.phone??'')}</a></td>
+        <td>${esc(lead.service??'')}</td>
+        <td class="td-location">${esc(lead.location??'')}</td>
+        <td class="td-status">
+          <select data-id="${lead.id}" onchange="updateStatus(this)">${opts}</select>
+        </td>
+        <td class="td-expand">${expandBtn}</td>
+      </tr>`;
+
+    const detRow = hasDetails ? (() => {
+      const pairs = Object.entries(details!).map(([k,v]) =>
+        `<div class="detail-pair"><span class="detail-key">${esc(k.replace(/_/g,' '))}</span><span class="detail-val">${esc(String(v))}</span></div>`).join('');
+      const notes = lead.notes ? `<div class="detail-notes">"${esc(lead.notes)}"</div>` : '';
+      return `<tr id="det-${lead.id}" class="detail-row"${isExp?'':' hidden'}><td colspan="7"><div class="detail-inner">${pairs}${notes}</div></td></tr>`;
+    })() : '';
+
+    return row + detRow;
+  }).join('');
+
+  const from = currentPage * PAGE_SIZE + 1;
+  const to   = Math.min((currentPage + 1) * PAGE_SIZE, total);
+
+  leadsWrap.innerHTML = `
+    <div class="leads-table-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Name</th><th>Phone</th><th>Service</th><th>Location</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <span>Showing ${from}–${to} of ${total}</span>
+      <div class="page-btns">
+        <button class="page-btn" onclick="changePage(-1)"${currentPage===0?' disabled':''}>← Prev</button>
+        <button class="page-btn" onclick="changePage(1)"${currentPage>=totalPages-1?' disabled':''}>Next →</button>
+      </div>
+    </div>`;
+}
+
+(window as any).toggleDet = (id: string) => {
+  const det = document.getElementById(`det-${id}`);
+  if (!det) return;
+  if (expandedId === id) {
+    det.hidden = true; expandedId = null;
+    const btn = document.querySelector<HTMLButtonElement>(`#lead-${id} .td-expand button`);
+    if (btn) btn.textContent = '▼';
+  } else {
+    if (expandedId) {
+      const old = document.getElementById(`det-${expandedId}`);
+      if (old) old.hidden = true;
+      const oldBtn = document.querySelector<HTMLButtonElement>(`#lead-${expandedId} .td-expand button`);
+      if (oldBtn) oldBtn.textContent = '▼';
+    }
+    det.hidden = false; expandedId = id;
+    const btn = document.querySelector<HTMLButtonElement>(`#lead-${id} .td-expand button`);
+    if (btn) btn.textContent = '▲';
+  }
+};
+
+(window as any).updateStatus = async (sel: HTMLSelectElement) => {
+  if (!sb) return;
+  const id = sel.dataset.id; const status = sel.value;
+  const tr = document.getElementById(`lead-${id}`);
+  if (tr) tr.dataset.status = status;
+  const { error } = await sb.from('leads').update({ status }).eq('id', id);
+  if (error) { alert('Failed to update: ' + error.message); loadLeads(); return; }
+  loadStats();
+};
+
+(window as any).changePage = (dir: number) => {
+  currentPage = Math.max(0, currentPage + dir);
+  loadLeads();
+  document.querySelector('.admin-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+/* ── Analytics ── */
+async function loadAnalytics() {
+  if (!sb) {
+    analyticsWrap.innerHTML = '<div class="state-msg">Supabase not configured — no analytics available.</div>';
+    return;
+  }
+  const { data, error } = await sb
+    .from('cart_events')
+    .select('service_name, price, created_at')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  if (error || !data) { analyticsWrap.innerHTML = '<div class="state-msg">Could not load analytics.</div>'; return; }
+  if (data.length === 0) { analyticsWrap.innerHTML = '<div class="state-msg">No cart events yet.</div>'; return; }
+
+  const svcMap: Record<string,{count:number;total:number}> = {};
+  data.forEach(e => {
+    const k = e.service_name ?? 'Unknown';
+    if (!svcMap[k]) svcMap[k] = { count:0, total:0 };
+    svcMap[k].count++; svcMap[k].total += e.price ?? 0;
+  });
+  const sorted = Object.entries(svcMap).sort((a,b) => b[1].count - a[1].count).slice(0, 8);
+  const maxCount = sorted[0]?.[1].count ?? 1;
+  const totalPot = data.reduce((s,e) => s + (e.price ?? 0), 0);
+
+  const bars = sorted.map(([name,{count}]) => `
+    <div class="bar-row">
+      <div class="bar-label"><span>${esc(name)}</span><span>${count}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxCount*100)}%"></div></div>
+    </div>`).join('');
+
+  const recentRows = data.slice(0,15).map(e => `
+    <tr>
+      <td>${fmtDate(e.created_at)}</td>
+      <td>${esc(e.service_name??'—')}</td>
+      <td style="text-align:right;font-weight:600">${fmtRs(e.price??0)}</td>
+    </tr>`).join('');
+
+  analyticsWrap.innerHTML = `
+    <div class="analytics-inner">
+      <div>
+        <div class="analytics-col-title">Top Services (add-to-cart)</div>
+        <div class="analytic-summary">
+          <div class="analytic-card"><div class="aval">${data.length}</div><div class="albl">Cart Events</div></div>
+          <div class="analytic-card"><div class="aval">${fmtRs(totalPot)}</div><div class="albl">Revenue Potential</div></div>
+        </div>
+        ${bars}
+      </div>
+      <div>
+        <div class="analytics-col-title">Recent Activity</div>
+        <table class="events-table">
+          <thead><tr><th>Date</th><th>Service</th><th style="text-align:right">Value</th></tr></thead>
+          <tbody>${recentRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* ── Boot ── */
+loadStats();
+loadLeads();
+loadAnalytics();
+</script>
+
+</body>
+</html>
