@@ -36,7 +36,7 @@ a, button, [role="button"] {
   --gold:        #b8945a;   /* warm gold accent */
   --sand:        #e4ddd0;   /* warm sand / light border */
   --charcoal:    #1e2820;   /* near-black with green tint */
-  --warm-gray:   #7a8c82;   /* body / secondary text — readable on both light & dark */
+  --warm-gray:   #4e5d56;   /* body / secondary text — 6:1+ contrast on light backgrounds */
   --stone:       #cfc9bc;   /* dividers / muted borders */
   --off-white:   #faf8f3;   /* page background */
 
@@ -100,7 +100,7 @@ h2 {
 /* Section description — used across Services, Materials, Bathroom */
 .sdesc {
   font-size: 1rem;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.82;
   color: var(--warm-gray);
   max-width: 54ch;
