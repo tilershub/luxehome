@@ -1685,3 +1685,303 @@ function printComparisonPDF(q: Quotation) {
   const w = window.open('', '_blank');
   if (w) { w.document.write(html); w.document.close(); }
 }
+
+
+/* ── PDF — Invoice ───────────────────────────────────────── */
+function printInvoicePDF(inv: Invoice) {
+  const remaining = inv.finalAmount - inv.paidAmount;
+  const html = `<!DOCTYPE html><html><head>
+  <meta charset="utf-8">
+  <title>${inv.quotationRef} — LUXEHOME Invoice</title>
+  <style>
+    @page { size: A4; margin: 18mm 16mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, 'Times New Roman', serif; color: #111; font-size: 10.5pt; line-height: 1.5; }
+    .logo { font-size: 22pt; font-weight: 900; letter-spacing: .06em; }
+    .gold { color: #b8892a; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12pt; border-bottom: 2pt solid #111; margin-bottom: 16pt; }
+    .section-title { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #888; margin: 16pt 0 8pt; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; }
+    .info-row { font-size: 10pt; }
+    .info-label { color: #666; font-size: 9pt; }
+    table { width: 100%; border-collapse: collapse; margin-top: 6pt; }
+    th { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .06em; color: #888; text-align: left; padding: 6pt 8pt; border-bottom: 1pt solid #ccc; }
+    th:last-child { text-align: right; }
+    td { padding: 7pt 8pt; border-bottom: .5pt solid #eee; font-size: 10pt; }
+    td:last-child { text-align: right; font-weight: 600; }
+    .final-box { background: #111; color: #fff; padding: 14pt 16pt; border-radius: 6pt; margin-top: 14pt; display: flex; justify-content: space-between; align-items: center; }
+    .final-label { font-size: 10pt; opacity: .7; }
+    .final-amount { font-size: 18pt; font-weight: 900; }
+    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin-top: 6pt; }
+    .term-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 8pt; text-align: center; }
+    .term-pct { font-size: 16pt; font-weight: 900; }
+    .term-lbl { font-size: 8.5pt; color: #666; margin-top: 2pt; }
+    .term-amt { font-size: 9.5pt; font-weight: 700; color: #b8892a; margin-top: 3pt; }
+    .footer { margin-top: 24pt; padding-top: 10pt; border-top: 1pt solid #ddd; font-size: 8.5pt; color: #888; text-align: center; }
+    .status-badge { display:inline-block; padding: 3pt 10pt; border-radius: 20pt; font-size: 9pt; font-weight: 700; border: 1.5pt solid #111; }
+  </style>
+  </head><body>
+  <div class="header">
+    <div>
+      <div class="logo">LUXE<span class="gold">HOME</span></div>
+      <div style="font-size:9pt;color:#888;margin-top:4pt">Premium Bathroom Renovation</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:12pt;font-weight:700">INVOICE</div>
+      <div style="font-size:9pt;color:#888;margin-top:2pt">${inv.quotationRef}</div>
+      <div style="font-size:9pt;color:#888">${fmtDate(inv.invoiceDate)}</div>
+      <div style="margin-top:4pt"><span class="status-badge">${inv.status.toUpperCase()}</span></div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div>
+      <div class="info-label">Billed To</div>
+      <div class="info-row" style="font-weight:700">${inv.clientName}</div>
+      ${inv.clientPhone ? `<div class="info-row">${inv.clientPhone}</div>` : ''}
+    </div>
+    <div>
+      <div class="info-label">Project</div>
+      <div class="info-row" style="font-weight:700">${inv.projectName || inv.projectLocation}</div>
+      ${inv.projectName ? `<div class="info-row">${inv.projectLocation}</div>` : ''}
+      <div class="info-row" style="font-size:9pt;color:#666">Due: ${fmtDate(inv.dueDate)}</div>
+    </div>
+  </div>
+
+  <div class="section-title">Summary</div>
+  <table>
+    <thead><tr><th>Description</th><th>Amount</th></tr></thead>
+    <tbody>
+      <tr><td>${packageLabel(inv.package)} Package — ${inv.projectType === 'renovation' ? 'Renovation' : 'Construction'}</td><td>${fmtRs(inv.finalAmount)}</td></tr>
+      ${inv.payments.map(p => `<tr><td style="color:#16a34a">Payment received — ${fmtDateShort(p.date)}${p.note ? ' (' + p.note + ')' : ''}</td><td style="color:#16a34a">− ${fmtRs(p.amount)}</td></tr>`).join('')}
+    </tbody>
+  </table>
+
+  <div class="final-box">
+    <div>
+      <div class="final-label">${remaining <= 0 ? 'PAID IN FULL' : 'Balance Due'}</div>
+    </div>
+    <div class="final-amount">${fmtRs(Math.max(0, remaining))}</div>
+  </div>
+
+  <div class="section-title">Payment Schedule</div>
+  <div class="terms-grid">
+    ${inv.paymentTerms.map(t => `
+      <div class="term-box">
+        <div class="term-pct">${t.percentage}%</div>
+        <div class="term-lbl">${t.label}</div>
+        <div class="term-amt">${fmtRs(inv.finalAmount * t.percentage / 100)}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="footer">LUXEHOME · Luxury Bathroom Renovation · Sri Lanka</div>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
+/* ── WhatsApp sharing ────────────────────────────────────── */
+function shareQuotationWA(q: Quotation) {
+  const bd = q.breakdown;
+  const ref = (q as any).ref || 'LH-QTN';
+  const text = [
+    `*LUXEHOME Quotation — ${ref}*`,
+    ``,
+    `Client: ${q.clientName}`,
+    `Project: ${q.projectName || q.projectLocation}`,
+    `Date: ${fmtDate(q.quotationDate)}`,
+    `Package: ${packageLabel(q.package)}`,
+    ``,
+    `*Total Investment: ${fmtRs(bd.finalAmount)}*`,
+    ``,
+    `Payment Terms:`,
+    ...q.paymentTerms.map(t => `• ${t.label}: ${t.percentage}% (${fmtRs(bd.finalAmount * t.percentage / 100)})`),
+    ``,
+    `_This quotation is valid for 30 days._`,
+  ].join('\n');
+
+  const phone = q.clientPhone?.replace(/\D/g, '') || '';
+  const waPhone = phone.startsWith('94') ? phone : phone.startsWith('0') ? '94' + phone.slice(1) : '';
+  const url = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+function shareInvoiceWA(inv: Invoice) {
+  const remaining = inv.finalAmount - inv.paidAmount;
+  const text = [
+    `*LUXEHOME Invoice — ${inv.quotationRef}*`,
+    ``,
+    `Client: ${inv.clientName}`,
+    `Project: ${inv.projectName || inv.projectLocation}`,
+    `Invoice Date: ${fmtDate(inv.invoiceDate)}`,
+    `Due Date: ${fmtDate(inv.dueDate)}`,
+    ``,
+    `Total: ${fmtRs(inv.finalAmount)}`,
+    `Paid: ${fmtRs(inv.paidAmount)}`,
+    `*Balance Due: ${fmtRs(Math.max(0, remaining))}*`,
+    ``,
+    `Payment Schedule:`,
+    ...inv.paymentTerms.map(t => `• ${t.label}: ${t.percentage}% (${fmtRs(inv.finalAmount * t.percentage / 100)})`),
+  ].join('\n');
+
+  const phone = inv.clientPhone?.replace(/\D/g, '') || '';
+  const waPhone = phone.startsWith('94') ? phone : phone.startsWith('0') ? '94' + phone.slice(1) : '';
+  const url = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+/* ── Wizard helpers ──────────────────────────────────────── */
+function setupSingleSelect(selector: string, field: keyof QuotationInputs) {
+  document.querySelectorAll<HTMLElement>(selector).forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll(selector).forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      (wizardData as any)[field] = card.dataset.val;
+    });
+  });
+}
+
+function stepper(label: string, sub: string, key: string, val: number, min: number, max: number): string {
+  return `
+    <div class="stepper-row">
+      <div><div class="stepper-label">${label}</div><div class="stepper-sub">${sub}</div></div>
+      <div class="stepper-ctrl">
+        <button class="stepper-btn" data-step="${key}" data-dir="-1" data-min="${min}" data-max="${max}">−</button>
+        <span class="stepper-val" id="step-val-${key}">${val}</span>
+        <button class="stepper-btn" data-step="${key}" data-dir="1" data-min="${min}" data-max="${max}">+</button>
+      </div>
+    </div>
+  `;
+}
+
+function setupSteppers(map: Record<string, keyof QuotationInputs>) {
+  document.querySelectorAll<HTMLButtonElement>('[data-step][data-dir]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.step!;
+      const dir = parseInt(btn.dataset.dir!);
+      const min = parseInt(btn.dataset.min || '0');
+      const max = parseInt(btn.dataset.max || '999');
+      const field = map[key];
+      if (!field) return;
+      const cur = (wizardData[field] as number) || 0;
+      const next = Math.max(min, Math.min(max, cur + dir));
+      (wizardData as any)[field] = next;
+      const el = document.getElementById(`step-val-${key}`);
+      if (el) el.textContent = String(next);
+    });
+  });
+}
+
+function toggle(label: string, sub: string, key: string, val: boolean): string {
+  return `
+    <div class="toggle-row" data-toggle="${key}">
+      <div><div class="toggle-label">${label}</div><div class="toggle-sub">${sub}</div></div>
+      <div class="toggle-switch ${val ? 'on' : ''}" id="sw-${key}"></div>
+    </div>
+  `;
+}
+
+function setupToggles(map: Record<string, keyof QuotationInputs>) {
+  document.querySelectorAll<HTMLElement>('[data-toggle]').forEach(row => {
+    row.addEventListener('click', () => {
+      const key = row.dataset.toggle!;
+      const field = map[key];
+      if (!field) return;
+      const next = !((wizardData as any)[field]);
+      (wizardData as any)[field] = next;
+      const sw = document.getElementById(`sw-${key}`)!;
+      sw.classList.toggle('on', next);
+    });
+  });
+}
+
+/* ── Collect step data ───────────────────────────────────── */
+function collectCurrentStep(): boolean {
+  switch (wizardStep) {
+    case 1:  return collectStep1();
+    case 4:  return collectStep4();
+    case 7:  return collectStep7();
+    case 9:  return collectStep9();
+    case 10: return collectStep10();
+    default: return true;
+  }
+}
+
+/* ── Wizard navigation ───────────────────────────────────── */
+document.getElementById('wizard-back-btn')!.addEventListener('click', () => {
+  if (wizardStep === 1) { viewHistory = []; navigate('quotations'); return; }
+  wizardStep--;
+  renderWizard();
+});
+
+document.getElementById('wizard-next-btn')!.addEventListener('click', () => {
+  if (!collectCurrentStep()) return;
+  if (wizardStep === WIZARD_STEPS) { saveQuotation(); return; }
+  wizardStep++;
+  renderWizard();
+});
+
+/* ── Modal helpers ───────────────────────────────────────── */
+type ModalBtn = { label: string; cls: string; action: () => void };
+function showModal(title: string, body: string, buttons: ModalBtn[]) {
+  const overlay = document.getElementById('modal-overlay')!;
+  const box = document.getElementById('modal-box')!;
+  box.innerHTML = `
+    <div class="modal-title">${title}</div>
+    ${body}
+    <div class="modal-actions">
+      ${buttons.map((b, i) => `<button class="${b.cls}" data-modal-btn="${i}">${b.label}</button>`).join('')}
+    </div>
+  `;
+  overlay.classList.add('open');
+  buttons.forEach((b, i) => {
+    box.querySelector<HTMLButtonElement>(`[data-modal-btn="${i}"]`)!
+      .addEventListener('click', b.action);
+  });
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); }, { once: true });
+}
+function closeModal() {
+  document.getElementById('modal-overlay')!.classList.remove('open');
+}
+
+/* ── Toast ───────────────────────────────────────────────── */
+let _toastTimer: ReturnType<typeof setTimeout>;
+function toast(msg: string) {
+  const el = document.getElementById('toast')!;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ── Escape helper ───────────────────────────────────────── */
+function esc(s: string | null | undefined): string {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Bottom nav clicks ───────────────────────────────────── */
+document.querySelectorAll<HTMLButtonElement>('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    viewHistory = [];
+    navigate(btn.dataset.view || 'dashboard', false);
+  });
+});
+
+/* ── Header back button ──────────────────────────────────── */
+headerBack.addEventListener('click', () => {
+  if (currentView === 'wizard') {
+    if (wizardStep > 1) { wizardStep--; renderWizard(); }
+    else { viewHistory = []; navigate('quotations'); }
+  } else {
+    goBack();
+  }
+});
+
+/* ── Boot ────────────────────────────────────────────────── */
+navigate('dashboard', false);
+</script>
+</body>
+</html>
