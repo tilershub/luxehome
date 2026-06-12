@@ -674,8 +674,8 @@ function renderStep8() {
     <div class="step-content">
       <div class="step-q">Extra items</div>
       <div class="step-hint">Toggle what's included in this bathroom.</div>
-      ${toggle('Ceiling Installation', `${fmtRs(RATES.ceiling.perSqFt)}/sqft × floor area`, 'ceiling', wizardData.hasCeiling)}
-      ${toggle('Vanity Cupboard & Countertop', `${fmtRs(RATES.vanity[wizardData.package])} (${packageLabel(wizardData.package)})`, 'vanity', wizardData.hasVanity)}
+      ${toggle('Ceiling Installation', `Yes: ${fmtRs(RATES.ceiling.perSqFt)}/sqft · No: ${fmtRs(RATES.ceiling.flat)} flat`, 'ceiling', wizardData.hasCeiling)}
+      ${toggle('Vanity Cupboard & Countertop', `Yes: ${fmtRs(RATES.vanity[wizardData.package])} (${packageLabel(wizardData.package)}) · No: ${fmtRs(RATES.vanity.basic)}`, 'vanity', wizardData.hasVanity)}
       ${toggle('Geyser / Water Heater', fmtRs(RATES.geyser), 'geyser', wizardData.hasGeyser)}
       ${toggle('Door', `${fmtRs(RATES.door[wizardData.package])} (${packageLabel(wizardData.package)})`, 'door', wizardData.hasDoor)}
       ${toggle('Window', `${fmtRs(RATES.window[wizardData.package])} (${packageLabel(wizardData.package)})`, 'window', wizardData.hasWindow)}
