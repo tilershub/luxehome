@@ -411,7 +411,7 @@ let _currentQtnId: string | null = null;
 
 function startWizard(qtn?: Quotation) {
   editingId = qtn?.id || null;
-  wizardData = qtn ? { ...qtn } : defaultInputs();
+  wizardData = qtn ? { ...defaultInputs(), ...qtn } : defaultInputs();
   wizardData.brands = [...(qtn?.brands ?? DEFAULT_BRANDS)];
   wizardData.paymentTerms = (qtn?.paymentTerms ?? DEFAULT_PAYMENT_TERMS).map(t => ({ ...t }));
   wizardStep = 1;
@@ -674,18 +674,21 @@ function renderStep8() {
     <div class="step-content">
       <div class="step-q">Extra items</div>
       <div class="step-hint">Toggle what's included in this bathroom.</div>
+      ${toggle('Ceiling Installation', `${fmtRs(RATES.ceiling.perSqFt)}/sqft × floor area`, 'ceiling', wizardData.hasCeiling)}
+      ${toggle('Vanity Cupboard & Countertop', `${fmtRs(RATES.vanity[wizardData.package])} (${packageLabel(wizardData.package)})`, 'vanity', wizardData.hasVanity)}
       ${toggle('Geyser / Water Heater', fmtRs(RATES.geyser), 'geyser', wizardData.hasGeyser)}
       ${toggle('Door', `${fmtRs(RATES.door[wizardData.package])} (${packageLabel(wizardData.package)})`, 'door', wizardData.hasDoor)}
       ${toggle('Window', `${fmtRs(RATES.window[wizardData.package])} (${packageLabel(wizardData.package)})`, 'window', wizardData.hasWindow)}
     </div>
   `;
-  setupToggles({ geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow' });
+  setupToggles({ ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow' });
 }
 
-/* Step 9 — Difficulty */
+/* Step 9 — Difficulty + Profit Margin */
 function renderStep9() {
   // Store as integer (×100) for cross-browser range compatibility; divide by 100 for display
   const val = Math.round(Math.max(80, Math.min(150, (wizardData.difficultyScore || 1) * 100)));
+  const profitPct = Math.round((wizardData.profitMargin ?? 0.15) * 100);
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Difficulty / complexity</div>
@@ -700,6 +703,11 @@ function renderStep9() {
           <span>1.50× Complex</span>
         </div>
       </div>
+
+      <div class="step-q" style="margin-top:2rem">Profit margin (%)</div>
+      <div class="step-hint">Percentage added on top of the difficulty-adjusted cost.</div>
+      <input type="number" id="profit-input" class="field-input" min="0" max="50" step="1"
+        value="${profitPct}" style="max-width:140px;font-size:1.1rem;font-weight:600;text-align:center">
     </div>
   `;
   const slider = document.getElementById('diff-slider') as HTMLInputElement;
@@ -715,6 +723,8 @@ function collectStep9(): boolean {
   const raw = parseInt((document.getElementById('diff-slider') as HTMLInputElement | null)?.value || '100', 10);
   const score = Math.max(80, Math.min(150, isNaN(raw) ? 100 : raw)) / 100;
   wizardData.difficultyScore = score;
+  const pct = parseFloat((document.getElementById('profit-input') as HTMLInputElement | null)?.value || '15');
+  wizardData.profitMargin = Math.max(0, Math.min(0.5, (isNaN(pct) ? 15 : pct) / 100));
   return true;
 }
 
@@ -835,13 +845,15 @@ function renderStep11() {
     ['Wall Niches',      `${wizardData.wallNiches}`],
     ['Plumbing',         packageLabel(wizardData.plumbing as PackageType)],
     ['Shower',           wizardData.showerCubicle === 'none' ? 'None' : `${wizardData.showerCubicle} (${wizardData.showerLength} lft)`],
-    ['Geyser',           wizardData.hasGeyser ? 'Yes' : 'No'],
-    ['Door',             wizardData.hasDoor   ? 'Yes' : 'No'],
-    ['Window',           wizardData.hasWindow ? 'Yes' : 'No'],
+    ['Ceiling',          wizardData.hasCeiling ? 'Yes' : 'No'],
+    ['Vanity',           wizardData.hasVanity  ? 'Yes' : 'No'],
+    ['Geyser',           wizardData.hasGeyser  ? 'Yes' : 'No'],
+    ['Door',             wizardData.hasDoor    ? 'Yes' : 'No'],
+    ['Window',           wizardData.hasWindow  ? 'Yes' : 'No'],
     ['Difficulty',       `${wizardData.difficultyScore.toFixed(2)}×`],
     ['Project Cost',     fmtRs(bd.projectCost)],
     ['After Difficulty', fmtRs(bd.difficultyAdjusted)],
-    ['Profit (15%)',     fmtRs(bd.profitAmount)],
+    [`Profit (${Math.round((wizardData.profitMargin ?? 0.15) * 100)}%)`, fmtRs(bd.profitAmount)],
   ];
 
   main.innerHTML = `
@@ -992,7 +1004,7 @@ function renderQtnDetail() {
             <span class="inv-detail-val">${fmtRs(bd.difficultyAdjusted)}</span>
           </div>
           <div class="inv-detail-row" style="padding:8px 16px;border-bottom:none">
-            <span class="inv-detail-key">Profit (15%)</span>
+            <span class="inv-detail-key">Profit (${Math.round((q.profitMargin ?? 0.15) * 100)}%)</span>
             <span class="inv-detail-val">${fmtRs(bd.profitAmount)}</span>
           </div>
         </div>
