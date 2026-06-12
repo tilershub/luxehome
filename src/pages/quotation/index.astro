@@ -1273,39 +1273,39 @@ function printQuotationPDF(q: Quotation) {
   <meta charset="utf-8">
   <title>${ref} — LUXEHOME Quotation</title>
   <style>
-    @page { size: A4; margin: 22mm 20mm 20mm 20mm; }
+    @page { size: A4; margin: 14mm 15mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; font-size: 10pt; line-height: 1.6; }
-    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 14pt; border-bottom: 2pt solid #111; margin-bottom: 22pt; }
-    .logo { font-size: 20pt; font-weight: 900; letter-spacing: .08em; line-height: 1; }
-    .logo-sub { font-size: 8pt; color: #999; letter-spacing: .12em; text-transform: uppercase; margin-top: 4pt; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; font-size: 9.5pt; line-height: 1.5; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 10pt; border-bottom: 2pt solid #111; margin-bottom: 14pt; }
+    .logo { font-size: 18pt; font-weight: 900; letter-spacing: .08em; line-height: 1; }
+    .logo-sub { font-size: 7.5pt; color: #999; letter-spacing: .1em; text-transform: uppercase; margin-top: 3pt; }
     .ref-block { text-align: right; }
-    .ref-no { font-size: 13pt; font-weight: 800; letter-spacing: .04em; }
-    .ref-meta { font-size: 8.5pt; color: #777; margin-top: 3pt; line-height: 1.6; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 22pt; }
-    .info-cell { padding-right: 22pt; }
-    .info-cell + .info-cell { padding-right: 0; padding-left: 22pt; border-left: 1pt solid #e8e8e8; }
-    .info-label { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; margin-bottom: 5pt; }
-    .info-name { font-size: 12pt; font-weight: 700; line-height: 1.3; }
-    .info-detail { font-size: 9.5pt; color: #555; margin-top: 3pt; }
-    .section-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; padding-bottom: 7pt; border-bottom: 1pt solid #e0e0e0; margin-bottom: 12pt; margin-top: 22pt; }
-    .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24pt; }
-    .scope-item { font-size: 9.5pt; padding: 5pt 0; display: flex; align-items: baseline; gap: 7pt; border-bottom: .5pt solid #f2f2f2; }
-    .scope-check { color: #b8892a; font-size: 8pt; font-weight: 700; flex-shrink: 0; }
-    .final-box { background: #111; color: #fff; padding: 16pt 20pt; border-radius: 6pt; margin-top: 22pt; display: flex; justify-content: space-between; align-items: center; }
-    .final-label { font-size: 9pt; opacity: .65; letter-spacing: .04em; }
-    .final-sub { font-size: 8pt; opacity: .5; margin-top: 3pt; }
-    .final-amount { font-size: 22pt; font-weight: 900; letter-spacing: -.01em; }
-    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; }
-    .term-box { border: 1pt solid #ddd; border-radius: 5pt; padding: 12pt 8pt; text-align: center; }
-    .term-pct { font-size: 18pt; font-weight: 900; color: #111; line-height: 1; }
-    .term-lbl { font-size: 8pt; color: #777; margin-top: 5pt; line-height: 1.4; }
-    .term-amt { font-size: 9.5pt; font-weight: 700; color: #b8892a; margin-top: 6pt; }
-    .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2pt 16pt; }
-    .brand-item { font-size: 9pt; color: #444; padding: 4pt 0; display: flex; align-items: center; gap: 6pt; border-bottom: .5pt solid #f2f2f2; }
-    .brand-dot { width: 4pt; height: 4pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
-    .note { font-size: 8.5pt; color: #888; font-style: italic; margin-top: 20pt; line-height: 1.6; }
-    .footer { margin-top: 16pt; padding-top: 10pt; border-top: 1pt solid #e0e0e0; font-size: 7.5pt; color: #bbb; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
+    .ref-no { font-size: 12pt; font-weight: 800; letter-spacing: .04em; }
+    .ref-meta { font-size: 8pt; color: #777; margin-top: 2pt; line-height: 1.5; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 14pt; }
+    .info-cell { padding-right: 18pt; }
+    .info-cell + .info-cell { padding-right: 0; padding-left: 18pt; border-left: 1pt solid #e8e8e8; }
+    .info-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; margin-bottom: 3pt; }
+    .info-name { font-size: 11pt; font-weight: 700; line-height: 1.3; }
+    .info-detail { font-size: 9pt; color: #555; margin-top: 2pt; }
+    .section-title { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; padding-bottom: 5pt; border-bottom: 1pt solid #e0e0e0; margin-bottom: 8pt; margin-top: 14pt; break-after: avoid; }
+    .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20pt; }
+    .scope-item { font-size: 9pt; padding: 3.5pt 0; display: flex; align-items: baseline; gap: 6pt; border-bottom: .5pt solid #f2f2f2; break-inside: avoid; }
+    .scope-check { color: #b8892a; font-size: 7.5pt; font-weight: 700; flex-shrink: 0; }
+    .final-box { background: #111; color: #fff; padding: 12pt 16pt; border-radius: 5pt; margin-top: 14pt; display: flex; justify-content: space-between; align-items: center; break-inside: avoid; }
+    .final-label { font-size: 8.5pt; opacity: .65; letter-spacing: .04em; }
+    .final-sub { font-size: 7.5pt; opacity: .5; margin-top: 2pt; }
+    .final-amount { font-size: 19pt; font-weight: 900; letter-spacing: -.01em; }
+    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; break-inside: avoid; }
+    .term-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 9pt 6pt; text-align: center; break-inside: avoid; }
+    .term-pct { font-size: 16pt; font-weight: 900; color: #111; line-height: 1; }
+    .term-lbl { font-size: 7.5pt; color: #777; margin-top: 4pt; line-height: 1.3; }
+    .term-amt { font-size: 9pt; font-weight: 700; color: #b8892a; margin-top: 4pt; }
+    .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1pt 14pt; break-inside: avoid; }
+    .brand-item { font-size: 8.5pt; color: #444; padding: 3pt 0; display: flex; align-items: center; gap: 5pt; border-bottom: .5pt solid #f2f2f2; break-inside: avoid; }
+    .brand-dot { width: 3.5pt; height: 3.5pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
+    .note { font-size: 8pt; color: #999; font-style: italic; margin-top: 14pt; line-height: 1.5; }
+    .footer { margin-top: 10pt; padding-top: 8pt; border-top: 1pt solid #e0e0e0; font-size: 7pt; color: #bbb; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
   </style>
   </head><body>
 
