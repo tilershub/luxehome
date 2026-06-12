@@ -25,7 +25,7 @@ export const RATES = {
   } as Record<PlumbingType, number>,
   wiring:        { perPoint: 3_000 },
   waterproofing: { perSqFt: 230 },
-  ceiling:       { perSqFt: 1_000, flat: 20_000 },
+  ceiling:       { perSqFt: { basic: 800, premium: 1_000, signature: 1_200 } as Record<PackageType, number>, flat: 20_000 },
   lightFixture: {
     basic: 3_000, premium: 3_500, signature: 4_000,
   } as Record<PackageType, number>,
@@ -181,7 +181,7 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
   const plumbingCost     = RATES.plumbing[q.plumbing];
   const wiringCost       = q.wiringPoints * RATES.wiring.perPoint;
   const waterproofingCost = q.waterproofingArea * RATES.waterproofing.perSqFt;
-  const ceilingCost      = q.hasCeiling ? ceilingArea * RATES.ceiling.perSqFt : RATES.ceiling.flat;
+  const ceilingCost      = q.hasCeiling ? ceilingArea * RATES.ceiling.perSqFt[q.package] : RATES.ceiling.flat;
   const lightFixtureCost = q.wiringPoints * RATES.lightFixture[q.package];
   const geyserCost       = q.hasGeyser ? RATES.geyser : 0;
   const vanityCost       = q.hasVanity ? RATES.vanity[q.package] : RATES.vanity.basic;
