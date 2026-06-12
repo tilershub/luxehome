@@ -160,6 +160,11 @@ export interface Invoice {
 
 /* ── Calculation ──────────────────────────────────────────── */
 export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
+  // Clamp difficultyScore — mobile range inputs may produce values outside min/max
+  const difficultyScore = Math.max(0.8, Math.min(1.5, Number(q.difficultyScore) || 1.0));
+  // Guard finalPriceOverride: treat 0 or negative same as null
+  const finalPriceOverride = (q.finalPriceOverride != null && q.finalPriceOverride > 0) ? q.finalPriceOverride : null;
+
   const totalTilingArea  = q.floorArea + q.wallArea;
   const ceilingArea      = q.floorArea;
   const renovationCost   = q.projectType === 'renovation' ? totalTilingArea * RATES.renovation.perSqFt : 0;
@@ -190,10 +195,10 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
     + ceilingCost + lightFixtureCost + geyserCost + vanityCost + showerCost
     + mirrorCost + bathwareCost + doorCost + windowCost + overhead;
 
-  const difficultyAdjusted = projectCost * q.difficultyScore;
+  const difficultyAdjusted = projectCost * difficultyScore;
   const profitAmount       = difficultyAdjusted * RATES.profitMargin;
   const finalSellingPrice  = difficultyAdjusted + profitAmount;
-  const finalAmount        = q.finalPriceOverride != null ? q.finalPriceOverride : finalSellingPrice;
+  const finalAmount        = finalPriceOverride != null ? finalPriceOverride : finalSellingPrice;
 
   return {
     totalTilingArea, ceilingArea,
