@@ -684,15 +684,16 @@ function renderStep8() {
 
 /* Step 9 — Difficulty */
 function renderStep9() {
-  const val = wizardData.difficultyScore;
+  // Store as integer (×100) for cross-browser range compatibility; divide by 100 for display
+  const val = Math.round(Math.max(80, Math.min(150, (wizardData.difficultyScore || 1) * 100)));
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Difficulty / complexity</div>
       <div class="step-hint">Adjust for site challenges. 1.00 = standard. Applied to all costs before profit.</div>
-      <div class="slider-current" id="diff-display">${val.toFixed(2)}×</div>
+      <div class="slider-current" id="diff-display">${(val / 100).toFixed(2)}×</div>
       <div class="slider-wrap">
         <input type="range" class="slider-inp" id="diff-slider"
-          min="0.80" max="1.50" step="0.01" value="${val}">
+          min="80" max="150" step="1" value="${val}">
         <div class="slider-labels">
           <span>0.80× Easy</span>
           <span>1.00× Standard</span>
@@ -704,9 +705,17 @@ function renderStep9() {
   const slider = document.getElementById('diff-slider') as HTMLInputElement;
   const display = document.getElementById('diff-display')!;
   slider.addEventListener('input', () => {
-    wizardData.difficultyScore = parseFloat(slider.value);
-    display.textContent = `${parseFloat(slider.value).toFixed(2)}×`;
+    const score = parseInt(slider.value, 10) / 100;
+    wizardData.difficultyScore = score;
+    display.textContent = `${score.toFixed(2)}×`;
   });
+}
+
+function collectStep9(): boolean {
+  const raw = parseInt((document.getElementById('diff-slider') as HTMLInputElement | null)?.value || '100', 10);
+  const score = Math.max(80, Math.min(150, isNaN(raw) ? 100 : raw)) / 100;
+  wizardData.difficultyScore = score;
+  return true;
 }
 
 /* Step 10 — Brands & Payment Terms */
@@ -1586,6 +1595,7 @@ function collectCurrentStep(): boolean {
     case 1:  return collectStep1();
     case 4:  return collectStep4();
     case 7:  return collectStep7();
+    case 9:  return collectStep9();
     case 10: return collectStep10();
     default: return true;
   }

@@ -24,6 +24,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- Mark JS as active before body parses so .reveal elements are hidden only when JS runs -->
+    <script>document.documentElement.classList.add('js');</script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
