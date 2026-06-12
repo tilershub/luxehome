@@ -98,6 +98,7 @@ export interface QuotationInputs {
   wallNiches:        number;
   wiringPoints:      number;
   difficultyScore:   number;
+  renovationRate:    number;
   brands:            string[];
   paymentTerms:      PaymentTerm[];
   finalPriceOverride: number | null;
@@ -170,7 +171,8 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
 
   const totalTilingArea  = q.floorArea + q.wallArea;
   const ceilingArea      = q.floorArea;
-  const renovationCost   = q.projectType === 'renovation' ? totalTilingArea * RATES.renovation.perSqFt : 0;
+  const renovationRate   = Math.max(0, Number(q.renovationRate) || RATES.renovation.perSqFt);
+  const renovationCost   = q.projectType === 'renovation' ? totalTilingArea * renovationRate : 0;
   const designPlanning   = RATES.designPlanning;
   const wallNicheCost    = q.wallNiches * RATES.wallNiche.each;
   const floorConcreteCost = q.floorArea * RATES.floorConcrete.perSqFt;
@@ -279,6 +281,7 @@ export function defaultInputs(): QuotationInputs {
     floorArea: 0, wallArea: 0, waterproofingArea: 0, dummyWallArea: 0,
     wallNiches: 0, wiringPoints: 0,
     difficultyScore: 1.00,
+    renovationRate: RATES.renovation.perSqFt,
     brands: [...DEFAULT_BRANDS],
     paymentTerms: DEFAULT_PAYMENT_TERMS.map(t => ({ ...t })),
     finalPriceOverride: null,

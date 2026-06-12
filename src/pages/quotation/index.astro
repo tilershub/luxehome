@@ -708,6 +708,13 @@ function renderStep9() {
       <div class="step-hint">Percentage added on top of the difficulty-adjusted cost.</div>
       <input type="number" id="profit-input" class="field-input" min="0" max="50" step="1"
         value="${profitPct}" style="max-width:140px;font-size:1.1rem;font-weight:600;text-align:center">
+
+      ${wizardData.projectType === 'renovation' ? `
+      <div class="step-q" style="margin-top:2rem">Renovation rate (Rs./sqft)</div>
+      <div class="step-hint">Applied to total tiling area (floor + wall). Default: Rs. 250/sqft.</div>
+      <input type="number" id="reno-rate-input" class="field-input" min="0" step="50"
+        value="${wizardData.renovationRate ?? 250}" style="max-width:180px;font-size:1.1rem;font-weight:600;text-align:center">
+      ` : ''}
     </div>
   `;
   const slider = document.getElementById('diff-slider') as HTMLInputElement;
@@ -725,6 +732,10 @@ function collectStep9(): boolean {
   wizardData.difficultyScore = score;
   const pct = parseFloat((document.getElementById('profit-input') as HTMLInputElement | null)?.value || '15');
   wizardData.profitMargin = Math.max(0, Math.min(0.5, (isNaN(pct) ? 15 : pct) / 100));
+  if (wizardData.projectType === 'renovation') {
+    const rr = parseFloat((document.getElementById('reno-rate-input') as HTMLInputElement | null)?.value || '250');
+    wizardData.renovationRate = Math.max(0, isNaN(rr) ? 250 : rr);
+  }
   return true;
 }
 
@@ -845,6 +856,7 @@ function renderStep11() {
     ['Wall Niches',      `${wizardData.wallNiches}`],
     ['Plumbing',         packageLabel(wizardData.plumbing as PackageType)],
     ['Shower',           wizardData.showerCubicle === 'none' ? 'None' : `${wizardData.showerCubicle} (${wizardData.showerLength} lft)`],
+    ...(wizardData.projectType === 'renovation' ? [['Renovation Rate', `Rs. ${wizardData.renovationRate ?? 250}/sqft`] as [string, string]] : []),
     ['Ceiling',          wizardData.hasCeiling ? 'Yes' : 'No'],
     ['Vanity',           wizardData.hasVanity  ? 'Yes' : 'No'],
     ['Geyser',           wizardData.hasGeyser  ? 'Yes' : 'No'],
