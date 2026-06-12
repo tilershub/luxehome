@@ -29,15 +29,15 @@ a, button, [role="button"] {
   --cream:       #ffffff;
   --forest:      #111111;
   --forest-deep: #000000;
-  --gold:        #111111;
+  --gold:        #b8892a;
   --sand:        #eeeeee;
   --charcoal:    #111111;
   --warm-gray:   #6f6f6f;
   --stone:       #e7e7e7;
   --off-white:   #fbfbf9;
 
-  --clay:        #111111;
-  --terracotta:  #3a3a3a;
+  --clay:        #7c5540;
+  --terracotta:  #c4602a;
   --surface:     #ffffff;
   --surface-soft:#f5f5f2;
   --ink-muted:   #8a8a8a;
@@ -303,7 +303,7 @@ section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero)::after {
 .svc-img img,
 .card-media img,
 .project-card img {
-  filter: grayscale(1) contrast(.94) brightness(.92) !important;
+  filter: brightness(.88) !important;
 }
 
 .svc-icon,
