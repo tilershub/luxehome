@@ -1257,109 +1257,79 @@ function printQuotationPDF(q: Quotation) {
   const ref = (q as any).ref || 'LH-QTN';
   const scope = generateScopeOfWork(q);
 
-  const costRows: Array<[string, number]> = [
-    ['Renovation / Demolition Works', bd.renovationCost],
-    ['Bathroom Design & Planning', bd.designPlanning],
-    ['Floor Concrete Works', bd.floorConcreteCost],
-    ['Dummy Wall Construction', bd.dummyWallCost],
-    ['Wall Niche Construction', bd.wallNicheCost],
-    ['Tiling & Grouting', bd.tilingCost],
-    ['Plumbing Works', bd.plumbingCost],
-    ['Electrical Wiring Works', bd.wiringCost],
-    ['Waterproofing', bd.waterproofingCost],
-    ['Ceiling Installation', bd.ceilingCost],
-    ['Light & Plug Fixtures', bd.lightFixtureCost],
-    ['Geyser / Water Heater', bd.geyserCost],
-    ['Vanity Cupboard & Countertop', bd.vanityCost],
-    ['Shower Cubicle', bd.showerCost],
-    ['Mirror', bd.mirrorCost],
-    ['Bathware & Tapware', bd.bathwareCost],
-    ['Door Works', bd.doorCost],
-    ['Window Works', bd.windowCost],
-  ].filter(([,v]) => v > 0);
-
   const html = `<!DOCTYPE html><html><head>
   <meta charset="utf-8">
   <title>${ref} — LUXEHOME Quotation</title>
   <style>
-    @page { size: A4; margin: 18mm 16mm; }
+    @page { size: A4; margin: 22mm 20mm 20mm 20mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Georgia, 'Times New Roman', serif; color: #111; font-size: 10.5pt; line-height: 1.5; }
-    .logo { font-size: 22pt; font-weight: 900; letter-spacing: .06em; }
-    .gold { color: #b8892a; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12pt; border-bottom: 2pt solid #111; margin-bottom: 16pt; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; font-size: 10pt; line-height: 1.6; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 14pt; border-bottom: 2pt solid #111; margin-bottom: 22pt; }
+    .logo { font-size: 20pt; font-weight: 900; letter-spacing: .08em; line-height: 1; }
+    .logo-sub { font-size: 8pt; color: #999; letter-spacing: .12em; text-transform: uppercase; margin-top: 4pt; }
     .ref-block { text-align: right; }
-    .ref-no { font-size: 12pt; font-weight: 700; }
-    .section-title { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #888; margin: 16pt 0 8pt; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; }
-    .info-row { font-size: 10pt; }
-    .info-label { color: #666; font-size: 9pt; }
-    table { width: 100%; border-collapse: collapse; margin-top: 6pt; }
-    th { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .06em; color: #888; text-align: left; padding: 6pt 8pt; border-bottom: 1pt solid #ccc; }
-    th:last-child { text-align: right; }
-    td { padding: 7pt 8pt; border-bottom: .5pt solid #eee; font-size: 10pt; }
-    td:last-child { text-align: right; font-weight: 600; }
-    .total-row td { border-top: 2pt solid #111; border-bottom: none; font-weight: 800; font-size: 12pt; padding-top: 10pt; }
-    .scope-list { columns: 2; gap: 16pt; margin-top: 4pt; }
-    .scope-item { font-size: 9.5pt; padding: 3pt 0; break-inside: avoid; }
-    .scope-item::before { content: "✓  "; color: #b8892a; font-weight: 700; }
-    .brands-list { display: flex; flex-wrap: wrap; gap: 6pt 20pt; margin-top: 4pt; }
-    .brand-item { font-size: 9.5pt; }
-    .brand-item::before { content: "• "; color: #b8892a; }
-    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin-top: 6pt; }
-    .term-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 8pt; text-align: center; }
-    .term-pct { font-size: 16pt; font-weight: 900; }
-    .term-lbl { font-size: 8.5pt; color: #666; margin-top: 2pt; }
-    .term-amt { font-size: 9.5pt; font-weight: 700; color: #b8892a; margin-top: 3pt; }
-    .footer { margin-top: 24pt; padding-top: 10pt; border-top: 1pt solid #ddd; font-size: 8.5pt; color: #888; text-align: center; }
-    .final-box { background: #111; color: #fff; padding: 14pt 16pt; border-radius: 6pt; margin-top: 14pt; display: flex; justify-content: space-between; align-items: center; }
-    .final-label { font-size: 10pt; opacity: .7; }
-    .final-amount { font-size: 18pt; font-weight: 900; }
-    .note { font-size: 9pt; color: #555; font-style: italic; margin-top: 10pt; }
+    .ref-no { font-size: 13pt; font-weight: 800; letter-spacing: .04em; }
+    .ref-meta { font-size: 8.5pt; color: #777; margin-top: 3pt; line-height: 1.6; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 22pt; }
+    .info-cell { padding-right: 22pt; }
+    .info-cell + .info-cell { padding-right: 0; padding-left: 22pt; border-left: 1pt solid #e8e8e8; }
+    .info-label { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; margin-bottom: 5pt; }
+    .info-name { font-size: 12pt; font-weight: 700; line-height: 1.3; }
+    .info-detail { font-size: 9.5pt; color: #555; margin-top: 3pt; }
+    .section-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; padding-bottom: 7pt; border-bottom: 1pt solid #e0e0e0; margin-bottom: 12pt; margin-top: 22pt; }
+    .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24pt; }
+    .scope-item { font-size: 9.5pt; padding: 5pt 0; display: flex; align-items: baseline; gap: 7pt; border-bottom: .5pt solid #f2f2f2; }
+    .scope-check { color: #b8892a; font-size: 8pt; font-weight: 700; flex-shrink: 0; }
+    .final-box { background: #111; color: #fff; padding: 16pt 20pt; border-radius: 6pt; margin-top: 22pt; display: flex; justify-content: space-between; align-items: center; }
+    .final-label { font-size: 9pt; opacity: .65; letter-spacing: .04em; }
+    .final-sub { font-size: 8pt; opacity: .5; margin-top: 3pt; }
+    .final-amount { font-size: 22pt; font-weight: 900; letter-spacing: -.01em; }
+    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; }
+    .term-box { border: 1pt solid #ddd; border-radius: 5pt; padding: 12pt 8pt; text-align: center; }
+    .term-pct { font-size: 18pt; font-weight: 900; color: #111; line-height: 1; }
+    .term-lbl { font-size: 8pt; color: #777; margin-top: 5pt; line-height: 1.4; }
+    .term-amt { font-size: 9.5pt; font-weight: 700; color: #b8892a; margin-top: 6pt; }
+    .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2pt 16pt; }
+    .brand-item { font-size: 9pt; color: #444; padding: 4pt 0; display: flex; align-items: center; gap: 6pt; border-bottom: .5pt solid #f2f2f2; }
+    .brand-dot { width: 4pt; height: 4pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
+    .note { font-size: 8.5pt; color: #888; font-style: italic; margin-top: 20pt; line-height: 1.6; }
+    .footer { margin-top: 16pt; padding-top: 10pt; border-top: 1pt solid #e0e0e0; font-size: 7.5pt; color: #bbb; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
   </style>
   </head><body>
+
   <div class="header">
     <div>
-      <div class="logo">LUXE<span class="gold">HOME</span></div>
-      <div style="font-size:9pt;color:#888;margin-top:4pt">Premium Bathroom Renovation</div>
+      <div class="logo">LUXE<span style="color:#b8892a">HOME</span></div>
+      <div class="logo-sub">Premium Bathroom Renovation · Sri Lanka</div>
     </div>
     <div class="ref-block">
       <div class="ref-no">${ref}</div>
-      <div style="font-size:9pt;color:#888;margin-top:2pt">${fmtDate(q.quotationDate)}</div>
-      <div style="font-size:9pt;color:#888;margin-top:2pt">${packageLabel(q.package)} Package</div>
+      <div class="ref-meta">${fmtDate(q.quotationDate)}<br>${packageLabel(q.package)} Package · ${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
     </div>
   </div>
 
   <div class="info-grid">
-    <div>
+    <div class="info-cell">
       <div class="info-label">Prepared For</div>
-      <div class="info-row" style="font-weight:700">${q.clientName}</div>
-      ${q.clientPhone ? `<div class="info-row">${q.clientPhone}</div>` : ''}
+      <div class="info-name">${q.clientName}</div>
+      ${q.clientPhone ? `<div class="info-detail">${q.clientPhone}</div>` : ''}
     </div>
-    <div>
+    <div class="info-cell">
       <div class="info-label">Project</div>
-      <div class="info-row" style="font-weight:700">${q.projectName || q.projectLocation}</div>
-      ${q.projectName ? `<div class="info-row">${q.projectLocation}</div>` : ''}
+      <div class="info-name">${q.projectName || q.projectLocation}</div>
+      ${q.projectName && q.projectLocation ? `<div class="info-detail">${q.projectLocation}</div>` : ''}
     </div>
   </div>
 
   <div class="section-title">Scope of Work</div>
-  <div class="scope-list">
-    ${scope.map(s => `<div class="scope-item">${s}</div>`).join('')}
+  <div class="scope-grid">
+    ${scope.map(s => `<div class="scope-item"><span class="scope-check">✓</span><span>${s}</span></div>`).join('')}
   </div>
-
-  <div class="section-title">Cost Breakdown</div>
-  <table>
-    <thead><tr><th>Item</th><th>Amount</th></tr></thead>
-    <tbody>
-      ${costRows.map(([k, v]) => `<tr><td>${k}</td><td>${fmtRs(v)}</td></tr>`).join('')}
-    </tbody>
-  </table>
 
   <div class="final-box">
     <div>
       <div class="final-label">${q.finalPriceOverride != null ? 'Special Price' : 'Total Investment'}</div>
-      <div style="font-size:8.5pt;opacity:.6">${packageLabel(q.package)} Package · ${q.projectType === 'renovation' ? 'Renovation' : 'Construction'}</div>
+      <div class="final-sub">${packageLabel(q.package)} Package · All inclusive</div>
     </div>
     <div class="final-amount">${fmtRs(bd.finalAmount)}</div>
   </div>
@@ -1371,18 +1341,17 @@ function printQuotationPDF(q: Quotation) {
         <div class="term-pct">${t.percentage}%</div>
         <div class="term-lbl">${t.label}</div>
         <div class="term-amt">${fmtRs(bd.finalAmount * t.percentage / 100)}</div>
-      </div>
-    `).join('')}
+      </div>`).join('')}
   </div>
 
-  <div class="section-title">Brands & Materials</div>
-  <div class="brands-list">
-    ${q.brands.map(b => `<span class="brand-item">${b}</span>`).join('')}
+  <div class="section-title">Brands &amp; Materials</div>
+  <div class="brands-grid">
+    ${q.brands.map(b => `<div class="brand-item"><div class="brand-dot"></div>${b}</div>`).join('')}
   </div>
 
-  <div class="note">This quotation is valid for 30 days from the date above. Prices are subject to change based on site conditions.</div>
+  <div class="note">This quotation is valid for 30 days from the date above. Prices are subject to change based on actual site conditions. All works carried out by LUXEHOME certified teams.</div>
 
-  <div class="footer">LUXEHOME · Luxury Bathroom Renovation · Sri Lanka</div>
+  <div class="footer">LUXEHOME &nbsp;·&nbsp; Luxury Bathroom Renovation &nbsp;·&nbsp; Sri Lanka</div>
   <script>window.onload=function(){window.print();}<\/script>
   </body></html>`;
 
