@@ -182,6 +182,9 @@ function renderDashboard() {
       <button class="dash-cta" id="dash-new-qtn">
         ＋ New Quotation
       </button>
+      <button class="dash-cta" id="dash-cmp-qtn" style="background:var(--surface);color:var(--clay);border:1.5px solid var(--clay);margin-top:10px">
+        ⊞ 3-Package Comparison
+      </button>
 
       <div class="stat-row">
         <div class="stat-card">
@@ -224,7 +227,8 @@ function renderDashboard() {
     </div>
   `;
 
-  document.getElementById('dash-new-qtn')!.addEventListener('click', startWizard);
+  document.getElementById('dash-new-qtn')!.addEventListener('click', () => startWizard());
+  document.getElementById('dash-cmp-qtn')!.addEventListener('click', startComparisonWizard);
   document.querySelectorAll<HTMLElement>('[data-qtn]').forEach(el => {
     el.addEventListener('click', () => openQtnDetail(el.dataset.qtn!));
   });
@@ -240,6 +244,7 @@ function renderQuotations() {
       <h2>Quotations</h2>
       <button class="add-btn" id="new-qtn-btn">＋</button>
     </div>
+    <button class="card-btn" id="cmp-qtn-btn" style="width:100%;margin-bottom:12px;height:42px;color:var(--clay);border-color:var(--clay)">⊞ 3-Package Comparison</button>
     ${qtns.length === 0 ? `
       <div class="empty-state">
         <div class="empty-icon">📋</div>
@@ -253,7 +258,10 @@ function renderQuotations() {
             <div class="list-card-title">${q.clientName || '(No name)'}</div>
             <div class="list-card-sub">${q.projectName || q.projectLocation || '—'}</div>
           </div>
-          <div class="list-card-amount">${fmtRs(q.breakdown.finalAmount)}</div>
+          <div style="text-align:right">
+            <div class="list-card-amount">${fmtRs(q.breakdown.finalAmount)}</div>
+            ${(q as any).isComparison ? `<span style="font-size:.65rem;background:#f0e8d8;color:#7c5540;padding:2px 7px;border-radius:20px;font-weight:600">3-PKG</span>` : ''}
+          </div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
           <span class="status-pill" style="color:${statusColor(q.status)};background:${statusColor(q.status)}18">${q.status.toUpperCase()}</span>
@@ -263,7 +271,8 @@ function renderQuotations() {
     `).join('')}
   `;
 
-  document.getElementById('new-qtn-btn')!.addEventListener('click', startWizard);
+  document.getElementById('new-qtn-btn')!.addEventListener('click', () => startWizard());
+  document.getElementById('cmp-qtn-btn')!.addEventListener('click', startComparisonWizard);
   document.querySelectorAll<HTMLElement>('[data-qtn]').forEach(el => {
     el.addEventListener('click', () => openQtnDetail(el.dataset.qtn!));
   });
@@ -418,6 +427,11 @@ function startWizard(qtn?: Quotation) {
   navigate('wizard');
 }
 
+function startComparisonWizard() {
+  startWizard();
+  (wizardData as any).isComparison = true;
+}
+
 function renderWizard() {
   progressFill.style.width = `${(wizardStep / WIZARD_STEPS) * 100}%`;
   stepLabel.textContent = `Step ${wizardStep} of ${WIZARD_STEPS}`;
@@ -514,6 +528,29 @@ function renderStep2() {
 
 /* Step 3 — Package */
 function renderStep3() {
+  if ((wizardData as any).isComparison) {
+    main.innerHTML = `
+      <div class="step-content">
+        <div class="step-q">Comparing all 3 packages</div>
+        <div class="step-hint">The PDF will show pricing for each package side-by-side so your client can choose.</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px">
+          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
+            <span style="font-size:1.8rem">⭐</span>
+            <div><span class="opt-label" style="display:block">Basic</span><span class="opt-sub">Rs. 850/sqft tiles</span></div>
+          </div>
+          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
+            <span style="font-size:1.8rem">⭐⭐</span>
+            <div><span class="opt-label" style="display:block">Premium</span><span class="opt-sub">Rs. 1,000/sqft tiles</span></div>
+          </div>
+          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
+            <span style="font-size:1.8rem">👑</span>
+            <div><span class="opt-label" style="display:block">Signature</span><span class="opt-sub">Rs. 1,300/sqft tiles</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
   const pkgs: Array<{ val: PackageType; icon: string; label: string; sub: string }> = [
     { val: 'basic',     icon: '⭐',  label: 'Basic',     sub: 'Rs. 850/sqft tiles' },
     { val: 'premium',   icon: '⭐⭐', label: 'Premium',   sub: 'Rs. 1,000/sqft tiles' },
@@ -670,15 +707,27 @@ function collectStep7(): boolean {
 
 /* Step 8 — Extras */
 function renderStep8() {
+  const isCmp = (wizardData as any).isComparison;
+  const rangeLabel = (r: Record<PackageType, number>) =>
+    `${fmtRs(r.basic)} – ${fmtRs(r.signature)}`;
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Extra items</div>
       <div class="step-hint">Toggle what's included in this bathroom.</div>
       ${toggle('Ceiling Installation', `Yes: ${fmtRs(RATES.ceiling.perSqFt)}/sqft · No: ${fmtRs(RATES.ceiling.flat)} flat`, 'ceiling', wizardData.hasCeiling)}
-      ${toggle('Vanity Cupboard & Countertop', `Yes: ${fmtRs(RATES.vanity[wizardData.package])} (${packageLabel(wizardData.package)}) · No: ${fmtRs(RATES.vanity.basic)}`, 'vanity', wizardData.hasVanity)}
+      ${toggle('Vanity Cupboard & Countertop',
+        isCmp ? `Yes: ${rangeLabel(RATES.vanity)} · No: ${fmtRs(RATES.vanity.basic)}`
+               : `Yes: ${fmtRs(RATES.vanity[wizardData.package])} (${packageLabel(wizardData.package)}) · No: ${fmtRs(RATES.vanity.basic)}`,
+        'vanity', wizardData.hasVanity)}
       ${toggle('Geyser / Water Heater', fmtRs(RATES.geyser), 'geyser', wizardData.hasGeyser)}
-      ${toggle('Door', `${fmtRs(RATES.door[wizardData.package])} (${packageLabel(wizardData.package)})`, 'door', wizardData.hasDoor)}
-      ${toggle('Window', `${fmtRs(RATES.window[wizardData.package])} (${packageLabel(wizardData.package)})`, 'window', wizardData.hasWindow)}
+      ${toggle('Door',
+        isCmp ? rangeLabel(RATES.door)
+               : `${fmtRs(RATES.door[wizardData.package])} (${packageLabel(wizardData.package)})`,
+        'door', wizardData.hasDoor)}
+      ${toggle('Window',
+        isCmp ? rangeLabel(RATES.window)
+               : `${fmtRs(RATES.window[wizardData.package])} (${packageLabel(wizardData.package)})`,
+        'window', wizardData.hasWindow)}
     </div>
   `;
   setupToggles({ ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow' });
@@ -838,6 +887,32 @@ function collectStep10(): boolean {
 
 /* Step 11 — Review */
 function renderStep11() {
+  if ((wizardData as any).isComparison) {
+    const bdB = calculateQuotation({ ...wizardData, package: 'basic' });
+    const bdP = calculateQuotation({ ...wizardData, package: 'premium' });
+    const bdS = calculateQuotation({ ...wizardData, package: 'signature' });
+    main.innerHTML = `
+      <div class="step-content">
+        <div class="step-q">Review & Save</div>
+        <div class="step-hint">${wizardData.clientName || 'Client'} · ${wizardData.projectLocation || 'Project'}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+          <div class="review-total" style="margin:0">
+            <div class="review-total-label">⭐ Basic</div>
+            <div class="review-total-amount" style="font-size:1.3rem">${fmtRs(bdB.finalAmount)}</div>
+          </div>
+          <div class="review-total" style="margin:0">
+            <div class="review-total-label">⭐⭐ Premium</div>
+            <div class="review-total-amount" style="font-size:1.3rem">${fmtRs(bdP.finalAmount)}</div>
+          </div>
+          <div class="review-total" style="margin:0;background:var(--charcoal)">
+            <div class="review-total-label">👑 Signature</div>
+            <div class="review-total-amount" style="font-size:1.3rem">${fmtRs(bdS.finalAmount)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
   const bd = calculateQuotation(wizardData);
 
   const rows: Array<[string, string]> = [
@@ -891,7 +966,8 @@ function renderStep11() {
 
 /* ── Save quotation ──────────────────────────────────────── */
 function saveQuotation() {
-  const bd = calculateQuotation(wizardData);
+  const isCmp = (wizardData as any).isComparison;
+  const bd = calculateQuotation(isCmp ? { ...wizardData, package: 'basic' } : wizardData);
   const qtns: Quotation[] = load(KEYS.qtns);
   const counters = getCounters();
 
@@ -902,6 +978,7 @@ function saveQuotation() {
         ...qtns[idx], ...wizardData, breakdown: bd,
         updatedAt: new Date().toISOString(),
       };
+      if (isCmp) (qtns[idx] as any).isComparison = true;
     }
   } else {
     counters.qtn++;
@@ -912,6 +989,7 @@ function saveQuotation() {
       status: 'draft', breakdown: bd,
     };
     (newQ as any).ref = qtnNumber(counters.qtn);
+    if (isCmp) (newQ as any).isComparison = true;
     qtns.unshift(newQ);
   }
 
@@ -1024,7 +1102,9 @@ function renderQtnDetail() {
 
       <!-- Actions -->
       <div class="card-actions" style="margin-bottom:16px">
-        <button class="card-btn primary" id="qtn-pdf-btn">📄 PDF</button>
+        ${(q as any).isComparison
+          ? `<button class="card-btn primary" id="qtn-pdf-btn">📊 Comparison PDF</button>`
+          : `<button class="card-btn primary" id="qtn-pdf-btn">📄 PDF</button>`}
         <button class="card-btn" id="qtn-wa-btn">💬 WhatsApp</button>
         <button class="card-btn" id="qtn-edit-btn">✏️ Edit</button>
         <button class="card-btn" id="qtn-inv-btn">💳 Invoice</button>
@@ -1043,7 +1123,8 @@ function renderQtnDetail() {
     });
   });
 
-  document.getElementById('qtn-pdf-btn')!.addEventListener('click', () => printQuotationPDF(q));
+  document.getElementById('qtn-pdf-btn')!.addEventListener('click', () =>
+    (q as any).isComparison ? printComparisonPDF(q) : printQuotationPDF(q));
   document.getElementById('qtn-wa-btn')!.addEventListener('click', () => shareQuotationWA(q));
   document.getElementById('qtn-edit-btn')!.addEventListener('click', () => startWizard(q));
   document.getElementById('qtn-inv-btn')!.addEventListener('click', () => convertToInvoice(q));
@@ -1362,6 +1443,178 @@ function printQuotationPDF(q: Quotation) {
   </div>
 
   <div class="note">This quotation is valid for 30 days from the date above. Prices are subject to change based on actual site conditions. All works carried out by LUXEHOME certified teams.</div>
+
+  <div class="footer">LUXEHOME &nbsp;·&nbsp; Luxury Bathroom Renovation &nbsp;·&nbsp; Sri Lanka</div>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
+/* ── PDF — 3-Package Comparison ─────────────────────────── */
+function printComparisonPDF(q: Quotation) {
+  const ref = (q as any).ref || 'LH-QTN';
+  const scope = generateScopeOfWork({ ...q, package: 'basic' });
+  const bdB = calculateQuotation({ ...q, package: 'basic' });
+  const bdP = calculateQuotation({ ...q, package: 'premium' });
+  const bdS = calculateQuotation({ ...q, package: 'signature' });
+
+  // Fixed costs (same across all packages) — use Basic breakdown
+  const fixedCost = bdB.renovationCost + bdB.designPlanning + bdB.floorConcreteCost
+    + bdB.dummyWallCost + bdB.wallNicheCost + bdB.plumbingCost + bdB.wiringCost
+    + bdB.waterproofingCost + bdB.ceilingCost + bdB.geyserCost + bdB.showerCost + bdB.overhead;
+
+  type Row = { label: string; b: number; p: number; s: number; hide?: boolean };
+  const varRows: Row[] = [
+    { label: 'Tiling & Grouting',      b: bdB.tilingCost,        p: bdP.tilingCost,        s: bdS.tilingCost },
+    { label: 'Light Fixtures',         b: bdB.lightFixtureCost,  p: bdP.lightFixtureCost,  s: bdS.lightFixtureCost, hide: q.wiringPoints === 0 },
+    { label: 'Vanity Cupboard',        b: bdB.vanityCost,        p: bdP.vanityCost,        s: bdS.vanityCost },
+    { label: 'Mirror',                 b: bdB.mirrorCost,        p: bdP.mirrorCost,        s: bdS.mirrorCost },
+    { label: 'Bathware & Tapware',     b: bdB.bathwareCost,      p: bdP.bathwareCost,      s: bdS.bathwareCost },
+    { label: 'Door Works',             b: bdB.doorCost,          p: bdP.doorCost,          s: bdS.doorCost,   hide: !q.hasDoor },
+    { label: 'Window Works',           b: bdB.windowCost,        p: bdP.windowCost,        s: bdS.windowCost, hide: !q.hasWindow },
+  ].filter(r => !r.hide);
+
+  const html = `<!DOCTYPE html><html><head>
+  <meta charset="utf-8">
+  <title>${ref} — LUXEHOME Package Comparison</title>
+  <style>
+    @page { size: A4; margin: 14mm 15mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; font-size: 9.5pt; line-height: 1.5; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 10pt; border-bottom: 2pt solid #111; margin-bottom: 14pt; }
+    .logo { font-size: 18pt; font-weight: 900; letter-spacing: .08em; line-height: 1; }
+    .logo-sub { font-size: 7.5pt; color: #999; letter-spacing: .1em; text-transform: uppercase; margin-top: 3pt; }
+    .ref-block { text-align: right; }
+    .ref-no { font-size: 12pt; font-weight: 800; }
+    .ref-meta { font-size: 8pt; color: #777; margin-top: 2pt; line-height: 1.5; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 14pt; }
+    .info-cell { padding-right: 18pt; }
+    .info-cell + .info-cell { padding-right: 0; padding-left: 18pt; border-left: 1pt solid #e8e8e8; }
+    .info-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; margin-bottom: 3pt; }
+    .info-name { font-size: 11pt; font-weight: 700; }
+    .info-detail { font-size: 9pt; color: #555; margin-top: 2pt; }
+    .section-title { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; padding-bottom: 5pt; border-bottom: 1pt solid #e0e0e0; margin-bottom: 8pt; margin-top: 14pt; break-after: avoid; }
+    /* Comparison table */
+    .cmp-table { width: 100%; border-collapse: collapse; }
+    .cmp-table th { padding: 7pt 8pt; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; text-align: right; border-bottom: 1.5pt solid #111; }
+    .cmp-table th:first-child { text-align: left; color: #999; }
+    .cmp-table th.basic  { color: #555; }
+    .cmp-table th.premium { color: #7c5540; }
+    .cmp-table th.sig { color: #b8892a; }
+    .cmp-table td { padding: 5.5pt 8pt; font-size: 9pt; border-bottom: .5pt solid #f0f0f0; text-align: right; }
+    .cmp-table td:first-child { text-align: left; color: #444; }
+    .cmp-table tr.fixed-row td { color: #888; font-size: 8.5pt; font-style: italic; }
+    .cmp-table tr.total-row td { border-top: 2pt solid #111; border-bottom: none; font-weight: 800; font-size: 10.5pt; padding-top: 8pt; background: #fafafa; }
+    .cmp-table tr.total-row td:first-child { color: #111; }
+    /* Price boxes */
+    .pkg-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin-top: 14pt; break-inside: avoid; }
+    .pkg-box { border-radius: 5pt; padding: 10pt 8pt; text-align: center; border: 1pt solid #e0e0e0; }
+    .pkg-box.basic   { border-color: #ddd; }
+    .pkg-box.premium { border-color: #7c5540; border-width: 1.5pt; }
+    .pkg-box.sig     { background: #111; color: #fff; border-color: #111; }
+    .pkg-name { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; opacity: .65; margin-bottom: 5pt; }
+    .pkg-price { font-size: 15pt; font-weight: 900; line-height: 1; }
+    .pkg-diff { font-size: 7.5pt; margin-top: 4pt; opacity: .55; }
+    /* Scope */
+    .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20pt; }
+    .scope-item { font-size: 9pt; padding: 3.5pt 0; display: flex; align-items: baseline; gap: 6pt; border-bottom: .5pt solid #f2f2f2; break-inside: avoid; }
+    .scope-check { color: #b8892a; font-size: 7.5pt; font-weight: 700; flex-shrink: 0; }
+    /* Brands */
+    .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1pt 14pt; break-inside: avoid; }
+    .brand-item { font-size: 8.5pt; color: #444; padding: 3pt 0; display: flex; align-items: center; gap: 5pt; border-bottom: .5pt solid #f2f2f2; }
+    .brand-dot { width: 3.5pt; height: 3.5pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
+    .note { font-size: 8pt; color: #999; font-style: italic; margin-top: 14pt; line-height: 1.5; }
+    .footer { margin-top: 10pt; padding-top: 8pt; border-top: 1pt solid #e0e0e0; font-size: 7pt; color: #bbb; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
+  </style>
+  </head><body>
+
+  <div class="header">
+    <div>
+      <div class="logo">LUXE<span style="color:#b8892a">HOME</span></div>
+      <div class="logo-sub">Premium Bathroom Renovation · Sri Lanka</div>
+    </div>
+    <div class="ref-block">
+      <div class="ref-no">${ref}</div>
+      <div class="ref-meta">${fmtDate(q.quotationDate)}<br>3-Package Comparison · ${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-cell">
+      <div class="info-label">Prepared For</div>
+      <div class="info-name">${q.clientName}</div>
+      ${q.clientPhone ? `<div class="info-detail">${q.clientPhone}</div>` : ''}
+    </div>
+    <div class="info-cell">
+      <div class="info-label">Project</div>
+      <div class="info-name">${q.projectName || q.projectLocation}</div>
+      ${q.projectName && q.projectLocation ? `<div class="info-detail">${q.projectLocation}</div>` : ''}
+    </div>
+  </div>
+
+  <div class="section-title">Package Comparison</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th class="basic">Basic</th>
+        <th class="premium">Premium</th>
+        <th class="sig">Signature</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${varRows.map(r => `
+        <tr>
+          <td>${r.label}</td>
+          <td>${fmtRs(r.b)}</td>
+          <td>${fmtRs(r.p)}</td>
+          <td>${fmtRs(r.s)}</td>
+        </tr>`).join('')}
+      <tr class="fixed-row">
+        <td>Other Works (plumbing, tiling prep, waterproofing…)</td>
+        <td>${fmtRs(fixedCost)}</td>
+        <td colspan="2" style="text-align:center;color:#aaa">Same</td>
+      </tr>
+      <tr class="total-row">
+        <td>Total Investment</td>
+        <td>${fmtRs(bdB.finalAmount)}</td>
+        <td>${fmtRs(bdP.finalAmount)}</td>
+        <td>${fmtRs(bdS.finalAmount)}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pkg-boxes">
+    <div class="pkg-box basic">
+      <div class="pkg-name">⭐ Basic</div>
+      <div class="pkg-price">${fmtRs(bdB.finalAmount)}</div>
+      <div class="pkg-diff">Base package</div>
+    </div>
+    <div class="pkg-box premium">
+      <div class="pkg-name" style="color:#7c5540">⭐⭐ Premium</div>
+      <div class="pkg-price">${fmtRs(bdP.finalAmount)}</div>
+      <div class="pkg-diff">+${fmtRs(bdP.finalAmount - bdB.finalAmount)} vs Basic</div>
+    </div>
+    <div class="pkg-box sig">
+      <div class="pkg-name">👑 Signature</div>
+      <div class="pkg-price" style="color:#e8c87a">${fmtRs(bdS.finalAmount)}</div>
+      <div class="pkg-diff">+${fmtRs(bdS.finalAmount - bdB.finalAmount)} vs Basic</div>
+    </div>
+  </div>
+
+  <div class="section-title">Scope of Work</div>
+  <div class="scope-grid">
+    ${scope.map(s => `<div class="scope-item"><span class="scope-check">✓</span><span>${s}</span></div>`).join('')}
+  </div>
+
+  <div class="section-title">Brands &amp; Materials</div>
+  <div class="brands-grid">
+    ${q.brands.map(b => `<div class="brand-item"><div class="brand-dot"></div>${b}</div>`).join('')}
+  </div>
+
+  <div class="note">This comparison is valid for 30 days from the date above. All packages include the same scope of work — the difference is in tile grade, fixture quality, vanity, bathware, and fittings. Prices subject to change based on actual site conditions.</div>
 
   <div class="footer">LUXEHOME &nbsp;·&nbsp; Luxury Bathroom Renovation &nbsp;·&nbsp; Sri Lanka</div>
   <script>window.onload=function(){window.print();}<\/script>
