@@ -25,7 +25,7 @@ export const RATES = {
   } as Record<PlumbingType, number>,
   wiring:        { perPoint: 3_000 },
   waterproofing: { perSqFt: 230 },
-  ceiling:       { perSqFt: { basic: 700, premium: 1_000, signature: 1_200 } as Record<PackageType, number>, flat: 20_000 },
+  ceiling:       { perSqFt: { basic: 800, premium: 1_000, signature: 1_200 } as Record<PackageType, number>, flat: 20_000 },
   lightFixture: {
     basic: 3_000, premium: 3_500, signature: 4_000,
   } as Record<PackageType, number>,
