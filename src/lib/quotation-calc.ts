@@ -25,7 +25,7 @@ export const RATES = {
   } as Record<PlumbingType, number>,
   wiring:        { perPoint: 3_000 },
   waterproofing: { perSqFt: 230 },
-  ceiling:       { perSqFt: 1_000 },
+  ceiling:       { perSqFt: 1_000, flat: 20_000 },
   lightFixture: {
     basic: 3_000, premium: 3_500, signature: 4_000,
   } as Record<PackageType, number>,
@@ -86,8 +86,11 @@ export interface QuotationInputs {
   showerCubicle:     ShowerType;
   showerLength:      number;
   hasGeyser:         boolean;
+  hasCeiling:        boolean;
+  hasVanity:         boolean;
   hasDoor:           boolean;
   hasWindow:         boolean;
+  profitMargin:      number;
   floorArea:         number;
   wallArea:          number;
   waterproofingArea: number;
@@ -176,10 +179,10 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
   const plumbingCost     = RATES.plumbing[q.plumbing];
   const wiringCost       = q.wiringPoints * RATES.wiring.perPoint;
   const waterproofingCost = q.waterproofingArea * RATES.waterproofing.perSqFt;
-  const ceilingCost      = ceilingArea * RATES.ceiling.perSqFt;
+  const ceilingCost      = q.hasCeiling ? ceilingArea * RATES.ceiling.perSqFt : RATES.ceiling.flat;
   const lightFixtureCost = q.wiringPoints * RATES.lightFixture[q.package];
   const geyserCost       = q.hasGeyser ? RATES.geyser : 0;
-  const vanityCost       = RATES.vanity[q.package];
+  const vanityCost       = q.hasVanity ? RATES.vanity[q.package] : RATES.vanity.basic;
   const showerCost       = q.showerCubicle === 'l-type'
     ? q.showerLength * RATES.shower.lType.perLinFt
     : q.showerCubicle === 'p-type'
@@ -195,8 +198,9 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
     + ceilingCost + lightFixtureCost + geyserCost + vanityCost + showerCost
     + mirrorCost + bathwareCost + doorCost + windowCost + overhead;
 
+  const profitMargin       = Math.max(0, Math.min(0.5, Number(q.profitMargin) || 0.15));
   const difficultyAdjusted = projectCost * difficultyScore;
-  const profitAmount       = difficultyAdjusted * RATES.profitMargin;
+  const profitAmount       = difficultyAdjusted * profitMargin;
   const finalSellingPrice  = difficultyAdjusted + profitAmount;
   const finalAmount        = finalPriceOverride != null ? finalPriceOverride : finalSellingPrice;
 
@@ -222,11 +226,13 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
     'Electrical Wiring Works',
     'Waterproofing Before Tiling',
     'Tiling & Grouting',
-    'Ceiling Installation',
+  );
+  if (q.hasCeiling) scope.push('Ceiling Installation');
+  scope.push(
     'Light & Plug Fixture Installation',
     'Exhaust Fan Installation',
-    'Vanity Cupboard & Countertop',
   );
+  if (q.hasVanity) scope.push('Vanity Cupboard & Countertop');
   if (q.showerCubicle !== 'none') scope.push('Shower Glass / Cubicle Installation');
   scope.push('Bathware & Tapware Installation', 'Mirror Installation');
   if (q.hasDoor)           scope.push('Door Works');
@@ -268,7 +274,8 @@ export function defaultInputs(): QuotationInputs {
     quotationDate: new Date().toISOString().split('T')[0],
     projectType: 'renovation', package: 'basic', plumbing: 'basic',
     showerCubicle: 'none', showerLength: 0,
-    hasGeyser: false, hasDoor: false, hasWindow: false,
+    hasGeyser: false, hasCeiling: true, hasVanity: true, hasDoor: false, hasWindow: false,
+    profitMargin: 0.15,
     floorArea: 0, wallArea: 0, waterproofingArea: 0, dummyWallArea: 0,
     wallNiches: 0, wiringPoints: 0,
     difficultyScore: 1.00,
