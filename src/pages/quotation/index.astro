@@ -629,6 +629,29 @@ function renderStep5() {
 
 /* Step 6 — Plumbing */
 function renderStep6() {
+  if ((wizardData as any).isComparison) {
+    main.innerHTML = `
+      <div class="step-content">
+        <div class="step-q">Comparing all 3 plumbing tiers</div>
+        <div class="step-hint">Each package includes its matching plumbing tier in the comparison PDF.</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px">
+          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
+            <span style="font-size:1.8rem">🔧</span>
+            <div><span class="opt-label" style="display:block">Basic Plumbing</span><span class="opt-sub">${fmtRs(RATES.plumbing.basic)}</span></div>
+          </div>
+          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
+            <span style="font-size:1.8rem">🚰</span>
+            <div><span class="opt-label" style="display:block">Premium Plumbing</span><span class="opt-sub">${fmtRs(RATES.plumbing.premium)}</span></div>
+          </div>
+          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
+            <span style="font-size:1.8rem">💎</span>
+            <div><span class="opt-label" style="display:block">Signature Plumbing</span><span class="opt-sub">${fmtRs(RATES.plumbing.signature)}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
   const opts: Array<{ val: PlumbingType; icon: string; label: string; price: string }> = [
     { val: 'basic',     icon: '🔧', label: 'Basic',     price: fmtRs(RATES.plumbing.basic) },
     { val: 'premium',   icon: '🚰', label: 'Premium',   price: fmtRs(RATES.plumbing.premium) },
@@ -892,9 +915,9 @@ function collectStep10(): boolean {
 /* Step 11 — Review */
 function renderStep11() {
   if ((wizardData as any).isComparison) {
-    const bdB = calculateQuotation({ ...wizardData, package: 'basic' });
-    const bdP = calculateQuotation({ ...wizardData, package: 'premium' });
-    const bdS = calculateQuotation({ ...wizardData, package: 'signature' });
+    const bdB = calculateQuotation({ ...wizardData, package: 'basic',     plumbing: 'basic' });
+    const bdP = calculateQuotation({ ...wizardData, package: 'premium',   plumbing: 'premium' });
+    const bdS = calculateQuotation({ ...wizardData, package: 'signature', plumbing: 'signature' });
     main.innerHTML = `
       <div class="step-content">
         <div class="step-q">Review & Save</div>
@@ -971,7 +994,7 @@ function renderStep11() {
 /* ── Save quotation ──────────────────────────────────────── */
 function saveQuotation() {
   const isCmp = (wizardData as any).isComparison;
-  const bd = calculateQuotation(isCmp ? { ...wizardData, package: 'basic' } : wizardData);
+  const bd = calculateQuotation(isCmp ? { ...wizardData, package: 'basic', plumbing: 'basic' } : wizardData);
   const qtns: Quotation[] = load(KEYS.qtns);
   const counters = getCounters();
 
@@ -1459,20 +1482,21 @@ function printQuotationPDF(q: Quotation) {
 /* ── PDF — 3-Package Comparison ─────────────────────────── */
 function printComparisonPDF(q: Quotation) {
   const ref = (q as any).ref || 'LH-QTN';
-  const scope = generateScopeOfWork({ ...q, package: 'basic' });
-  const bdB = calculateQuotation({ ...q, package: 'basic' });
-  const bdP = calculateQuotation({ ...q, package: 'premium' });
-  const bdS = calculateQuotation({ ...q, package: 'signature' });
+  const scope = generateScopeOfWork({ ...q, package: 'basic', plumbing: 'basic' });
+  const bdB = calculateQuotation({ ...q, package: 'basic',     plumbing: 'basic' });
+  const bdP = calculateQuotation({ ...q, package: 'premium',   plumbing: 'premium' });
+  const bdS = calculateQuotation({ ...q, package: 'signature', plumbing: 'signature' });
 
   // Fixed costs (same across all packages) — use Basic breakdown
   const fixedCost = bdB.renovationCost + bdB.designPlanning + bdB.floorConcreteCost
-    + bdB.dummyWallCost + bdB.wallNicheCost + bdB.plumbingCost + bdB.wiringCost
+    + bdB.dummyWallCost + bdB.wallNicheCost + bdB.wiringCost
     + bdB.waterproofingCost + bdB.geyserCost + bdB.showerCost + bdB.overhead;
 
   type Row = { label: string; b: number; p: number; s: number; hide?: boolean };
   const varRows: Row[] = [
     { label: 'Tiling & Grouting',      b: bdB.tilingCost,        p: bdP.tilingCost,        s: bdS.tilingCost },
     { label: 'Ceiling Installation',   b: bdB.ceilingCost,       p: bdP.ceilingCost,       s: bdS.ceilingCost },
+    { label: 'Plumbing Works',         b: bdB.plumbingCost,      p: bdP.plumbingCost,      s: bdS.plumbingCost },
     { label: 'Light Fixtures',         b: bdB.lightFixtureCost,  p: bdP.lightFixtureCost,  s: bdS.lightFixtureCost, hide: q.wiringPoints === 0 },
     { label: 'Vanity Cupboard',        b: bdB.vanityCost,        p: bdP.vanityCost,        s: bdS.vanityCost },
     { label: 'Mirror',                 b: bdB.mirrorCost,        p: bdP.mirrorCost,        s: bdS.mirrorCost },
