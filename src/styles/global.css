@@ -174,13 +174,15 @@ h2 {
 
 /* ── Scroll Reveal ───────────────────────────────────────── */
 
-.reveal {
+/* Only hide elements when JS has confirmed it's running.
+   Without this guard, .reveal text is invisible if JS is slow to execute. */
+html.js .reveal {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity .65s, transform .65s;
 }
 
-.reveal.visible {
+html.js .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -217,7 +219,7 @@ h2 {
     scroll-behavior: auto !important;
   }
 
-  .reveal {
+  html.js .reveal {
     opacity: 1;
     transform: none;
     transition: none;
@@ -259,13 +261,13 @@ img { display: block; }
 }
 
 /* Component-wide minimalist surfaces */
-section:not(.hero) {
+section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero) {
   background: var(--off-white) !important;
   padding-block: clamp(4.5rem, 8vw, 7.5rem) !important;
 }
 
-section:not(.hero)::before,
-section:not(.hero)::after {
+section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero)::before,
+section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero)::after {
   opacity: 0 !important;
 }
 
