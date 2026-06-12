@@ -1482,80 +1482,117 @@ function printQuotationPDF(q: Quotation) {
 /* ── PDF — 3-Package Comparison ─────────────────────────── */
 function printComparisonPDF(q: Quotation) {
   const ref = (q as any).ref || 'LH-QTN';
-  const scope = generateScopeOfWork({ ...q, package: 'basic', plumbing: 'basic' });
   const bdB = calculateQuotation({ ...q, package: 'basic',     plumbing: 'basic' });
   const bdP = calculateQuotation({ ...q, package: 'premium',   plumbing: 'premium' });
   const bdS = calculateQuotation({ ...q, package: 'signature', plumbing: 'signature' });
 
-  // Fixed costs (same across all packages) — use Basic breakdown
-  const fixedCost = bdB.renovationCost + bdB.designPlanning + bdB.floorConcreteCost
-    + bdB.dummyWallCost + bdB.wallNicheCost + bdB.wiringCost
-    + bdB.waterproofingCost + bdB.geyserCost + bdB.showerCost + bdB.overhead;
 
-  type Row = { label: string; b: number; p: number; s: number; hide?: boolean };
-  const varRows: Row[] = [
-    { label: 'Tiling & Grouting',      b: bdB.tilingCost,        p: bdP.tilingCost,        s: bdS.tilingCost },
-    { label: 'Ceiling Installation',   b: bdB.ceilingCost,       p: bdP.ceilingCost,       s: bdS.ceilingCost },
-    { label: 'Plumbing Works',         b: bdB.plumbingCost,      p: bdP.plumbingCost,      s: bdS.plumbingCost },
-    { label: 'Light Fixtures',         b: bdB.lightFixtureCost,  p: bdP.lightFixtureCost,  s: bdS.lightFixtureCost, hide: q.wiringPoints === 0 },
-    { label: 'Vanity Cupboard',        b: bdB.vanityCost,        p: bdP.vanityCost,        s: bdS.vanityCost },
-    { label: 'Mirror',                 b: bdB.mirrorCost,        p: bdP.mirrorCost,        s: bdS.mirrorCost },
-    { label: 'Bathware & Tapware',     b: bdB.bathwareCost,      p: bdP.bathwareCost,      s: bdS.bathwareCost },
-    { label: 'Door Works',             b: bdB.doorCost,          p: bdP.doorCost,          s: bdS.doorCost,   hide: !q.hasDoor },
-    { label: 'Window Works',           b: bdB.windowCost,        p: bdP.windowCost,        s: bdS.windowCost, hide: !q.hasWindow },
+  type FeatRow = { label: string; b: string[]; p: string[]; s: string[]; hide?: boolean };
+  const featRows: FeatRow[] = [
+    { label: 'Tiling & Grouting',
+      b: ['Indian tiles', 'Swisstek adhesive', 'Swisstek grout'],
+      p: ['Mega tiles', 'Swisstek adhesive', 'Swisstek grout'],
+      s: ['Rocell tiles', 'Swisstek adhesive', 'Swisstek grout'] },
+    { label: 'Ceiling Installation',
+      b: ['Standard PVC ceiling', 'Rs. 800/sqft'],
+      p: ['Premium PVC ceiling', 'Rs. 1,000/sqft'],
+      s: ['High-grade PVC ceiling', 'Rs. 1,200/sqft'],
+      hide: !q.hasCeiling },
+    { label: 'Plumbing Works',
+      b: ['Basic plumbing package', 'Slon pipes & fittings'],
+      p: ['Premium plumbing package', 'Slon pipes & fittings'],
+      s: ['Signature plumbing package', 'Slon pipes & fittings'] },
+    { label: 'Light Fixtures',
+      b: ['Standard light fittings', 'ACL cables'],
+      p: ['Mid-range light fittings', 'ACL cables'],
+      s: ['Premium light fittings', 'ACL cables'],
+      hide: q.wiringPoints === 0 },
+    { label: 'Vanity Cupboard',
+      b: ['Standard vanity'], p: ['Premium vanity'], s: ['Custom vanity'] },
+    { label: 'Mirror',
+      b: ['Standard mirror'], p: ['Premium mirror'], s: ['Designer mirror'] },
+    { label: 'Bathware & Tapware',
+      b: ['Swiss Standard bathware & tapware'],
+      p: ['Swiss Premium bathware & tapware'],
+      s: ['Swiss Signature bathware & tapware'] },
+    { label: 'Door Works',
+      b: ['Standard door works'], p: ['Premium door works'], s: ['Premium door works'],
+      hide: !q.hasDoor },
+    { label: 'Window Works',
+      b: ['Standard window works'], p: ['Premium window works'], s: ['Premium window works'],
+      hide: !q.hasWindow },
   ].filter(r => !r.hide);
+
+  function cell(lines: string[]): string {
+    return `<td>${lines.map((l, i) => `<span class="${i===0?'feat-main':'feat-sub'}">${l}</span>`).join('<br>')}</td>`;
+  }
+
+  const baseInclusions: string[] = [
+    'Bathroom design & planning',
+    'Floor concrete works',
+    'Tokyo Super 2K waterproofing',
+    'Electrical wiring — ACL cables',
+    ...(q.projectType === 'renovation' ? ['Demolition & debris removal'] : []),
+    ...(q.wallNiches > 0 ? [`Wall niches (${q.wallNiches})`] : []),
+    ...(q.dummyWallArea > 0 ? ['Dummy wall construction'] : []),
+    ...(q.hasGeyser ? ['Geyser / water heater installation'] : []),
+    ...(q.showerCubicle !== 'none' ? ['Shower glass cubicle installation'] : []),
+    ...(!q.hasCeiling ? ['Basic ceiling works (flat rate)'] : []),
+  ];
 
   const html = `<!DOCTYPE html><html><head>
   <meta charset="utf-8">
   <title>${ref} — LUXEHOME Package Comparison</title>
   <style>
-    @page { size: A4; margin: 14mm 15mm; }
+    @page { size: A4; margin: 12mm 14mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; font-size: 9.5pt; line-height: 1.5; }
-    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 10pt; border-bottom: 2pt solid #111; margin-bottom: 14pt; }
-    .logo { font-size: 18pt; font-weight: 900; letter-spacing: .08em; line-height: 1; }
-    .logo-sub { font-size: 7.5pt; color: #999; letter-spacing: .1em; text-transform: uppercase; margin-top: 3pt; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; font-size: 9pt; line-height: 1.5; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 9pt; border-bottom: 2pt solid #111; margin-bottom: 12pt; }
+    .logo { font-size: 17pt; font-weight: 900; letter-spacing: .08em; line-height: 1; }
+    .logo-sub { font-size: 7pt; color: #999; letter-spacing: .1em; text-transform: uppercase; margin-top: 3pt; }
     .ref-block { text-align: right; }
-    .ref-no { font-size: 12pt; font-weight: 800; }
-    .ref-meta { font-size: 8pt; color: #777; margin-top: 2pt; line-height: 1.5; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 14pt; }
-    .info-cell { padding-right: 18pt; }
-    .info-cell + .info-cell { padding-right: 0; padding-left: 18pt; border-left: 1pt solid #e8e8e8; }
+    .ref-no { font-size: 11pt; font-weight: 800; }
+    .ref-meta { font-size: 7.5pt; color: #777; margin-top: 2pt; line-height: 1.5; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 12pt; }
+    .info-cell { padding-right: 16pt; }
+    .info-cell + .info-cell { padding-right: 0; padding-left: 16pt; border-left: 1pt solid #e8e8e8; }
     .info-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; margin-bottom: 3pt; }
-    .info-name { font-size: 11pt; font-weight: 700; }
-    .info-detail { font-size: 9pt; color: #555; margin-top: 2pt; }
-    .section-title { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; padding-bottom: 5pt; border-bottom: 1pt solid #e0e0e0; margin-bottom: 8pt; margin-top: 14pt; break-after: avoid; }
-    /* Comparison table */
+    .info-name { font-size: 10pt; font-weight: 700; }
+    .info-detail { font-size: 8.5pt; color: #555; margin-top: 2pt; }
+    .section-title { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; padding-bottom: 4pt; border-bottom: 1pt solid #e0e0e0; margin-bottom: 8pt; margin-top: 12pt; break-after: avoid; }
     .cmp-table { width: 100%; border-collapse: collapse; }
-    .cmp-table th { padding: 7pt 8pt; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; text-align: right; border-bottom: 1.5pt solid #111; }
-    .cmp-table th:first-child { text-align: left; color: #999; }
-    .cmp-table th.basic  { color: #555; }
+    .cmp-table colgroup col:first-child { width: 22%; }
+    .cmp-table th { padding: 7pt 8pt; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; text-align: left; border-bottom: 1.5pt solid #111; }
+    .cmp-table th:first-child { color: #999; }
+    .cmp-table th.basic { color: #555; }
     .cmp-table th.premium { color: #7c5540; }
     .cmp-table th.sig { color: #b8892a; }
-    .cmp-table td { padding: 5.5pt 8pt; font-size: 9pt; border-bottom: .5pt solid #f0f0f0; text-align: right; }
-    .cmp-table td:first-child { text-align: left; color: #444; }
-    .cmp-table tr.fixed-row td { color: #888; font-size: 8.5pt; font-style: italic; }
-    .cmp-table tr.total-row td { border-top: 2pt solid #111; border-bottom: none; font-weight: 800; font-size: 10.5pt; padding-top: 8pt; background: #fafafa; }
-    .cmp-table tr.total-row td:first-child { color: #111; }
-    /* Price boxes */
-    .pkg-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin-top: 14pt; break-inside: avoid; }
-    .pkg-box { border-radius: 5pt; padding: 10pt 8pt; text-align: center; border: 1pt solid #e0e0e0; }
-    .pkg-box.basic   { border-color: #ddd; }
-    .pkg-box.premium { border-color: #7c5540; border-width: 1.5pt; }
-    .pkg-box.sig     { background: #111; color: #fff; border-color: #111; }
-    .pkg-name { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; opacity: .65; margin-bottom: 5pt; }
+    .cmp-table td { padding: 7pt 8pt; border-bottom: .5pt solid #efefef; vertical-align: top; }
+    .cmp-table td:first-child { font-size: 8pt; font-weight: 700; color: #444; }
+    .feat-main { font-size: 8pt; font-weight: 600; color: #111; }
+    .feat-sub { font-size: 7.5pt; color: #777; }
+    .cmp-table tr:nth-child(even) td { background: #fafafa; }
+    .pkg-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin-top: 12pt; break-inside: avoid; }
+    .pkg-box { border-radius: 4pt; padding: 10pt 8pt; text-align: center; }
+    .pkg-box.basic { border: 1pt solid #ddd; }
+    .pkg-box.premium { border: 1.5pt solid #7c5540; }
+    .pkg-box.sig { background: #111; color: #fff; }
+    .pkg-name { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; opacity: .6; margin-bottom: 5pt; }
     .pkg-price { font-size: 15pt; font-weight: 900; line-height: 1; }
-    .pkg-diff { font-size: 7.5pt; margin-top: 4pt; opacity: .55; }
-    /* Scope */
-    .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20pt; }
-    .scope-item { font-size: 9pt; padding: 3.5pt 0; display: flex; align-items: baseline; gap: 6pt; border-bottom: .5pt solid #f2f2f2; break-inside: avoid; }
-    .scope-check { color: #b8892a; font-size: 7.5pt; font-weight: 700; flex-shrink: 0; }
-    /* Brands */
-    .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1pt 14pt; break-inside: avoid; }
-    .brand-item { font-size: 8.5pt; color: #444; padding: 3pt 0; display: flex; align-items: center; gap: 5pt; border-bottom: .5pt solid #f2f2f2; }
-    .brand-dot { width: 3.5pt; height: 3.5pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
-    .note { font-size: 8pt; color: #999; font-style: italic; margin-top: 14pt; line-height: 1.5; }
-    .footer { margin-top: 10pt; padding-top: 8pt; border-top: 1pt solid #e0e0e0; font-size: 7pt; color: #bbb; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
+    .pkg-diff { font-size: 7.5pt; margin-top: 4pt; opacity: .5; }
+    .base-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14pt; }
+    .base-item { font-size: 8pt; color: #555; padding: 3pt 0; display: flex; align-items: baseline; gap: 5pt; border-bottom: .5pt solid #f5f5f5; }
+    .base-check { color: #b8892a; font-size: 7.5pt; font-weight: 700; flex-shrink: 0; }
+    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7pt; break-inside: avoid; }
+    .term-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 8pt 6pt; text-align: center; break-inside: avoid; }
+    .term-pct { font-size: 15pt; font-weight: 900; color: #111; line-height: 1; }
+    .term-lbl { font-size: 7pt; color: #777; margin-top: 3pt; line-height: 1.3; }
+    .term-amt { font-size: 8.5pt; font-weight: 700; color: #b8892a; margin-top: 3pt; }
+    .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1pt 12pt; break-inside: avoid; }
+    .brand-item { font-size: 8pt; color: #444; padding: 3pt 0; display: flex; align-items: center; gap: 5pt; border-bottom: .5pt solid #f2f2f2; }
+    .brand-dot { width: 3pt; height: 3pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
+    .note { font-size: 7.5pt; color: #999; font-style: italic; margin-top: 12pt; line-height: 1.5; }
+    .footer { margin-top: 9pt; padding-top: 7pt; border-top: 1pt solid #e0e0e0; font-size: 6.5pt; color: #bbb; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
   </style>
   </head><body>
 
@@ -1585,36 +1622,26 @@ function printComparisonPDF(q: Quotation) {
 
   <div class="section-title">Package Comparison</div>
   <table class="cmp-table">
+    <colgroup><col><col><col><col></colgroup>
     <thead>
       <tr>
-        <th>Item</th>
-        <th class="basic">Basic</th>
-        <th class="premium">Premium</th>
-        <th class="sig">Signature</th>
+        <th>Work Item</th>
+        <th class="basic">⭐ Basic</th>
+        <th class="premium">⭐⭐ Premium</th>
+        <th class="sig">👑 Signature</th>
       </tr>
     </thead>
     <tbody>
-      ${varRows.map(r => `
-        <tr>
-          <td>${r.label}</td>
-          <td>${fmtRs(r.b)}</td>
-          <td>${fmtRs(r.p)}</td>
-          <td>${fmtRs(r.s)}</td>
-        </tr>`).join('')}
-      <tr class="fixed-row">
-        <td>Other Works (plumbing, tiling prep, waterproofing…)</td>
-        <td>${fmtRs(fixedCost)}</td>
-        <td colspan="2" style="text-align:center;color:#aaa">Same</td>
-      </tr>
-      <tr class="total-row">
-        <td>Total Investment</td>
-        <td>${fmtRs(bdB.finalAmount)}</td>
-        <td>${fmtRs(bdP.finalAmount)}</td>
-        <td>${fmtRs(bdS.finalAmount)}</td>
-      </tr>
+      ${featRows.map(r => `<tr><td>${r.label}</td>${cell(r.b)}${cell(r.p)}${cell(r.s)}</tr>`).join('')}
     </tbody>
   </table>
 
+  <div class="section-title">Included in All Packages</div>
+  <div class="base-grid">
+    ${baseInclusions.map(item => `<div class="base-item"><span class="base-check">✓</span><span>${item}</span></div>`).join('')}
+  </div>
+
+  <div class="section-title">Total Investment</div>
   <div class="pkg-boxes">
     <div class="pkg-box basic">
       <div class="pkg-name">⭐ Basic</div>
@@ -1628,14 +1655,20 @@ function printComparisonPDF(q: Quotation) {
     </div>
     <div class="pkg-box sig">
       <div class="pkg-name">👑 Signature</div>
-      <div class="pkg-price" style="color:#e8c87a">${fmtRs(bdS.finalAmount)}</div>
+      <div class="pkg-price">${fmtRs(bdS.finalAmount)}</div>
       <div class="pkg-diff">+${fmtRs(bdS.finalAmount - bdB.finalAmount)} vs Basic</div>
     </div>
   </div>
 
-  <div class="section-title">Scope of Work</div>
-  <div class="scope-grid">
-    ${scope.map(s => `<div class="scope-item"><span class="scope-check">✓</span><span>${s}</span></div>`).join('')}
+  <div class="section-title">Payment Schedule</div>
+  <div style="font-size:7.5pt;color:#888;margin-bottom:6pt">Amounts shown for Basic package. Same schedule applies proportionally to all.</div>
+  <div class="terms-grid">
+    ${q.paymentTerms.map(t => `
+      <div class="term-box">
+        <div class="term-pct">${t.percentage}%</div>
+        <div class="term-lbl">${t.label}</div>
+        <div class="term-amt">${fmtRs(bdB.finalAmount * t.percentage / 100)}</div>
+      </div>`).join('')}
   </div>
 
   <div class="section-title">Brands &amp; Materials</div>
@@ -1643,7 +1676,7 @@ function printComparisonPDF(q: Quotation) {
     ${q.brands.map(b => `<div class="brand-item"><div class="brand-dot"></div>${b}</div>`).join('')}
   </div>
 
-  <div class="note">This comparison is valid for 30 days from the date above. All packages include the same scope of work — the difference is in tile grade, fixture quality, vanity, bathware, and fittings. Prices subject to change based on actual site conditions.</div>
+  <div class="note">This comparison is valid for 30 days from the date above. All packages cover the same full scope — the difference is in tile grade, fixture quality, vanity, and bathware. Prices subject to change based on actual site conditions.</div>
 
   <div class="footer">LUXEHOME &nbsp;·&nbsp; Luxury Bathroom Renovation &nbsp;·&nbsp; Sri Lanka</div>
   <script>window.onload=function(){window.print();}<\/script>
@@ -1652,302 +1685,3 @@ function printComparisonPDF(q: Quotation) {
   const w = window.open('', '_blank');
   if (w) { w.document.write(html); w.document.close(); }
 }
-
-/* ── PDF — Invoice ───────────────────────────────────────── */
-function printInvoicePDF(inv: Invoice) {
-  const remaining = inv.finalAmount - inv.paidAmount;
-  const html = `<!DOCTYPE html><html><head>
-  <meta charset="utf-8">
-  <title>${inv.quotationRef} — LUXEHOME Invoice</title>
-  <style>
-    @page { size: A4; margin: 18mm 16mm; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Georgia, 'Times New Roman', serif; color: #111; font-size: 10.5pt; line-height: 1.5; }
-    .logo { font-size: 22pt; font-weight: 900; letter-spacing: .06em; }
-    .gold { color: #b8892a; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12pt; border-bottom: 2pt solid #111; margin-bottom: 16pt; }
-    .section-title { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #888; margin: 16pt 0 8pt; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; }
-    .info-row { font-size: 10pt; }
-    .info-label { color: #666; font-size: 9pt; }
-    table { width: 100%; border-collapse: collapse; margin-top: 6pt; }
-    th { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .06em; color: #888; text-align: left; padding: 6pt 8pt; border-bottom: 1pt solid #ccc; }
-    th:last-child { text-align: right; }
-    td { padding: 7pt 8pt; border-bottom: .5pt solid #eee; font-size: 10pt; }
-    td:last-child { text-align: right; font-weight: 600; }
-    .final-box { background: #111; color: #fff; padding: 14pt 16pt; border-radius: 6pt; margin-top: 14pt; display: flex; justify-content: space-between; align-items: center; }
-    .final-label { font-size: 10pt; opacity: .7; }
-    .final-amount { font-size: 18pt; font-weight: 900; }
-    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin-top: 6pt; }
-    .term-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 8pt; text-align: center; }
-    .term-pct { font-size: 16pt; font-weight: 900; }
-    .term-lbl { font-size: 8.5pt; color: #666; margin-top: 2pt; }
-    .term-amt { font-size: 9.5pt; font-weight: 700; color: #b8892a; margin-top: 3pt; }
-    .footer { margin-top: 24pt; padding-top: 10pt; border-top: 1pt solid #ddd; font-size: 8.5pt; color: #888; text-align: center; }
-    .status-badge { display:inline-block; padding: 3pt 10pt; border-radius: 20pt; font-size: 9pt; font-weight: 700; border: 1.5pt solid #111; }
-  </style>
-  </head><body>
-  <div class="header">
-    <div>
-      <div class="logo">LUXE<span class="gold">HOME</span></div>
-      <div style="font-size:9pt;color:#888;margin-top:4pt">Premium Bathroom Renovation</div>
-    </div>
-    <div style="text-align:right">
-      <div style="font-size:12pt;font-weight:700">INVOICE</div>
-      <div style="font-size:9pt;color:#888;margin-top:2pt">${inv.quotationRef}</div>
-      <div style="font-size:9pt;color:#888">${fmtDate(inv.invoiceDate)}</div>
-      <div style="margin-top:4pt"><span class="status-badge">${inv.status.toUpperCase()}</span></div>
-    </div>
-  </div>
-
-  <div class="info-grid">
-    <div>
-      <div class="info-label">Billed To</div>
-      <div class="info-row" style="font-weight:700">${inv.clientName}</div>
-      ${inv.clientPhone ? `<div class="info-row">${inv.clientPhone}</div>` : ''}
-    </div>
-    <div>
-      <div class="info-label">Project</div>
-      <div class="info-row" style="font-weight:700">${inv.projectName || inv.projectLocation}</div>
-      ${inv.projectName ? `<div class="info-row">${inv.projectLocation}</div>` : ''}
-      <div class="info-row" style="font-size:9pt;color:#666">Due: ${fmtDate(inv.dueDate)}</div>
-    </div>
-  </div>
-
-  <div class="section-title">Summary</div>
-  <table>
-    <thead><tr><th>Description</th><th>Amount</th></tr></thead>
-    <tbody>
-      <tr><td>${packageLabel(inv.package)} Package — ${inv.projectType === 'renovation' ? 'Renovation' : 'Construction'}</td><td>${fmtRs(inv.finalAmount)}</td></tr>
-      ${inv.payments.map(p => `<tr><td style="color:#16a34a">Payment received — ${fmtDateShort(p.date)}${p.note ? ' (' + p.note + ')' : ''}</td><td style="color:#16a34a">− ${fmtRs(p.amount)}</td></tr>`).join('')}
-    </tbody>
-  </table>
-
-  <div class="final-box">
-    <div>
-      <div class="final-label">${remaining <= 0 ? 'PAID IN FULL' : 'Balance Due'}</div>
-    </div>
-    <div class="final-amount">${fmtRs(Math.max(0, remaining))}</div>
-  </div>
-
-  <div class="section-title">Payment Schedule</div>
-  <div class="terms-grid">
-    ${inv.paymentTerms.map(t => `
-      <div class="term-box">
-        <div class="term-pct">${t.percentage}%</div>
-        <div class="term-lbl">${t.label}</div>
-        <div class="term-amt">${fmtRs(inv.finalAmount * t.percentage / 100)}</div>
-      </div>
-    `).join('')}
-  </div>
-
-  <div class="footer">LUXEHOME · Luxury Bathroom Renovation · Sri Lanka</div>
-  <script>window.onload=function(){window.print();}<\/script>
-  </body></html>`;
-
-  const w = window.open('', '_blank');
-  if (w) { w.document.write(html); w.document.close(); }
-}
-
-/* ── WhatsApp sharing ────────────────────────────────────── */
-function shareQuotationWA(q: Quotation) {
-  const bd = q.breakdown;
-  const ref = (q as any).ref || 'LH-QTN';
-  const text = [
-    `*LUXEHOME Quotation — ${ref}*`,
-    ``,
-    `Client: ${q.clientName}`,
-    `Project: ${q.projectName || q.projectLocation}`,
-    `Date: ${fmtDate(q.quotationDate)}`,
-    `Package: ${packageLabel(q.package)}`,
-    ``,
-    `*Total Investment: ${fmtRs(bd.finalAmount)}*`,
-    ``,
-    `Payment Terms:`,
-    ...q.paymentTerms.map(t => `• ${t.label}: ${t.percentage}% (${fmtRs(bd.finalAmount * t.percentage / 100)})`),
-    ``,
-    `_This quotation is valid for 30 days._`,
-  ].join('\n');
-
-  const phone = q.clientPhone?.replace(/\D/g, '') || '';
-  const waPhone = phone.startsWith('94') ? phone : phone.startsWith('0') ? '94' + phone.slice(1) : '';
-  const url = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
-  window.open(url, '_blank');
-}
-
-function shareInvoiceWA(inv: Invoice) {
-  const remaining = inv.finalAmount - inv.paidAmount;
-  const text = [
-    `*LUXEHOME Invoice — ${inv.quotationRef}*`,
-    ``,
-    `Client: ${inv.clientName}`,
-    `Project: ${inv.projectName || inv.projectLocation}`,
-    `Invoice Date: ${fmtDate(inv.invoiceDate)}`,
-    `Due Date: ${fmtDate(inv.dueDate)}`,
-    ``,
-    `Total: ${fmtRs(inv.finalAmount)}`,
-    `Paid: ${fmtRs(inv.paidAmount)}`,
-    `*Balance Due: ${fmtRs(Math.max(0, remaining))}*`,
-    ``,
-    `Payment Schedule:`,
-    ...inv.paymentTerms.map(t => `• ${t.label}: ${t.percentage}% (${fmtRs(inv.finalAmount * t.percentage / 100)})`),
-  ].join('\n');
-
-  const phone = inv.clientPhone?.replace(/\D/g, '') || '';
-  const waPhone = phone.startsWith('94') ? phone : phone.startsWith('0') ? '94' + phone.slice(1) : '';
-  const url = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
-  window.open(url, '_blank');
-}
-
-/* ── Wizard helpers ──────────────────────────────────────── */
-function setupSingleSelect(selector: string, field: keyof QuotationInputs) {
-  document.querySelectorAll<HTMLElement>(selector).forEach(card => {
-    card.addEventListener('click', () => {
-      document.querySelectorAll(selector).forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      (wizardData as any)[field] = card.dataset.val;
-    });
-  });
-}
-
-function stepper(label: string, sub: string, key: string, val: number, min: number, max: number): string {
-  return `
-    <div class="stepper-row">
-      <div><div class="stepper-label">${label}</div><div class="stepper-sub">${sub}</div></div>
-      <div class="stepper-ctrl">
-        <button class="stepper-btn" data-step="${key}" data-dir="-1" data-min="${min}" data-max="${max}">−</button>
-        <span class="stepper-val" id="step-val-${key}">${val}</span>
-        <button class="stepper-btn" data-step="${key}" data-dir="1" data-min="${min}" data-max="${max}">+</button>
-      </div>
-    </div>
-  `;
-}
-
-function setupSteppers(map: Record<string, keyof QuotationInputs>) {
-  document.querySelectorAll<HTMLButtonElement>('[data-step][data-dir]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.step!;
-      const dir = parseInt(btn.dataset.dir!);
-      const min = parseInt(btn.dataset.min || '0');
-      const max = parseInt(btn.dataset.max || '999');
-      const field = map[key];
-      if (!field) return;
-      const cur = (wizardData[field] as number) || 0;
-      const next = Math.max(min, Math.min(max, cur + dir));
-      (wizardData as any)[field] = next;
-      const el = document.getElementById(`step-val-${key}`);
-      if (el) el.textContent = String(next);
-    });
-  });
-}
-
-function toggle(label: string, sub: string, key: string, val: boolean): string {
-  return `
-    <div class="toggle-row" data-toggle="${key}">
-      <div><div class="toggle-label">${label}</div><div class="toggle-sub">${sub}</div></div>
-      <div class="toggle-switch ${val ? 'on' : ''}" id="sw-${key}"></div>
-    </div>
-  `;
-}
-
-function setupToggles(map: Record<string, keyof QuotationInputs>) {
-  document.querySelectorAll<HTMLElement>('[data-toggle]').forEach(row => {
-    row.addEventListener('click', () => {
-      const key = row.dataset.toggle!;
-      const field = map[key];
-      if (!field) return;
-      const next = !((wizardData as any)[field]);
-      (wizardData as any)[field] = next;
-      const sw = document.getElementById(`sw-${key}`)!;
-      sw.classList.toggle('on', next);
-    });
-  });
-}
-
-/* ── Collect step data ───────────────────────────────────── */
-function collectCurrentStep(): boolean {
-  switch (wizardStep) {
-    case 1:  return collectStep1();
-    case 4:  return collectStep4();
-    case 7:  return collectStep7();
-    case 9:  return collectStep9();
-    case 10: return collectStep10();
-    default: return true;
-  }
-}
-
-/* ── Wizard navigation ───────────────────────────────────── */
-document.getElementById('wizard-back-btn')!.addEventListener('click', () => {
-  if (wizardStep === 1) { viewHistory = []; navigate('quotations'); return; }
-  wizardStep--;
-  renderWizard();
-});
-
-document.getElementById('wizard-next-btn')!.addEventListener('click', () => {
-  if (!collectCurrentStep()) return;
-  if (wizardStep === WIZARD_STEPS) { saveQuotation(); return; }
-  wizardStep++;
-  renderWizard();
-});
-
-/* ── Modal helpers ───────────────────────────────────────── */
-type ModalBtn = { label: string; cls: string; action: () => void };
-function showModal(title: string, body: string, buttons: ModalBtn[]) {
-  const overlay = document.getElementById('modal-overlay')!;
-  const box = document.getElementById('modal-box')!;
-  box.innerHTML = `
-    <div class="modal-title">${title}</div>
-    ${body}
-    <div class="modal-actions">
-      ${buttons.map((b, i) => `<button class="${b.cls}" data-modal-btn="${i}">${b.label}</button>`).join('')}
-    </div>
-  `;
-  overlay.classList.add('open');
-  buttons.forEach((b, i) => {
-    box.querySelector<HTMLButtonElement>(`[data-modal-btn="${i}"]`)!
-      .addEventListener('click', b.action);
-  });
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); }, { once: true });
-}
-function closeModal() {
-  document.getElementById('modal-overlay')!.classList.remove('open');
-}
-
-/* ── Toast ───────────────────────────────────────────────── */
-let _toastTimer: ReturnType<typeof setTimeout>;
-function toast(msg: string) {
-  const el = document.getElementById('toast')!;
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-/* ── Escape helper ───────────────────────────────────────── */
-function esc(s: string | null | undefined): string {
-  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* ── Bottom nav clicks ───────────────────────────────────── */
-document.querySelectorAll<HTMLButtonElement>('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    viewHistory = [];
-    navigate(btn.dataset.view || 'dashboard', false);
-  });
-});
-
-/* ── Header back button ──────────────────────────────────── */
-headerBack.addEventListener('click', () => {
-  if (currentView === 'wizard') {
-    if (wizardStep > 1) { wizardStep--; renderWizard(); }
-    else { viewHistory = []; navigate('quotations'); }
-  } else {
-    goBack();
-  }
-});
-
-/* ── Boot ────────────────────────────────────────────────── */
-navigate('dashboard', false);
-</script>
-</body>
-</html>
