@@ -714,7 +714,11 @@ function renderStep8() {
     <div class="step-content">
       <div class="step-q">Extra items</div>
       <div class="step-hint">Toggle what's included in this bathroom.</div>
-      ${toggle('Ceiling Installation', `Yes: ${fmtRs(RATES.ceiling.perSqFt)}/sqft · No: ${fmtRs(RATES.ceiling.flat)} flat`, 'ceiling', wizardData.hasCeiling)}
+      ${toggle('Ceiling Installation',
+        isCmp
+          ? `Yes: ${fmtRs(RATES.ceiling.perSqFt.basic)} – ${fmtRs(RATES.ceiling.perSqFt.signature)}/sqft · No: ${fmtRs(RATES.ceiling.flat)} flat`
+          : `Yes: ${fmtRs(RATES.ceiling.perSqFt[wizardData.package])}/sqft (${packageLabel(wizardData.package)}) · No: ${fmtRs(RATES.ceiling.flat)} flat`,
+        'ceiling', wizardData.hasCeiling)}
       ${toggle('Vanity Cupboard & Countertop',
         isCmp ? `Yes: ${rangeLabel(RATES.vanity)} · No: ${fmtRs(RATES.vanity.basic)}`
                : `Yes: ${fmtRs(RATES.vanity[wizardData.package])} (${packageLabel(wizardData.package)}) · No: ${fmtRs(RATES.vanity.basic)}`,
@@ -1463,11 +1467,12 @@ function printComparisonPDF(q: Quotation) {
   // Fixed costs (same across all packages) — use Basic breakdown
   const fixedCost = bdB.renovationCost + bdB.designPlanning + bdB.floorConcreteCost
     + bdB.dummyWallCost + bdB.wallNicheCost + bdB.plumbingCost + bdB.wiringCost
-    + bdB.waterproofingCost + bdB.ceilingCost + bdB.geyserCost + bdB.showerCost + bdB.overhead;
+    + bdB.waterproofingCost + bdB.geyserCost + bdB.showerCost + bdB.overhead;
 
   type Row = { label: string; b: number; p: number; s: number; hide?: boolean };
   const varRows: Row[] = [
     { label: 'Tiling & Grouting',      b: bdB.tilingCost,        p: bdP.tilingCost,        s: bdS.tilingCost },
+    { label: 'Ceiling Installation',   b: bdB.ceilingCost,       p: bdP.ceilingCost,       s: bdS.ceilingCost },
     { label: 'Light Fixtures',         b: bdB.lightFixtureCost,  p: bdP.lightFixtureCost,  s: bdS.lightFixtureCost, hide: q.wiringPoints === 0 },
     { label: 'Vanity Cupboard',        b: bdB.vanityCost,        p: bdP.vanityCost,        s: bdS.vanityCost },
     { label: 'Mirror',                 b: bdB.mirrorCost,        p: bdP.mirrorCost,        s: bdS.mirrorCost },
