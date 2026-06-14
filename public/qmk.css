@@ -137,6 +137,8 @@ body {
   padding: 3px 9px; border-radius: 20px; background: #f0f0ec; margin-top: 8px;
 }
 .card-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.pill-filter { height: 30px; padding: 0 12px; border-radius: 20px; border: 1.5px solid #e0e0da; background: #fff; font-size: .78rem; font-weight: 600; cursor: pointer; white-space: nowrap; color: #555; }
+.pill-filter.active { background: var(--clay); border-color: var(--clay); color: #fff; }
 .card-btn {
   flex: 1; min-width: 80px; height: 36px; border-radius: 8px;
   font-size: .78rem; font-weight: 600; cursor: pointer; border: none;
