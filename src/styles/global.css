@@ -261,13 +261,13 @@ img { display: block; }
 }
 
 /* Component-wide minimalist surfaces */
-section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero) {
+section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero):not(#shop) {
   background: var(--off-white) !important;
   padding-block: clamp(4.5rem, 8vw, 7.5rem) !important;
 }
 
-section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero)::before,
-section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero)::after {
+section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero):not(#shop)::before,
+section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero):not(#shop)::after {
   opacity: 0 !important;
 }
 
