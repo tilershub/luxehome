@@ -521,57 +521,81 @@ function renderInquiryDetail() {
     : { id: '', createdAt: '', name: '', phone: '', service: '', location: '', notes: '', status: 'new' };
   const isNew = !detailInqId;
 
+  const statusDotColor = inqStatusColor(inq.status);
+
   main.innerHTML = `
-    <div class="page-header"><h2>${isNew ? 'New Inquiry' : 'Edit Inquiry'}</h2></div>
-    <div style="padding:0 16px 100px">
-      ${!isNew ? `<div style="font-size:.78rem;color:#aaa;margin-bottom:12px">Logged ${fmtDate(inq.createdAt)}</div>` : ''}
+    <div style="padding:20px 16px 100px">
 
-      <div class="wizard-field">
-        <label class="wizard-label">Name</label>
-        <input id="inq-name" class="wizard-input" type="text" placeholder="Client name" value="${inq.name}">
-      </div>
-      <div class="wizard-field">
-        <label class="wizard-label">Phone / WhatsApp</label>
-        <input id="inq-phone" class="wizard-input" type="tel" placeholder="+94 7X XXX XXXX" value="${inq.phone}">
-      </div>
-      <div class="wizard-field">
-        <label class="wizard-label">Service / Interest</label>
-        <input id="inq-service" class="wizard-input" type="text" placeholder="e.g. Bathroom renovation, Tiling…" value="${inq.service}">
-      </div>
-      <div class="wizard-field">
-        <label class="wizard-label">Location / Area</label>
-        <input id="inq-location" class="wizard-input" type="text" placeholder="e.g. Colombo 7, Nugegoda…" value="${inq.location}">
-      </div>
-      <div class="wizard-field">
-        <label class="wizard-label">Status</label>
-        <select id="inq-status" class="wizard-input">
-          ${(['new','contacted','quoted','won','lost'] as InquiryStatus[]).map(s =>
-            `<option value="${s}"${inq.status === s ? ' selected' : ''} style="color:${inqStatusColor(s)}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`
-          ).join('')}
-        </select>
-      </div>
-      <div class="wizard-field">
-        <label class="wizard-label">Notes</label>
-        <textarea id="inq-notes" class="wizard-input" rows="4" placeholder="Details, follow-up reminders…" style="resize:vertical">${inq.notes}</textarea>
+      ${!isNew ? `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+          <span style="width:10px;height:10px;border-radius:50%;background:${statusDotColor};flex-shrink:0;display:inline-block"></span>
+          <span style="font-size:.8rem;color:#888">Logged ${fmtDate(inq.createdAt)}</span>
+        </div>
+      ` : ''}
+
+      <div class="inq-form-card">
+        <div class="field-group">
+          <label class="field-label">Name</label>
+          <input id="inq-name" class="field-input" type="text" placeholder="Client name" value="${inq.name}" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Phone / WhatsApp</label>
+          <input id="inq-phone" class="field-input" type="tel" placeholder="+94 7X XXX XXXX" value="${inq.phone}">
+        </div>
       </div>
 
-      <button class="dash-cta" id="inq-save-btn" style="margin-top:8px">
+      <div class="inq-form-card">
+        <div class="field-group">
+          <label class="field-label">Service / Interest</label>
+          <input id="inq-service" class="field-input" type="text" placeholder="e.g. Bathroom renovation, Tiling…" value="${inq.service}" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Location / Area</label>
+          <input id="inq-location" class="field-input" type="text" placeholder="e.g. Colombo 7, Nugegoda…" value="${inq.location}" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="inq-form-card">
+        <div class="field-group">
+          <label class="field-label">Status</label>
+          <div style="position:relative">
+            <select id="inq-status" class="field-input" style="appearance:none;-webkit-appearance:none;padding-right:36px;font-weight:600;color:${statusDotColor}">
+              ${(['new','contacted','quoted','won','lost'] as InquiryStatus[]).map(s =>
+                `<option value="${s}"${inq.status === s ? ' selected' : ''} style="color:${inqStatusColor(s)};font-weight:600">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`
+              ).join('')}
+            </select>
+            <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#888;font-size:.75rem">▼</span>
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-label">Notes</label>
+          <textarea id="inq-notes" class="field-textarea" rows="4" placeholder="Details, follow-up reminders, budget discussed…">${inq.notes}</textarea>
+        </div>
+      </div>
+
+      <button class="dash-cta" id="inq-save-btn">
         ${isNew ? '＋ Save Inquiry' : '✓ Save Changes'}
       </button>
       ${!isNew ? `
-        <button class="card-btn danger" id="inq-delete-btn" style="width:100%;margin-top:10px;height:44px">
+        <button class="inq-delete-btn" id="inq-delete-btn">
           🗑 Delete Inquiry
         </button>
       ` : ''}
     </div>
   `;
 
+  // Update select colour when changed
+  const statusSel = document.getElementById('inq-status') as HTMLSelectElement;
+  statusSel.addEventListener('change', () => {
+    statusSel.style.color = inqStatusColor(statusSel.value as InquiryStatus);
+  });
+
   document.getElementById('inq-save-btn')!.addEventListener('click', () => {
     const name     = (document.getElementById('inq-name') as HTMLInputElement).value.trim();
     const phone    = (document.getElementById('inq-phone') as HTMLInputElement).value.trim();
     const service  = (document.getElementById('inq-service') as HTMLInputElement).value.trim();
     const location = (document.getElementById('inq-location') as HTMLInputElement).value.trim();
-    const status   = (document.getElementById('inq-status') as HTMLSelectElement).value as InquiryStatus;
+    const status   = statusSel.value as InquiryStatus;
     const notes    = (document.getElementById('inq-notes') as HTMLTextAreaElement).value.trim();
 
     if (!name && !phone) { toast('Enter at least a name or phone number'); return; }
