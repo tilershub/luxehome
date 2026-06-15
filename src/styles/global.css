@@ -260,89 +260,8 @@ img { display: block; }
   box-shadow: 0 18px 36px rgba(17, 17, 17, .14);
 }
 
-/* Component-wide minimalist surfaces */
-section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero):not(#shop) {
-  background: var(--off-white) !important;
-  padding-block: clamp(4.5rem, 8vw, 7.5rem) !important;
-}
-
-section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero):not(#shop)::before,
-section:not(.hero):not(.page-hero):not(.blog-hero):not(.post-hero):not(#shop)::after {
-  opacity: 0 !important;
-}
-
 .section-head {
   max-width: 760px !important;
-}
-
-.svc-card,
-.project-card,
-.pkg-card,
-.mat-card,
-.cart-panel,
-.quote-card,
-.process-card,
-.value-card {
-  background: var(--surface) !important;
-  border: 1px solid var(--stone) !important;
-  border-radius: var(--radius-md) !important;
-  box-shadow: none !important;
-  overflow: hidden;
-}
-
-.svc-card:hover,
-.project-card:hover,
-.pkg-card:hover,
-.mat-card:hover,
-.process-card:hover,
-.value-card:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: var(--shadow-min) !important;
-}
-
-.svc-img img,
-.card-media img,
-.project-card img {
-  filter: brightness(.88) !important;
-}
-
-.svc-icon,
-.check-icon,
-.step-num,
-.meta-pill,
-.card-type,
-.media-label,
-.after-label {
-  background: var(--surface-soft) !important;
-  border-color: var(--stone) !important;
-  color: var(--charcoal) !important;
-  border-radius: 999px !important;
-}
-
-.projects-grid h3,
-.project-card h3,
-.svc-name,
-.check-text strong,
-.card-body h3 {
-  font-family: 'DM Sans', sans-serif !important;
-  color: var(--charcoal) !important;
-  letter-spacing: -.02em;
-}
-
-.projects-grid p,
-.project-card p,
-.svc-desc,
-.check-text span,
-.card-body p,
-.meta-pill,
-.card-type {
-  color: var(--warm-gray) !important;
-}
-
-.card-btn,
-.svc-cta,
-.projects-footer .btn-ghost {
-  color: var(--charcoal) !important;
 }
 
 footer {
