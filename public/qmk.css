@@ -338,3 +338,13 @@ body {
   margin: 0 16px 12px; overflow: hidden;
 }
 .override-note { font-size: .75rem; color: #888; margin-top: 6px; }
+.inq-form-card {
+  background: #fff; border-radius: 14px; border: 1px solid #e8e8e4;
+  padding: 16px; margin-bottom: 12px;
+}
+.inq-form-card .field-group:last-child { margin-bottom: 0; }
+.inq-delete-btn {
+  display: block; width: 100%; margin-top: 10px; padding: 0 16px; height: 46px;
+  border-radius: 12px; border: 1.5px solid #fca5a5; background: #fff5f5;
+  color: #dc2626; font-size: .88rem; font-weight: 600; cursor: pointer; text-align: center;
+}
