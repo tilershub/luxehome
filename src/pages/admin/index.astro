@@ -85,7 +85,7 @@ import type {
 } from '../../lib/quotation-calc';
 
 /* ── Inquiry types ───────────────────────────────────────── */
-type InquiryStatus = 'new' | 'contacted' | 'quoted' | 'won' | 'lost';
+type InquiryStatus = 'new' | 'contacted' | 'site_visit' | 'quoted' | 'won' | 'lost';
 interface Inquiry {
   id: string;
   createdAt: string;
@@ -97,7 +97,10 @@ interface Inquiry {
   status: InquiryStatus;
 }
 function inqStatusColor(s: InquiryStatus): string {
-  return { new:'#4a90d9', contacted:'#f5a623', quoted:'#7c5540', won:'#4caf50', lost:'#aaa' }[s] ?? '#999';
+  return { new:'#4a90d9', contacted:'#f5a623', site_visit:'#9b59b6', quoted:'#7c5540', won:'#4caf50', lost:'#aaa' }[s] ?? '#999';
+}
+function inqStatusLabel(s: InquiryStatus): string {
+  return { new:'New', contacted:'Contacted', site_visit:'Site Visit', quoted:'Quoted', won:'Won', lost:'Lost' }[s] ?? s;
 }
 
 /* ── Storage ──────────────────────────────────────────────── */
@@ -465,6 +468,7 @@ function renderInquiries() {
       ${filterBtn('all','All')}
       ${filterBtn('new','New')}
       ${filterBtn('contacted','Contacted')}
+      ${filterBtn('site_visit','Site Visit')}
       ${filterBtn('quoted','Quoted')}
       ${filterBtn('won','Won')}
       ${filterBtn('lost','Lost')}
@@ -485,7 +489,7 @@ function renderInquiries() {
             ${i.notes ? `<div style="font-size:.78rem;color:#999;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px">${i.notes}</div>` : ''}
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-            <span style="font-size:.72rem;font-weight:700;color:${inqStatusColor(i.status)};text-transform:capitalize">${i.status}</span>
+            <span style="font-size:.72rem;font-weight:700;color:${inqStatusColor(i.status)}">${inqStatusLabel(i.status)}</span>
             <a href="tel:${i.phone}" style="font-size:.8rem;color:#4a90d9" onclick="event.stopPropagation()">${i.phone}</a>
           </div>
         </div>
@@ -560,8 +564,8 @@ function renderInquiryDetail() {
           <label class="field-label">Status</label>
           <div style="position:relative">
             <select id="inq-status" class="field-input" style="appearance:none;-webkit-appearance:none;padding-right:36px;font-weight:600;color:${statusDotColor}">
-              ${(['new','contacted','quoted','won','lost'] as InquiryStatus[]).map(s =>
-                `<option value="${s}"${inq.status === s ? ' selected' : ''} style="color:${inqStatusColor(s)};font-weight:600">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`
+              ${(['new','contacted','site_visit','quoted','won','lost'] as InquiryStatus[]).map(s =>
+                `<option value="${s}"${inq.status === s ? ' selected' : ''} style="color:${inqStatusColor(s)};font-weight:600">${inqStatusLabel(s)}</option>`
               ).join('')}
             </select>
             <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#888;font-size:.75rem">▼</span>
