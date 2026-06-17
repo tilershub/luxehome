@@ -241,7 +241,7 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
     'Plumbing Works',
     'Electrical Wiring Works',
     'Waterproofing Before Tiling',
-    'Tiling & Grouting',
+    `Tiling & Grouting${q.clientSupplyTiles ? ' (Client Supply)' : ''}`,
   );
   if (q.hasCeiling) scope.push('Ceiling Installation');
   scope.push(
