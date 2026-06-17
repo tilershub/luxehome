@@ -158,6 +158,22 @@ import Footer from '../../components/Footer.astro';
         </ul>
       </div>
 
+      <div class="exclusions-box reveal">
+        <strong>Exclusions</strong>
+        <p class="exclusions-note">The following items are excluded from the scope of work unless specifically stated in this quotation:</p>
+        <ul class="exclusions-list">
+          <li>Outdoor plumbing works</li>
+          <li>External drainage modifications</li>
+          <li>Septic tank construction, repairs, or alterations</li>
+          <li>Main water supply line alterations</li>
+          <li>Municipal water and sewer connections</li>
+          <li>External electrical works outside the bathroom area</li>
+          <li>Structural modifications to the building</li>
+          <li>Any work outside the bathroom area</li>
+        </ul>
+        <p class="exclusions-footer">Any additional works requested by the client that fall outside the agreed scope will be assessed and quoted separately before commencement.</p>
+      </div>
+
     </div>
   </section>
 
@@ -767,6 +783,57 @@ import Footer from '../../components/Footer.astro';
   .not-included-list li {
     font-size: .78rem;
     color: rgba(240,236,224,.72);
+  }
+
+  /* ── Exclusions ── */
+
+  .exclusions-box {
+    font-size: .8rem;
+    color: rgba(240,236,224,.78);
+    padding: 1.2rem 1.4rem;
+    background: rgba(255,80,50,.04);
+    border-left: 3px solid rgba(255,120,80,.28);
+    border-radius: 0 3px 3px 0;
+    line-height: 1.65;
+    margin-top: .8rem;
+  }
+
+  .exclusions-box strong {
+    display: block;
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: rgba(240,236,224,.6);
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+
+  .exclusions-note {
+    margin-bottom: .6rem;
+    color: rgba(240,236,224,.72);
+  }
+
+  .exclusions-list {
+    margin: 0 0 .75rem 1rem;
+    padding: 0;
+    list-style: disc;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+  }
+
+  .exclusions-list li {
+    font-size: .78rem;
+    color: rgba(240,236,224,.68);
+  }
+
+  .exclusions-footer {
+    font-size: .75rem;
+    font-style: italic;
+    color: rgba(240,236,224,.55);
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding-top: .65rem;
+    margin-top: .1rem;
   }
 
   /* ── Responsive ── */
