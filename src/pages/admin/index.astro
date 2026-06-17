@@ -965,7 +965,9 @@ function renderStep8() {
         isCmp ? `Yes: ${rangeLabel(RATES.vanity)} · No: ${fmtRs(RATES.vanity.basic)}`
                : `Yes: ${fmtRs(RATES.vanity[wizardData.package])} (${packageLabel(wizardData.package)}) · No: ${fmtRs(RATES.vanity.basic)}`,
         'vanity', wizardData.hasVanity)}
-      ${toggle('Geyser / Water Heater', fmtRs(RATES.geyser), 'geyser', wizardData.hasGeyser)}
+      ${toggle('Geyser / Water Heater',
+        `${fmtRs(RATES.geyser)} supply + install · ${fmtRs(RATES.clientSupply.geyser)} install only`,
+        'geyser', wizardData.hasGeyser)}
       ${toggle('Door',
         isCmp ? rangeLabel(RATES.door)
                : `${fmtRs(RATES.door[wizardData.package])} (${packageLabel(wizardData.package)})`,
@@ -974,9 +976,34 @@ function renderStep8() {
         isCmp ? rangeLabel(RATES.window)
                : `${fmtRs(RATES.window[wizardData.package])} (${packageLabel(wizardData.package)})`,
         'window', wizardData.hasWindow)}
+
+      <div class="step-q" style="margin-top:1.8rem">Client Will Supply</div>
+      <div class="step-hint">Enable when the client provides these items — only installation labour is charged.</div>
+      ${toggle('Tiles (Client Supply)',
+        `${fmtRs(RATES.clientSupply.tileRate)}/sqft labour only · standard: ${
+          isCmp ? `${fmtRs(RATES.tiling.basic)}–${fmtRs(RATES.tiling.signature)}/sqft`
+                : `${fmtRs(RATES.tiling[wizardData.package])}/sqft`}`,
+        'cs-tiles', wizardData.clientSupplyTiles)}
+      ${toggle('Bathware (Client Supply)',
+        `${fmtRs(RATES.clientSupply.bathware)} installation only · standard: ${
+          isCmp ? `${fmtRs(RATES.bathware.basic)}–${fmtRs(RATES.bathware.signature)}`
+                : fmtRs(RATES.bathware[wizardData.package])}`,
+        'cs-bathware', wizardData.clientSupplyBathware)}
+      ${toggle('Mirror (Client Supply)',
+        `${fmtRs(RATES.clientSupply.mirror)} installation only · standard: ${
+          isCmp ? `${fmtRs(RATES.mirror.basic)}–${fmtRs(RATES.mirror.signature)}`
+                : fmtRs(RATES.mirror[wizardData.package])}`,
+        'cs-mirror', wizardData.clientSupplyMirror)}
+      ${toggle('Geyser (Client Supply)',
+        `${fmtRs(RATES.clientSupply.geyser)} installation only — enable Geyser above first`,
+        'cs-geyser', wizardData.clientSupplyGeyser)}
     </div>
   `;
-  setupToggles({ ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow' });
+  setupToggles({
+    ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow',
+    'cs-tiles': 'clientSupplyTiles', 'cs-bathware': 'clientSupplyBathware',
+    'cs-mirror': 'clientSupplyMirror', 'cs-geyser': 'clientSupplyGeyser',
+  });
 }
 
 /* Step 9 — Difficulty + Profit Margin */
