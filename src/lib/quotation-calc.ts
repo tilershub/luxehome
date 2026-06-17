@@ -50,8 +50,8 @@ export const RATES = {
     pType: { perLinFt: 17_000 },
   },
   floorConcreteMinimal: 1_000,  // flat rate when hasFloorConcrete is false
-  wiringMinimal:        5_000,  // flat rate when hasElectricalWiring is false
-  lightFixtureMinimal:  6_000,  // flat rate when hasLightFixtures is false
+  wiringMinimal:        10_000, // flat rate when hasElectricalWiring is false
+  lightFixtureMinimal:  10_000, // flat rate when hasLightFixtures is false
   overhead:     100_000,   // internal only — hidden from customer PDFs
   profitMargin: 0.15,
   clientSupply: {
