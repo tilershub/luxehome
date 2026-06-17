@@ -997,12 +997,29 @@ function renderStep8() {
       ${toggle('Geyser (Client Supply)',
         `${fmtRs(RATES.clientSupply.geyser)} installation only — enable Geyser above first`,
         'cs-geyser', wizardData.clientSupplyGeyser)}
+
+      <div class="step-q" style="margin-top:1.8rem">Cost Adjustments</div>
+      <div class="step-hint">Toggle off to apply a minimal flat rate instead of the full calculation.</div>
+      ${toggle('Floor Concrete Works',
+        `Yes: ${fmtRs(RATES.floorConcrete.perSqFt)}/sqft · No: ${fmtRs(RATES.floorConcreteMinimal)} flat`,
+        'floor-concrete', wizardData.hasFloorConcrete !== false)}
+      ${toggle('Electrical Wiring',
+        `Yes: ${fmtRs(RATES.wiring.perPoint)}/point · No: ${fmtRs(RATES.wiringMinimal)} flat`,
+        'elec-wiring', wizardData.hasElectricalWiring !== false)}
+      ${toggle('Light & Plug Fixtures',
+        isCmp
+          ? `Yes: ${rangeLabel(RATES.lightFixture)}/point · No: ${fmtRs(RATES.lightFixtureMinimal)} flat`
+          : `Yes: ${fmtRs(RATES.lightFixture[wizardData.package])}/point · No: ${fmtRs(RATES.lightFixtureMinimal)} flat`,
+        'light-fixtures', wizardData.hasLightFixtures !== false)}
+      ${toggle('Exhaust Fan', 'Include exhaust fan installation in scope of work', 'exhaust-fan', wizardData.hasExhaustFan !== false)}
     </div>
   `;
   setupToggles({
     ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow',
     'cs-tiles': 'clientSupplyTiles', 'cs-bathware': 'clientSupplyBathware',
     'cs-mirror': 'clientSupplyMirror', 'cs-geyser': 'clientSupplyGeyser',
+    'floor-concrete': 'hasFloorConcrete', 'elec-wiring': 'hasElectricalWiring',
+    'light-fixtures': 'hasLightFixtures', 'exhaust-fan': 'hasExhaustFan',
   });
 }
 
@@ -1031,6 +1048,12 @@ function renderStep9() {
       <input type="number" id="profit-input" class="field-input" min="0" max="50" step="1"
         value="${profitPct}" style="max-width:140px;font-size:1.1rem;font-weight:600;text-align:center">
 
+      <div class="step-q" style="margin-top:2rem">Manual Plumbing Cost (optional)</div>
+      <div class="step-hint">Enter a custom amount to override the package plumbing rate. Leave blank to use the package rate.</div>
+      <input type="number" id="plumbing-override-input" class="field-input" min="0" step="1000"
+        value="${wizardData.plumbingCostOverride || ''}" placeholder="e.g. 55,000"
+        style="max-width:180px;font-size:1.1rem;font-weight:600;text-align:center">
+
       ${wizardData.projectType === 'renovation' ? `
       <div class="step-q" style="margin-top:2rem">Renovation rate (Rs./sqft)</div>
       <div class="step-hint">Applied to total tiling area (floor + wall). Default: Rs. 250/sqft.</div>
@@ -1054,6 +1077,8 @@ function collectStep9(): boolean {
   wizardData.difficultyScore = score;
   const pct = parseFloat((document.getElementById('profit-input') as HTMLInputElement | null)?.value || '15');
   wizardData.profitMargin = Math.max(0, Math.min(0.5, (isNaN(pct) ? 15 : pct) / 100));
+  const po = parseFloat((document.getElementById('plumbing-override-input') as HTMLInputElement | null)?.value || '');
+  wizardData.plumbingCostOverride = (!isNaN(po) && po > 0) ? po : null;
   if (wizardData.projectType === 'renovation') {
     const rr = parseFloat((document.getElementById('reno-rate-input') as HTMLInputElement | null)?.value || '250');
     wizardData.renovationRate = Math.max(0, isNaN(rr) ? 250 : rr);
