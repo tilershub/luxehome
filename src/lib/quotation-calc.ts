@@ -51,6 +51,12 @@ export const RATES = {
   },
   overhead:     100_000,   // internal only — hidden from customer PDFs
   profitMargin: 0.15,
+  clientSupply: {
+    tileRate:  500,     // per sq.ft — labour only when client supplies tiles
+    bathware:  20_000,  // installation only when client supplies bathware
+    mirror:    1_000,   // installation only when client supplies mirror
+    geyser:    5_000,   // installation only when client supplies geyser unit
+  },
 };
 
 /* ── Defaults ─────────────────────────────────────────────── */
@@ -90,6 +96,10 @@ export interface QuotationInputs {
   hasVanity:         boolean;
   hasDoor:           boolean;
   hasWindow:         boolean;
+  clientSupplyTiles:    boolean;
+  clientSupplyBathware: boolean;
+  clientSupplyMirror:   boolean;
+  clientSupplyGeyser:   boolean;
   profitMargin:      number;
   floorArea:         number;
   wallArea:          number;
@@ -177,20 +187,24 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
   const wallNicheCost    = q.wallNiches * RATES.wallNiche.each;
   const floorConcreteCost = q.floorArea * RATES.floorConcrete.perSqFt;
   const dummyWallCost    = q.dummyWallArea * RATES.dummyWall.perSqFt;
-  const tilingCost       = totalTilingArea * RATES.tiling[q.package];
+  const tilingCost       = q.clientSupplyTiles
+    ? totalTilingArea * RATES.clientSupply.tileRate
+    : totalTilingArea * RATES.tiling[q.package];
   const plumbingCost     = RATES.plumbing[q.plumbing];
   const wiringCost       = q.wiringPoints * RATES.wiring.perPoint;
   const waterproofingCost = q.waterproofingArea * RATES.waterproofing.perSqFt;
   const ceilingCost      = q.hasCeiling ? ceilingArea * RATES.ceiling.perSqFt[q.package] : RATES.ceiling.flat;
   const lightFixtureCost = q.wiringPoints * RATES.lightFixture[q.package];
-  const geyserCost       = q.hasGeyser ? RATES.geyser : 0;
+  const geyserCost       = q.hasGeyser
+    ? (q.clientSupplyGeyser ? RATES.clientSupply.geyser : RATES.geyser)
+    : 0;
   const vanityCost       = q.hasVanity ? RATES.vanity[q.package] : RATES.vanity.basic;
   const showerCost       = q.showerCubicle === 'l-type'
     ? q.showerLength * RATES.shower.lType.perLinFt
     : q.showerCubicle === 'p-type'
     ? q.showerLength * RATES.shower.pType.perLinFt : 0;
-  const mirrorCost    = RATES.mirror[q.package];
-  const bathwareCost  = RATES.bathware[q.package];
+  const mirrorCost    = q.clientSupplyMirror   ? RATES.clientSupply.mirror   : RATES.mirror[q.package];
+  const bathwareCost  = q.clientSupplyBathware ? RATES.clientSupply.bathware : RATES.bathware[q.package];
   const doorCost      = q.hasDoor   ? RATES.door[q.package]   : 0;
   const windowCost    = q.hasWindow ? RATES.window[q.package] : 0;
   const overhead      = RATES.overhead;
@@ -236,10 +250,13 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
   );
   if (q.hasVanity) scope.push('Vanity Cupboard & Countertop');
   if (q.showerCubicle !== 'none') scope.push('Shower Glass / Cubicle Installation');
-  scope.push('Bathware & Tapware Installation', 'Mirror Installation');
+  scope.push(
+    `Bathware & Tapware Installation${q.clientSupplyBathware ? ' (Client Supply)' : ''}`,
+    `Mirror Installation${q.clientSupplyMirror ? ' (Client Supply)' : ''}`,
+  );
   if (q.hasDoor)           scope.push('Door Works');
   if (q.hasWindow)         scope.push('Window Works');
-  if (q.hasGeyser)         scope.push('Geyser Installation');
+  if (q.hasGeyser) scope.push(`Geyser Installation${q.clientSupplyGeyser ? ' (Client Supply)' : ''}`);
   if (q.wallNiches > 0)    scope.push('Wall Niche Construction');
   if (q.dummyWallArea > 0) scope.push('Dummy Wall Construction');
   return scope;
@@ -277,6 +294,7 @@ export function defaultInputs(): QuotationInputs {
     projectType: 'renovation', package: 'basic', plumbing: 'basic',
     showerCubicle: 'none', showerLength: 0,
     hasGeyser: false, hasCeiling: true, hasVanity: true, hasDoor: false, hasWindow: false,
+    clientSupplyTiles: false, clientSupplyBathware: false, clientSupplyMirror: false, clientSupplyGeyser: false,
     profitMargin: 0.15,
     floorArea: 0, wallArea: 0, waterproofingArea: 0, dummyWallArea: 0,
     wallNiches: 0, wiringPoints: 0,
