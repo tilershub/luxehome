@@ -49,6 +49,9 @@ export const RATES = {
     lType: { perLinFt: 18_000 },
     pType: { perLinFt: 17_000 },
   },
+  floorConcreteMinimal: 1_000,  // flat rate when hasFloorConcrete is false
+  wiringMinimal:        10_000, // flat rate when hasElectricalWiring is false
+  lightFixtureMinimal:  10_000, // flat rate when hasLightFixtures is false
   overhead:     100_000,   // internal only — hidden from customer PDFs
   profitMargin: 0.15,
   clientSupply: {
@@ -100,6 +103,11 @@ export interface QuotationInputs {
   clientSupplyBathware: boolean;
   clientSupplyMirror:   boolean;
   clientSupplyGeyser:   boolean;
+  hasFloorConcrete:     boolean;
+  plumbingCostOverride: number | null;
+  hasElectricalWiring:  boolean;
+  hasLightFixtures:     boolean;
+  hasExhaustFan:        boolean;
   profitMargin:      number;
   floorArea:         number;
   wallArea:          number;
@@ -185,16 +193,20 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
   const renovationCost   = q.projectType === 'renovation' ? totalTilingArea * renovationRate : 0;
   const designPlanning   = RATES.designPlanning;
   const wallNicheCost    = q.wallNiches * RATES.wallNiche.each;
-  const floorConcreteCost = q.floorArea * RATES.floorConcrete.perSqFt;
+  const floorConcreteCost = (q.hasFloorConcrete !== false)
+    ? q.floorArea * RATES.floorConcrete.perSqFt : RATES.floorConcreteMinimal;
   const dummyWallCost    = q.dummyWallArea * RATES.dummyWall.perSqFt;
   const tilingCost       = q.clientSupplyTiles
     ? totalTilingArea * RATES.clientSupply.tileRate
     : totalTilingArea * RATES.tiling[q.package];
-  const plumbingCost     = RATES.plumbing[q.plumbing];
-  const wiringCost       = q.wiringPoints * RATES.wiring.perPoint;
+  const plumbingCost     = (q.plumbingCostOverride != null && q.plumbingCostOverride > 0)
+    ? q.plumbingCostOverride : RATES.plumbing[q.plumbing];
+  const wiringCost       = (q.hasElectricalWiring !== false)
+    ? q.wiringPoints * RATES.wiring.perPoint : RATES.wiringMinimal;
   const waterproofingCost = q.waterproofingArea * RATES.waterproofing.perSqFt;
   const ceilingCost      = q.hasCeiling ? ceilingArea * RATES.ceiling.perSqFt[q.package] : RATES.ceiling.flat;
-  const lightFixtureCost = q.wiringPoints * RATES.lightFixture[q.package];
+  const lightFixtureCost = (q.hasLightFixtures !== false)
+    ? q.wiringPoints * RATES.lightFixture[q.package] : RATES.lightFixtureMinimal;
   const geyserCost       = q.hasGeyser
     ? (q.clientSupplyGeyser ? RATES.clientSupply.geyser : RATES.geyser)
     : 0;
@@ -241,13 +253,12 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
     'Plumbing Works',
     'Electrical Wiring Works',
     'Waterproofing Before Tiling',
-    'Tiling & Grouting',
+    `Tiling & Grouting${q.clientSupplyTiles ? ' (Client Supply)' : ''}`,
   );
   if (q.hasCeiling) scope.push('Ceiling Installation');
-  scope.push(
-    'Light & Plug Fixture Installation',
-    'Exhaust Fan Installation',
-  );
+  if (q.hasLightFixtures !== false) scope.push('Light & Plug Fixture Installation');
+  else scope.push('Basic Light Provision');
+  if (q.hasExhaustFan !== false) scope.push('Exhaust Fan Installation');
   if (q.hasVanity) scope.push('Vanity Cupboard & Countertop');
   if (q.showerCubicle !== 'none') scope.push('Shower Glass / Cubicle Installation');
   scope.push(
@@ -295,6 +306,8 @@ export function defaultInputs(): QuotationInputs {
     showerCubicle: 'none', showerLength: 0,
     hasGeyser: false, hasCeiling: true, hasVanity: true, hasDoor: false, hasWindow: false,
     clientSupplyTiles: false, clientSupplyBathware: false, clientSupplyMirror: false, clientSupplyGeyser: false,
+    hasFloorConcrete: true, plumbingCostOverride: null,
+    hasElectricalWiring: true, hasLightFixtures: true, hasExhaustFan: true,
     profitMargin: 0.15,
     floorArea: 0, wallArea: 0, waterproofingArea: 0, dummyWallArea: 0,
     wallNiches: 0, wiringPoints: 0,

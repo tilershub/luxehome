@@ -997,12 +997,29 @@ function renderStep8() {
       ${toggle('Geyser (Client Supply)',
         `${fmtRs(RATES.clientSupply.geyser)} installation only — enable Geyser above first`,
         'cs-geyser', wizardData.clientSupplyGeyser)}
+
+      <div class="step-q" style="margin-top:1.8rem">Cost Adjustments</div>
+      <div class="step-hint">Toggle off to apply a minimal flat rate instead of the full calculation.</div>
+      ${toggle('Floor Concrete Works',
+        `Yes: ${fmtRs(RATES.floorConcrete.perSqFt)}/sqft · No: ${fmtRs(RATES.floorConcreteMinimal)} flat`,
+        'floor-concrete', wizardData.hasFloorConcrete !== false)}
+      ${toggle('Electrical Wiring',
+        `Yes: ${fmtRs(RATES.wiring.perPoint)}/point · No: ${fmtRs(RATES.wiringMinimal)} flat`,
+        'elec-wiring', wizardData.hasElectricalWiring !== false)}
+      ${toggle('Light & Plug Fixtures',
+        isCmp
+          ? `Yes: ${rangeLabel(RATES.lightFixture)}/point · No: ${fmtRs(RATES.lightFixtureMinimal)} flat`
+          : `Yes: ${fmtRs(RATES.lightFixture[wizardData.package])}/point · No: ${fmtRs(RATES.lightFixtureMinimal)} flat`,
+        'light-fixtures', wizardData.hasLightFixtures !== false)}
+      ${toggle('Exhaust Fan', 'Include exhaust fan installation in scope of work', 'exhaust-fan', wizardData.hasExhaustFan !== false)}
     </div>
   `;
   setupToggles({
     ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow',
     'cs-tiles': 'clientSupplyTiles', 'cs-bathware': 'clientSupplyBathware',
     'cs-mirror': 'clientSupplyMirror', 'cs-geyser': 'clientSupplyGeyser',
+    'floor-concrete': 'hasFloorConcrete', 'elec-wiring': 'hasElectricalWiring',
+    'light-fixtures': 'hasLightFixtures', 'exhaust-fan': 'hasExhaustFan',
   });
 }
 
@@ -1031,6 +1048,12 @@ function renderStep9() {
       <input type="number" id="profit-input" class="field-input" min="0" max="50" step="1"
         value="${profitPct}" style="max-width:140px;font-size:1.1rem;font-weight:600;text-align:center">
 
+      <div class="step-q" style="margin-top:2rem">Manual Plumbing Cost (optional)</div>
+      <div class="step-hint">Enter a custom amount to override the package plumbing rate. Leave blank to use the package rate.</div>
+      <input type="number" id="plumbing-override-input" class="field-input" min="0" step="1000"
+        value="${wizardData.plumbingCostOverride || ''}" placeholder="e.g. 55,000"
+        style="max-width:180px;font-size:1.1rem;font-weight:600;text-align:center">
+
       ${wizardData.projectType === 'renovation' ? `
       <div class="step-q" style="margin-top:2rem">Renovation rate (Rs./sqft)</div>
       <div class="step-hint">Applied to total tiling area (floor + wall). Default: Rs. 250/sqft.</div>
@@ -1054,6 +1077,8 @@ function collectStep9(): boolean {
   wizardData.difficultyScore = score;
   const pct = parseFloat((document.getElementById('profit-input') as HTMLInputElement | null)?.value || '15');
   wizardData.profitMargin = Math.max(0, Math.min(0.5, (isNaN(pct) ? 15 : pct) / 100));
+  const po = parseFloat((document.getElementById('plumbing-override-input') as HTMLInputElement | null)?.value || '');
+  wizardData.plumbingCostOverride = (!isNaN(po) && po > 0) ? po : null;
   if (wizardData.projectType === 'renovation') {
     const rr = parseFloat((document.getElementById('reno-rate-input') as HTMLInputElement | null)?.value || '250');
     wizardData.renovationRate = Math.max(0, isNaN(rr) ? 250 : rr);
@@ -1657,6 +1682,8 @@ function printQuotationPDF(q: Quotation) {
     .term-lbl { font-size: 7.5pt; color: #777; margin-top: 4pt; line-height: 1.3; }
     .term-amt { font-size: 9pt; font-weight: 700; color: #b8892a; margin-top: 4pt; }
     .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1pt 14pt; break-inside: avoid; }
+    .conditions { font-size: 7.5pt; color: #555; background: #f7f5f0; border-left: 2.5pt solid #b8892a; padding: 6pt 9pt; border-radius: 0 3pt 3pt 0; margin-bottom: 8pt; line-height: 1.55; }
+    .conditions strong { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .1em; color: #b8892a; font-weight: 700; margin-bottom: 3pt; }
     .brand-item { font-size: 8.5pt; color: #444; padding: 3pt 0; display: flex; align-items: center; gap: 5pt; border-bottom: .5pt solid #f2f2f2; break-inside: avoid; }
     .brand-dot { width: 3.5pt; height: 3.5pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
     .note { font-size: 8pt; color: #999; font-style: italic; margin-top: 14pt; line-height: 1.5; }
@@ -1716,6 +1743,11 @@ function printQuotationPDF(q: Quotation) {
     ${q.brands.map(b => `<div class="brand-item"><div class="brand-dot"></div>${b}</div>`).join('')}
   </div>
 
+  <div class="conditions">
+    <strong>Conditions</strong>
+    This quotation covers all works inside the bathroom area only. Any works required outside the bathroom (external plumbing, drainage, electrical supply lines, structural works, etc.) are not included and will be quoted separately upon request.
+  </div>
+
   <div class="note">This quotation is valid for 30 days from the date above. Prices are subject to change based on actual site conditions. All works carried out by LUXEHOME certified teams.</div>
 
   <div class="footer">LUXEHOME &nbsp;·&nbsp; Luxury Bathroom Renovation &nbsp;·&nbsp; Sri Lanka</div>
@@ -1736,10 +1768,10 @@ function printComparisonPDF(q: Quotation) {
 
   type FeatRow = { label: string; b: string[]; p: string[]; s: string[]; hide?: boolean };
   const featRows: FeatRow[] = [
-    { label: 'Tiling & Grouting',
-      b: ['Indian tiles', 'Swisstek adhesive', 'Swisstek grout'],
-      p: ['Mega tiles', 'Swisstek adhesive', 'Swisstek grout'],
-      s: ['Rocell tiles', 'Swisstek adhesive', 'Swisstek grout'] },
+    { label: `Tiling & Grouting${q.clientSupplyTiles ? ' (Client Supply)' : ''}`,
+      b: q.clientSupplyTiles ? ['Labour only — client supplies tiles'] : ['Indian tiles', 'Swisstek adhesive', 'Swisstek grout'],
+      p: q.clientSupplyTiles ? ['Labour only — client supplies tiles'] : ['Mega tiles', 'Swisstek adhesive', 'Swisstek grout'],
+      s: q.clientSupplyTiles ? ['Labour only — client supplies tiles'] : ['Rocell tiles', 'Swisstek adhesive', 'Swisstek grout'] },
     { label: 'Ceiling Installation',
       b: ['Standard PVC ceiling', 'Rs. 800/sqft'],
       p: ['Premium PVC ceiling', 'Rs. 1,000/sqft'],
@@ -1756,12 +1788,14 @@ function printComparisonPDF(q: Quotation) {
       hide: q.wiringPoints === 0 },
     { label: 'Vanity Cupboard',
       b: ['Standard vanity'], p: ['Premium vanity'], s: ['Custom vanity'] },
-    { label: 'Mirror',
-      b: ['Standard mirror'], p: ['Premium mirror'], s: ['Designer mirror'] },
-    { label: 'Bathware & Tapware',
-      b: ['Swiss Standard bathware & tapware'],
-      p: ['Swiss Premium bathware & tapware'],
-      s: ['Swiss Signature bathware & tapware'] },
+    { label: `Mirror${q.clientSupplyMirror ? ' (Client Supply)' : ''}`,
+      b: q.clientSupplyMirror ? ['Installation only — client supplies mirror'] : ['Standard mirror'],
+      p: q.clientSupplyMirror ? ['Installation only — client supplies mirror'] : ['Premium mirror'],
+      s: q.clientSupplyMirror ? ['Installation only — client supplies mirror'] : ['Designer mirror'] },
+    { label: `Bathware & Tapware${q.clientSupplyBathware ? ' (Client Supply)' : ''}`,
+      b: q.clientSupplyBathware ? ['Installation only — client supplies bathware'] : ['Swiss Standard bathware & tapware'],
+      p: q.clientSupplyBathware ? ['Installation only — client supplies bathware'] : ['Swiss Premium bathware & tapware'],
+      s: q.clientSupplyBathware ? ['Installation only — client supplies bathware'] : ['Swiss Signature bathware & tapware'] },
     { label: 'Door Works',
       b: ['Standard door works'], p: ['Premium door works'], s: ['Premium door works'],
       hide: !q.hasDoor },
@@ -1782,7 +1816,7 @@ function printComparisonPDF(q: Quotation) {
     ...(q.projectType === 'renovation' ? ['Demolition & debris removal'] : []),
     ...(q.wallNiches > 0 ? [`Wall niches (${q.wallNiches})`] : []),
     ...(q.dummyWallArea > 0 ? ['Dummy wall construction'] : []),
-    ...(q.hasGeyser ? ['Geyser / water heater installation'] : []),
+    ...(q.hasGeyser ? [`Geyser / water heater installation${q.clientSupplyGeyser ? ' (Client Supply)' : ''}`] : []),
     ...(q.showerCubicle !== 'none' ? ['Shower glass cubicle installation'] : []),
     ...(!q.hasCeiling ? ['Basic ceiling works (flat rate)'] : []),
   ];
@@ -1836,6 +1870,8 @@ function printComparisonPDF(q: Quotation) {
     .term-lbl { font-size: 7pt; color: #777; margin-top: 3pt; line-height: 1.3; }
     .term-amt { font-size: 8.5pt; font-weight: 700; color: #b8892a; margin-top: 3pt; }
     .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1pt 12pt; break-inside: avoid; }
+    .conditions { font-size: 7.5pt; color: #555; background: #f7f5f0; border-left: 2.5pt solid #b8892a; padding: 6pt 9pt; border-radius: 0 3pt 3pt 0; margin-bottom: 8pt; line-height: 1.55; }
+    .conditions strong { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .1em; color: #b8892a; font-weight: 700; margin-bottom: 3pt; }
     .brand-item { font-size: 8pt; color: #444; padding: 3pt 0; display: flex; align-items: center; gap: 5pt; border-bottom: .5pt solid #f2f2f2; }
     .brand-dot { width: 3pt; height: 3pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
     .note { font-size: 7.5pt; color: #999; font-style: italic; margin-top: 12pt; line-height: 1.5; }
@@ -1921,6 +1957,11 @@ function printComparisonPDF(q: Quotation) {
   <div class="section-title">Brands &amp; Materials</div>
   <div class="brands-grid">
     ${q.brands.map(b => `<div class="brand-item"><div class="brand-dot"></div>${b}</div>`).join('')}
+  </div>
+
+  <div class="conditions">
+    <strong>Conditions</strong>
+    This quotation covers all works inside the bathroom area only. Any works required outside the bathroom (external plumbing, drainage, electrical supply lines, structural works, etc.) are not included and will be quoted separately upon request.
   </div>
 
   <div class="note">This comparison is valid for 30 days from the date above. All packages cover the same full scope — the difference is in tile grade, fixture quality, vanity, and bathware. Prices subject to change based on actual site conditions.</div>
