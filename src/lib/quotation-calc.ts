@@ -3,9 +3,7 @@
    Edit RATES to update all prices globally.
    ============================================================ */
 
-export type PackageType     = 'basic' | 'premium' | 'signature';
 export type ProjectType     = 'renovation' | 'construction';
-export type PlumbingType    = 'basic' | 'premium' | 'signature';
 export type ShowerType      = 'none' | 'l-swing' | 'l-sliding' | 'panel-swing' | 'panel-sliding' | 'panel';
 export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'converted';
 export type InvoiceStatus   = 'draft' | 'sent' | 'partially-paid' | 'paid' | 'cancelled';
@@ -19,44 +17,18 @@ export const RATES = {
   wallNiche:     { each: 10_000 },
   floorConcrete: { perSqFt: 350 },
   dummyWall:     { perSqFt: 1_000 },
-  tiling: {
-    basic: 850, premium: 1_000, signature: 1_300,
-  } as Record<PackageType, number>,
-  plumbing: {
-    basic: 45_000, premium: 60_000, signature: 80_000,
-  } as Record<PlumbingType, number>,
-  wiring:        { perPoint: 3_000 },
+  wiring:        { perPoint: 1_500 },  // service labour only per point
   waterproofing: { perSqFt: 230 },
-  ceiling:       { perSqFt: { basic: 800, premium: 1_000, signature: 1_200 } as Record<PackageType, number>, flat: 20_000 },
-  lightFixture: {
-    basic: 3_000, premium: 3_500, signature: 4_000,
-  } as Record<PackageType, number>,
-  geyser: 60_000,
-  vanity: {
-    basic: 30_000, premium: 50_000, signature: 60_000,
-  } as Record<PackageType, number>,
-  mirror: {
-    basic: 15_000, premium: 20_000, signature: 25_000,
-  } as Record<PackageType, number>,
-  bathware: {
-    basic: 200_000, premium: 250_000, signature: 350_000,
-  } as Record<PackageType, number>,
-  door: {
-    basic: 40_000, premium: 50_000, signature: 60_000,
-  } as Record<PackageType, number>,
-  window: {
-    basic: 20_000, premium: 30_000, signature: 40_000,
-  } as Record<PackageType, number>,
+  ceiling:       { perSqFt: 1_000, flat: 20_000 },
+  lightFixture:  { perPoint: 500 },   // service per point
+  geyser:        60_000,
+  door:          45_000,
+  window:        30_000,
   floorConcreteMinimal: 1_000,  // flat rate when hasFloorConcrete is false
-  wiringMinimal:        10_000, // flat rate when hasElectricalWiring is false
-  lightFixtureMinimal:  10_000, // flat rate when hasLightFixtures is false
   overhead:     100_000,   // internal only — hidden from customer PDFs
   profitMargin: 0.15,
   clientSupply: {
-    tileRate:  500,     // per sq.ft — labour only when client supplies tiles
-    bathware:  20_000,  // installation only when client supplies bathware
-    mirror:    1_000,   // installation only when client supplies mirror
-    geyser:    5_000,   // installation only when client supplies geyser unit
+    geyser: 5_000,   // installation only when client supplies geyser unit
   },
 };
 
@@ -88,8 +60,6 @@ export interface QuotationInputs {
   projectName:       string;
   quotationDate:     string;
   projectType:       ProjectType;
-  package:           PackageType;
-  plumbing:          PlumbingType;
   showerCubicle:     ShowerType;
   showerCubiclePrice: number;
   hasGeyser:         boolean;
@@ -97,14 +67,25 @@ export interface QuotationInputs {
   hasVanity:         boolean;
   hasDoor:           boolean;
   hasWindow:         boolean;
-  clientSupplyTiles:    boolean;
-  clientSupplyBathware: boolean;
-  clientSupplyMirror:   boolean;
-  clientSupplyGeyser:   boolean;
-  hasFloorConcrete:     boolean;
-  hasElectricalWiring:  boolean;
-  hasLightFixtures:     boolean;
-  hasExhaustFan:        boolean;
+  hasBathware:       boolean;
+  hasMirror:         boolean;
+  hasFloorConcrete:  boolean;
+  hasElectricalWiring: boolean;
+  hasLightFixtures:  boolean;
+  hasExhaustFan:     boolean;
+  tileIncluded:      boolean;
+  tileRate:          number;    // material cost per sqft (when tileIncluded)
+  tilingRate:        number;    // labour cost per sqft (always)
+  bathwareMaterialCost: number;
+  bathwareInstallCost:  number;
+  mirrorAmount:      number;
+  vanityAmount:      number;
+  wiringMaterialsEnabled: boolean;
+  wiringMaterialsCost:    number;
+  wiringServiceEnabled:   boolean;
+  wiringServiceRate:      number;   // per point, default 1500
+  lightMaterialsCost:     number;
+  lightServiceRate:       number;   // per point, default 500
   demolitionArea:       number;
   plasteringArea:       number;
   insidePlumbingCost:   number;
@@ -182,7 +163,7 @@ export interface Invoice {
   clientPhone:     string;
   projectLocation: string;
   projectName:     string;
-  package:         PackageType;
+  package?:        string;   // legacy field — kept for backward compat
   projectType:     ProjectType;
   paymentTerms:    PaymentTerm[];
 }
@@ -196,37 +177,47 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
 
   const totalTilingArea  = q.floorArea + q.wallArea;
   const ceilingArea      = q.floorArea;
+
   const demolitionCost      = q.projectType === 'renovation' ? (q.demolitionArea || 0) * RATES.demolition.perSqFt : 0;
   const debrisRemovalCost   = q.projectType === 'renovation' ? (q.demolitionArea || 0) * RATES.debrisRemoval.perSqFt : 0;
   const wallPlasteringCost  = (q.plasteringArea || 0) * RATES.wallPlastering.perSqFt;
-  const designPlanning   = RATES.designPlanning;
-  const wallNicheCost    = q.wallNiches * RATES.wallNiche.each;
-  const floorConcreteCost = (q.hasFloorConcrete !== false)
+  const designPlanning      = RATES.designPlanning;
+  const wallNicheCost       = q.wallNiches * RATES.wallNiche.each;
+  const floorConcreteCost   = (q.hasFloorConcrete !== false)
     ? q.floorArea * RATES.floorConcrete.perSqFt : RATES.floorConcreteMinimal;
-  const dummyWallCost    = q.dummyWallArea * RATES.dummyWall.perSqFt;
-  const tilingCost       = q.clientSupplyTiles
-    ? totalTilingArea * RATES.clientSupply.tileRate
-    : totalTilingArea * RATES.tiling[q.package];
+  const dummyWallCost       = q.dummyWallArea * RATES.dummyWall.perSqFt;
+
+  const tilingMaterialRate  = (q.tileIncluded ?? true) ? (q.tileRate || 0) : 0;
+  const tilingLaborRate     = q.tilingRate || 0;
+  const tilingCost          = totalTilingArea * (tilingMaterialRate + tilingLaborRate);
+
   const insidePlumbingCost  = Math.max(0, Number(q.insidePlumbingCost) || 0);
   const outsidePlumbingCost = Math.max(0, Number(q.outsidePlumbingCost) || 0);
-  const plumbingCost = (insidePlumbingCost + outsidePlumbingCost) > 0
-    ? insidePlumbingCost + outsidePlumbingCost
-    : RATES.plumbing[q.plumbing || 'basic'];
-  const wiringCost       = (q.hasElectricalWiring !== false)
-    ? q.wiringPoints * RATES.wiring.perPoint : RATES.wiringMinimal;
-  const waterproofingCost = q.waterproofingArea * RATES.waterproofing.perSqFt;
-  const ceilingCost      = q.hasCeiling ? ceilingArea * RATES.ceiling.perSqFt[q.package] : RATES.ceiling.flat;
-  const lightFixtureCost = (q.hasLightFixtures !== false)
-    ? q.wiringPoints * RATES.lightFixture[q.package] : RATES.lightFixtureMinimal;
-  const geyserCost       = q.hasGeyser
-    ? (q.clientSupplyGeyser ? RATES.clientSupply.geyser : RATES.geyser)
+  const plumbingCost        = insidePlumbingCost + outsidePlumbingCost;
+
+  const wiringCost = (q.hasElectricalWiring !== false)
+    ? ((q.wiringMaterialsEnabled !== false ? (q.wiringMaterialsCost || 0) : 0)
+       + (q.wiringServiceEnabled !== false ? q.wiringPoints * (q.wiringServiceRate || RATES.wiring.perPoint) : 0))
     : 0;
-  const vanityCost       = q.hasVanity ? RATES.vanity[q.package] : RATES.vanity.basic;
-  const showerCost       = q.showerCubicle !== 'none' ? Math.max(0, Number(q.showerCubiclePrice) || 0) : 0;
-  const mirrorCost    = q.clientSupplyMirror   ? RATES.clientSupply.mirror   : RATES.mirror[q.package];
-  const bathwareCost  = q.clientSupplyBathware ? RATES.clientSupply.bathware : RATES.bathware[q.package];
-  const doorCost      = q.hasDoor   ? RATES.door[q.package]   : 0;
-  const windowCost    = q.hasWindow ? RATES.window[q.package] : 0;
+
+  const waterproofingCost = q.waterproofingArea * RATES.waterproofing.perSqFt;
+  const ceilingCost       = q.hasCeiling ? ceilingArea * RATES.ceiling.perSqFt : RATES.ceiling.flat;
+
+  const lightFixtureCost  = (q.hasLightFixtures !== false)
+    ? (q.lightMaterialsCost || 0) + q.wiringPoints * (q.lightServiceRate || RATES.lightFixture.perPoint)
+    : 0;
+
+  const geyserCost    = q.hasGeyser
+    ? ((q as any).clientSupplyGeyser ? RATES.clientSupply.geyser : RATES.geyser)
+    : 0;
+  const vanityCost    = q.hasVanity ? (q.vanityAmount || 0) : 0;
+  const showerCost    = q.showerCubicle !== 'none' ? Math.max(0, Number(q.showerCubiclePrice) || 0) : 0;
+  const mirrorCost    = (q.hasMirror ?? true) ? (q.mirrorAmount || 0) : 0;
+  const bathwareCost  = (q.hasBathware ?? true)
+    ? ((q.bathwareMaterialCost || 0) + (q.bathwareInstallCost || 0))
+    : 0;
+  const doorCost      = q.hasDoor   ? RATES.door   : 0;
+  const windowCost    = q.hasWindow ? RATES.window : 0;
   const otherCost     = Math.max(0, Number(q.otherCost) || 0);
   const overhead      = RATES.overhead;
 
@@ -275,7 +266,7 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
     'Floor Concrete Works',
     'Electrical Wiring Works',
     'Waterproofing Before Tiling',
-    `Tiling & Grouting${q.clientSupplyTiles ? ' (Client Supply)' : ''}`,
+    `Tiling & Grouting${(q.tileIncluded ?? true) ? '' : ' (Labour Only)'}`,
   );
   if (q.hasCeiling) scope.push('Ceiling Installation');
   if (q.hasLightFixtures !== false) scope.push('Light & Plug Fixture Installation');
@@ -285,13 +276,11 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
   if ((q.outsidePlumbingCost || 0) > 0) scope.push('Outside Plumbing Works');
   if (q.hasVanity) scope.push('Vanity Cupboard & Countertop');
   if (q.showerCubicle !== 'none') scope.push(SHOWER_LABELS[q.showerCubicle] || 'Shower Cubicle / Glass Partition');
-  scope.push(
-    `Bathware & Tapware Installation${q.clientSupplyBathware ? ' (Client Supply)' : ''}`,
-    `Mirror Installation${q.clientSupplyMirror ? ' (Client Supply)' : ''}`,
-  );
+  if (q.hasBathware ?? true) scope.push('Bathware & Tapware Installation');
+  if (q.hasMirror ?? true) scope.push('Mirror Installation');
   if (q.hasDoor)           scope.push('Door Works');
   if (q.hasWindow)         scope.push('Window Works');
-  if (q.hasGeyser) scope.push(`Water Heater (Geyser) Installation${q.clientSupplyGeyser ? ' (Client Supply)' : ''}`);
+  if (q.hasGeyser) scope.push(`Water Heater (Geyser) Installation${(q as any).clientSupplyGeyser ? ' (Client Supply)' : ''}`);
   if (q.wallNiches > 0)    scope.push('Wall Niche Construction');
   if (q.dummyWallArea > 0) scope.push('Dummy Wall Construction');
   if ((q.otherCost || 0) > 0 && q.otherCostLabel) scope.push(q.otherCostLabel);
@@ -327,11 +316,17 @@ export function defaultInputs(): QuotationInputs {
   return {
     clientName: '', clientPhone: '', projectLocation: '', projectName: '',
     quotationDate: new Date().toISOString().split('T')[0],
-    projectType: 'renovation', package: 'basic', plumbing: 'basic',
+    projectType: 'renovation',
     showerCubicle: 'none', showerCubiclePrice: 0,
     hasGeyser: false, hasCeiling: true, hasVanity: true, hasDoor: false, hasWindow: false,
-    clientSupplyTiles: false, clientSupplyBathware: false, clientSupplyMirror: false, clientSupplyGeyser: false,
+    hasBathware: true, hasMirror: true,
     hasFloorConcrete: true, hasElectricalWiring: true, hasLightFixtures: true, hasExhaustFan: true,
+    tileIncluded: true, tileRate: 0, tilingRate: 850,
+    bathwareMaterialCost: 0, bathwareInstallCost: 0,
+    mirrorAmount: 0, vanityAmount: 0,
+    wiringMaterialsEnabled: true, wiringMaterialsCost: 0,
+    wiringServiceEnabled: true, wiringServiceRate: 1500,
+    lightMaterialsCost: 0, lightServiceRate: 500,
     demolitionArea: 0, plasteringArea: 0,
     insidePlumbingCost: 0, outsidePlumbingCost: 0,
     otherCostLabel: '', otherCost: 0,
@@ -343,10 +338,6 @@ export function defaultInputs(): QuotationInputs {
     paymentTerms: DEFAULT_PAYMENT_TERMS.map(t => ({ ...t })),
     finalPriceOverride: null,
   };
-}
-
-export function packageLabel(p: PackageType): string {
-  return p === 'basic' ? 'Basic' : p === 'premium' ? 'Premium' : 'Signature';
 }
 
 export function statusColor(s: string): string {

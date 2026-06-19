@@ -75,13 +75,13 @@
 import {
   calculateQuotation, generateScopeOfWork,
   fmtRs, fmtDate, fmtDateShort, qtnNumber, invNumber,
-  defaultInputs, packageLabel, statusColor,
+  defaultInputs, statusColor,
   DEFAULT_BRANDS, DEFAULT_PAYMENT_TERMS,
   RATES,
 } from '../../lib/quotation-calc';
 import type {
   QuotationInputs, QuotationBreakdown, Quotation, Invoice,
-  PaymentTerm, Payment, PackageType, ProjectType, PlumbingType, ShowerType,
+  PaymentTerm, Payment, ProjectType, ShowerType,
 } from '../../lib/quotation-calc';
 
 /* ── Inquiry types ───────────────────────────────────────── */
@@ -209,9 +209,6 @@ function renderDashboard() {
       <button class="dash-cta" id="dash-new-qtn">
         ＋ New Quotation
       </button>
-      <button class="dash-cta" id="dash-cmp-qtn" style="background:var(--surface);color:var(--clay);border:1.5px solid var(--clay);margin-top:10px">
-        ⊞ 3-Package Comparison
-      </button>
 
       <div class="stat-row">
         <div class="stat-card">
@@ -259,7 +256,6 @@ function renderDashboard() {
   `;
 
   document.getElementById('dash-new-qtn')!.addEventListener('click', () => startWizard());
-  document.getElementById('dash-cmp-qtn')!.addEventListener('click', startComparisonWizard);
   document.getElementById('dash-inq-card')?.addEventListener('click', () => navigate('inquiries'));
   document.querySelectorAll<HTMLElement>('[data-qtn]').forEach(el => {
     el.addEventListener('click', () => openQtnDetail(el.dataset.qtn!));
@@ -276,7 +272,6 @@ function renderQuotations() {
       <h2>Quotations</h2>
       <button class="add-btn" id="new-qtn-btn">＋</button>
     </div>
-    <button class="card-btn" id="cmp-qtn-btn" style="width:100%;margin-bottom:12px;height:42px;color:var(--clay);border-color:var(--clay)">⊞ 3-Package Comparison</button>
     ${qtns.length === 0 ? `
       <div class="empty-state">
         <div class="empty-icon">📋</div>
@@ -292,7 +287,6 @@ function renderQuotations() {
           </div>
           <div style="text-align:right">
             <div class="list-card-amount">${fmtRs(q.breakdown.finalAmount)}</div>
-            ${(q as any).isComparison ? `<span style="font-size:.65rem;background:#f0e8d8;color:#7c5540;padding:2px 7px;border-radius:20px;font-weight:600">3-PKG</span>` : ''}
           </div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
@@ -304,7 +298,6 @@ function renderQuotations() {
   `;
 
   document.getElementById('new-qtn-btn')!.addEventListener('click', () => startWizard());
-  document.getElementById('cmp-qtn-btn')!.addEventListener('click', startComparisonWizard);
   document.querySelectorAll<HTMLElement>('[data-qtn]').forEach(el => {
     el.addEventListener('click', () => openQtnDetail(el.dataset.qtn!));
   });
@@ -646,17 +639,12 @@ function startWizard(qtn?: Quotation) {
   navigate('wizard');
 }
 
-function startComparisonWizard() {
-  startWizard();
-  (wizardData as any).isComparison = true;
-}
-
 function renderWizard() {
   progressFill.style.width = `${(wizardStep / WIZARD_STEPS) * 100}%`;
   stepLabel.textContent = `Step ${wizardStep} of ${WIZARD_STEPS}`;
 
   const stepNames = [
-    'Client Details', 'Project Type', 'Package', 'Areas', 'Quantities',
+    'Client Details', 'Project Type', 'Tiling', 'Areas', 'Quantities',
     'Plumbing', 'Shower', 'Extras', 'Difficulty', 'Brands & Terms', 'Review',
   ];
   stepName.textContent = stepNames[wizardStep - 1] || '';
@@ -745,54 +733,39 @@ function renderStep2() {
   setupSingleSelect('.opt-card', 'projectType');
 }
 
-/* Step 3 — Package */
+/* Step 3 — Tiling */
 function renderStep3() {
-  if ((wizardData as any).isComparison) {
-    main.innerHTML = `
-      <div class="step-content">
-        <div class="step-q">Comparing all 3 packages</div>
-        <div class="step-hint">The PDF will show pricing for each package side-by-side so your client can choose.</div>
-        <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px">
-          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
-            <span style="font-size:1.8rem">⭐</span>
-            <div><span class="opt-label" style="display:block">Basic</span><span class="opt-sub">Rs. 850/sqft tiles</span></div>
-          </div>
-          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
-            <span style="font-size:1.8rem">⭐⭐</span>
-            <div><span class="opt-label" style="display:block">Premium</span><span class="opt-sub">Rs. 1,000/sqft tiles</span></div>
-          </div>
-          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
-            <span style="font-size:1.8rem">👑</span>
-            <div><span class="opt-label" style="display:block">Signature</span><span class="opt-sub">Rs. 1,300/sqft tiles</span></div>
-          </div>
-        </div>
-      </div>
-    `;
-    return;
-  }
-  const pkgs: Array<{ val: PackageType; icon: string; label: string; sub: string }> = [
-    { val: 'basic',     icon: '⭐',  label: 'Basic',     sub: 'Rs. 850/sqft tiles' },
-    { val: 'premium',   icon: '⭐⭐', label: 'Premium',   sub: 'Rs. 1,000/sqft tiles' },
-    { val: 'signature', icon: '👑',  label: 'Signature', sub: 'Rs. 1,300/sqft tiles' },
-  ];
+  const tileIncl = wizardData.tileIncluded ?? true;
   main.innerHTML = `
     <div class="step-content">
-      <div class="step-q">Select a package</div>
-      <div class="step-hint">Affects tiling, fixtures, vanity, mirror, bathware, and fittings.</div>
-      <div class="option-grid">
-        ${pkgs.map(p => `
-          <div class="opt-card ${wizardData.package===p.val?'selected':''}" data-val="${p.val}" style="text-align:left;display:flex;align-items:center;gap:14px">
-            <span style="font-size:1.8rem">${p.icon}</span>
-            <div>
-              <span class="opt-label" style="display:block">${p.label}</span>
-              <span class="opt-sub" style="display:block">${p.sub}</span>
-            </div>
-          </div>
-        `).join('')}
+      <div class="step-q">Tiling configuration</div>
+      <div class="step-hint">Set the tile material and installation rates for floor and wall areas.</div>
+      ${toggle('Include Tile Supply', 'Tiles are in this quote (material cost charged)', 'tile-included', tileIncl)}
+      <div id="tile-rate-wrap" style="${tileIncl ? '' : 'display:none'}">
+        <div class="field-group" style="margin-top:4px">
+          <label class="field-label">Tile Rate (Rs/sqft) — material</label>
+          <input class="field-input" id="f-tile-rate" type="number" min="0" step="50"
+            placeholder="e.g. 1,200" value="${wizardData.tileRate || ''}">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Tiling Rate (Rs/sqft) — installation</label>
+        <input class="field-input" id="f-tiling-rate" type="number" min="0" step="50"
+          placeholder="e.g. 850" value="${wizardData.tilingRate || 850}">
       </div>
     </div>
   `;
-  setupSingleSelect('.opt-card', 'package');
+  setupToggles({ 'tile-included': 'tileIncluded' });
+  document.querySelector<HTMLElement>('[data-toggle="tile-included"]')!.addEventListener('click', () => {
+    const wrap = document.getElementById('tile-rate-wrap')!;
+    wrap.style.display = wizardData.tileIncluded ? '' : 'none';
+  });
+}
+
+function collectStep3(): boolean {
+  wizardData.tileRate   = parseFloat((document.getElementById('f-tile-rate')   as HTMLInputElement | null)?.value || '0') || 0;
+  wizardData.tilingRate = parseFloat((document.getElementById('f-tiling-rate') as HTMLInputElement | null)?.value || '0') || 0;
+  return true;
 }
 
 /* Step 4 — Areas */
@@ -940,78 +913,167 @@ function collectStep7(): boolean {
 
 /* Step 8 — Extras */
 function renderStep8() {
-  const isCmp = (wizardData as any).isComparison;
-  const rangeLabel = (r: Record<PackageType, number>) =>
-    `${fmtRs(r.basic)} – ${fmtRs(r.signature)}`;
+  const isVanity    = wizardData.hasVanity;
+  const isBathware  = wizardData.hasBathware ?? true;
+  const isMirror    = wizardData.hasMirror ?? true;
+  const isWiring    = wizardData.hasElectricalWiring !== false;
+  const isWiringMat = wizardData.wiringMaterialsEnabled !== false;
+  const isWiringSvc = wizardData.wiringServiceEnabled !== false;
+  const isLights    = wizardData.hasLightFixtures !== false;
+
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Extra items</div>
       <div class="step-hint">Toggle what's included in this bathroom.</div>
+
       ${toggle('Ceiling Installation',
-        isCmp
-          ? `Yes: ${fmtRs(RATES.ceiling.perSqFt.basic)} – ${fmtRs(RATES.ceiling.perSqFt.signature)}/sqft · No: ${fmtRs(RATES.ceiling.flat)} flat`
-          : `Yes: ${fmtRs(RATES.ceiling.perSqFt[wizardData.package])}/sqft (${packageLabel(wizardData.package)}) · No: ${fmtRs(RATES.ceiling.flat)} flat`,
+        `Yes: ${fmtRs(RATES.ceiling.perSqFt)}/sqft · No: ${fmtRs(RATES.ceiling.flat)} flat`,
         'ceiling', wizardData.hasCeiling)}
-      ${toggle('Vanity Cupboard & Countertop',
-        isCmp ? `Yes: ${rangeLabel(RATES.vanity)} · No: ${fmtRs(RATES.vanity.basic)}`
-               : `Yes: ${fmtRs(RATES.vanity[wizardData.package])} (${packageLabel(wizardData.package)}) · No: ${fmtRs(RATES.vanity.basic)}`,
-        'vanity', wizardData.hasVanity)}
+
+      <div>
+        ${toggle('Vanity Cupboard & Countertop', 'Enter cost below when included', 'vanity', isVanity)}
+        <div id="vanity-input-wrap" style="${isVanity ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Vanity Amount (Rs.)</label>
+            <input class="field-input" id="f-vanity-amount" type="number" min="0" step="500"
+              placeholder="e.g. 40,000" value="${wizardData.vanityAmount || ''}">
+          </div>
+        </div>
+      </div>
+
       ${toggle('Geyser / Water Heater',
         `${fmtRs(RATES.geyser)} supply + install · ${fmtRs(RATES.clientSupply.geyser)} install only`,
         'geyser', wizardData.hasGeyser)}
-      ${toggle('Door',
-        isCmp ? rangeLabel(RATES.door)
-               : `${fmtRs(RATES.door[wizardData.package])} (${packageLabel(wizardData.package)})`,
-        'door', wizardData.hasDoor)}
-      ${toggle('Window',
-        isCmp ? rangeLabel(RATES.window)
-               : `${fmtRs(RATES.window[wizardData.package])} (${packageLabel(wizardData.package)})`,
-        'window', wizardData.hasWindow)}
+      ${toggle('Door', `Yes: ${fmtRs(RATES.door)} flat`, 'door', wizardData.hasDoor)}
+      ${toggle('Window', `Yes: ${fmtRs(RATES.window)} flat`, 'window', wizardData.hasWindow)}
 
-      <div class="step-q" style="margin-top:1.8rem">Client Will Supply</div>
-      <div class="step-hint">Enable when the client provides these items — only installation labour is charged.</div>
-      ${toggle('Tiles (Client Supply)',
-        `${fmtRs(RATES.clientSupply.tileRate)}/sqft labour only · standard: ${
-          isCmp ? `${fmtRs(RATES.tiling.basic)}–${fmtRs(RATES.tiling.signature)}/sqft`
-                : `${fmtRs(RATES.tiling[wizardData.package])}/sqft`}`,
-        'cs-tiles', wizardData.clientSupplyTiles)}
-      ${toggle('Bathware (Client Supply)',
-        `${fmtRs(RATES.clientSupply.bathware)} installation only · standard: ${
-          isCmp ? `${fmtRs(RATES.bathware.basic)}–${fmtRs(RATES.bathware.signature)}`
-                : fmtRs(RATES.bathware[wizardData.package])}`,
-        'cs-bathware', wizardData.clientSupplyBathware)}
-      ${toggle('Mirror (Client Supply)',
-        `${fmtRs(RATES.clientSupply.mirror)} installation only · standard: ${
-          isCmp ? `${fmtRs(RATES.mirror.basic)}–${fmtRs(RATES.mirror.signature)}`
-                : fmtRs(RATES.mirror[wizardData.package])}`,
-        'cs-mirror', wizardData.clientSupplyMirror)}
-      ${toggle('Geyser (Client Supply)',
-        `${fmtRs(RATES.clientSupply.geyser)} installation only — enable Geyser above first`,
-        'cs-geyser', wizardData.clientSupplyGeyser)}
+      <div class="step-q" style="margin-top:1.8rem">Bathware &amp; Tapware</div>
+      <div>
+        ${toggle('Include Bathware & Tapware', 'Toggle off to exclude from quote', 'bathware', isBathware)}
+        <div id="bathware-input-wrap" style="${isBathware ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 8px">
+            <label class="field-label">Material Cost (Rs.)</label>
+            <input class="field-input" id="f-bathware-mat" type="number" min="0" step="1000"
+              placeholder="e.g. 200,000" value="${wizardData.bathwareMaterialCost || ''}">
+          </div>
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Installation Charge (Rs.)</label>
+            <input class="field-input" id="f-bathware-install" type="number" min="0" step="500"
+              placeholder="e.g. 20,000" value="${wizardData.bathwareInstallCost || ''}">
+          </div>
+        </div>
+      </div>
 
-      <div class="step-q" style="margin-top:1.8rem">Cost Adjustments</div>
-      <div class="step-hint">Toggle off to apply a minimal flat rate instead of the full calculation.</div>
+      <div class="step-q" style="margin-top:1.2rem">Mirror</div>
+      <div>
+        ${toggle('Include Mirror', 'Toggle off to exclude from quote', 'mirror', isMirror)}
+        <div id="mirror-input-wrap" style="${isMirror ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Mirror Amount (Rs.)</label>
+            <input class="field-input" id="f-mirror-amount" type="number" min="0" step="500"
+              placeholder="e.g. 15,000" value="${wizardData.mirrorAmount || ''}">
+          </div>
+        </div>
+      </div>
+
+      <div class="step-q" style="margin-top:1.2rem">Cost Adjustments</div>
+      <div class="step-hint">Toggle off to apply minimal flat rate.</div>
       ${toggle('Floor Concrete Works',
         `Yes: ${fmtRs(RATES.floorConcrete.perSqFt)}/sqft · No: ${fmtRs(RATES.floorConcreteMinimal)} flat`,
         'floor-concrete', wizardData.hasFloorConcrete !== false)}
-      ${toggle('Electrical Wiring',
-        `Yes: ${fmtRs(RATES.wiring.perPoint)}/point · No: ${fmtRs(RATES.wiringMinimal)} flat`,
-        'elec-wiring', wizardData.hasElectricalWiring !== false)}
-      ${toggle('Light & Plug Fixtures',
-        isCmp
-          ? `Yes: ${rangeLabel(RATES.lightFixture)}/point · No: ${fmtRs(RATES.lightFixtureMinimal)} flat`
-          : `Yes: ${fmtRs(RATES.lightFixture[wizardData.package])}/point · No: ${fmtRs(RATES.lightFixtureMinimal)} flat`,
-        'light-fixtures', wizardData.hasLightFixtures !== false)}
+
+      <div>
+        ${toggle('Electrical Wiring', 'If off, wiring cost = Rs. 0', 'elec-wiring', isWiring)}
+        <div id="wiring-sub-wrap" style="${isWiring ? '' : 'display:none'}">
+          <div>
+            ${toggle('Wiring Materials', 'Manual flat amount for wire & conduit materials', 'wiring-mat', isWiringMat)}
+            <div id="wiring-mat-wrap" style="${isWiringMat ? '' : 'display:none'}">
+              <div class="field-group" style="margin:0 0 8px">
+                <label class="field-label">Materials Cost (Rs.)</label>
+                <input class="field-input" id="f-wiring-mat" type="number" min="0" step="500"
+                  placeholder="e.g. 45,000" value="${wizardData.wiringMaterialsCost || ''}">
+              </div>
+            </div>
+          </div>
+          <div>
+            ${toggle('Wiring Service', `${fmtRs(wizardData.wiringServiceRate || 1500)}/point labour`, 'wiring-svc', isWiringSvc)}
+            <div id="wiring-svc-wrap" style="${isWiringSvc ? '' : 'display:none'}">
+              <div class="field-group" style="margin:0 0 8px">
+                <label class="field-label">Service Rate (Rs/point)</label>
+                <input class="field-input" id="f-wiring-svc-rate" type="number" min="0" step="100"
+                  placeholder="1500" value="${wizardData.wiringServiceRate || 1500}">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-q" style="margin-top:1.2rem">Light &amp; Plug Fixtures</div>
+      <div>
+        ${toggle('Include Light & Plug Fixtures', 'If off, light fixture cost = Rs. 0', 'light-fixtures', isLights)}
+        <div id="light-input-wrap" style="${isLights ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 8px">
+            <label class="field-label">Materials Amount (Rs.)</label>
+            <input class="field-input" id="f-light-mat" type="number" min="0" step="500"
+              placeholder="e.g. 25,000" value="${wizardData.lightMaterialsCost || ''}">
+          </div>
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Service Rate (Rs/point)</label>
+            <input class="field-input" id="f-light-svc-rate" type="number" min="0" step="50"
+              placeholder="500" value="${wizardData.lightServiceRate || 500}">
+          </div>
+        </div>
+      </div>
+
       ${toggle('Exhaust Fan', 'Include exhaust fan installation in scope of work', 'exhaust-fan', wizardData.hasExhaustFan !== false)}
     </div>
   `;
+
   setupToggles({
-    ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser', door: 'hasDoor', window: 'hasWindow',
-    'cs-tiles': 'clientSupplyTiles', 'cs-bathware': 'clientSupplyBathware',
-    'cs-mirror': 'clientSupplyMirror', 'cs-geyser': 'clientSupplyGeyser',
+    ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser',
+    door: 'hasDoor', window: 'hasWindow',
+    bathware: 'hasBathware', mirror: 'hasMirror',
     'floor-concrete': 'hasFloorConcrete', 'elec-wiring': 'hasElectricalWiring',
+    'wiring-mat': 'wiringMaterialsEnabled', 'wiring-svc': 'wiringServiceEnabled',
     'light-fixtures': 'hasLightFixtures', 'exhaust-fan': 'hasExhaustFan',
   });
+
+  // Show/hide sub-input panels after each toggle click
+  document.querySelector<HTMLElement>('[data-toggle="vanity"]')!.addEventListener('click', () => {
+    document.getElementById('vanity-input-wrap')!.style.display = wizardData.hasVanity ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="bathware"]')!.addEventListener('click', () => {
+    document.getElementById('bathware-input-wrap')!.style.display = (wizardData.hasBathware ?? true) ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="mirror"]')!.addEventListener('click', () => {
+    document.getElementById('mirror-input-wrap')!.style.display = (wizardData.hasMirror ?? true) ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="elec-wiring"]')!.addEventListener('click', () => {
+    document.getElementById('wiring-sub-wrap')!.style.display = (wizardData.hasElectricalWiring !== false) ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="wiring-mat"]')!.addEventListener('click', () => {
+    document.getElementById('wiring-mat-wrap')!.style.display = (wizardData.wiringMaterialsEnabled !== false) ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="wiring-svc"]')!.addEventListener('click', () => {
+    document.getElementById('wiring-svc-wrap')!.style.display = (wizardData.wiringServiceEnabled !== false) ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="light-fixtures"]')!.addEventListener('click', () => {
+    document.getElementById('light-input-wrap')!.style.display = (wizardData.hasLightFixtures !== false) ? '' : 'none';
+  });
+}
+
+function collectStep8(): boolean {
+  wizardData.vanityAmount       = parseFloat((document.getElementById('f-vanity-amount')    as HTMLInputElement | null)?.value || '0') || 0;
+  wizardData.bathwareMaterialCost = parseFloat((document.getElementById('f-bathware-mat')   as HTMLInputElement | null)?.value || '0') || 0;
+  wizardData.bathwareInstallCost  = parseFloat((document.getElementById('f-bathware-install') as HTMLInputElement | null)?.value || '0') || 0;
+  wizardData.mirrorAmount       = parseFloat((document.getElementById('f-mirror-amount')    as HTMLInputElement | null)?.value || '0') || 0;
+  wizardData.wiringMaterialsCost = parseFloat((document.getElementById('f-wiring-mat')      as HTMLInputElement | null)?.value || '0') || 0;
+  const svcRate = parseFloat((document.getElementById('f-wiring-svc-rate') as HTMLInputElement | null)?.value || '1500');
+  wizardData.wiringServiceRate  = isNaN(svcRate) ? 1500 : Math.max(0, svcRate);
+  wizardData.lightMaterialsCost = parseFloat((document.getElementById('f-light-mat')        as HTMLInputElement | null)?.value || '0') || 0;
+  const lightSvc = parseFloat((document.getElementById('f-light-svc-rate') as HTMLInputElement | null)?.value || '500');
+  wizardData.lightServiceRate   = isNaN(lightSvc) ? 500 : Math.max(0, lightSvc);
+  return true;
 }
 
 /* Step 9 — Difficulty + Profit Margin */
@@ -1169,32 +1231,6 @@ function collectStep10(): boolean {
 
 /* Step 11 — Review */
 function renderStep11() {
-  if ((wizardData as any).isComparison) {
-    const bdB = calculateQuotation({ ...wizardData, package: 'basic',     plumbing: 'basic' });
-    const bdP = calculateQuotation({ ...wizardData, package: 'premium',   plumbing: 'premium' });
-    const bdS = calculateQuotation({ ...wizardData, package: 'signature', plumbing: 'signature' });
-    main.innerHTML = `
-      <div class="step-content">
-        <div class="step-q">Review & Save</div>
-        <div class="step-hint">${wizardData.clientName || 'Client'} · ${wizardData.projectLocation || 'Project'}</div>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
-          <div class="review-total" style="margin:0">
-            <div class="review-total-label">⭐ Basic</div>
-            <div class="review-total-amount" style="font-size:1.3rem">${fmtRs(bdB.finalAmount)}</div>
-          </div>
-          <div class="review-total" style="margin:0">
-            <div class="review-total-label">⭐⭐ Premium</div>
-            <div class="review-total-amount" style="font-size:1.3rem">${fmtRs(bdP.finalAmount)}</div>
-          </div>
-          <div class="review-total" style="margin:0;background:var(--charcoal)">
-            <div class="review-total-label">👑 Signature</div>
-            <div class="review-total-amount" style="font-size:1.3rem">${fmtRs(bdS.finalAmount)}</div>
-          </div>
-        </div>
-      </div>
-    `;
-    return;
-  }
   const bd = calculateQuotation(wizardData);
 
   const rows: Array<[string, string]> = [
@@ -1204,7 +1240,6 @@ function renderStep11() {
     ['Project',          wizardData.projectName || '—'],
     ['Date',             fmtDate(wizardData.quotationDate)],
     ['Type',             wizardData.projectType === 'renovation' ? 'Renovation' : 'Construction'],
-    ['Package',          packageLabel(wizardData.package)],
     ['Floor',            `${wizardData.floorArea} sqft`],
     ['Wall',             `${wizardData.wallArea} sqft`],
     ['Tiling Area',      `${bd.totalTilingArea} sqft`],
@@ -1248,8 +1283,7 @@ function renderStep11() {
 
 /* ── Save quotation ──────────────────────────────────────── */
 function saveQuotation() {
-  const isCmp = (wizardData as any).isComparison;
-  const bd = calculateQuotation(isCmp ? { ...wizardData, package: 'basic', plumbing: 'basic' } : wizardData);
+  const bd = calculateQuotation(wizardData);
   const qtns: Quotation[] = load(KEYS.qtns);
   const counters = getCounters();
 
@@ -1260,7 +1294,6 @@ function saveQuotation() {
         ...qtns[idx], ...wizardData, breakdown: bd,
         updatedAt: new Date().toISOString(),
       };
-      if (isCmp) (qtns[idx] as any).isComparison = true;
     }
   } else {
     counters.qtn++;
@@ -1271,7 +1304,6 @@ function saveQuotation() {
       status: 'draft', breakdown: bd,
     };
     (newQ as any).ref = qtnNumber(counters.qtn);
-    if (isCmp) (newQ as any).isComparison = true;
     qtns.unshift(newQ);
   }
 
@@ -1391,9 +1423,7 @@ function renderQtnDetail() {
 
       <!-- Actions -->
       <div class="card-actions" style="margin-bottom:16px">
-        ${(q as any).isComparison
-          ? `<button class="card-btn primary" id="qtn-pdf-btn">📊 Comparison PDF</button>`
-          : `<button class="card-btn primary" id="qtn-pdf-btn">📄 PDF</button>`}
+        <button class="card-btn primary" id="qtn-pdf-btn">📄 PDF</button>
         <button class="card-btn" id="qtn-wa-btn">💬 WhatsApp</button>
         <button class="card-btn" id="qtn-edit-btn">✏️ Edit</button>
         <button class="card-btn" id="qtn-inv-btn">💳 Invoice</button>
@@ -1412,8 +1442,7 @@ function renderQtnDetail() {
     });
   });
 
-  document.getElementById('qtn-pdf-btn')!.addEventListener('click', () =>
-    (q as any).isComparison ? printComparisonPDF(q) : printQuotationPDF(q));
+  document.getElementById('qtn-pdf-btn')!.addEventListener('click', () => printQuotationPDF(q));
   document.getElementById('qtn-wa-btn')!.addEventListener('click', () => shareQuotationWA(q));
   document.getElementById('qtn-edit-btn')!.addEventListener('click', () => startWizard(q));
   document.getElementById('qtn-inv-btn')!.addEventListener('click', () => convertToInvoice(q));
@@ -1618,7 +1647,6 @@ function convertToInvoice(q: Quotation) {
     clientPhone: q.clientPhone,
     projectLocation: q.projectLocation,
     projectName: q.projectName,
-    package: q.package,
     projectType: q.projectType,
     paymentTerms: q.paymentTerms,
   };
@@ -1697,7 +1725,7 @@ function printQuotationPDF(q: Quotation) {
     </div>
     <div class="ref-block">
       <div class="ref-no">${ref}</div>
-      <div class="ref-meta">${fmtDate(q.quotationDate)}<br>${packageLabel(q.package)} Package · ${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
+      <div class="ref-meta">${fmtDate(q.quotationDate)}<br>${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
     </div>
   </div>
 
@@ -1766,7 +1794,7 @@ function printQuotationPDF(q: Quotation) {
   <div class="final-box">
     <div>
       <div class="final-label">${q.finalPriceOverride != null ? 'Special Price' : 'Total Investment'}</div>
-      <div class="final-sub">${packageLabel(q.package)} Package · All inclusive</div>
+      <div class="final-sub">All inclusive · ${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
     </div>
     <div class="final-amount">${fmtRs(bd.finalAmount)}</div>
   </div>
@@ -1800,226 +1828,6 @@ function printQuotationPDF(q: Quotation) {
   const w = window.open('', '_blank');
   if (w) { w.document.write(html); w.document.close(); }
 }
-
-/* ── PDF — 3-Package Comparison ─────────────────────────── */
-function printComparisonPDF(q: Quotation) {
-  const ref = (q as any).ref || 'LH-QTN';
-  const bdB = calculateQuotation({ ...q, package: 'basic',     plumbing: 'basic' });
-  const bdP = calculateQuotation({ ...q, package: 'premium',   plumbing: 'premium' });
-  const bdS = calculateQuotation({ ...q, package: 'signature', plumbing: 'signature' });
-
-
-  type FeatRow = { label: string; b: string[]; p: string[]; s: string[]; hide?: boolean };
-  const featRows: FeatRow[] = [
-    { label: `Tiling & Grouting${q.clientSupplyTiles ? ' (Client Supply)' : ''}`,
-      b: q.clientSupplyTiles ? ['Labour only — client supplies tiles'] : ['Indian tiles', 'Swisstek adhesive', 'Swisstek grout'],
-      p: q.clientSupplyTiles ? ['Labour only — client supplies tiles'] : ['Mega tiles', 'Swisstek adhesive', 'Swisstek grout'],
-      s: q.clientSupplyTiles ? ['Labour only — client supplies tiles'] : ['Rocell tiles', 'Swisstek adhesive', 'Swisstek grout'] },
-    { label: 'Ceiling Installation',
-      b: ['Standard PVC ceiling', 'Rs. 800/sqft'],
-      p: ['Premium PVC ceiling', 'Rs. 1,000/sqft'],
-      s: ['High-grade PVC ceiling', 'Rs. 1,200/sqft'],
-      hide: !q.hasCeiling },
-    { label: 'Plumbing Works',
-      b: ['Slon pipes & fittings'],
-      p: ['Slon pipes & fittings'],
-      s: ['Slon pipes & fittings'] },
-    { label: 'Light Fixtures',
-      b: ['Standard light fittings', 'ACL cables'],
-      p: ['Mid-range light fittings', 'ACL cables'],
-      s: ['Premium light fittings', 'ACL cables'],
-      hide: q.wiringPoints === 0 },
-    { label: 'Vanity Cupboard',
-      b: ['Standard vanity'], p: ['Premium vanity'], s: ['Custom vanity'] },
-    { label: `Mirror${q.clientSupplyMirror ? ' (Client Supply)' : ''}`,
-      b: q.clientSupplyMirror ? ['Installation only — client supplies mirror'] : ['Standard mirror'],
-      p: q.clientSupplyMirror ? ['Installation only — client supplies mirror'] : ['Premium mirror'],
-      s: q.clientSupplyMirror ? ['Installation only — client supplies mirror'] : ['Designer mirror'] },
-    { label: `Bathware & Tapware${q.clientSupplyBathware ? ' (Client Supply)' : ''}`,
-      b: q.clientSupplyBathware ? ['Installation only — client supplies bathware'] : ['Swiss Standard bathware & tapware'],
-      p: q.clientSupplyBathware ? ['Installation only — client supplies bathware'] : ['Swiss Premium bathware & tapware'],
-      s: q.clientSupplyBathware ? ['Installation only — client supplies bathware'] : ['Swiss Signature bathware & tapware'] },
-    { label: 'Door Works',
-      b: ['Standard door works'], p: ['Premium door works'], s: ['Premium door works'],
-      hide: !q.hasDoor },
-    { label: 'Window Works',
-      b: ['Standard window works'], p: ['Premium window works'], s: ['Premium window works'],
-      hide: !q.hasWindow },
-  ].filter(r => !r.hide);
-
-  function cell(lines: string[]): string {
-    return `<td>${lines.map((l, i) => `<span class="${i===0?'feat-main':'feat-sub'}">${l}</span>`).join('<br>')}</td>`;
-  }
-
-  const baseInclusions: string[] = [
-    ...(q.projectType === 'renovation' && ((q as any).demolitionArea||0) > 0 ? ['Demolition works & debris removal'] : []),
-    ...((q as any).plasteringArea > 0 ? ['Wall plastering'] : []),
-    'Bathroom design & planning',
-    'Floor concrete works',
-    'Tokyo Super 2K waterproofing',
-    'Electrical wiring — ACL cables',
-    ...(q.wallNiches > 0 ? [`Wall niches (${q.wallNiches})`] : []),
-    ...(q.dummyWallArea > 0 ? ['Dummy wall construction'] : []),
-    ...(q.hasGeyser ? [`Water heater (geyser) installation${q.clientSupplyGeyser ? ' (Client Supply)' : ''}`] : []),
-    ...(q.showerCubicle !== 'none' ? ['Shower cubicle / glass partition'] : []),
-    ...(!q.hasCeiling ? ['Basic ceiling works (flat rate)'] : []),
-    ...((q as any).otherCostLabel && (q as any).otherCost > 0 ? [(q as any).otherCostLabel] : []),
-    'Overhead & site management',
-  ];
-
-  const html = `<!DOCTYPE html><html><head>
-  <meta charset="utf-8">
-  <title>${ref} — LUXEHOME Package Comparison</title>
-  <style>
-    @page { size: A4; margin: 12mm 14mm; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; font-size: 9pt; line-height: 1.5; }
-    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 9pt; border-bottom: 2pt solid #111; margin-bottom: 12pt; }
-    .logo { font-size: 17pt; font-weight: 900; letter-spacing: .08em; line-height: 1; }
-    .logo-sub { font-size: 7pt; color: #999; letter-spacing: .1em; text-transform: uppercase; margin-top: 3pt; }
-    .ref-block { text-align: right; }
-    .ref-no { font-size: 11pt; font-weight: 800; }
-    .ref-meta { font-size: 7.5pt; color: #777; margin-top: 2pt; line-height: 1.5; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 12pt; }
-    .info-cell { padding-right: 16pt; }
-    .info-cell + .info-cell { padding-right: 0; padding-left: 16pt; border-left: 1pt solid #e8e8e8; }
-    .info-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; margin-bottom: 3pt; }
-    .info-name { font-size: 10pt; font-weight: 700; }
-    .info-detail { font-size: 8.5pt; color: #555; margin-top: 2pt; }
-    .section-title { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #999; padding-bottom: 4pt; border-bottom: 1pt solid #e0e0e0; margin-bottom: 8pt; margin-top: 12pt; break-after: avoid; }
-    .cmp-table { width: 100%; border-collapse: collapse; }
-    .cmp-table colgroup col:first-child { width: 22%; }
-    .cmp-table th { padding: 7pt 8pt; font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; text-align: left; border-bottom: 1.5pt solid #111; }
-    .cmp-table th:first-child { color: #999; }
-    .cmp-table th.basic { color: #555; }
-    .cmp-table th.premium { color: #7c5540; }
-    .cmp-table th.sig { color: #b8892a; }
-    .cmp-table td { padding: 7pt 8pt; border-bottom: .5pt solid #efefef; vertical-align: top; }
-    .cmp-table td:first-child { font-size: 8pt; font-weight: 700; color: #444; }
-    .feat-main { font-size: 8pt; font-weight: 600; color: #111; }
-    .feat-sub { font-size: 7.5pt; color: #777; }
-    .cmp-table tr:nth-child(even) td { background: #fafafa; }
-    .pkg-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin-top: 12pt; break-inside: avoid; }
-    .pkg-box { border-radius: 4pt; padding: 10pt 8pt; text-align: center; }
-    .pkg-box.basic { border: 1pt solid #ddd; }
-    .pkg-box.premium { border: 1.5pt solid #7c5540; }
-    .pkg-box.sig { background: #111; color: #fff; }
-    .pkg-name { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; opacity: .6; margin-bottom: 5pt; }
-    .pkg-price { font-size: 15pt; font-weight: 900; line-height: 1; }
-    .pkg-diff { font-size: 7.5pt; margin-top: 4pt; opacity: .5; }
-    .base-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14pt; }
-    .base-item { font-size: 8pt; color: #555; padding: 3pt 0; display: flex; align-items: baseline; gap: 5pt; border-bottom: .5pt solid #f5f5f5; }
-    .base-check { color: #b8892a; font-size: 7.5pt; font-weight: 700; flex-shrink: 0; }
-    .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7pt; break-inside: avoid; }
-    .term-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 8pt 6pt; text-align: center; break-inside: avoid; }
-    .term-pct { font-size: 15pt; font-weight: 900; color: #111; line-height: 1; }
-    .term-lbl { font-size: 7pt; color: #777; margin-top: 3pt; line-height: 1.3; }
-    .term-amt { font-size: 8.5pt; font-weight: 700; color: #b8892a; margin-top: 3pt; }
-    .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1pt 12pt; break-inside: avoid; }
-    .conditions { font-size: 7.5pt; color: #555; background: #f7f5f0; border-left: 2.5pt solid #b8892a; padding: 6pt 9pt; border-radius: 0 3pt 3pt 0; margin-bottom: 8pt; line-height: 1.55; }
-    .conditions strong { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .1em; color: #b8892a; font-weight: 700; margin-bottom: 3pt; }
-    .brand-item { font-size: 8pt; color: #444; padding: 3pt 0; display: flex; align-items: center; gap: 5pt; border-bottom: .5pt solid #f2f2f2; }
-    .brand-dot { width: 3pt; height: 3pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
-    .note { font-size: 7.5pt; color: #999; font-style: italic; margin-top: 12pt; line-height: 1.5; }
-    .footer { margin-top: 9pt; padding-top: 7pt; border-top: 1pt solid #e0e0e0; font-size: 6.5pt; color: #bbb; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
-  </style>
-  </head><body>
-
-  <div class="header">
-    <div>
-      <div class="logo">LUXE<span style="color:#b8892a">HOME</span></div>
-      <div class="logo-sub">Premium Bathroom Renovation · Sri Lanka</div>
-    </div>
-    <div class="ref-block">
-      <div class="ref-no">${ref}</div>
-      <div class="ref-meta">${fmtDate(q.quotationDate)}<br>3-Package Comparison · ${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
-    </div>
-  </div>
-
-  <div class="info-grid">
-    <div class="info-cell">
-      <div class="info-label">Prepared For</div>
-      <div class="info-name">${q.clientName}</div>
-      ${q.clientPhone ? `<div class="info-detail">${q.clientPhone}</div>` : ''}
-    </div>
-    <div class="info-cell">
-      <div class="info-label">Project</div>
-      <div class="info-name">${q.projectName || q.projectLocation}</div>
-      ${q.projectName && q.projectLocation ? `<div class="info-detail">${q.projectLocation}</div>` : ''}
-    </div>
-  </div>
-
-  <div class="section-title">Package Comparison</div>
-  <table class="cmp-table">
-    <colgroup><col><col><col><col></colgroup>
-    <thead>
-      <tr>
-        <th>Work Item</th>
-        <th class="basic">⭐ Basic</th>
-        <th class="premium">⭐⭐ Premium</th>
-        <th class="sig">👑 Signature</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${featRows.map(r => `<tr><td>${r.label}</td>${cell(r.b)}${cell(r.p)}${cell(r.s)}</tr>`).join('')}
-    </tbody>
-  </table>
-
-  <div class="section-title">Included in All Packages</div>
-  <div class="base-grid">
-    ${baseInclusions.map(item => `<div class="base-item"><span class="base-check">✓</span><span>${item}</span></div>`).join('')}
-  </div>
-
-  <div class="section-title">Total Investment</div>
-  <div class="pkg-boxes">
-    <div class="pkg-box basic">
-      <div class="pkg-name">⭐ Basic</div>
-      <div class="pkg-price">${fmtRs(bdB.finalAmount)}</div>
-      <div class="pkg-diff">Base package</div>
-    </div>
-    <div class="pkg-box premium">
-      <div class="pkg-name" style="color:#7c5540">⭐⭐ Premium</div>
-      <div class="pkg-price">${fmtRs(bdP.finalAmount)}</div>
-      <div class="pkg-diff">+${fmtRs(bdP.finalAmount - bdB.finalAmount)} vs Basic</div>
-    </div>
-    <div class="pkg-box sig">
-      <div class="pkg-name">👑 Signature</div>
-      <div class="pkg-price">${fmtRs(bdS.finalAmount)}</div>
-      <div class="pkg-diff">+${fmtRs(bdS.finalAmount - bdB.finalAmount)} vs Basic</div>
-    </div>
-  </div>
-
-  <div class="section-title">Payment Schedule</div>
-  <div style="font-size:7.5pt;color:#888;margin-bottom:6pt">Amounts shown for Basic package. Same schedule applies proportionally to all.</div>
-  <div class="terms-grid">
-    ${q.paymentTerms.map(t => `
-      <div class="term-box">
-        <div class="term-pct">${t.percentage}%</div>
-        <div class="term-lbl">${t.label}</div>
-        <div class="term-amt">${fmtRs(bdB.finalAmount * t.percentage / 100)}</div>
-      </div>`).join('')}
-  </div>
-
-  <div class="section-title">Brands &amp; Materials</div>
-  <div class="brands-grid">
-    ${q.brands.map(b => `<div class="brand-item"><div class="brand-dot"></div>${b}</div>`).join('')}
-  </div>
-
-  <div class="conditions">
-    <strong>Conditions</strong>
-    This quotation covers all works inside the bathroom area only. Any works required outside the bathroom (external plumbing, drainage, electrical supply lines, structural works, etc.) are not included and will be quoted separately upon request.
-  </div>
-
-  <div class="note">This comparison is valid for 30 days from the date above. All packages cover the same full scope — the difference is in tile grade, fixture quality, vanity, and bathware. Prices subject to change based on actual site conditions.</div>
-
-  <div class="footer">LUXEHOME &nbsp;·&nbsp; Luxury Bathroom Renovation &nbsp;·&nbsp; Sri Lanka</div>
-  <script>window.onload=function(){window.print();}<\/script>
-  </body></html>`;
-
-  const w = window.open('', '_blank');
-  if (w) { w.document.write(html); w.document.close(); }
-}
-
 
 /* ── PDF — Invoice ───────────────────────────────────────── */
 function printInvoicePDF(inv: Invoice) {
@@ -2086,7 +1894,7 @@ function printInvoicePDF(inv: Invoice) {
   <table>
     <thead><tr><th>Description</th><th>Amount</th></tr></thead>
     <tbody>
-      <tr><td>${packageLabel(inv.package)} Package — ${inv.projectType === 'renovation' ? 'Renovation' : 'Construction'}</td><td>${fmtRs(inv.finalAmount)}</td></tr>
+      <tr><td>${inv.projectType === 'renovation' ? 'Renovation' : 'Construction'} Project</td><td>${fmtRs(inv.finalAmount)}</td></tr>
       ${inv.payments.map(p => `<tr><td style="color:#16a34a">Payment received — ${fmtDateShort(p.date)}${p.note ? ' (' + p.note + ')' : ''}</td><td style="color:#16a34a">− ${fmtRs(p.amount)}</td></tr>`).join('')}
     </tbody>
   </table>
@@ -2127,7 +1935,6 @@ function shareQuotationWA(q: Quotation) {
     `Client: ${q.clientName}`,
     `Project: ${q.projectName || q.projectLocation}`,
     `Date: ${fmtDate(q.quotationDate)}`,
-    `Package: ${packageLabel(q.package)}`,
     ``,
     `*Total Investment: ${fmtRs(bd.finalAmount)}*`,
     ``,
@@ -2236,9 +2043,11 @@ function setupToggles(map: Record<string, keyof QuotationInputs>) {
 function collectCurrentStep(): boolean {
   switch (wizardStep) {
     case 1:  return collectStep1();
+    case 3:  return collectStep3();
     case 4:  return collectStep4();
     case 6:  return collectStep6();
     case 7:  return collectStep7();
+    case 8:  return collectStep8();
     case 9:  return collectStep9();
     case 10: return collectStep10();
     default: return true;
