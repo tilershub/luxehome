@@ -786,10 +786,6 @@ function renderStep4() {
         <label class="field-label">Waterproofing Area (sqft)</label>
         <input class="field-input" id="f-wp" type="number" min="0" step="0.5" placeholder="Usually = floor area" value="${wizardData.waterproofingArea || ''}">
       </div>
-      <div class="field-group">
-        <label class="field-label">Dummy Wall Area (sqft)</label>
-        <input class="field-input" id="f-dw" type="number" min="0" step="0.5" placeholder="0 if none" value="${wizardData.dummyWallArea || ''}">
-      </div>
     </div>
   `;
 }
@@ -802,7 +798,6 @@ function collectStep4(): boolean {
   wizardData.floorArea         = floor;
   wizardData.wallArea          = wall;
   wizardData.waterproofingArea = parseFloat((document.getElementById('f-wp') as HTMLInputElement).value) || 0;
-  wizardData.dummyWallArea     = parseFloat((document.getElementById('f-dw') as HTMLInputElement).value) || 0;
   return true;
 }
 
@@ -1038,6 +1033,17 @@ function renderStep8() {
         </div>
       </div>
 
+      <div>
+        ${toggle('Dummy Wall Construction', 'If No: Rs. 0', 'dummy-wall', (wizardData as any).hasDummyWall ?? false)}
+        <div id="dummy-wall-input-wrap" style="${(wizardData as any).hasDummyWall ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Dummy Wall Cost (Rs.)</label>
+            <input class="field-input" id="f-dummy-wall-cost" type="number" min="0" step="500"
+              placeholder="e.g. 40,000" value="${(wizardData as any).dummyWallCostManual || ''}">
+          </div>
+        </div>
+      </div>
+
       <div class="step-q" style="margin-top:1.8rem">Bathware &amp; Tapware</div>
       <div>
         ${toggle('Include Bathware & Tapware', 'Toggle off to exclude from quote', 'bathware', isBathware)}
@@ -1130,6 +1136,7 @@ function renderStep8() {
     'design-planning': 'hasDesignPlanning',
     ceiling: 'hasCeiling', geyser: 'hasGeyser',
     door: 'hasDoor', window: 'hasWindow',
+    'dummy-wall': 'hasDummyWall',
     bathware: 'hasBathware', mirror: 'hasMirror',
     'floor-concrete': 'hasFloorConcrete', 'elec-wiring': 'hasElectricalWiring',
     'wiring-mat': 'wiringMaterialsEnabled', 'wiring-svc': 'wiringServiceEnabled',
@@ -1163,6 +1170,9 @@ function renderStep8() {
   });
   document.querySelector<HTMLElement>('[data-toggle="window"]')!.addEventListener('click', () => {
     document.getElementById('window-input-wrap')!.style.display = wizardData.hasWindow ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="dummy-wall"]')!.addEventListener('click', () => {
+    document.getElementById('dummy-wall-input-wrap')!.style.display = (wizardData as any).hasDummyWall ? '' : 'none';
   });
   document.querySelector<HTMLElement>('[data-toggle="floor-concrete"]')!.addEventListener('click', () => {
     document.getElementById('floor-concrete-input-wrap')!.style.display =
@@ -1198,6 +1208,7 @@ function collectStep8(): boolean {
   (wizardData as any).geyserCostManual      = parseFloat(g('f-geyser-cost'))          || 0;
   (wizardData as any).doorCostManual        = parseFloat(g('f-door-cost'))            || 0;
   (wizardData as any).windowCostManual      = parseFloat(g('f-window-cost'))          || 0;
+  (wizardData as any).dummyWallCostManual   = parseFloat(g('f-dummy-wall-cost'))      || 0;
   (wizardData as any).floorConcreteCostManual = parseFloat(g('f-floor-concrete-cost'))|| 0;
   wizardData.vanityAmount         = parseFloat(g('f-vanity-amount'))   || 0;
   wizardData.bathwareMaterialCost = parseFloat(g('f-bathware-mat'))    || 0;

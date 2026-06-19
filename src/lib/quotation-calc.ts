@@ -13,7 +13,6 @@ export type InvoiceStatus   = 'draft' | 'sent' | 'partially-paid' | 'paid' | 'ca
 export const RATES = {
   wallNiche:     { each: 10_000 },
   floorConcrete: { perSqFt: 350 },    // reference rate shown as placeholder hint
-  dummyWall:     { perSqFt: 1_000 },
   wiring:        { perPoint: 1_500 }, // service labour only per point
   waterproofing: { perSqFt: 230 },
   ceiling:       { perSqFt: 1_000 }, // reference rate shown as placeholder hint
@@ -75,6 +74,8 @@ export interface QuotationInputs {
   mirrorAmount:      number;
   hasFloorConcrete:  boolean;
   floorConcreteCostManual: number;
+  hasDummyWall:      boolean;
+  dummyWallCostManual: number;
   hasDesignPlanning: boolean;
   designPlanningCost: number;
   // Plumbing (4 sub-fields; legacy fields kept for backward compat)
@@ -108,7 +109,6 @@ export interface QuotationInputs {
   floorArea:         number;
   wallArea:          number;
   waterproofingArea: number;
-  dummyWallArea:     number;
   wallNiches:        number;
   wiringPoints:      number;
   difficultyScore:   number;
@@ -207,7 +207,7 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
         : q.floorArea * RATES.floorConcrete.perSqFt)  // fallback for old quotes
     : 0;
 
-  const dummyWallCost = q.dummyWallArea * RATES.dummyWall.perSqFt;
+  const dummyWallCost = (q.hasDummyWall) ? Math.max(0, Number(q.dummyWallCostManual) || 0) : 0;
 
   const tilingMaterialRate = (q.tileIncluded ?? true) ? (q.tileRate || 0) : 0;
   const tilingLaborRate    = q.tilingRate || 0;
@@ -321,8 +321,8 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
   if (q.hasDoor)   scope.push('Door Works');
   if (q.hasWindow) scope.push('Window Works');
   if (q.hasGeyser) scope.push('Water Heater (Geyser) Installation');
-  if (q.wallNiches > 0)    scope.push('Wall Niche Construction');
-  if (q.dummyWallArea > 0) scope.push('Dummy Wall Construction');
+  if (q.wallNiches > 0) scope.push('Wall Niche Construction');
+  if (q.hasDummyWall)   scope.push('Dummy Wall Construction');
   if ((q.otherCost || 0) > 0 && q.otherCostLabel) scope.push(q.otherCostLabel);
   return scope;
 }
@@ -367,6 +367,7 @@ export function defaultInputs(): QuotationInputs {
     hasBathware: true, bathwareMaterialCost: 0, bathwareInstallCost: 0,
     hasMirror: true, mirrorAmount: 0,
     hasFloorConcrete: true, floorConcreteCostManual: 0,
+    hasDummyWall: false, dummyWallCostManual: 0,
     hasDesignPlanning: true, designPlanningCost: 0,
     hasPlumbing: true,
     insidePlumbingMaterial: 0, insidePlumbingService: 0,
@@ -380,7 +381,7 @@ export function defaultInputs(): QuotationInputs {
     otherCostLabel: '', otherCost: 0,
     profitMargin: 0.10,
     finalPriceOverride: null,
-    floorArea: 0, wallArea: 0, waterproofingArea: 0, dummyWallArea: 0,
+    floorArea: 0, wallArea: 0, waterproofingArea: 0,
     wallNiches: 0, wiringPoints: 0,
     difficultyScore: 1.00,
     brands: [...DEFAULT_BRANDS],
