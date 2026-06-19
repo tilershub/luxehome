@@ -81,7 +81,7 @@ import {
 } from '../../lib/quotation-calc';
 import type {
   QuotationInputs, QuotationBreakdown, Quotation, Invoice,
-  PaymentTerm, Payment, ProjectType, ShowerType,
+  PaymentTerm, Payment, ProjectType, ShowerType, VanityType,
 } from '../../lib/quotation-calc';
 
 /* ── Inquiry types ───────────────────────────────────────── */
@@ -786,19 +786,6 @@ function renderStep4() {
         <label class="field-label">Waterproofing Area (sqft)</label>
         <input class="field-input" id="f-wp" type="number" min="0" step="0.5" placeholder="Usually = floor area" value="${wizardData.waterproofingArea || ''}">
       </div>
-      <div class="field-group">
-        <label class="field-label">Dummy Wall Area (sqft)</label>
-        <input class="field-input" id="f-dw" type="number" min="0" step="0.5" placeholder="0 if none" value="${wizardData.dummyWallArea || ''}">
-      </div>
-      ${wizardData.projectType === 'renovation' ? `
-      <div class="field-group">
-        <label class="field-label">Demolition Area (sqft)</label>
-        <input class="field-input" id="f-demo" type="number" min="0" step="0.5" placeholder="Area to demolish" value="${(wizardData as any).demolitionArea || ''}">
-      </div>` : ''}
-      <div class="field-group">
-        <label class="field-label">Plastering Area (sqft)</label>
-        <input class="field-input" id="f-plaster" type="number" min="0" step="0.5" placeholder="0 if no plastering" value="${(wizardData as any).plasteringArea || ''}">
-      </div>
     </div>
   `;
 }
@@ -811,9 +798,6 @@ function collectStep4(): boolean {
   wizardData.floorArea         = floor;
   wizardData.wallArea          = wall;
   wizardData.waterproofingArea = parseFloat((document.getElementById('f-wp') as HTMLInputElement).value) || 0;
-  wizardData.dummyWallArea     = parseFloat((document.getElementById('f-dw') as HTMLInputElement).value) || 0;
-  (wizardData as any).demolitionArea = parseFloat((document.getElementById('f-demo') as HTMLInputElement | null)?.value || '0') || 0;
-  (wizardData as any).plasteringArea = parseFloat((document.getElementById('f-plaster') as HTMLInputElement | null)?.value || '0') || 0;
   return true;
 }
 
@@ -832,29 +816,54 @@ function renderStep5() {
 
 /* Step 6 — Plumbing */
 function renderStep6() {
-  const inVal  = (wizardData as any).insidePlumbingCost  || '';
-  const outVal = (wizardData as any).outsidePlumbingCost || '';
+  const hasPlumb = (wizardData as any).hasPlumbing ?? true;
+  const inMat  = (wizardData as any).insidePlumbingMaterial  || '';
+  const inSvc  = (wizardData as any).insidePlumbingService   || '';
+  const outMat = (wizardData as any).outsidePlumbingMaterial || '';
+  const outSvc = (wizardData as any).outsidePlumbingService  || '';
   main.innerHTML = `
     <div class="step-content">
-      <div class="step-q">Plumbing costs</div>
-      <div class="step-hint">Enter the inside and outside plumbing amounts separately.</div>
-      <div class="field-group">
-        <label class="field-label">Inside Plumbing (Rs.)</label>
-        <input class="field-input" id="f-plumb-in" type="number" min="0" step="1000" placeholder="e.g. 45,000" value="${inVal}">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Outside Plumbing (Rs.)</label>
-        <input class="field-input" id="f-plumb-out" type="number" min="0" step="1000" placeholder="0 if none" value="${outVal}">
+      <div class="step-q">Plumbing works</div>
+      ${toggle('Include Plumbing Works', 'Toggle off if plumbing is excluded from this quote', 'plumbing', hasPlumb)}
+      <div id="plumbing-sub-wrap" style="${hasPlumb ? '' : 'display:none'}">
+        <div class="step-q" style="margin-top:1rem;font-size:.85rem">Inside Plumbing</div>
+        <div class="field-group">
+          <label class="field-label">Material Cost (Rs.)</label>
+          <input class="field-input" id="f-plumb-in-mat" type="number" min="0" step="1000"
+            placeholder="e.g. 30,000" value="${inMat}">
+        </div>
+        <div class="field-group" style="margin-bottom:1rem">
+          <label class="field-label">Service Charge (Rs.)</label>
+          <input class="field-input" id="f-plumb-in-svc" type="number" min="0" step="1000"
+            placeholder="e.g. 15,000" value="${inSvc}">
+        </div>
+        <div class="step-q" style="font-size:.85rem">Outside Plumbing</div>
+        <div class="field-group">
+          <label class="field-label">Material Cost (Rs.)</label>
+          <input class="field-input" id="f-plumb-out-mat" type="number" min="0" step="1000"
+            placeholder="0 if none" value="${outMat}">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Service Charge (Rs.)</label>
+          <input class="field-input" id="f-plumb-out-svc" type="number" min="0" step="1000"
+            placeholder="0 if none" value="${outSvc}">
+        </div>
       </div>
     </div>
   `;
+  setupToggles({ plumbing: 'hasPlumbing' });
+  document.querySelector<HTMLElement>('[data-toggle="plumbing"]')!.addEventListener('click', () => {
+    document.getElementById('plumbing-sub-wrap')!.style.display =
+      ((wizardData as any).hasPlumbing !== false) ? '' : 'none';
+  });
 }
 
 function collectStep6(): boolean {
-  const inAmt  = parseFloat((document.getElementById('f-plumb-in')  as HTMLInputElement).value || '0');
-  const outAmt = parseFloat((document.getElementById('f-plumb-out') as HTMLInputElement).value || '0');
-  (wizardData as any).insidePlumbingCost  = isNaN(inAmt)  ? 0 : Math.max(0, inAmt);
-  (wizardData as any).outsidePlumbingCost = isNaN(outAmt) ? 0 : Math.max(0, outAmt);
+  (wizardData as any).hasPlumbing             = (wizardData as any).hasPlumbing ?? true;
+  (wizardData as any).insidePlumbingMaterial  = parseFloat((document.getElementById('f-plumb-in-mat')  as HTMLInputElement | null)?.value || '0') || 0;
+  (wizardData as any).insidePlumbingService   = parseFloat((document.getElementById('f-plumb-in-svc')  as HTMLInputElement | null)?.value || '0') || 0;
+  (wizardData as any).outsidePlumbingMaterial = parseFloat((document.getElementById('f-plumb-out-mat') as HTMLInputElement | null)?.value || '0') || 0;
+  (wizardData as any).outsidePlumbingService  = parseFloat((document.getElementById('f-plumb-out-svc') as HTMLInputElement | null)?.value || '0') || 0;
   return true;
 }
 
@@ -913,39 +922,127 @@ function collectStep7(): boolean {
 
 /* Step 8 — Extras */
 function renderStep8() {
-  const isVanity    = wizardData.hasVanity;
-  const isBathware  = wizardData.hasBathware ?? true;
-  const isMirror    = wizardData.hasMirror ?? true;
-  const isWiring    = wizardData.hasElectricalWiring !== false;
-  const isWiringMat = wizardData.wiringMaterialsEnabled !== false;
-  const isWiringSvc = wizardData.wiringServiceEnabled !== false;
-  const isLights    = wizardData.hasLightFixtures !== false;
+  const vanityType    = (wizardData as any).vanityType || 'none';
+  const isBathware    = wizardData.hasBathware ?? true;
+  const isMirror      = wizardData.hasMirror ?? true;
+  const isWiring      = wizardData.hasElectricalWiring !== false;
+  const isWiringMat   = wizardData.wiringMaterialsEnabled !== false;
+  const isWiringSvc   = wizardData.wiringServiceEnabled !== false;
+  const isLights      = wizardData.hasLightFixtures !== false;
+  const isDesignPlan  = (wizardData as any).hasDesignPlanning ?? true;
 
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Extra items</div>
       <div class="step-hint">Toggle what's included in this bathroom.</div>
 
-      ${toggle('Ceiling Installation',
-        `Yes: ${fmtRs(RATES.ceiling.perSqFt)}/sqft · No: ${fmtRs(RATES.ceiling.flat)} flat`,
-        'ceiling', wizardData.hasCeiling)}
+      ${wizardData.projectType === 'renovation' ? `
+      <div class="step-q" style="font-size:.85rem;margin-bottom:.3rem">Renovation Works</div>
+      <div class="field-group">
+        <label class="field-label">Demolition Cost (Rs.)</label>
+        <input class="field-input" id="f-demolition-cost" type="number" min="0" step="500"
+          placeholder="e.g. 30,000" value="${(wizardData as any).demolitionCost || ''}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Debris Removal Cost (Rs.)</label>
+        <input class="field-input" id="f-debris-removal-cost" type="number" min="0" step="500"
+          placeholder="e.g. 20,000" value="${(wizardData as any).debrisRemovalCost || ''}">
+      </div>
+      <div class="field-group" style="margin-bottom:1rem">
+        <label class="field-label">Wall Plastering Cost (Rs.)</label>
+        <input class="field-input" id="f-wall-plastering-cost" type="number" min="0" step="500"
+          placeholder="e.g. 15,000" value="${(wizardData as any).wallPlasteringCost || ''}">
+      </div>` : ''}
 
       <div>
-        ${toggle('Vanity Cupboard & Countertop', 'Enter cost below when included', 'vanity', isVanity)}
-        <div id="vanity-input-wrap" style="${isVanity ? '' : 'display:none'}">
+        ${toggle('Bathroom Design &amp; Planning', 'If No: Rs. 0', 'design-planning', isDesignPlan)}
+        <div id="design-planning-input-wrap" style="${isDesignPlan ? '' : 'display:none'}">
           <div class="field-group" style="margin:0 0 12px">
-            <label class="field-label">Vanity Amount (Rs.)</label>
-            <input class="field-input" id="f-vanity-amount" type="number" min="0" step="500"
-              placeholder="e.g. 40,000" value="${wizardData.vanityAmount || ''}">
+            <label class="field-label">Design &amp; Planning Cost (Rs.)</label>
+            <input class="field-input" id="f-design-planning-cost" type="number" min="0" step="500"
+              placeholder="Default: 30,000" value="${(wizardData as any).designPlanningCost || ''}">
           </div>
         </div>
       </div>
 
-      ${toggle('Geyser / Water Heater',
-        `${fmtRs(RATES.geyser)} supply + install · ${fmtRs(RATES.clientSupply.geyser)} install only`,
-        'geyser', wizardData.hasGeyser)}
-      ${toggle('Door', `Yes: ${fmtRs(RATES.door)} flat`, 'door', wizardData.hasDoor)}
-      ${toggle('Window', `Yes: ${fmtRs(RATES.window)} flat`, 'window', wizardData.hasWindow)}
+      <div>
+        ${toggle('Ceiling Installation', 'If No: Rs. 0', 'ceiling', wizardData.hasCeiling)}
+        <div id="ceiling-input-wrap" style="${wizardData.hasCeiling ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Ceiling Cost (Rs.)</label>
+            <input class="field-input" id="f-ceiling-cost" type="number" min="0" step="500"
+              placeholder="e.g. ${Math.round((wizardData.floorArea || 0) * RATES.ceiling.perSqFt).toLocaleString()}"
+              value="${(wizardData as any).ceilingCostManual || ''}">
+          </div>
+        </div>
+      </div>
+
+      <div class="step-q" style="margin-top:.8rem">Vanity</div>
+      <div class="option-grid cols3" style="margin-bottom:8px">
+        <div class="opt-card ${vanityType==='none'?'selected':''}" data-vanity="none">
+          <span class="opt-icon">✕</span>
+          <span class="opt-label" style="font-size:.75rem">None</span>
+        </div>
+        <div class="opt-card ${vanityType==='vanity-top'?'selected':''}" data-vanity="vanity-top">
+          <span class="opt-icon">🪨</span>
+          <span class="opt-label" style="font-size:.75rem">Vanity Top</span>
+        </div>
+        <div class="opt-card ${vanityType==='vanity-cupboard'?'selected':''}" data-vanity="vanity-cupboard">
+          <span class="opt-icon">🚪</span>
+          <span class="opt-label" style="font-size:.75rem">Cupboard</span>
+        </div>
+      </div>
+      <div id="vanity-input-wrap" style="${vanityType!=='none'?'':'display:none'}">
+        <div class="field-group" style="margin:0 0 12px">
+          <label class="field-label">Vanity Amount (Rs.)</label>
+          <input class="field-input" id="f-vanity-amount" type="number" min="0" step="500"
+            placeholder="e.g. 40,000" value="${wizardData.vanityAmount || ''}">
+        </div>
+      </div>
+
+      <div>
+        ${toggle('Geyser / Water Heater', 'If No: Rs. 0', 'geyser', wizardData.hasGeyser)}
+        <div id="geyser-input-wrap" style="${wizardData.hasGeyser ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Geyser Cost (Rs.)</label>
+            <input class="field-input" id="f-geyser-cost" type="number" min="0" step="500"
+              placeholder="e.g. 60,000" value="${(wizardData as any).geyserCostManual || ''}">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        ${toggle('Door', 'If No: Rs. 0', 'door', wizardData.hasDoor)}
+        <div id="door-input-wrap" style="${wizardData.hasDoor ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Door Cost (Rs.)</label>
+            <input class="field-input" id="f-door-cost" type="number" min="0" step="500"
+              placeholder="e.g. 45,000" value="${(wizardData as any).doorCostManual || ''}">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        ${toggle('Window', 'If No: Rs. 0', 'window', wizardData.hasWindow)}
+        <div id="window-input-wrap" style="${wizardData.hasWindow ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Window Cost (Rs.)</label>
+            <input class="field-input" id="f-window-cost" type="number" min="0" step="500"
+              placeholder="e.g. 30,000" value="${(wizardData as any).windowCostManual || ''}">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        ${toggle('Dummy Wall Construction', 'If No: Rs. 0', 'dummy-wall', (wizardData as any).hasDummyWall ?? false)}
+        <div id="dummy-wall-input-wrap" style="${(wizardData as any).hasDummyWall ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Dummy Wall Cost (Rs.)</label>
+            <input class="field-input" id="f-dummy-wall-cost" type="number" min="0" step="500"
+              placeholder="e.g. 40,000" value="${(wizardData as any).dummyWallCostManual || ''}">
+          </div>
+        </div>
+      </div>
 
       <div class="step-q" style="margin-top:1.8rem">Bathware &amp; Tapware</div>
       <div>
@@ -978,9 +1075,17 @@ function renderStep8() {
 
       <div class="step-q" style="margin-top:1.2rem">Cost Adjustments</div>
       <div class="step-hint">Toggle off to apply minimal flat rate.</div>
-      ${toggle('Floor Concrete Works',
-        `Yes: ${fmtRs(RATES.floorConcrete.perSqFt)}/sqft · No: ${fmtRs(RATES.floorConcreteMinimal)} flat`,
-        'floor-concrete', wizardData.hasFloorConcrete !== false)}
+      <div>
+        ${toggle('Floor Concrete Works', 'If No: Rs. 0', 'floor-concrete', wizardData.hasFloorConcrete !== false)}
+        <div id="floor-concrete-input-wrap" style="${wizardData.hasFloorConcrete !== false ? '' : 'display:none'}">
+          <div class="field-group" style="margin:0 0 12px">
+            <label class="field-label">Floor Concrete Cost (Rs.)</label>
+            <input class="field-input" id="f-floor-concrete-cost" type="number" min="0" step="500"
+              placeholder="Default: ${fmtRs((wizardData.floorArea || 0) * RATES.floorConcrete.perSqFt)} (${wizardData.floorArea || 0}sqft × Rs.350)"
+              value="${(wizardData as any).floorConcreteCostManual || ''}">
+          </div>
+        </div>
+      </div>
 
       <div>
         ${toggle('Electrical Wiring', 'If off, wiring cost = Rs. 0', 'elec-wiring', isWiring)}
@@ -1010,7 +1115,7 @@ function renderStep8() {
 
       <div class="step-q" style="margin-top:1.2rem">Light &amp; Plug Fixtures</div>
       <div>
-        ${toggle('Include Light & Plug Fixtures', 'If off, light fixture cost = Rs. 0', 'light-fixtures', isLights)}
+        ${toggle('Include Light & Plug Fixtures (incl. Exhaust Fan)', 'If off, light fixture cost = Rs. 0', 'light-fixtures', isLights)}
         <div id="light-input-wrap" style="${isLights ? '' : 'display:none'}">
           <div class="field-group" style="margin:0 0 8px">
             <label class="field-label">Materials Amount (Rs.)</label>
@@ -1024,23 +1129,54 @@ function renderStep8() {
           </div>
         </div>
       </div>
-
-      ${toggle('Exhaust Fan', 'Include exhaust fan installation in scope of work', 'exhaust-fan', wizardData.hasExhaustFan !== false)}
     </div>
   `;
 
   setupToggles({
-    ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser',
+    'design-planning': 'hasDesignPlanning',
+    ceiling: 'hasCeiling', geyser: 'hasGeyser',
     door: 'hasDoor', window: 'hasWindow',
+    'dummy-wall': 'hasDummyWall',
     bathware: 'hasBathware', mirror: 'hasMirror',
     'floor-concrete': 'hasFloorConcrete', 'elec-wiring': 'hasElectricalWiring',
     'wiring-mat': 'wiringMaterialsEnabled', 'wiring-svc': 'wiringServiceEnabled',
-    'light-fixtures': 'hasLightFixtures', 'exhaust-fan': 'hasExhaustFan',
+    'light-fixtures': 'hasLightFixtures',
   });
 
-  // Show/hide sub-input panels after each toggle click
-  document.querySelector<HTMLElement>('[data-toggle="vanity"]')!.addEventListener('click', () => {
-    document.getElementById('vanity-input-wrap')!.style.display = wizardData.hasVanity ? '' : 'none';
+  // Vanity 3-card selector
+  document.querySelectorAll<HTMLElement>('[data-vanity]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll<HTMLElement>('[data-vanity]').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      (wizardData as any).vanityType = card.dataset.vanity as VanityType;
+      document.getElementById('vanity-input-wrap')!.style.display =
+        (wizardData as any).vanityType !== 'none' ? '' : 'none';
+    });
+  });
+
+  // Show/hide manual cost inputs when each toggle fires
+  document.querySelector<HTMLElement>('[data-toggle="design-planning"]')!.addEventListener('click', () => {
+    document.getElementById('design-planning-input-wrap')!.style.display =
+      ((wizardData as any).hasDesignPlanning !== false) ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="ceiling"]')!.addEventListener('click', () => {
+    document.getElementById('ceiling-input-wrap')!.style.display = wizardData.hasCeiling ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="geyser"]')!.addEventListener('click', () => {
+    document.getElementById('geyser-input-wrap')!.style.display = wizardData.hasGeyser ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="door"]')!.addEventListener('click', () => {
+    document.getElementById('door-input-wrap')!.style.display = wizardData.hasDoor ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="window"]')!.addEventListener('click', () => {
+    document.getElementById('window-input-wrap')!.style.display = wizardData.hasWindow ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="dummy-wall"]')!.addEventListener('click', () => {
+    document.getElementById('dummy-wall-input-wrap')!.style.display = (wizardData as any).hasDummyWall ? '' : 'none';
+  });
+  document.querySelector<HTMLElement>('[data-toggle="floor-concrete"]')!.addEventListener('click', () => {
+    document.getElementById('floor-concrete-input-wrap')!.style.display =
+      (wizardData.hasFloorConcrete !== false) ? '' : 'none';
   });
   document.querySelector<HTMLElement>('[data-toggle="bathware"]')!.addEventListener('click', () => {
     document.getElementById('bathware-input-wrap')!.style.display = (wizardData.hasBathware ?? true) ? '' : 'none';
@@ -1063,16 +1199,27 @@ function renderStep8() {
 }
 
 function collectStep8(): boolean {
-  wizardData.vanityAmount       = parseFloat((document.getElementById('f-vanity-amount')    as HTMLInputElement | null)?.value || '0') || 0;
-  wizardData.bathwareMaterialCost = parseFloat((document.getElementById('f-bathware-mat')   as HTMLInputElement | null)?.value || '0') || 0;
-  wizardData.bathwareInstallCost  = parseFloat((document.getElementById('f-bathware-install') as HTMLInputElement | null)?.value || '0') || 0;
-  wizardData.mirrorAmount       = parseFloat((document.getElementById('f-mirror-amount')    as HTMLInputElement | null)?.value || '0') || 0;
-  wizardData.wiringMaterialsCost = parseFloat((document.getElementById('f-wiring-mat')      as HTMLInputElement | null)?.value || '0') || 0;
-  const svcRate = parseFloat((document.getElementById('f-wiring-svc-rate') as HTMLInputElement | null)?.value || '1500');
-  wizardData.wiringServiceRate  = isNaN(svcRate) ? 1500 : Math.max(0, svcRate);
-  wizardData.lightMaterialsCost = parseFloat((document.getElementById('f-light-mat')        as HTMLInputElement | null)?.value || '0') || 0;
-  const lightSvc = parseFloat((document.getElementById('f-light-svc-rate') as HTMLInputElement | null)?.value || '500');
-  wizardData.lightServiceRate   = isNaN(lightSvc) ? 500 : Math.max(0, lightSvc);
+  const g = (id: string) => (document.getElementById(id) as HTMLInputElement | null)?.value || '0';
+  (wizardData as any).demolitionCost      = parseFloat(g('f-demolition-cost'))     || 0;
+  (wizardData as any).debrisRemovalCost   = parseFloat(g('f-debris-removal-cost')) || 0;
+  (wizardData as any).wallPlasteringCost  = parseFloat(g('f-wall-plastering-cost'))|| 0;
+  (wizardData as any).designPlanningCost    = parseFloat(g('f-design-planning-cost')) || 0;
+  (wizardData as any).ceilingCostManual     = parseFloat(g('f-ceiling-cost'))         || 0;
+  (wizardData as any).geyserCostManual      = parseFloat(g('f-geyser-cost'))          || 0;
+  (wizardData as any).doorCostManual        = parseFloat(g('f-door-cost'))            || 0;
+  (wizardData as any).windowCostManual      = parseFloat(g('f-window-cost'))          || 0;
+  (wizardData as any).dummyWallCostManual   = parseFloat(g('f-dummy-wall-cost'))      || 0;
+  (wizardData as any).floorConcreteCostManual = parseFloat(g('f-floor-concrete-cost'))|| 0;
+  wizardData.vanityAmount         = parseFloat(g('f-vanity-amount'))   || 0;
+  wizardData.bathwareMaterialCost = parseFloat(g('f-bathware-mat'))    || 0;
+  wizardData.bathwareInstallCost  = parseFloat(g('f-bathware-install'))|| 0;
+  wizardData.mirrorAmount         = parseFloat(g('f-mirror-amount'))   || 0;
+  wizardData.wiringMaterialsCost  = parseFloat(g('f-wiring-mat'))      || 0;
+  const svcRate = parseFloat(g('f-wiring-svc-rate') || '1500');
+  wizardData.wiringServiceRate    = isNaN(svcRate) ? 1500 : Math.max(0, svcRate);
+  wizardData.lightMaterialsCost   = parseFloat(g('f-light-mat'))       || 0;
+  const lightSvc = parseFloat(g('f-light-svc-rate') || '500');
+  wizardData.lightServiceRate     = isNaN(lightSvc) ? 500 : Math.max(0, lightSvc);
   return true;
 }
 
@@ -1080,7 +1227,7 @@ function collectStep8(): boolean {
 function renderStep9() {
   // Store as integer (×100) for cross-browser range compatibility; divide by 100 for display
   const val = Math.round(Math.max(80, Math.min(150, (wizardData.difficultyScore || 1) * 100)));
-  const profitPct = Math.round((wizardData.profitMargin ?? 0.15) * 100);
+  const profitPct = Math.round((wizardData.profitMargin ?? 0.10) * 100);
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Difficulty / complexity</div>
@@ -1246,18 +1393,19 @@ function renderStep11() {
     ['Waterproofing',    `${wizardData.waterproofingArea} sqft`],
     ['Wiring Points',    `${wizardData.wiringPoints}`],
     ['Wall Niches',      `${wizardData.wallNiches}`],
-    ['Inside Plumbing',  fmtRs((wizardData as any).insidePlumbingCost || 0)],
-    ['Outside Plumbing', fmtRs((wizardData as any).outsidePlumbingCost || 0)],
+    ['Plumbing',         (wizardData as any).hasPlumbing !== false ? 'Yes' : 'No'],
+    ['Inside Plumbing',  fmtRs(((wizardData as any).insidePlumbingMaterial || 0) + ((wizardData as any).insidePlumbingService || 0) || (wizardData as any).insidePlumbingCost || 0)],
+    ['Outside Plumbing', fmtRs(((wizardData as any).outsidePlumbingMaterial || 0) + ((wizardData as any).outsidePlumbingService || 0) || (wizardData as any).outsidePlumbingCost || 0)],
     ['Shower',           wizardData.showerCubicle === 'none' ? 'None' : `${wizardData.showerCubicle} — ${fmtRs((wizardData as any).showerCubiclePrice || 0)}`],
-    ['Ceiling',          wizardData.hasCeiling ? 'Yes' : 'No'],
-    ['Vanity',           wizardData.hasVanity  ? 'Yes' : 'No'],
-    ['Geyser',           wizardData.hasGeyser  ? 'Yes' : 'No'],
-    ['Door',             wizardData.hasDoor    ? 'Yes' : 'No'],
-    ['Window',           wizardData.hasWindow  ? 'Yes' : 'No'],
+    ['Ceiling',          wizardData.hasCeiling ? `Yes — ${fmtRs((wizardData as any).ceilingCostManual || 0)}` : 'No'],
+    ['Vanity',           ({'none':'None','vanity-top':'Vanity Top','vanity-cupboard':'Cupboard'} as any)[(wizardData as any).vanityType || 'none'] || 'None'],
+    ['Geyser',           wizardData.hasGeyser  ? `Yes — ${fmtRs((wizardData as any).geyserCostManual || 0)}` : 'No'],
+    ['Door',             wizardData.hasDoor    ? `Yes — ${fmtRs((wizardData as any).doorCostManual || 0)}` : 'No'],
+    ['Window',           wizardData.hasWindow  ? `Yes — ${fmtRs((wizardData as any).windowCostManual || 0)}` : 'No'],
     ['Difficulty',       `${wizardData.difficultyScore.toFixed(2)}×`],
     ['Project Cost',     fmtRs(bd.projectCost)],
     ['After Difficulty', fmtRs(bd.difficultyAdjusted)],
-    [`Profit (${Math.round((wizardData.profitMargin ?? 0.15) * 100)}%)`, fmtRs(bd.profitAmount)],
+    [`Profit (${Math.round((wizardData.profitMargin ?? 0.10) * 100)}%)`, fmtRs(bd.profitAmount)],
   ];
 
   main.innerHTML = `
@@ -1415,7 +1563,7 @@ function renderQtnDetail() {
             <span class="inv-detail-val">${fmtRs(bd.difficultyAdjusted)}</span>
           </div>
           <div class="inv-detail-row" style="padding:8px 16px;border-bottom:none">
-            <span class="inv-detail-key">Profit (${Math.round((q.profitMargin ?? 0.15) * 100)}%)</span>
+            <span class="inv-detail-key">Profit (${Math.round((q.profitMargin ?? 0.10) * 100)}%)</span>
             <span class="inv-detail-val">${fmtRs(bd.profitAmount)}</span>
           </div>
         </div>
@@ -1776,7 +1924,7 @@ function printQuotationPDF(q: Quotation) {
       ...((bda.otherCostLabel && (bda.otherCost||0) > 0) ? [[bda.otherCostLabel, bda.otherCost] as [string,number]] : []),
       ['Overhead & Site Management', bd.overhead],
     ].filter(([,v]) => v > 0);
-    const profitPct = Math.round((q.profitMargin || 0.15) * 100);
+    const profitPct = Math.round((q.profitMargin || 0.10) * 100);
     return `<table class="cost-table">
       <thead><tr><th class="th-no">No.</th><th>Description</th><th class="th-amt">Amount</th></tr></thead>
       <tbody>${rows.map(([label, amt], i) => `

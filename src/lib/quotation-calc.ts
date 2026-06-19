@@ -5,31 +5,20 @@
 
 export type ProjectType     = 'renovation' | 'construction';
 export type ShowerType      = 'none' | 'l-swing' | 'l-sliding' | 'panel-swing' | 'panel-sliding' | 'panel';
+export type VanityType      = 'none' | 'vanity-top' | 'vanity-cupboard';
 export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'converted';
 export type InvoiceStatus   = 'draft' | 'sent' | 'partially-paid' | 'paid' | 'cancelled';
 
 /* ── All editable rates (change prices here) ─────────────── */
 export const RATES = {
-  demolition:     { perSqFt: 200 },   // Demolition Works (renovation only)
-  debrisRemoval:  { perSqFt: 200 },   // Debris Removal & Site Cleaning (renovation only)
-  wallPlastering: { perSqFt: 125 },   // Wall Plastering
-  designPlanning: 30_000,
   wallNiche:     { each: 10_000 },
-  floorConcrete: { perSqFt: 350 },
-  dummyWall:     { perSqFt: 1_000 },
-  wiring:        { perPoint: 1_500 },  // service labour only per point
+  floorConcrete: { perSqFt: 350 },    // reference rate shown as placeholder hint
+  wiring:        { perPoint: 1_500 }, // service labour only per point
   waterproofing: { perSqFt: 230 },
-  ceiling:       { perSqFt: 1_000, flat: 20_000 },
-  lightFixture:  { perPoint: 500 },   // service per point
-  geyser:        60_000,
-  door:          45_000,
-  window:        30_000,
-  floorConcreteMinimal: 1_000,  // flat rate when hasFloorConcrete is false
-  overhead:     100_000,   // internal only — hidden from customer PDFs
-  profitMargin: 0.15,
-  clientSupply: {
-    geyser: 5_000,   // installation only when client supplies geyser unit
-  },
+  ceiling:       { perSqFt: 1_000 }, // reference rate shown as placeholder hint
+  lightFixture:  { perPoint: 500 },  // service per point
+  overhead:     100_000,              // internal only — hidden from customer PDFs
+  profitMargin: 0.10,
 };
 
 /* ── Defaults ─────────────────────────────────────────────── */
@@ -60,49 +49,72 @@ export interface QuotationInputs {
   projectName:       string;
   quotationDate:     string;
   projectType:       ProjectType;
+  // Renovation-only manual costs
+  demolitionCost:    number;
+  debrisRemovalCost: number;
+  wallPlasteringCost: number;
+  // Shower
   showerCubicle:     ShowerType;
   showerCubiclePrice: number;
+  // Toggles with manual cost
   hasGeyser:         boolean;
+  geyserCostManual:  number;
   hasCeiling:        boolean;
-  hasVanity:         boolean;
+  ceilingCostManual: number;
+  vanityType:        VanityType;
+  vanityAmount:      number;
   hasDoor:           boolean;
+  doorCostManual:    number;
   hasWindow:         boolean;
+  windowCostManual:  number;
   hasBathware:       boolean;
-  hasMirror:         boolean;
-  hasFloorConcrete:  boolean;
-  hasElectricalWiring: boolean;
-  hasLightFixtures:  boolean;
-  hasExhaustFan:     boolean;
-  tileIncluded:      boolean;
-  tileRate:          number;    // material cost per sqft (when tileIncluded)
-  tilingRate:        number;    // labour cost per sqft (always)
   bathwareMaterialCost: number;
   bathwareInstallCost:  number;
+  hasMirror:         boolean;
   mirrorAmount:      number;
-  vanityAmount:      number;
+  hasFloorConcrete:  boolean;
+  floorConcreteCostManual: number;
+  hasDummyWall:      boolean;
+  dummyWallCostManual: number;
+  hasDesignPlanning: boolean;
+  designPlanningCost: number;
+  // Plumbing (4 sub-fields; legacy fields kept for backward compat)
+  hasPlumbing:            boolean;
+  insidePlumbingMaterial:  number;
+  insidePlumbingService:   number;
+  outsidePlumbingMaterial: number;
+  outsidePlumbingService:  number;
+  insidePlumbingCost:      number;   // legacy — kept for old quotes
+  outsidePlumbingCost:     number;   // legacy — kept for old quotes
+  // Electrical
+  hasElectricalWiring:    boolean;
   wiringMaterialsEnabled: boolean;
   wiringMaterialsCost:    number;
   wiringServiceEnabled:   boolean;
-  wiringServiceRate:      number;   // per point, default 1500
+  wiringServiceRate:      number;    // per point, default 1500
+  hasLightFixtures:       boolean;
   lightMaterialsCost:     number;
-  lightServiceRate:       number;   // per point, default 500
-  demolitionArea:       number;
-  plasteringArea:       number;
-  insidePlumbingCost:   number;
-  outsidePlumbingCost:  number;
-  otherCostLabel:       string;
-  otherCost:            number;
+  lightServiceRate:       number;    // per point, default 500
+  // Tiling
+  tileIncluded:      boolean;
+  tileRate:          number;         // material cost per sqft (when tileIncluded)
+  tilingRate:        number;         // labour cost per sqft (always)
+  // Other cost
+  otherCostLabel:    string;
+  otherCost:         number;
+  // Pricing
   profitMargin:      number;
+  finalPriceOverride: number | null;
+  // Measurements
   floorArea:         number;
   wallArea:          number;
   waterproofingArea: number;
-  dummyWallArea:     number;
   wallNiches:        number;
   wiringPoints:      number;
   difficultyScore:   number;
+  // Meta
   brands:            string[];
   paymentTerms:      PaymentTerm[];
-  finalPriceOverride: number | null;
 }
 
 export interface QuotationBreakdown {
@@ -170,30 +182,48 @@ export interface Invoice {
 
 /* ── Calculation ──────────────────────────────────────────── */
 export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
-  // Clamp difficultyScore — mobile range inputs may produce values outside min/max
-  const difficultyScore = Math.max(0.8, Math.min(1.5, Number(q.difficultyScore) || 1.0));
-  // Guard finalPriceOverride: treat 0 or negative same as null
+  const difficultyScore    = Math.max(0.8, Math.min(1.5, Number(q.difficultyScore) || 1.0));
   const finalPriceOverride = (q.finalPriceOverride != null && q.finalPriceOverride > 0) ? q.finalPriceOverride : null;
 
-  const totalTilingArea  = q.floorArea + q.wallArea;
-  const ceilingArea      = q.floorArea;
+  const totalTilingArea = q.floorArea + q.wallArea;
+  const ceilingArea     = q.floorArea;
 
-  const demolitionCost      = q.projectType === 'renovation' ? (q.demolitionArea || 0) * RATES.demolition.perSqFt : 0;
-  const debrisRemovalCost   = q.projectType === 'renovation' ? (q.demolitionArea || 0) * RATES.debrisRemoval.perSqFt : 0;
-  const wallPlasteringCost  = (q.plasteringArea || 0) * RATES.wallPlastering.perSqFt;
-  const designPlanning      = RATES.designPlanning;
-  const wallNicheCost       = q.wallNiches * RATES.wallNiche.each;
-  const floorConcreteCost   = (q.hasFloorConcrete !== false)
-    ? q.floorArea * RATES.floorConcrete.perSqFt : RATES.floorConcreteMinimal;
-  const dummyWallCost       = q.dummyWallArea * RATES.dummyWall.perSqFt;
+  // Renovation-only manual costs (backward compat: old quotes had demolitionArea; now 0 unless re-entered)
+  const demolitionCost     = q.projectType === 'renovation' ? Math.max(0, Number(q.demolitionCost)     || 0) : 0;
+  const debrisRemovalCost  = q.projectType === 'renovation' ? Math.max(0, Number(q.debrisRemovalCost)  || 0) : 0;
+  const wallPlasteringCost = q.projectType === 'renovation' ? Math.max(0, Number(q.wallPlasteringCost) || 0) : 0;
 
-  const tilingMaterialRate  = (q.tileIncluded ?? true) ? (q.tileRate || 0) : 0;
-  const tilingLaborRate     = q.tilingRate || 0;
-  const tilingCost          = totalTilingArea * (tilingMaterialRate + tilingLaborRate);
+  // Design & Planning: manual cost (blank = Rs.30,000 fallback); No = 0
+  const designPlanning = (q.hasDesignPlanning ?? true)
+    ? (Number(q.designPlanningCost) > 0 ? Number(q.designPlanningCost) : 30_000)
+    : 0;
 
-  const insidePlumbingCost  = Math.max(0, Number(q.insidePlumbingCost) || 0);
-  const outsidePlumbingCost = Math.max(0, Number(q.outsidePlumbingCost) || 0);
-  const plumbingCost        = insidePlumbingCost + outsidePlumbingCost;
+  const wallNicheCost = q.wallNiches * RATES.wallNiche.each;
+
+  // Floor Concrete: manual cost when Yes; No = 0
+  const floorConcreteCost = (q.hasFloorConcrete !== false)
+    ? (Number(q.floorConcreteCostManual) > 0
+        ? Number(q.floorConcreteCostManual)
+        : q.floorArea * RATES.floorConcrete.perSqFt)  // fallback for old quotes
+    : 0;
+
+  const dummyWallCost = (q.hasDummyWall) ? Math.max(0, Number(q.dummyWallCostManual) || 0) : 0;
+
+  const tilingMaterialRate = (q.tileIncluded ?? true) ? (q.tileRate || 0) : 0;
+  const tilingLaborRate    = q.tilingRate || 0;
+  const tilingCost         = totalTilingArea * (tilingMaterialRate + tilingLaborRate);
+
+  // Plumbing: 4 sub-fields; fallback to legacy single fields for old quotes
+  const hasPlumbing = q.hasPlumbing ?? true;
+  const insidePlumbingCost = hasPlumbing
+    ? (((Number(q.insidePlumbingMaterial) || 0) + (Number(q.insidePlumbingService) || 0))
+       || (Number(q.insidePlumbingCost) || 0))
+    : 0;
+  const outsidePlumbingCost = hasPlumbing
+    ? (((Number(q.outsidePlumbingMaterial) || 0) + (Number(q.outsidePlumbingService) || 0))
+       || (Number(q.outsidePlumbingCost) || 0))
+    : 0;
+  const plumbingCost = insidePlumbingCost + outsidePlumbingCost;
 
   const wiringCost = (q.hasElectricalWiring !== false)
     ? ((q.wiringMaterialsEnabled !== false ? (q.wiringMaterialsCost || 0) : 0)
@@ -201,23 +231,27 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
     : 0;
 
   const waterproofingCost = q.waterproofingArea * RATES.waterproofing.perSqFt;
-  const ceilingCost       = q.hasCeiling ? ceilingArea * RATES.ceiling.perSqFt : RATES.ceiling.flat;
 
-  const lightFixtureCost  = (q.hasLightFixtures !== false)
+  // Ceiling: manual cost when Yes; fallback to perSqFt for old quotes; No = 0
+  const ceilingCost = q.hasCeiling
+    ? (Number(q.ceilingCostManual) > 0
+        ? Number(q.ceilingCostManual)
+        : ceilingArea * RATES.ceiling.perSqFt)
+    : 0;
+
+  const lightFixtureCost = (q.hasLightFixtures !== false)
     ? (q.lightMaterialsCost || 0) + q.wiringPoints * (q.lightServiceRate || RATES.lightFixture.perPoint)
     : 0;
 
-  const geyserCost    = q.hasGeyser
-    ? ((q as any).clientSupplyGeyser ? RATES.clientSupply.geyser : RATES.geyser)
-    : 0;
-  const vanityCost    = q.hasVanity ? (q.vanityAmount || 0) : 0;
+  const geyserCost    = q.hasGeyser ? Math.max(0, Number(q.geyserCostManual)   || 0) : 0;
+  const vanityType    = q.vanityType ?? ((q as any).hasVanity ? 'vanity-cupboard' : 'none');
+  const vanityCost    = vanityType !== 'none' ? (q.vanityAmount || 0) : 0;
   const showerCost    = q.showerCubicle !== 'none' ? Math.max(0, Number(q.showerCubiclePrice) || 0) : 0;
   const mirrorCost    = (q.hasMirror ?? true) ? (q.mirrorAmount || 0) : 0;
   const bathwareCost  = (q.hasBathware ?? true)
-    ? ((q.bathwareMaterialCost || 0) + (q.bathwareInstallCost || 0))
-    : 0;
-  const doorCost      = q.hasDoor   ? RATES.door   : 0;
-  const windowCost    = q.hasWindow ? RATES.window : 0;
+    ? ((q.bathwareMaterialCost || 0) + (q.bathwareInstallCost || 0)) : 0;
+  const doorCost      = q.hasDoor   ? Math.max(0, Number(q.doorCostManual)   || 0) : 0;
+  const windowCost    = q.hasWindow ? Math.max(0, Number(q.windowCostManual) || 0) : 0;
   const otherCost     = Math.max(0, Number(q.otherCost) || 0);
   const overhead      = RATES.overhead;
 
@@ -227,7 +261,7 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
     + ceilingCost + lightFixtureCost + geyserCost + vanityCost + showerCost
     + mirrorCost + bathwareCost + doorCost + windowCost + otherCost + overhead;
 
-  const profitMargin       = Math.max(0, Math.min(0.5, Number(q.profitMargin) || 0.15));
+  const profitMargin       = Math.max(0, Math.min(0.5, Number(q.profitMargin) || RATES.profitMargin));
   const difficultyAdjusted = projectCost * difficultyScore;
   const profitAmount       = difficultyAdjusted * profitMargin;
   const finalSellingPrice  = difficultyAdjusted + profitAmount;
@@ -257,12 +291,13 @@ const SHOWER_LABELS: Record<ShowerType, string> = {
 
 export function generateScopeOfWork(q: QuotationInputs): string[] {
   const scope: string[] = [];
-  if (q.projectType === 'renovation' && (q.demolitionArea || 0) > 0) {
-    scope.push('Demolition Works', 'Debris Removal & Site Cleaning');
+  if (q.projectType === 'renovation') {
+    if ((q.demolitionCost    || 0) > 0) scope.push('Demolition Works');
+    if ((q.debrisRemovalCost || 0) > 0) scope.push('Debris Removal & Site Cleaning');
+    if ((q.wallPlasteringCost || 0) > 0) scope.push('Wall Plastering');
   }
-  if ((q.plasteringArea || 0) > 0) scope.push('Wall Plastering');
+  if (q.hasDesignPlanning ?? true) scope.push('Bathroom Design & Planning');
   scope.push(
-    'Bathroom Design & Planning',
     'Floor Concrete Works',
     'Electrical Wiring Works',
     'Waterproofing Before Tiling',
@@ -271,18 +306,23 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
   if (q.hasCeiling) scope.push('Ceiling Installation');
   if (q.hasLightFixtures !== false) scope.push('Light & Plug Fixture Installation');
   else scope.push('Basic Light Provision');
-  if (q.hasExhaustFan !== false) scope.push('Exhaust Fan Installation');
-  scope.push(`Inside Plumbing${(q.insidePlumbingCost || 0) > 0 ? '' : ' Works'}`);
-  if ((q.outsidePlumbingCost || 0) > 0) scope.push('Outside Plumbing Works');
-  if (q.hasVanity) scope.push('Vanity Cupboard & Countertop');
+  if (q.hasPlumbing ?? true) {
+    scope.push('Inside Plumbing Works');
+    const outsideTotal = ((Number(q.outsidePlumbingMaterial) || 0) + (Number(q.outsidePlumbingService) || 0))
+      || (Number(q.outsidePlumbingCost) || 0);
+    if (outsideTotal > 0) scope.push('Outside Plumbing Works');
+  }
+  const vanityTypeSow = q.vanityType ?? ((q as any).hasVanity ? 'vanity-cupboard' : 'none');
+  if (vanityTypeSow === 'vanity-top')      scope.push('Vanity Top');
+  if (vanityTypeSow === 'vanity-cupboard') scope.push('Vanity Cupboard & Countertop');
   if (q.showerCubicle !== 'none') scope.push(SHOWER_LABELS[q.showerCubicle] || 'Shower Cubicle / Glass Partition');
   if (q.hasBathware ?? true) scope.push('Bathware & Tapware Installation');
   if (q.hasMirror ?? true) scope.push('Mirror Installation');
-  if (q.hasDoor)           scope.push('Door Works');
-  if (q.hasWindow)         scope.push('Window Works');
-  if (q.hasGeyser) scope.push(`Water Heater (Geyser) Installation${(q as any).clientSupplyGeyser ? ' (Client Supply)' : ''}`);
-  if (q.wallNiches > 0)    scope.push('Wall Niche Construction');
-  if (q.dummyWallArea > 0) scope.push('Dummy Wall Construction');
+  if (q.hasDoor)   scope.push('Door Works');
+  if (q.hasWindow) scope.push('Window Works');
+  if (q.hasGeyser) scope.push('Water Heater (Geyser) Installation');
+  if (q.wallNiches > 0) scope.push('Wall Niche Construction');
+  if (q.hasDummyWall)   scope.push('Dummy Wall Construction');
   if ((q.otherCost || 0) > 0 && q.otherCostLabel) scope.push(q.otherCostLabel);
   return scope;
 }
@@ -317,26 +357,35 @@ export function defaultInputs(): QuotationInputs {
     clientName: '', clientPhone: '', projectLocation: '', projectName: '',
     quotationDate: new Date().toISOString().split('T')[0],
     projectType: 'renovation',
+    demolitionCost: 0, debrisRemovalCost: 0, wallPlasteringCost: 0,
     showerCubicle: 'none', showerCubiclePrice: 0,
-    hasGeyser: false, hasCeiling: true, hasVanity: true, hasDoor: false, hasWindow: false,
-    hasBathware: true, hasMirror: true,
-    hasFloorConcrete: true, hasElectricalWiring: true, hasLightFixtures: true, hasExhaustFan: true,
-    tileIncluded: true, tileRate: 0, tilingRate: 850,
-    bathwareMaterialCost: 0, bathwareInstallCost: 0,
-    mirrorAmount: 0, vanityAmount: 0,
+    hasGeyser: false, geyserCostManual: 0,
+    hasCeiling: true, ceilingCostManual: 0,
+    vanityType: 'none', vanityAmount: 0,
+    hasDoor: false, doorCostManual: 0,
+    hasWindow: false, windowCostManual: 0,
+    hasBathware: true, bathwareMaterialCost: 0, bathwareInstallCost: 0,
+    hasMirror: true, mirrorAmount: 0,
+    hasFloorConcrete: true, floorConcreteCostManual: 0,
+    hasDummyWall: false, dummyWallCostManual: 0,
+    hasDesignPlanning: true, designPlanningCost: 0,
+    hasPlumbing: true,
+    insidePlumbingMaterial: 0, insidePlumbingService: 0,
+    outsidePlumbingMaterial: 0, outsidePlumbingService: 0,
+    insidePlumbingCost: 0, outsidePlumbingCost: 0,
+    hasElectricalWiring: true,
     wiringMaterialsEnabled: true, wiringMaterialsCost: 0,
     wiringServiceEnabled: true, wiringServiceRate: 1500,
-    lightMaterialsCost: 0, lightServiceRate: 500,
-    demolitionArea: 0, plasteringArea: 0,
-    insidePlumbingCost: 0, outsidePlumbingCost: 0,
+    hasLightFixtures: true, lightMaterialsCost: 0, lightServiceRate: 500,
+    tileIncluded: true, tileRate: 0, tilingRate: 850,
     otherCostLabel: '', otherCost: 0,
-    profitMargin: 0.15,
-    floorArea: 0, wallArea: 0, waterproofingArea: 0, dummyWallArea: 0,
+    profitMargin: 0.10,
+    finalPriceOverride: null,
+    floorArea: 0, wallArea: 0, waterproofingArea: 0,
     wallNiches: 0, wiringPoints: 0,
     difficultyScore: 1.00,
     brands: [...DEFAULT_BRANDS],
     paymentTerms: DEFAULT_PAYMENT_TERMS.map(t => ({ ...t })),
-    finalPriceOverride: null,
   };
 }
 
