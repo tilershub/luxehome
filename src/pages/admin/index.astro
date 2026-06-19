@@ -790,15 +790,6 @@ function renderStep4() {
         <label class="field-label">Dummy Wall Area (sqft)</label>
         <input class="field-input" id="f-dw" type="number" min="0" step="0.5" placeholder="0 if none" value="${wizardData.dummyWallArea || ''}">
       </div>
-      ${wizardData.projectType === 'renovation' ? `
-      <div class="field-group">
-        <label class="field-label">Demolition Area (sqft)</label>
-        <input class="field-input" id="f-demo" type="number" min="0" step="0.5" placeholder="Area to demolish" value="${(wizardData as any).demolitionArea || ''}">
-      </div>` : ''}
-      <div class="field-group">
-        <label class="field-label">Plastering Area (sqft)</label>
-        <input class="field-input" id="f-plaster" type="number" min="0" step="0.5" placeholder="0 if no plastering" value="${(wizardData as any).plasteringArea || ''}">
-      </div>
     </div>
   `;
 }
@@ -812,8 +803,6 @@ function collectStep4(): boolean {
   wizardData.wallArea          = wall;
   wizardData.waterproofingArea = parseFloat((document.getElementById('f-wp') as HTMLInputElement).value) || 0;
   wizardData.dummyWallArea     = parseFloat((document.getElementById('f-dw') as HTMLInputElement).value) || 0;
-  (wizardData as any).demolitionArea = parseFloat((document.getElementById('f-demo') as HTMLInputElement | null)?.value || '0') || 0;
-  (wizardData as any).plasteringArea = parseFloat((document.getElementById('f-plaster') as HTMLInputElement | null)?.value || '0') || 0;
   return true;
 }
 
@@ -952,6 +941,24 @@ function renderStep8() {
       <div class="step-q">Extra items</div>
       <div class="step-hint">Toggle what's included in this bathroom.</div>
 
+      ${wizardData.projectType === 'renovation' ? `
+      <div class="step-q" style="font-size:.85rem;margin-bottom:.3rem">Renovation Works</div>
+      <div class="field-group">
+        <label class="field-label">Demolition Cost (Rs.)</label>
+        <input class="field-input" id="f-demolition-cost" type="number" min="0" step="500"
+          placeholder="e.g. 30,000" value="${(wizardData as any).demolitionCost || ''}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Debris Removal Cost (Rs.)</label>
+        <input class="field-input" id="f-debris-removal-cost" type="number" min="0" step="500"
+          placeholder="e.g. 20,000" value="${(wizardData as any).debrisRemovalCost || ''}">
+      </div>
+      <div class="field-group" style="margin-bottom:1rem">
+        <label class="field-label">Wall Plastering Cost (Rs.)</label>
+        <input class="field-input" id="f-wall-plastering-cost" type="number" min="0" step="500"
+          placeholder="e.g. 15,000" value="${(wizardData as any).wallPlasteringCost || ''}">
+      </div>` : ''}
+
       <div>
         ${toggle('Bathroom Design &amp; Planning', 'If No: Rs. 0', 'design-planning', isDesignPlan)}
         <div id="design-planning-input-wrap" style="${isDesignPlan ? '' : 'display:none'}">
@@ -964,7 +971,7 @@ function renderStep8() {
       </div>
 
       <div>
-        ${toggle('Ceiling Installation', `Yes: manual entry · No: ${fmtRs(RATES.ceiling.flat)} flat (painting only)`, 'ceiling', wizardData.hasCeiling)}
+        ${toggle('Ceiling Installation', 'If No: Rs. 0', 'ceiling', wizardData.hasCeiling)}
         <div id="ceiling-input-wrap" style="${wizardData.hasCeiling ? '' : 'display:none'}">
           <div class="field-group" style="margin:0 0 12px">
             <label class="field-label">Ceiling Cost (Rs.)</label>
@@ -1063,7 +1070,7 @@ function renderStep8() {
       <div class="step-q" style="margin-top:1.2rem">Cost Adjustments</div>
       <div class="step-hint">Toggle off to apply minimal flat rate.</div>
       <div>
-        ${toggle('Floor Concrete Works', `Yes: manual entry · No: ${fmtRs(RATES.floorConcreteMinimal)} flat`, 'floor-concrete', wizardData.hasFloorConcrete !== false)}
+        ${toggle('Floor Concrete Works', 'If No: Rs. 0', 'floor-concrete', wizardData.hasFloorConcrete !== false)}
         <div id="floor-concrete-input-wrap" style="${wizardData.hasFloorConcrete !== false ? '' : 'display:none'}">
           <div class="field-group" style="margin:0 0 12px">
             <label class="field-label">Floor Concrete Cost (Rs.)</label>
@@ -1183,6 +1190,9 @@ function renderStep8() {
 
 function collectStep8(): boolean {
   const g = (id: string) => (document.getElementById(id) as HTMLInputElement | null)?.value || '0';
+  (wizardData as any).demolitionCost      = parseFloat(g('f-demolition-cost'))     || 0;
+  (wizardData as any).debrisRemovalCost   = parseFloat(g('f-debris-removal-cost')) || 0;
+  (wizardData as any).wallPlasteringCost  = parseFloat(g('f-wall-plastering-cost'))|| 0;
   (wizardData as any).designPlanningCost    = parseFloat(g('f-design-planning-cost')) || 0;
   (wizardData as any).ceilingCostManual     = parseFloat(g('f-ceiling-cost'))         || 0;
   (wizardData as any).geyserCostManual      = parseFloat(g('f-geyser-cost'))          || 0;
