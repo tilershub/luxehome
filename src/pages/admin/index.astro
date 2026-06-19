@@ -1930,49 +1930,6 @@ function printQuotationPDF(q: Quotation) {
     ${scope.map(s => `<div class="scope-item"><span class="scope-check">✓</span><span>${s}</span></div>`).join('')}
   </div>
 
-  <div class="section-title" style="margin-top:14pt">Cost Breakdown</div>
-  ${(() => {
-    const bda = bd as any;
-    const rows: [string, number][] = [
-      ...(q.projectType === 'renovation' && (bda.demolitionCost||0) > 0 ? [['Demolition Works', bda.demolitionCost] as [string,number]] : []),
-      ...(q.projectType === 'renovation' && (bda.debrisRemovalCost||0) > 0 ? [['Debris Removal & Site Cleaning', bda.debrisRemovalCost] as [string,number]] : []),
-      ...((bda.wallPlasteringCost||0) > 0 ? [['Wall Plastering', bda.wallPlasteringCost] as [string,number]] : []),
-      ['Bathroom Design & Planning', bd.designPlanning],
-      ['Floor Concrete Works', bd.floorConcreteCost],
-      ...(bd.dummyWallCost > 0 ? [['Dummy Wall Construction', bd.dummyWallCost] as [string,number]] : []),
-      ...(bd.wallNicheCost > 0 ? [['Wall Niche Construction', bd.wallNicheCost] as [string,number]] : []),
-      ...((bda.insidePlumbingCost||0) > 0 ? [['Inside Plumbing', bda.insidePlumbingCost] as [string,number]] : []),
-      ...((bda.outsidePlumbingCost||0) > 0 ? [['Outside Plumbing', bda.outsidePlumbingCost] as [string,number]] : []),
-      ...((bda.insidePlumbingCost||0) + (bda.outsidePlumbingCost||0) === 0 ? [['Plumbing Works', bd.plumbingCost] as [string,number]] : []),
-      ['Electrical Wiring Works', bd.wiringCost],
-      ['Waterproofing Before Tiling', bd.waterproofingCost],
-      ['Tiling & Grouting', bd.tilingCost],
-      ...(bd.ceilingCost > 0 ? [['Ceiling Installation', bd.ceilingCost] as [string,number]] : []),
-      ['Light & Plug Fixture Installation', bd.lightFixtureCost],
-      ...(bd.geyserCost > 0 ? [['Water Heater (Geyser) Installation', bd.geyserCost] as [string,number]] : []),
-      ['Vanity Cupboard & Countertop', bd.vanityCost],
-      ...(bd.showerCost > 0 ? [['Shower Cubicle / Glass Partition', bd.showerCost] as [string,number]] : []),
-      ['Bathware & Tapware Installation', bd.bathwareCost],
-      ['Mirror Installation', bd.mirrorCost],
-      ...(bd.doorCost > 0 ? [['Door Works', bd.doorCost] as [string,number]] : []),
-      ...(bd.windowCost > 0 ? [['Window Works', bd.windowCost] as [string,number]] : []),
-      ...((bda.otherCostLabel && (bda.otherCost||0) > 0) ? [[bda.otherCostLabel, bda.otherCost] as [string,number]] : []),
-      ['Overhead & Site Management', bd.overhead],
-    ].filter(([,v]) => v > 0);
-    const profitPct = Math.round((q.profitMargin || 0.10) * 100);
-    return `<table class="cost-table">
-      <thead><tr><th class="th-no">No.</th><th>Description</th><th class="th-amt">Amount</th></tr></thead>
-      <tbody>${rows.map(([label, amt], i) => `
-        <tr><td class="row-no">${String(i+1).padStart(2,'0')}</td><td>${label}</td><td class="row-amt">${fmtRs(amt)}</td></tr>`).join('')}
-      </tbody>
-      <tfoot>
-        <tr><td></td><td>Total Project Cost</td><td class="row-amt">${fmtRs(bd.projectCost)}</td></tr>
-        <tr><td></td><td>Difficulty Adjustment (${(q.difficultyScore||1).toFixed(2)}×)</td><td class="row-amt">${fmtRs(bd.difficultyAdjusted)}</td></tr>
-        <tr><td></td><td>Profit Margin (${profitPct}%)</td><td class="row-amt">${fmtRs(bd.profitAmount)}</td></tr>
-        <tr class="cost-total-row"><td></td><td>Final Selling Price</td><td class="row-amt">${fmtRs(bd.finalAmount)}</td></tr>
-      </tfoot>
-    </table>`;
-  })()}
 
   <div class="final-box">
     <div>
