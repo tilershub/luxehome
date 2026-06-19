@@ -113,6 +113,7 @@ export interface QuotationInputs {
   wiringPoints:      number;
   difficultyScore:   number;
   // Meta
+  packageTier:       'signature' | 'premium' | 'economy' | '';
   brands:            string[];
   paymentTerms:      PaymentTerm[];
 }
@@ -384,6 +385,7 @@ export function defaultInputs(): QuotationInputs {
     floorArea: 0, wallArea: 0, waterproofingArea: 0,
     wallNiches: 0, wiringPoints: 0,
     difficultyScore: 1.00,
+    packageTier: '',
     brands: [...DEFAULT_BRANDS],
     paymentTerms: DEFAULT_PAYMENT_TERMS.map(t => ({ ...t })),
   };
