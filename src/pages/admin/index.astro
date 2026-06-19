@@ -1228,8 +1228,26 @@ function renderStep9() {
   // Store as integer (×100) for cross-browser range compatibility; divide by 100 for display
   const val = Math.round(Math.max(80, Math.min(150, (wizardData.difficultyScore || 1) * 100)));
   const profitPct = Math.round((wizardData.profitMargin ?? 0.10) * 100);
+  const tier = (wizardData as any).packageTier || '';
   main.innerHTML = `
     <div class="step-content">
+      <div class="step-q">Package tier (optional)</div>
+      <div class="step-hint">Selected tier appears on the PDF quotation.</div>
+      <div class="option-grid" style="grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.4rem">
+        <div class="opt-card ${!tier ? 'selected' : ''}" data-tier="">
+          <span class="opt-label" style="font-size:.8rem">None</span>
+        </div>
+        <div class="opt-card ${tier==='economy' ? 'selected' : ''}" data-tier="economy">
+          <span class="opt-label" style="font-size:.8rem">Economy</span>
+        </div>
+        <div class="opt-card ${tier==='premium' ? 'selected' : ''}" data-tier="premium">
+          <span class="opt-label" style="font-size:.8rem">Premium</span>
+        </div>
+        <div class="opt-card ${tier==='signature' ? 'selected' : ''}" data-tier="signature">
+          <span class="opt-label" style="font-size:.8rem">Signature</span>
+        </div>
+      </div>
+
       <div class="step-q">Difficulty / complexity</div>
       <div class="step-hint">Adjust for site challenges. 1.00 = standard. Applied to all costs before profit.</div>
       <div class="slider-current" id="diff-display">${(val / 100).toFixed(2)}×</div>
@@ -1263,6 +1281,13 @@ function renderStep9() {
     const score = parseInt(slider.value, 10) / 100;
     wizardData.difficultyScore = score;
     display.textContent = `${score.toFixed(2)}×`;
+  });
+  document.querySelectorAll<HTMLElement>('[data-tier]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('[data-tier]').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      (wizardData as any).packageTier = card.dataset.tier || '';
+    });
   });
 }
 
@@ -1874,6 +1899,10 @@ function printQuotationPDF(q: Quotation) {
     <div class="ref-block">
       <div class="ref-no">${ref}</div>
       <div class="ref-meta">${fmtDate(q.quotationDate)}<br>${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
+      <div style="font-size:7.5pt;color:#777;line-height:1.75;margin-top:5pt">
+        0774503744 &nbsp;·&nbsp; tilershub@gmail.com<br>
+        luxehome.lk &nbsp;·&nbsp; Sangamitta Rd, Gampaha
+      </div>
     </div>
   </div>
 
@@ -1889,6 +1918,12 @@ function printQuotationPDF(q: Quotation) {
       ${q.projectName && q.projectLocation ? `<div class="info-detail">${q.projectLocation}</div>` : ''}
     </div>
   </div>
+  ${(q as any).packageTier ? `
+  <div style="margin-bottom:10pt">
+    <span style="display:inline-block;background:#111;color:#b8892a;font-size:7pt;font-weight:800;text-transform:uppercase;letter-spacing:.14em;padding:3pt 9pt;border-radius:3pt">
+      ${((q as any).packageTier as string).charAt(0).toUpperCase() + ((q as any).packageTier as string).slice(1)} Package
+    </span>
+  </div>` : ''}
 
   <div class="section-title">Scope of Work</div>
   <div class="scope-grid">
@@ -1947,6 +1982,12 @@ function printQuotationPDF(q: Quotation) {
     <div class="final-amount">${fmtRs(bd.finalAmount)}</div>
   </div>
 
+  <div class="section-title">Package Benefits</div>
+  <div style="font-size:8.5pt;color:#555;line-height:1.65;padding:4pt 0 2pt">
+    Bathware, tapware, lighting, design, and tile brand can vary by package.
+    Your selected package determines the product quality tier supplied for these items.
+  </div>
+
   <div class="section-title">Payment Schedule</div>
   <div class="terms-grid">
     ${q.paymentTerms.map(t => `
@@ -1955,6 +1996,18 @@ function printQuotationPDF(q: Quotation) {
         <div class="term-lbl">${t.label}</div>
         <div class="term-amt">${fmtRs(bd.finalAmount * t.percentage / 100)}</div>
       </div>`).join('')}
+  </div>
+
+  <div class="section-title">Estimated Timeline</div>
+  <div style="display:flex;gap:16pt;font-size:8.5pt;padding:4pt 0 2pt">
+    <div style="flex-shrink:0;border:1pt solid #e0e0e0;border-radius:4pt;padding:8pt 12pt;text-align:center;min-width:60pt">
+      <div style="font-size:15pt;font-weight:900;color:#b8892a;line-height:1">${q.projectType === 'renovation' ? '3–4' : '2–3'}</div>
+      <div style="font-size:7.5pt;color:#777;margin-top:3pt;line-height:1.3">weeks<br>${q.projectType === 'renovation' ? 'Renovation' : 'New Build'}</div>
+    </div>
+    <div style="font-size:8pt;color:#555;line-height:1.65;padding-top:2pt">
+      Timeline is an estimate based on project scope and site conditions.
+      Actual duration may vary. Work schedule will be confirmed before commencement.
+    </div>
   </div>
 
   <div class="section-title">Brands &amp; Materials</div>
