@@ -1847,12 +1847,13 @@ function printQuotationPDF(q: Quotation) {
     @page { size: A4; margin: 14mm 15mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; font-size: 9.5pt; line-height: 1.5; }
-    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 10pt; border-bottom: 2pt solid #111; margin-bottom: 14pt; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10pt; border-bottom: 2pt solid #111; margin-bottom: 8pt; }
     .logo { font-size: 18pt; font-weight: 900; letter-spacing: .08em; line-height: 1; }
     .logo-sub { font-size: 7.5pt; color: #999; letter-spacing: .1em; text-transform: uppercase; margin-top: 3pt; }
-    .ref-block { text-align: right; }
-    .ref-no { font-size: 12pt; font-weight: 800; letter-spacing: .04em; }
-    .ref-meta { font-size: 8pt; color: #777; margin-top: 2pt; line-height: 1.5; }
+    .ref-strip { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14pt; }
+    .ref-no { font-size: 12pt; font-weight: 800; letter-spacing: .04em; color: #111; }
+    .ref-meta { font-size: 8pt; color: #777; line-height: 1.5; text-align: right; }
+    .contact-block { text-align: right; font-size: 8pt; color: #666; line-height: 1.7; }
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 14pt; }
     .info-cell { padding-right: 18pt; }
     .info-cell + .info-cell { padding-right: 0; padding-left: 18pt; border-left: 1pt solid #e8e8e8; }
@@ -1896,14 +1897,14 @@ function printQuotationPDF(q: Quotation) {
       <div class="logo">LUXE<span style="color:#b8892a">HOME</span></div>
       <div class="logo-sub">Premium Bathroom Renovation · Sri Lanka</div>
     </div>
-    <div class="ref-block">
-      <div class="ref-no">${ref}</div>
-      <div class="ref-meta">${fmtDate(q.quotationDate)}<br>${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
-      <div style="font-size:7.5pt;color:#777;line-height:1.75;margin-top:5pt">
-        0774503744 &nbsp;·&nbsp; tilershub@gmail.com<br>
-        luxehome.lk &nbsp;·&nbsp; Sangamitta Rd, Gampaha
-      </div>
+    <div class="contact-block">
+      <div>0774503744 &nbsp;·&nbsp; tilershub@gmail.com</div>
+      <div>luxehome.lk &nbsp;·&nbsp; Sangamitta Rd, Gampaha</div>
     </div>
+  </div>
+  <div class="ref-strip">
+    <div class="ref-no">${ref}</div>
+    <div class="ref-meta">${fmtDate(q.quotationDate)} &nbsp;·&nbsp; ${q.projectType === 'renovation' ? 'Renovation' : 'New Construction'}</div>
   </div>
 
   <div class="info-grid">
