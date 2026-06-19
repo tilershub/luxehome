@@ -81,7 +81,7 @@ import {
 } from '../../lib/quotation-calc';
 import type {
   QuotationInputs, QuotationBreakdown, Quotation, Invoice,
-  PaymentTerm, Payment, ProjectType, ShowerType,
+  PaymentTerm, Payment, ProjectType, ShowerType, VanityType,
 } from '../../lib/quotation-calc';
 
 /* ── Inquiry types ───────────────────────────────────────── */
@@ -913,7 +913,7 @@ function collectStep7(): boolean {
 
 /* Step 8 — Extras */
 function renderStep8() {
-  const isVanity    = wizardData.hasVanity;
+  const vanityType  = (wizardData as any).vanityType || 'none';
   const isBathware  = wizardData.hasBathware ?? true;
   const isMirror    = wizardData.hasMirror ?? true;
   const isWiring    = wizardData.hasElectricalWiring !== false;
@@ -930,14 +930,26 @@ function renderStep8() {
         `Yes: ${fmtRs(RATES.ceiling.perSqFt)}/sqft · No: ${fmtRs(RATES.ceiling.flat)} flat`,
         'ceiling', wizardData.hasCeiling)}
 
-      <div>
-        ${toggle('Vanity Cupboard & Countertop', 'Enter cost below when included', 'vanity', isVanity)}
-        <div id="vanity-input-wrap" style="${isVanity ? '' : 'display:none'}">
-          <div class="field-group" style="margin:0 0 12px">
-            <label class="field-label">Vanity Amount (Rs.)</label>
-            <input class="field-input" id="f-vanity-amount" type="number" min="0" step="500"
-              placeholder="e.g. 40,000" value="${wizardData.vanityAmount || ''}">
-          </div>
+      <div class="step-q" style="margin-top:.8rem">Vanity</div>
+      <div class="option-grid cols3" style="margin-bottom:8px">
+        <div class="opt-card ${vanityType==='none'?'selected':''}" data-vanity="none">
+          <span class="opt-icon">✕</span>
+          <span class="opt-label" style="font-size:.75rem">None</span>
+        </div>
+        <div class="opt-card ${vanityType==='vanity-top'?'selected':''}" data-vanity="vanity-top">
+          <span class="opt-icon">🪨</span>
+          <span class="opt-label" style="font-size:.75rem">Vanity Top</span>
+        </div>
+        <div class="opt-card ${vanityType==='vanity-cupboard'?'selected':''}" data-vanity="vanity-cupboard">
+          <span class="opt-icon">🚪</span>
+          <span class="opt-label" style="font-size:.75rem">Cupboard</span>
+        </div>
+      </div>
+      <div id="vanity-input-wrap" style="${vanityType!=='none'?'':'display:none'}">
+        <div class="field-group" style="margin:0 0 12px">
+          <label class="field-label">Vanity Amount (Rs.)</label>
+          <input class="field-input" id="f-vanity-amount" type="number" min="0" step="500"
+            placeholder="e.g. 40,000" value="${wizardData.vanityAmount || ''}">
         </div>
       </div>
 
@@ -1030,7 +1042,7 @@ function renderStep8() {
   `;
 
   setupToggles({
-    ceiling: 'hasCeiling', vanity: 'hasVanity', geyser: 'hasGeyser',
+    ceiling: 'hasCeiling', geyser: 'hasGeyser',
     door: 'hasDoor', window: 'hasWindow',
     bathware: 'hasBathware', mirror: 'hasMirror',
     'floor-concrete': 'hasFloorConcrete', 'elec-wiring': 'hasElectricalWiring',
@@ -1038,10 +1050,18 @@ function renderStep8() {
     'light-fixtures': 'hasLightFixtures', 'exhaust-fan': 'hasExhaustFan',
   });
 
-  // Show/hide sub-input panels after each toggle click
-  document.querySelector<HTMLElement>('[data-toggle="vanity"]')!.addEventListener('click', () => {
-    document.getElementById('vanity-input-wrap')!.style.display = wizardData.hasVanity ? '' : 'none';
+  // Vanity 3-card selector
+  document.querySelectorAll<HTMLElement>('[data-vanity]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll<HTMLElement>('[data-vanity]').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      (wizardData as any).vanityType = card.dataset.vanity as VanityType;
+      document.getElementById('vanity-input-wrap')!.style.display =
+        (wizardData as any).vanityType !== 'none' ? '' : 'none';
+    });
   });
+
+  // Show/hide sub-input panels after each toggle click
   document.querySelector<HTMLElement>('[data-toggle="bathware"]')!.addEventListener('click', () => {
     document.getElementById('bathware-input-wrap')!.style.display = (wizardData.hasBathware ?? true) ? '' : 'none';
   });
@@ -1250,7 +1270,7 @@ function renderStep11() {
     ['Outside Plumbing', fmtRs((wizardData as any).outsidePlumbingCost || 0)],
     ['Shower',           wizardData.showerCubicle === 'none' ? 'None' : `${wizardData.showerCubicle} — ${fmtRs((wizardData as any).showerCubiclePrice || 0)}`],
     ['Ceiling',          wizardData.hasCeiling ? 'Yes' : 'No'],
-    ['Vanity',           wizardData.hasVanity  ? 'Yes' : 'No'],
+    ['Vanity',           ({'none':'None','vanity-top':'Vanity Top','vanity-cupboard':'Cupboard'} as any)[(wizardData as any).vanityType || 'none'] || 'None'],
     ['Geyser',           wizardData.hasGeyser  ? 'Yes' : 'No'],
     ['Door',             wizardData.hasDoor    ? 'Yes' : 'No'],
     ['Window',           wizardData.hasWindow  ? 'Yes' : 'No'],

@@ -5,6 +5,7 @@
 
 export type ProjectType     = 'renovation' | 'construction';
 export type ShowerType      = 'none' | 'l-swing' | 'l-sliding' | 'panel-swing' | 'panel-sliding' | 'panel';
+export type VanityType      = 'none' | 'vanity-top' | 'vanity-cupboard';
 export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'converted';
 export type InvoiceStatus   = 'draft' | 'sent' | 'partially-paid' | 'paid' | 'cancelled';
 
@@ -64,7 +65,7 @@ export interface QuotationInputs {
   showerCubiclePrice: number;
   hasGeyser:         boolean;
   hasCeiling:        boolean;
-  hasVanity:         boolean;
+  vanityType:        VanityType;
   hasDoor:           boolean;
   hasWindow:         boolean;
   hasBathware:       boolean;
@@ -210,7 +211,8 @@ export function calculateQuotation(q: QuotationInputs): QuotationBreakdown {
   const geyserCost    = q.hasGeyser
     ? ((q as any).clientSupplyGeyser ? RATES.clientSupply.geyser : RATES.geyser)
     : 0;
-  const vanityCost    = q.hasVanity ? (q.vanityAmount || 0) : 0;
+  const vanityType    = q.vanityType ?? ((q as any).hasVanity ? 'vanity-cupboard' : 'none');
+  const vanityCost    = vanityType !== 'none' ? (q.vanityAmount || 0) : 0;
   const showerCost    = q.showerCubicle !== 'none' ? Math.max(0, Number(q.showerCubiclePrice) || 0) : 0;
   const mirrorCost    = (q.hasMirror ?? true) ? (q.mirrorAmount || 0) : 0;
   const bathwareCost  = (q.hasBathware ?? true)
@@ -274,7 +276,9 @@ export function generateScopeOfWork(q: QuotationInputs): string[] {
   if (q.hasExhaustFan !== false) scope.push('Exhaust Fan Installation');
   scope.push(`Inside Plumbing${(q.insidePlumbingCost || 0) > 0 ? '' : ' Works'}`);
   if ((q.outsidePlumbingCost || 0) > 0) scope.push('Outside Plumbing Works');
-  if (q.hasVanity) scope.push('Vanity Cupboard & Countertop');
+  const vanityTypeSow = q.vanityType ?? ((q as any).hasVanity ? 'vanity-cupboard' : 'none');
+  if (vanityTypeSow === 'vanity-top')      scope.push('Vanity Top');
+  if (vanityTypeSow === 'vanity-cupboard') scope.push('Vanity Cupboard & Countertop');
   if (q.showerCubicle !== 'none') scope.push(SHOWER_LABELS[q.showerCubicle] || 'Shower Cubicle / Glass Partition');
   if (q.hasBathware ?? true) scope.push('Bathware & Tapware Installation');
   if (q.hasMirror ?? true) scope.push('Mirror Installation');
@@ -318,7 +322,7 @@ export function defaultInputs(): QuotationInputs {
     quotationDate: new Date().toISOString().split('T')[0],
     projectType: 'renovation',
     showerCubicle: 'none', showerCubiclePrice: 0,
-    hasGeyser: false, hasCeiling: true, hasVanity: true, hasDoor: false, hasWindow: false,
+    hasGeyser: false, hasCeiling: true, vanityType: 'none', hasDoor: false, hasWindow: false,
     hasBathware: true, hasMirror: true,
     hasFloorConcrete: true, hasElectricalWiring: true, hasLightFixtures: true, hasExhaustFan: true,
     tileIncluded: true, tileRate: 0, tilingRate: 850,
