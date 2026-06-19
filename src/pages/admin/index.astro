@@ -817,6 +817,15 @@ function renderStep4() {
         <label class="field-label">Dummy Wall Area (sqft)</label>
         <input class="field-input" id="f-dw" type="number" min="0" step="0.5" placeholder="0 if none" value="${wizardData.dummyWallArea || ''}">
       </div>
+      ${wizardData.projectType === 'renovation' ? `
+      <div class="field-group">
+        <label class="field-label">Demolition Area (sqft)</label>
+        <input class="field-input" id="f-demo" type="number" min="0" step="0.5" placeholder="Area to demolish" value="${(wizardData as any).demolitionArea || ''}">
+      </div>` : ''}
+      <div class="field-group">
+        <label class="field-label">Plastering Area (sqft)</label>
+        <input class="field-input" id="f-plaster" type="number" min="0" step="0.5" placeholder="0 if no plastering" value="${(wizardData as any).plasteringArea || ''}">
+      </div>
     </div>
   `;
 }
@@ -830,6 +839,8 @@ function collectStep4(): boolean {
   wizardData.wallArea          = wall;
   wizardData.waterproofingArea = parseFloat((document.getElementById('f-wp') as HTMLInputElement).value) || 0;
   wizardData.dummyWallArea     = parseFloat((document.getElementById('f-dw') as HTMLInputElement).value) || 0;
+  (wizardData as any).demolitionArea = parseFloat((document.getElementById('f-demo') as HTMLInputElement | null)?.value || '0') || 0;
+  (wizardData as any).plasteringArea = parseFloat((document.getElementById('f-plaster') as HTMLInputElement | null)?.value || '0') || 0;
   return true;
 }
 
@@ -848,80 +859,60 @@ function renderStep5() {
 
 /* Step 6 — Plumbing */
 function renderStep6() {
-  if ((wizardData as any).isComparison) {
-    main.innerHTML = `
-      <div class="step-content">
-        <div class="step-q">Comparing all 3 plumbing tiers</div>
-        <div class="step-hint">Each package includes its matching plumbing tier in the comparison PDF.</div>
-        <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px">
-          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
-            <span style="font-size:1.8rem">🔧</span>
-            <div><span class="opt-label" style="display:block">Basic Plumbing</span><span class="opt-sub">${fmtRs(RATES.plumbing.basic)}</span></div>
-          </div>
-          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
-            <span style="font-size:1.8rem">🚰</span>
-            <div><span class="opt-label" style="display:block">Premium Plumbing</span><span class="opt-sub">${fmtRs(RATES.plumbing.premium)}</span></div>
-          </div>
-          <div class="opt-card selected" style="text-align:left;display:flex;align-items:center;gap:14px;pointer-events:none">
-            <span style="font-size:1.8rem">💎</span>
-            <div><span class="opt-label" style="display:block">Signature Plumbing</span><span class="opt-sub">${fmtRs(RATES.plumbing.signature)}</span></div>
-          </div>
-        </div>
-      </div>
-    `;
-    return;
-  }
-  const opts: Array<{ val: PlumbingType; icon: string; label: string; price: string }> = [
-    { val: 'basic',     icon: '🔧', label: 'Basic',     price: fmtRs(RATES.plumbing.basic) },
-    { val: 'premium',   icon: '🚰', label: 'Premium',   price: fmtRs(RATES.plumbing.premium) },
-    { val: 'signature', icon: '💎', label: 'Signature', price: fmtRs(RATES.plumbing.signature) },
-  ];
+  const inVal  = (wizardData as any).insidePlumbingCost  || '';
+  const outVal = (wizardData as any).outsidePlumbingCost || '';
   main.innerHTML = `
     <div class="step-content">
-      <div class="step-q">Plumbing package</div>
-      <div class="step-hint">Includes all piping, supply lines, and drain works.</div>
-      <div class="option-grid">
-        ${opts.map(o => `
-          <div class="opt-card ${wizardData.plumbing===o.val?'selected':''}" data-val="${o.val}" style="text-align:left;display:flex;align-items:center;gap:14px">
-            <span style="font-size:1.8rem">${o.icon}</span>
-            <div>
-              <span class="opt-label" style="display:block">${o.label}</span>
-              <span class="opt-sub" style="display:block">${o.price}</span>
-            </div>
-          </div>
-        `).join('')}
+      <div class="step-q">Plumbing costs</div>
+      <div class="step-hint">Enter the inside and outside plumbing amounts separately.</div>
+      <div class="field-group">
+        <label class="field-label">Inside Plumbing (Rs.)</label>
+        <input class="field-input" id="f-plumb-in" type="number" min="0" step="1000" placeholder="e.g. 45,000" value="${inVal}">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Outside Plumbing (Rs.)</label>
+        <input class="field-input" id="f-plumb-out" type="number" min="0" step="1000" placeholder="0 if none" value="${outVal}">
       </div>
     </div>
   `;
-  setupSingleSelect('.opt-card', 'plumbing');
+}
+
+function collectStep6(): boolean {
+  const inAmt  = parseFloat((document.getElementById('f-plumb-in')  as HTMLInputElement).value || '0');
+  const outAmt = parseFloat((document.getElementById('f-plumb-out') as HTMLInputElement).value || '0');
+  (wizardData as any).insidePlumbingCost  = isNaN(inAmt)  ? 0 : Math.max(0, inAmt);
+  (wizardData as any).outsidePlumbingCost = isNaN(outAmt) ? 0 : Math.max(0, outAmt);
+  return true;
 }
 
 /* Step 7 — Shower */
+const SHOWER_OPTS: Array<{ val: ShowerType; icon: string; label: string }> = [
+  { val: 'none',         icon: '🚿', label: 'None' },
+  { val: 'l-swing',     icon: '📐', label: 'L-Shape Swing' },
+  { val: 'l-sliding',   icon: '📐', label: 'L-Shape Sliding' },
+  { val: 'panel-swing', icon: '▬',  label: 'Panel Swing' },
+  { val: 'panel-sliding',icon: '▬', label: 'Panel Sliding' },
+  { val: 'panel',       icon: '▬',  label: 'Panel' },
+];
+
 function renderStep7() {
+  const curPrice = (wizardData as any).showerCubiclePrice || '';
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Shower cubicle?</div>
-      <div class="step-hint">L-Type = corner; P-Type = straight panel.</div>
+      <div class="step-hint">Select type, then enter the total cost.</div>
       <div class="option-grid cols3" style="margin-bottom:20px">
-        <div class="opt-card ${wizardData.showerCubicle==='none'?'selected':''}" data-val="none">
-          <span class="opt-icon">🚿</span>
-          <span class="opt-label">None</span>
-        </div>
-        <div class="opt-card ${wizardData.showerCubicle==='l-type'?'selected':''}" data-val="l-type">
-          <span class="opt-icon">📐</span>
-          <span class="opt-label">L-Type</span>
-          <span class="opt-sub">${fmtRs(RATES.shower.lType.perLinFt)}/lft</span>
-        </div>
-        <div class="opt-card ${wizardData.showerCubicle==='p-type'?'selected':''}" data-val="p-type">
-          <span class="opt-icon">▬</span>
-          <span class="opt-label">P-Type</span>
-          <span class="opt-sub">${fmtRs(RATES.shower.pType.perLinFt)}/lft</span>
-        </div>
+        ${SHOWER_OPTS.map(o => `
+          <div class="opt-card ${wizardData.showerCubicle===o.val?'selected':''}" data-val="${o.val}">
+            <span class="opt-icon">${o.icon}</span>
+            <span class="opt-label" style="font-size:.75rem">${o.label}</span>
+          </div>`).join('')}
       </div>
-      <div id="shower-len-wrap" style="${wizardData.showerCubicle==='none'?'display:none':''}">
+      <div id="shower-cost-wrap" style="${wizardData.showerCubicle==='none'?'display:none':''}">
         <div class="field-group">
-          <label class="field-label">Shower Length (linear feet)</label>
-          <input class="field-input" id="f-shower-len" type="number" min="0" step="0.5" value="${wizardData.showerLength || ''}">
+          <label class="field-label">Shower Cubicle Cost (Rs.)</label>
+          <input class="field-input" id="f-shower-cost" type="number" min="0" step="1000"
+            placeholder="Enter total cost" value="${curPrice}">
         </div>
       </div>
     </div>
@@ -931,18 +922,18 @@ function renderStep7() {
     card.addEventListener('click', () => {
       document.querySelectorAll('.opt-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
-      (wizardData as any).showerCubicle = card.dataset.val as ShowerType;
-      const wrap = document.getElementById('shower-len-wrap')!;
+      wizardData.showerCubicle = card.dataset.val as ShowerType;
+      const wrap = document.getElementById('shower-cost-wrap')!;
       wrap.style.display = card.dataset.val === 'none' ? 'none' : '';
     });
   });
 }
 
 function collectStep7(): boolean {
-  const len = parseFloat((document.getElementById('f-shower-len') as HTMLInputElement | null)?.value || '0');
-  wizardData.showerLength = isNaN(len) ? 0 : len;
-  if (wizardData.showerCubicle !== 'none' && wizardData.showerLength <= 0) {
-    toast('Enter shower length'); return false;
+  const cost = parseFloat((document.getElementById('f-shower-cost') as HTMLInputElement | null)?.value || '0');
+  (wizardData as any).showerCubiclePrice = isNaN(cost) ? 0 : Math.max(0, cost);
+  if (wizardData.showerCubicle !== 'none' && ((wizardData as any).showerCubiclePrice || 0) <= 0) {
+    toast('Enter shower cubicle cost'); return false;
   }
   return true;
 }
@@ -1048,18 +1039,13 @@ function renderStep9() {
       <input type="number" id="profit-input" class="field-input" min="0" max="50" step="1"
         value="${profitPct}" style="max-width:140px;font-size:1.1rem;font-weight:600;text-align:center">
 
-      <div class="step-q" style="margin-top:2rem">Manual Plumbing Cost (optional)</div>
-      <div class="step-hint">Enter a custom amount to override the package plumbing rate. Leave blank to use the package rate.</div>
-      <input type="number" id="plumbing-override-input" class="field-input" min="0" step="1000"
-        value="${wizardData.plumbingCostOverride || ''}" placeholder="e.g. 55,000"
-        style="max-width:180px;font-size:1.1rem;font-weight:600;text-align:center">
-
-      ${wizardData.projectType === 'renovation' ? `
-      <div class="step-q" style="margin-top:2rem">Renovation rate (Rs./sqft)</div>
-      <div class="step-hint">Applied to total tiling area (floor + wall). Default: Rs. 250/sqft.</div>
-      <input type="number" id="reno-rate-input" class="field-input" min="0" step="50"
-        value="${wizardData.renovationRate ?? 250}" style="max-width:180px;font-size:1.1rem;font-weight:600;text-align:center">
-      ` : ''}
+      <div class="step-q" style="margin-top:2rem">Other Cost (optional)</div>
+      <div class="step-hint">Custom line item — enter a label and amount. Appears on the PDF.</div>
+      <input type="text" id="other-cost-label" class="field-input"
+        placeholder="e.g. Tile Design Fee" value="${(wizardData as any).otherCostLabel || ''}"
+        style="margin-bottom:8px">
+      <input type="number" id="other-cost-amount" class="field-input" min="0" step="500"
+        value="${(wizardData as any).otherCost || ''}" placeholder="Amount (Rs.)">
     </div>
   `;
   const slider = document.getElementById('diff-slider') as HTMLInputElement;
@@ -1077,12 +1063,10 @@ function collectStep9(): boolean {
   wizardData.difficultyScore = score;
   const pct = parseFloat((document.getElementById('profit-input') as HTMLInputElement | null)?.value || '15');
   wizardData.profitMargin = Math.max(0, Math.min(0.5, (isNaN(pct) ? 15 : pct) / 100));
-  const po = parseFloat((document.getElementById('plumbing-override-input') as HTMLInputElement | null)?.value || '');
-  wizardData.plumbingCostOverride = (!isNaN(po) && po > 0) ? po : null;
-  if (wizardData.projectType === 'renovation') {
-    const rr = parseFloat((document.getElementById('reno-rate-input') as HTMLInputElement | null)?.value || '250');
-    wizardData.renovationRate = Math.max(0, isNaN(rr) ? 250 : rr);
-  }
+  const ocLabel = (document.getElementById('other-cost-label') as HTMLInputElement | null)?.value?.trim() || '';
+  const ocAmt   = parseFloat((document.getElementById('other-cost-amount') as HTMLInputElement | null)?.value || '');
+  (wizardData as any).otherCostLabel = ocLabel;
+  (wizardData as any).otherCost = (!isNaN(ocAmt) && ocAmt > 0) ? ocAmt : 0;
   return true;
 }
 
@@ -1227,9 +1211,9 @@ function renderStep11() {
     ['Waterproofing',    `${wizardData.waterproofingArea} sqft`],
     ['Wiring Points',    `${wizardData.wiringPoints}`],
     ['Wall Niches',      `${wizardData.wallNiches}`],
-    ['Plumbing',         packageLabel(wizardData.plumbing as PackageType)],
-    ['Shower',           wizardData.showerCubicle === 'none' ? 'None' : `${wizardData.showerCubicle} (${wizardData.showerLength} lft)`],
-    ...(wizardData.projectType === 'renovation' ? [['Renovation Rate', `Rs. ${wizardData.renovationRate ?? 250}/sqft`] as [string, string]] : []),
+    ['Inside Plumbing',  fmtRs((wizardData as any).insidePlumbingCost || 0)],
+    ['Outside Plumbing', fmtRs((wizardData as any).outsidePlumbingCost || 0)],
+    ['Shower',           wizardData.showerCubicle === 'none' ? 'None' : `${wizardData.showerCubicle} — ${fmtRs((wizardData as any).showerCubiclePrice || 0)}`],
     ['Ceiling',          wizardData.hasCeiling ? 'Yes' : 'No'],
     ['Vanity',           wizardData.hasVanity  ? 'Yes' : 'No'],
     ['Geyser',           wizardData.hasGeyser  ? 'Yes' : 'No'],
@@ -1317,25 +1301,31 @@ function renderQtnDetail() {
   const ref = (q as any).ref || 'LH-QTN';
 
   const costRows: Array<[string, number]> = [
-    ['Renovation / Demolition', bd.renovationCost],
-    ['Design & Planning', bd.designPlanning],
-    ['Floor Concrete', bd.floorConcreteCost],
-    ['Dummy Wall', bd.dummyWallCost],
-    ['Wall Niches', bd.wallNicheCost],
-    ['Tiling & Grouting', bd.tilingCost],
-    ['Plumbing', bd.plumbingCost],
-    ['Wiring', bd.wiringCost],
-    ['Waterproofing', bd.waterproofingCost],
-    ['Ceiling', bd.ceilingCost],
-    ['Light Fixtures', bd.lightFixtureCost],
-    ['Geyser', bd.geyserCost],
-    ['Vanity', bd.vanityCost],
-    ['Shower Cubicle', bd.showerCost],
-    ['Mirror', bd.mirrorCost],
-    ['Bathware & Tapware', bd.bathwareCost],
-    ['Door', bd.doorCost],
-    ['Window', bd.windowCost],
-  ].filter(([,v]) => v > 0);
+    ['Demolition Works',          (bd as any).demolitionCost    ?? (bd as any).renovationCost ?? 0],
+    ['Debris Removal',            (bd as any).debrisRemovalCost ?? 0],
+    ['Wall Plastering',           (bd as any).wallPlasteringCost ?? 0],
+    ['Design & Planning',         bd.designPlanning],
+    ['Floor Concrete',            bd.floorConcreteCost],
+    ['Dummy Wall',                bd.dummyWallCost],
+    ['Wall Niches',               bd.wallNicheCost],
+    ['Inside Plumbing',           (bd as any).insidePlumbingCost  ?? 0],
+    ['Outside Plumbing',          (bd as any).outsidePlumbingCost ?? 0],
+    ...((((bd as any).insidePlumbingCost ?? 0) + ((bd as any).outsidePlumbingCost ?? 0)) === 0
+      ? [['Plumbing Works', bd.plumbingCost] as [string, number]] : []),
+    ['Wiring',                    bd.wiringCost],
+    ['Waterproofing',             bd.waterproofingCost],
+    ['Tiling & Grouting',         bd.tilingCost],
+    ['Ceiling',                   bd.ceilingCost],
+    ['Light Fixtures',            bd.lightFixtureCost],
+    ['Water Heater (Geyser)',     bd.geyserCost],
+    ['Vanity',                    bd.vanityCost],
+    ['Shower Cubicle',            bd.showerCost],
+    ['Bathware & Tapware',        bd.bathwareCost],
+    ['Mirror',                    bd.mirrorCost],
+    ['Door',                      bd.doorCost],
+    ['Window',                    bd.windowCost],
+    [(q as any).otherCostLabel || 'Other Cost', (bd as any).otherCost ?? 0],
+  ].filter(([,v]) => (v as number) > 0) as [string, number][];
 
   const statuses: Array<{ val: string; label: string }> = [
     { val: 'draft', label: 'Draft' }, { val: 'sent', label: 'Sent' },
@@ -1681,6 +1671,15 @@ function printQuotationPDF(q: Quotation) {
     .term-pct { font-size: 16pt; font-weight: 900; color: #111; line-height: 1; }
     .term-lbl { font-size: 7.5pt; color: #777; margin-top: 4pt; line-height: 1.3; }
     .term-amt { font-size: 9pt; font-weight: 700; color: #b8892a; margin-top: 4pt; }
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+    .cost-table thead th { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: #999; border-bottom: 1pt solid #e0e0e0; padding: 0 0 4pt; text-align: left; }
+    .cost-table thead th.th-amt { text-align: right; }
+    .cost-table tbody td { padding: 3.5pt 0; border-bottom: .5pt solid #f4f4f4; vertical-align: top; }
+    .row-no { color: #bbb; font-size: 7.5pt; width: 22pt; padding-right: 6pt !important; font-variant-numeric: tabular-nums; }
+    .row-amt { text-align: right; font-variant-numeric: tabular-nums; min-width: 70pt; padding-left: 8pt !important; color: #333; }
+    .cost-table tfoot td { padding: 4pt 0; font-weight: 700; }
+    .cost-table tfoot tr:first-child td { border-top: 1pt solid #ddd; }
+    .cost-total-row td { font-size: 9pt; color: #b8892a; }
     .brands-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1pt 14pt; break-inside: avoid; }
     .conditions { font-size: 7.5pt; color: #555; background: #f7f5f0; border-left: 2.5pt solid #b8892a; padding: 6pt 9pt; border-radius: 0 3pt 3pt 0; margin-bottom: 8pt; line-height: 1.55; }
     .conditions strong { display: block; font-size: 6.5pt; text-transform: uppercase; letter-spacing: .1em; color: #b8892a; font-weight: 700; margin-bottom: 3pt; }
@@ -1719,6 +1718,50 @@ function printQuotationPDF(q: Quotation) {
   <div class="scope-grid">
     ${scope.map(s => `<div class="scope-item"><span class="scope-check">✓</span><span>${s}</span></div>`).join('')}
   </div>
+
+  <div class="section-title" style="margin-top:14pt">Cost Breakdown</div>
+  ${(() => {
+    const bda = bd as any;
+    const rows: [string, number][] = [
+      ...(q.projectType === 'renovation' && (bda.demolitionCost||0) > 0 ? [['Demolition Works', bda.demolitionCost] as [string,number]] : []),
+      ...(q.projectType === 'renovation' && (bda.debrisRemovalCost||0) > 0 ? [['Debris Removal & Site Cleaning', bda.debrisRemovalCost] as [string,number]] : []),
+      ...((bda.wallPlasteringCost||0) > 0 ? [['Wall Plastering', bda.wallPlasteringCost] as [string,number]] : []),
+      ['Bathroom Design & Planning', bd.designPlanning],
+      ['Floor Concrete Works', bd.floorConcreteCost],
+      ...(bd.dummyWallCost > 0 ? [['Dummy Wall Construction', bd.dummyWallCost] as [string,number]] : []),
+      ...(bd.wallNicheCost > 0 ? [['Wall Niche Construction', bd.wallNicheCost] as [string,number]] : []),
+      ...((bda.insidePlumbingCost||0) > 0 ? [['Inside Plumbing', bda.insidePlumbingCost] as [string,number]] : []),
+      ...((bda.outsidePlumbingCost||0) > 0 ? [['Outside Plumbing', bda.outsidePlumbingCost] as [string,number]] : []),
+      ...((bda.insidePlumbingCost||0) + (bda.outsidePlumbingCost||0) === 0 ? [['Plumbing Works', bd.plumbingCost] as [string,number]] : []),
+      ['Electrical Wiring Works', bd.wiringCost],
+      ['Waterproofing Before Tiling', bd.waterproofingCost],
+      ['Tiling & Grouting', bd.tilingCost],
+      ...(bd.ceilingCost > 0 ? [['Ceiling Installation', bd.ceilingCost] as [string,number]] : []),
+      ['Light & Plug Fixture Installation', bd.lightFixtureCost],
+      ...(bd.geyserCost > 0 ? [['Water Heater (Geyser) Installation', bd.geyserCost] as [string,number]] : []),
+      ['Vanity Cupboard & Countertop', bd.vanityCost],
+      ...(bd.showerCost > 0 ? [['Shower Cubicle / Glass Partition', bd.showerCost] as [string,number]] : []),
+      ['Bathware & Tapware Installation', bd.bathwareCost],
+      ['Mirror Installation', bd.mirrorCost],
+      ...(bd.doorCost > 0 ? [['Door Works', bd.doorCost] as [string,number]] : []),
+      ...(bd.windowCost > 0 ? [['Window Works', bd.windowCost] as [string,number]] : []),
+      ...((bda.otherCostLabel && (bda.otherCost||0) > 0) ? [[bda.otherCostLabel, bda.otherCost] as [string,number]] : []),
+      ['Overhead & Site Management', bd.overhead],
+    ].filter(([,v]) => v > 0);
+    const profitPct = Math.round((q.profitMargin || 0.15) * 100);
+    return `<table class="cost-table">
+      <thead><tr><th class="th-no">No.</th><th>Description</th><th class="th-amt">Amount</th></tr></thead>
+      <tbody>${rows.map(([label, amt], i) => `
+        <tr><td class="row-no">${String(i+1).padStart(2,'0')}</td><td>${label}</td><td class="row-amt">${fmtRs(amt)}</td></tr>`).join('')}
+      </tbody>
+      <tfoot>
+        <tr><td></td><td>Total Project Cost</td><td class="row-amt">${fmtRs(bd.projectCost)}</td></tr>
+        <tr><td></td><td>Difficulty Adjustment (${(q.difficultyScore||1).toFixed(2)}×)</td><td class="row-amt">${fmtRs(bd.difficultyAdjusted)}</td></tr>
+        <tr><td></td><td>Profit Margin (${profitPct}%)</td><td class="row-amt">${fmtRs(bd.profitAmount)}</td></tr>
+        <tr class="cost-total-row"><td></td><td>Final Selling Price</td><td class="row-amt">${fmtRs(bd.finalAmount)}</td></tr>
+      </tfoot>
+    </table>`;
+  })()}
 
   <div class="final-box">
     <div>
@@ -1778,9 +1821,9 @@ function printComparisonPDF(q: Quotation) {
       s: ['High-grade PVC ceiling', 'Rs. 1,200/sqft'],
       hide: !q.hasCeiling },
     { label: 'Plumbing Works',
-      b: ['Basic plumbing package', 'Slon pipes & fittings'],
-      p: ['Premium plumbing package', 'Slon pipes & fittings'],
-      s: ['Signature plumbing package', 'Slon pipes & fittings'] },
+      b: ['Slon pipes & fittings'],
+      p: ['Slon pipes & fittings'],
+      s: ['Slon pipes & fittings'] },
     { label: 'Light Fixtures',
       b: ['Standard light fittings', 'ACL cables'],
       p: ['Mid-range light fittings', 'ACL cables'],
@@ -1809,16 +1852,19 @@ function printComparisonPDF(q: Quotation) {
   }
 
   const baseInclusions: string[] = [
+    ...(q.projectType === 'renovation' && ((q as any).demolitionArea||0) > 0 ? ['Demolition works & debris removal'] : []),
+    ...((q as any).plasteringArea > 0 ? ['Wall plastering'] : []),
     'Bathroom design & planning',
     'Floor concrete works',
     'Tokyo Super 2K waterproofing',
     'Electrical wiring — ACL cables',
-    ...(q.projectType === 'renovation' ? ['Demolition & debris removal'] : []),
     ...(q.wallNiches > 0 ? [`Wall niches (${q.wallNiches})`] : []),
     ...(q.dummyWallArea > 0 ? ['Dummy wall construction'] : []),
-    ...(q.hasGeyser ? [`Geyser / water heater installation${q.clientSupplyGeyser ? ' (Client Supply)' : ''}`] : []),
-    ...(q.showerCubicle !== 'none' ? ['Shower glass cubicle installation'] : []),
+    ...(q.hasGeyser ? [`Water heater (geyser) installation${q.clientSupplyGeyser ? ' (Client Supply)' : ''}`] : []),
+    ...(q.showerCubicle !== 'none' ? ['Shower cubicle / glass partition'] : []),
     ...(!q.hasCeiling ? ['Basic ceiling works (flat rate)'] : []),
+    ...((q as any).otherCostLabel && (q as any).otherCost > 0 ? [(q as any).otherCostLabel] : []),
+    'Overhead & site management',
   ];
 
   const html = `<!DOCTYPE html><html><head>
@@ -2191,6 +2237,7 @@ function collectCurrentStep(): boolean {
   switch (wizardStep) {
     case 1:  return collectStep1();
     case 4:  return collectStep4();
+    case 6:  return collectStep6();
     case 7:  return collectStep7();
     case 9:  return collectStep9();
     case 10: return collectStep10();
