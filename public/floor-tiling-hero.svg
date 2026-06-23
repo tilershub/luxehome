@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600">
+  <defs>
+    <linearGradient id="wallGr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5f0e8"/>
+      <stop offset="100%" stop-color="#ebe5dc"/>
+    </linearGradient>
+    <linearGradient id="wallShadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.05)"/>
+    </linearGradient>
+    <radialGradient id="ctrGlow" cx="50%" cy="68%" r="52%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+    <linearGradient id="leftEdge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.08)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </linearGradient>
+    <linearGradient id="rightEdge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.08)"/>
+    </linearGradient>
+    <linearGradient id="btmEdge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.07)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Wall -->
+  <rect x="0" y="0" width="900" height="193" fill="url(#wallGr)"/>
+  <rect x="0" y="150" width="900" height="43" fill="url(#wallShadow)"/>
+
+  <!-- Skirting board -->
+  <rect x="0" y="193" width="900" height="10" fill="#cac4bb"/>
+  <rect x="0" y="201" width="900" height="3" fill="#b4aea5" opacity="0.7"/>
+
+  <!-- Floor grout background -->
+  <rect x="0" y="200" width="900" height="400" fill="#b4ae9f"/>
+
+  <!-- ROW 0 (y=200→270) — triangles near horizon -->
+  <polygon points="450,200 371.25,270 397.5,270" fill="#d2cdc0"/>
+  <polygon points="450,200 397.5,270 423.75,270" fill="#d4cfc2"/>
+  <polygon points="450,200 423.75,270 450,270"   fill="#d2cdc0"/>
+  <polygon points="450,200 450,270 476.25,270"   fill="#d4cfc2"/>
+  <polygon points="450,200 476.25,270 502.5,270" fill="#d2cdc0"/>
+  <polygon points="450,200 502.5,270 528.75,270" fill="#d4cfc2"/>
+
+  <!-- ROW 1 (y=270→350) -->
+  <polygon points="371.25,270 397.5,270  337.5,350  281.25,350" fill="#d7d1c4"/>
+  <polygon points="397.5,270  423.75,270 393.75,350 337.5,350"  fill="#d9d3c6"/>
+  <polygon points="423.75,270 450,270    450,350    393.75,350" fill="#d7d1c4"/>
+  <polygon points="450,270    476.25,270 506.25,350 450,350"    fill="#d9d3c6"/>
+  <polygon points="476.25,270 502.5,270  562.5,350  506.25,350" fill="#d7d1c4"/>
+  <polygon points="502.5,270  528.75,270 618.75,350 562.5,350"  fill="#d9d3c6"/>
+
+  <!-- ROW 2 (y=350→440) -->
+  <polygon points="281.25,350 337.5,350  270,440 180,440" fill="#dbd5c8"/>
+  <polygon points="337.5,350  393.75,350 360,440 270,440" fill="#ddd7ca"/>
+  <polygon points="393.75,350 450,350    450,440 360,440" fill="#dbd5c8"/>
+  <polygon points="450,350    506.25,350 540,440 450,440" fill="#ddd7ca"/>
+  <polygon points="506.25,350 562.5,350  630,440 540,440" fill="#dbd5c8"/>
+  <polygon points="562.5,350  618.75,350 720,440 630,440" fill="#ddd7ca"/>
+
+  <!-- ROW 3 (y=440→520) -->
+  <polygon points="180,440 270,440 210,520 90,520"  fill="#dfdacd"/>
+  <polygon points="270,440 360,440 330,520 210,520" fill="#e1dccf"/>
+  <polygon points="360,440 450,440 450,520 330,520" fill="#dfdacd"/>
+  <polygon points="450,440 540,440 570,520 450,520" fill="#e1dccf"/>
+  <polygon points="540,440 630,440 690,520 570,520" fill="#dfdacd"/>
+  <polygon points="630,440 720,440 810,520 690,520" fill="#e1dccf"/>
+
+  <!-- ROW 4 (y=520→600) — largest/nearest tiles -->
+  <polygon points="90,520  210,520 150,600 0,600"   fill="#e4ded1"/>
+  <polygon points="210,520 330,520 300,600 150,600"  fill="#e6e0d3"/>
+  <polygon points="330,520 450,520 450,600 300,600"  fill="#e4ded1"/>
+  <polygon points="450,520 570,520 600,600 450,600"  fill="#e6e0d3"/>
+  <polygon points="570,520 690,520 750,600 600,600"  fill="#e4ded1"/>
+  <polygon points="690,520 810,520 900,600 750,600"  fill="#e6e0d3"/>
+
+  <!-- Subtle marble veining -->
+  <path d="M 165,585 Q 210,562 255,572 Q 278,579 290,568" fill="none" stroke="#c6c0b4" stroke-width="0.9" stroke-linecap="round" opacity="0.50"/>
+  <path d="M 255,572 Q 260,579 264,590"                   fill="none" stroke="#c6c0b4" stroke-width="0.6" stroke-linecap="round" opacity="0.35"/>
+  <path d="M 458,580 Q 496,558 532,568 Q 553,575 562,563" fill="none" stroke="#c8c2b6" stroke-width="0.9" stroke-linecap="round" opacity="0.48"/>
+  <path d="M 585,563 Q 622,553 652,561 Q 669,566 675,556" fill="none" stroke="#c6c0b4" stroke-width="0.8" stroke-linecap="round" opacity="0.42"/>
+  <path d="M 368,504 Q 400,488 433,496"                   fill="none" stroke="#c4beb3" stroke-width="0.75" stroke-linecap="round" opacity="0.38"/>
+  <path d="M 458,492 Q 490,477 521,486 Q 538,492 546,481" fill="none" stroke="#c4beb3" stroke-width="0.75" stroke-linecap="round" opacity="0.40"/>
+  <path d="M 278,420 Q 306,407 335,414"                   fill="none" stroke="#c2bcb1" stroke-width="0.65" stroke-linecap="round" opacity="0.32"/>
+  <path d="M 518,408 Q 545,395 572,402"                   fill="none" stroke="#c2bcb1" stroke-width="0.65" stroke-linecap="round" opacity="0.32"/>
+
+  <!-- Overlays -->
+  <rect x="0"   y="200" width="900" height="400" fill="url(#ctrGlow)"/>
+  <rect x="0"   y="200" width="120" height="400" fill="url(#leftEdge)"/>
+  <rect x="780" y="200" width="120" height="400" fill="url(#rightEdge)"/>
+  <rect x="0"   y="540" width="900" height="60"  fill="url(#btmEdge)"/>
+</svg>
