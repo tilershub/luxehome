@@ -279,10 +279,14 @@
     function blankProject() {
       return {
         id: null, title: '', slug: '', category: 'bathroom', location: '',
+        reference_id: '', area_label: '', completion_month: '',
         completion_date: '', completion_year: new Date().getFullYear(),
         design_style: 'modern', status: 'draft',
         cover_image: '', hero_video: '',
         before_images: [], after_images: [], progress_images: [], gallery_images: [],
+        old_space_images: [], design_3d_images: [],
+        episode_01_youtube: '', episode_02_youtube: '',
+        episode_01_thumbnail: '', episode_02_thumbnail: '',
         project_overview: '', client_requirements: '', design_concept: '',
         scope_of_work: '', materials_brands: '',
         project_timeline: [], challenges_solutions: '',
@@ -290,7 +294,8 @@
         cost_range: '', faqs: [], related_projects: [],
         cta_book_consultation: true, cta_whatsapp: true,
         meta_title: '', meta_description: '', og_image: '', canonical_url: '',
-        breadcrumb_title: '', include_in_sitemap: true
+        breadcrumb_title: '', include_in_sitemap: true,
+        homepage_display: false
       };
     }
 
@@ -388,7 +393,7 @@
 
     function goEditor(p = null) {
       view = 'editor';
-      proj = p ? { ...p, before_images: p.before_images || [], after_images: p.after_images || [], progress_images: p.progress_images || [], gallery_images: p.gallery_images || [], project_timeline: p.project_timeline || [], faqs: p.faqs || [], related_projects: p.related_projects || [] } : blankProject();
+      proj = p ? { ...p, before_images: p.before_images || [], after_images: p.after_images || [], progress_images: p.progress_images || [], gallery_images: p.gallery_images || [], old_space_images: p.old_space_images || [], design_3d_images: p.design_3d_images || [], project_timeline: p.project_timeline || [], faqs: p.faqs || [], related_projects: p.related_projects || [] } : blankProject();
       activeTab = 0;
       hdrTitle.textContent = proj.id ? 'Edit Project' : 'New Project';
       newBtn.style.display = 'none';
@@ -414,18 +419,25 @@
     }
 
     function collectTab0() {
-      proj.title          = gv('f-title');
-      proj.slug           = gv('f-slug');
-      proj.category       = gv('f-category');
-      proj.location       = gv('f-location');
-      proj.completion_date = gv('f-date');
-      proj.completion_year = parseInt(gv('f-year')) || new Date().getFullYear();
-      proj.design_style   = gv('f-style');
+      proj.title            = gv('f-title');
+      proj.slug             = gv('f-slug');
+      proj.category         = gv('f-category');
+      proj.location         = gv('f-location');
+      proj.reference_id     = gv('f-ref-id');
+      proj.area_label       = gv('f-area-label');
+      proj.completion_date  = gv('f-date');
+      proj.completion_year  = parseInt(gv('f-year')) || new Date().getFullYear();
+      proj.completion_month = parseInt(gv('f-month')) || null;
+      proj.design_style     = gv('f-style');
     }
 
     function collectTab1() {
-      proj.cover_image = gv('f-cover');
-      proj.hero_video  = gv('f-video');
+      proj.cover_image          = gv('f-cover');
+      proj.hero_video           = gv('f-video');
+      proj.episode_01_youtube   = gv('f-ep1-yt');
+      proj.episode_02_youtube   = gv('f-ep2-yt');
+      proj.episode_01_thumbnail = gv('f-ep1-thumb');
+      proj.episode_02_thumbnail = gv('f-ep2-thumb');
       // multi-image arrays are updated live via the add/remove handlers
     }
 
@@ -473,7 +485,8 @@
     }
 
     function collectTab6() {
-      proj.status = gv('f-status');
+      proj.status           = gv('f-status');
+      proj.homepage_display = gc('f-homepage-display');
     }
 
     // ── List view ─────────────────────────────────────────────────────────
@@ -611,6 +624,16 @@
         </div>
         <div class="row-2">
           <div class="field">
+            <label>Reference ID</label>
+            <input id="f-ref-id" type="text" value="${esc(proj.reference_id)}" placeholder="e.g. LH-2024-001" />
+          </div>
+          <div class="field">
+            <label>Area Label</label>
+            <input id="f-area-label" type="text" value="${esc(proj.area_label)}" placeholder="e.g. Master Bathroom" />
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
             <label>Completion Date</label>
             <input id="f-date" type="date" value="${proj.completion_date || ''}" />
           </div>
@@ -618,6 +641,13 @@
             <label>Year</label>
             <input id="f-year" type="number" value="${proj.completion_year || ''}" placeholder="${new Date().getFullYear()}" min="2000" max="2099" />
           </div>
+        </div>
+        <div class="field">
+          <label>Completion Month</label>
+          <select id="f-month">
+            <option value="">— Not specified —</option>
+            ${['January','February','March','April','May','June','July','August','September','October','November','December'].map((m,i) => `<option value="${i+1}"${proj.completion_month===(i+1)?' selected':''}>${m}</option>`).join('')}
+          </select>
         </div>
         <div class="field">
           <label>Design Style</label>
@@ -647,10 +677,23 @@
           <label>Hero Video URL</label>
           <input id="f-video" type="url" value="${esc(proj.hero_video)}" placeholder="YouTube, Vimeo, or direct video URL" />
         </div>
+        <div class="field" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+          <label>Episode 01 — Old Space to 3D Design</label>
+          <input id="f-ep1-yt" type="url" value="${esc(proj.episode_01_youtube)}" placeholder="https://youtu.be/… or https://youtube.com/watch?v=…" style="margin-bottom:8px" />
+          <input id="f-ep1-thumb" type="url" value="${esc(proj.episode_01_thumbnail)}" placeholder="Custom thumbnail URL (optional — auto-generated from YouTube if blank)" />
+        </div>
+        <div class="field">
+          <label>Episode 02 — Completed Project Tour</label>
+          <input id="f-ep2-yt" type="url" value="${esc(proj.episode_02_youtube)}" placeholder="https://youtu.be/… or https://youtube.com/watch?v=…" style="margin-bottom:8px" />
+          <input id="f-ep2-thumb" type="url" value="${esc(proj.episode_02_thumbnail)}" placeholder="Custom thumbnail URL (optional — auto-generated from YouTube if blank)" />
+        </div>
+        <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)"></div>
+        ${renderImageArrayField('Old Space Photos', 'old_space_images')}
+        ${renderImageArrayField('3D Design Renders', 'design_3d_images')}
         ${renderImageArrayField('Before Images', 'before_images')}
         ${renderImageArrayField('After Images', 'after_images')}
         ${renderImageArrayField('Construction Progress Images', 'progress_images')}
-        ${renderImageArrayField('Gallery Images', 'gallery_images')}
+        ${renderImageArrayField('Completed Project Gallery', 'gallery_images')}
       `;
     }
 
@@ -862,6 +905,16 @@
             ${proj.status === 'draft' ? 'Only you can see this project.' : ''}
             ${proj.status === 'published' ? 'Visible at /projects and on service pages.' : ''}
             ${proj.status === 'featured' ? 'Highlighted on the homepage, /projects, and service pages.' : ''}
+          </div>
+        </div>
+        <div class="field">
+          <label>Homepage Display</label>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Show on Homepage Featured Section</div>
+              <div class="toggle-sub">Pin this project to the featured grid on the homepage</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="f-homepage-display" ${proj.homepage_display ? 'checked' : ''} /><span class="toggle-slider"></span></label>
           </div>
         </div>
         ${proj.id ? `

@@ -1,0 +1,349 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="About LUXEhome — Sri Lanka's Premium Renovation Brand"
+  description="LUXEhome is Sri Lanka's premium design-and-build renovation brand. We specialise in luxury bathrooms, designer floors, staircases, and kitchens across the Western Province."
+>
+  <Nav />
+
+  <section class="about-hero">
+    <div class="about-hero-inner reveal">
+      <div class="stag">About Us</div>
+      <h1>Sri Lanka's Premium<br />Design-and-Build Brand</h1>
+      <p class="hero-sub">
+        We don't just renovate spaces — we design and build them to a standard that
+        homeowners are proud to show off for decades.
+      </p>
+    </div>
+  </section>
+
+  <section class="story-section">
+    <div class="story-inner">
+
+      <div class="story-text reveal">
+        <div class="stag">Our Story</div>
+        <h2>Built on Craft,<br />Driven by Detail</h2>
+        <p>
+          LUXEhome was founded with a single belief: that Sri Lankan homeowners deserve
+          the same standard of renovation quality available in the world's finest cities.
+          Every project we take on is treated as a portfolio piece — because it is.
+        </p>
+        <p>
+          We operate across the Western Province, specialising in four disciplines:
+          luxury bathrooms, designer floors, designer staircases, and luxury kitchens.
+          Each specialism has its own team of skilled tradespeople with proven track records
+          delivering precision finishes.
+        </p>
+        <p>
+          From the first consultation to the final handover, every decision is documented,
+          every finish is inspected, and every client is kept informed daily. That's the
+          LUXEhome standard.
+        </p>
+      </div>
+
+      <div class="values-grid reveal">
+        {[
+          { icon: '◆', title: 'Premium by Design', desc: 'Every project begins with 3D visualisations and civil plans before a single tile is laid.' },
+          { icon: '◆', title: 'Transparent Always', desc: 'Fixed written quotations. No hidden charges. No surprises at handover.' },
+          { icon: '◆', title: 'Daily Updates', desc: 'Photos and progress reports shared daily — whether you\'re local or living abroad.' },
+          { icon: '◆', title: 'Quality Inspected', desc: 'Formal snagging and quality inspections before every handover. We\'re not done until it\'s done right.' },
+        ].map(v => (
+          <div class="value-card">
+            <span class="v-icon" aria-hidden="true">{v.icon}</span>
+            <strong>{v.title}</strong>
+            <p>{v.desc}</p>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  </section>
+
+  <section class="services-bar reveal">
+    <div class="services-bar-inner">
+      <div class="stag">What We Do</div>
+      <div class="service-pills">
+        <a href="/services/bathroom" class="pill">Luxury Bathroom Renovation</a>
+        <a href="/services/flooring" class="pill">Designer Floors</a>
+        <a href="/services/staircase-tiling" class="pill">Designer Staircases</a>
+        <a href="/services/kitchen" class="pill">Luxury Kitchens</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-cta reveal">
+    <div class="about-cta-inner">
+      <h2>Ready to Start Your Renovation?</h2>
+      <p>
+        Book a site visit and we'll assess your space, discuss your vision, and
+        deliver a detailed custom quotation within 48 hours.
+      </p>
+      <div class="cta-btns">
+        <a href="/contact" class="btn-primary">Book a Site Visit</a>
+        <a href="/projects" class="btn-ghost">View Our Projects</a>
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* ── Hero ── */
+  .about-hero {
+    background: var(--charcoal, #1e1a17);
+    padding: 8rem 4rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-hero::before {
+    content: '';
+    position: absolute;
+    top: -6rem;
+    right: -4rem;
+    width: 40rem;
+    height: 40rem;
+    background: radial-gradient(circle, rgba(184,137,42,.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .about-hero-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stag {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--clay, #b8892a);
+    margin-bottom: .85rem;
+  }
+
+  .about-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-weight: 700;
+    color: var(--cream, #f0ece0);
+    line-height: 1.1;
+    margin-bottom: 1.4rem;
+  }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: rgba(240,236,224,.72);
+    line-height: 1.85;
+    max-width: 56ch;
+  }
+
+  /* ── Story ── */
+  .story-section {
+    padding: 5.5rem 4rem;
+    background: var(--off-white, #fbfbf9);
+  }
+
+  .story-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .story-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem, 3vw, 2.6rem);
+    font-weight: 700;
+    color: var(--charcoal, #1e1a17);
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+  }
+
+  .story-text p {
+    font-size: .92rem;
+    font-weight: 300;
+    color: var(--warm-gray, #6f6f6f);
+    line-height: 1.9;
+    margin-bottom: 1.1rem;
+  }
+
+  .story-text p:last-child { margin-bottom: 0; }
+
+  /* ── Values grid ── */
+  .values-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .value-card {
+    background: #fff;
+    border: 1px solid var(--stone, #e7e7e7);
+    border-radius: 8px;
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  .v-icon {
+    font-size: .9rem;
+    color: var(--clay, #b8892a);
+    margin-bottom: .2rem;
+  }
+
+  .value-card strong {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--charcoal, #1e1a17);
+    line-height: 1.3;
+  }
+
+  .value-card p {
+    font-size: .8rem;
+    font-weight: 300;
+    color: var(--warm-gray, #6f6f6f);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* ── Services bar ── */
+  .services-bar {
+    background: var(--charcoal, #1e1a17);
+    padding: 3.5rem 4rem;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+
+  .services-bar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .services-bar .stag {
+    margin-bottom: 1.2rem;
+  }
+
+  .service-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: .6rem 1.4rem;
+    border: 1px solid rgba(184,137,42,.35);
+    border-radius: 2px;
+    color: rgba(240,236,224,.82);
+    font-size: .82rem;
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-decoration: none;
+    transition: background .2s, border-color .2s, color .2s;
+  }
+
+  .pill:hover {
+    background: rgba(184,137,42,.1);
+    border-color: var(--clay, #b8892a);
+    color: var(--clay, #b8892a);
+  }
+
+  /* ── CTA ── */
+  .about-cta {
+    padding: 6rem 4rem;
+    text-align: center;
+    background: var(--cream, #f0ece0);
+  }
+
+  .about-cta-inner {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .about-cta h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    color: var(--charcoal, #1e1a17);
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+
+  .about-cta p {
+    font-size: .92rem;
+    font-weight: 300;
+    color: var(--warm-gray, #6f6f6f);
+    line-height: 1.85;
+    margin-bottom: 2.2rem;
+  }
+
+  .cta-btns {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    background: var(--charcoal, #1e1a17);
+    color: #fff;
+    padding: .95rem 2.4rem;
+    border-radius: 3px;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    min-height: 52px;
+    transition: background .2s, transform .2s;
+  }
+
+  .btn-primary:hover { background: var(--clay, #b8892a); transform: translateY(-2px); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    color: var(--charcoal, #1e1a17);
+    border: 1px solid rgba(30,26,23,.3);
+    padding: .95rem 2.4rem;
+    border-radius: 3px;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    min-height: 52px;
+    transition: border-color .2s, color .2s;
+  }
+
+  .btn-ghost:hover { border-color: var(--clay, #b8892a); color: var(--clay, #b8892a); }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .about-hero, .story-section, .services-bar, .about-cta { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .story-inner { gap: 3.5rem; }
+  }
+
+  @media (max-width: 768px) {
+    .about-hero { padding: 6rem 1.5rem 4rem; }
+    .story-section { padding: 4rem 1.5rem; }
+    .story-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .values-grid { grid-template-columns: 1fr; }
+    .services-bar { padding: 3rem 1.5rem; }
+    .about-cta { padding: 4rem 1.5rem; }
+    .cta-btns { flex-direction: column; align-items: stretch; }
+    .btn-primary, .btn-ghost { justify-content: center; }
+  }
+</style>

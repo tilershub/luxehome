@@ -1,0 +1,206 @@
+---
+const features = [
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.906V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.906a1 1 0 0 1 1.447-.894L9 10"/><rect x="7" y="2" width="10" height="10" rx="1"/></svg>`,
+    label: 'Online Consultation',
+    desc: 'Start your project from anywhere via video call.',
+  },
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3-8.59A2 2 0 0 1 3.61 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.4a16 16 0 0 0 6.29 6.29l.95-.96a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+    label: 'WhatsApp Updates',
+    desc: 'Daily communication and progress photos on WhatsApp.',
+  },
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
+    label: 'Video Progress Reports',
+    desc: 'Regular video walkthroughs so you see every detail.',
+  },
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+    label: 'Digital Quotations',
+    desc: 'Detailed written quotations shared online — no need to be present.',
+  },
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    label: 'Milestone Payments',
+    desc: 'Pay in stages tied to verified project milestones.',
+  },
+  {
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    label: 'End-to-End Management',
+    desc: 'One dedicated project manager handles everything on the ground.',
+  },
+];
+---
+
+<section class="overseas-section">
+  <div class="overseas-inner">
+
+    <div class="overseas-left reveal">
+      <div class="stag">For Overseas Clients</div>
+      <h2>Renovating Your Home in Sri Lanka While Living Abroad?</h2>
+      <p class="os-desc">
+        We manage everything remotely. You stay informed and in control, from wherever you are —
+        Australia, UK, UAE, or anywhere in the world.
+      </p>
+      <a href="/contact" class="os-cta">Start an Online Consultation →</a>
+    </div>
+
+    <div class="overseas-right reveal">
+      <div class="features-grid">
+        {features.map((f) => (
+          <div class="feature-tile">
+            <div class="feat-icon" aria-hidden="true" set:html={f.icon} />
+            <div class="feat-text">
+              <strong>{f.label}</strong>
+              <span>{f.desc}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .overseas-section {
+    background: var(--charcoal, #1e1a17);
+    padding: 5.5rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overseas-section::before {
+    content: '';
+    position: absolute;
+    right: -10rem;
+    top: -10rem;
+    width: 40rem;
+    height: 40rem;
+    background: radial-gradient(circle, rgba(184,137,42,.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .overseas-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 6rem;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stag {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--clay, #b8892a);
+    margin-bottom: .75rem;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.7rem, 2.8vw, 2.5rem);
+    font-weight: 700;
+    color: var(--cream, #f0ece0);
+    line-height: 1.2;
+    margin-bottom: 1.2rem;
+  }
+
+  .os-desc {
+    font-size: .92rem;
+    font-weight: 300;
+    color: rgba(240,236,224,.72);
+    line-height: 1.82;
+    margin-bottom: 2rem;
+    max-width: 46ch;
+  }
+
+  .os-cta {
+    display: inline-flex;
+    align-items: center;
+    color: var(--clay, #b8892a);
+    text-decoration: none;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    border-bottom: 1px solid rgba(184,137,42,.35);
+    padding-bottom: .12rem;
+    transition: color .2s, border-color .2s;
+  }
+
+  .os-cta:hover { color: #d4a940; border-color: #d4a940; }
+
+  /* ── Features grid ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .feature-tile {
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+    padding: 1.2rem 1.2rem;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 8px;
+    transition: border-color .25s;
+  }
+
+  .feature-tile:hover { border-color: rgba(184,137,42,.25); }
+
+  .feat-icon {
+    width: 2.6rem;
+    height: 2.6rem;
+    background: rgba(184,137,42,.1);
+    border: 1px solid rgba(184,137,42,.18);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--clay, #b8892a);
+    flex-shrink: 0;
+  }
+
+  .feat-text {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+  }
+
+  .feat-text strong {
+    font-size: .84rem;
+    font-weight: 600;
+    color: rgba(240,236,224,.92);
+    line-height: 1.25;
+  }
+
+  .feat-text span {
+    font-size: .76rem;
+    font-weight: 300;
+    color: rgba(240,236,224,.55);
+    line-height: 1.6;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .overseas-section { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .overseas-inner { gap: 3.5rem; }
+  }
+
+  @media (max-width: 900px) {
+    .overseas-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .os-desc { max-width: none; }
+  }
+
+  @media (max-width: 768px) {
+    .overseas-section { padding: 4rem 1.5rem; }
+    .features-grid { grid-template-columns: 1fr; }
+  }
+</style>
