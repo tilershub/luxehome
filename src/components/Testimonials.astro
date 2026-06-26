@@ -1,0 +1,142 @@
+---
+const testimonials = [
+  {
+    name: 'Niroshan Perera',
+    location: 'Nugegoda',
+    service: 'Bathroom Renovation',
+    quote: 'The team transformed our dated bathroom into something we are genuinely proud of. Professional from start to finish — precise work, clean site, and delivered exactly on time.',
+  },
+  {
+    name: 'Priya Fernando',
+    location: 'Moratuwa',
+    service: 'Designer Floor Tiling',
+    quote: 'Exceptional tile work throughout our ground floor. The cuts are precise, the alignment is perfect, and the finish quality is far above what we expected. Highly recommend LUXEHOME.',
+  },
+  {
+    name: 'Chaminda Silva',
+    location: 'Colombo 06',
+    service: 'Staircase Tiling',
+    quote: 'Our staircase looks stunning. The site visit gave us full confidence before committing — the team assessed everything thoroughly and the final result exceeded our expectations.',
+  },
+];
+---
+
+<section class="testimonials-section">
+  <div class="testimonials-inner">
+    <div class="stag reveal">What Our Clients Say</div>
+    <h2 class="reveal">Trusted Across the Western Province</h2>
+
+    <div class="testimonials-grid">
+      {testimonials.map((t) => (
+        <div class="testimonial-card reveal">
+          <div class="stars" aria-label="5 stars">
+            {[...Array(5)].map(() => (
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1L8.545 5.09H13L9.59 7.581L10.82 12L7 9.41L3.18 12L4.41 7.581L1 5.09H5.455L7 1Z" fill="#b8892a"/>
+              </svg>
+            ))}
+          </div>
+          <blockquote class="testimonial-quote">"{t.quote}"</blockquote>
+          <div class="testimonial-author">
+            <div class="author-name">{t.name}</div>
+            <div class="author-meta">{t.location} · {t.service}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .testimonials-section {
+    background: var(--charcoal, #1e1a17);
+    padding: 5rem 4rem;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+
+  .testimonials-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .stag {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--clay, #b8892a);
+    margin-bottom: .75rem;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 700;
+    color: var(--cream, #f0ece0);
+    line-height: 1.2;
+    margin-bottom: 2.5rem;
+  }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .testimonial-card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 4px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: border-color .25s;
+  }
+
+  .testimonial-card:hover {
+    border-color: rgba(184,137,42,.25);
+  }
+
+  .stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .testimonial-quote {
+    font-size: .93rem;
+    color: rgba(240,236,224,.85);
+    line-height: 1.75;
+    font-style: italic;
+    margin: 0;
+    flex: 1;
+  }
+
+  .testimonial-author {
+    border-top: 1px solid rgba(255,255,255,.07);
+    padding-top: .9rem;
+  }
+
+  .author-name {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--cream, #f0ece0);
+    margin-bottom: .2rem;
+  }
+
+  .author-meta {
+    font-size: .72rem;
+    color: rgba(240,236,224,.5);
+    letter-spacing: .04em;
+  }
+
+  @media (max-width: 900px) {
+    .testimonials-section { padding: 4rem 2.5rem; }
+    .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 600px) {
+    .testimonials-section { padding: 3.5rem 1.5rem; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+  }
+</style>
