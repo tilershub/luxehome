@@ -3,103 +3,31 @@ import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
 import Services from '../components/Services.astro';
-import WhyUs from '../components/WhyUs.astro';
 import Projects from '../components/Projects.astro';
-import Testimonials from '../components/Testimonials.astro';
+import ProjectJourney from '../components/ProjectJourney.astro';
+import FeaturedVideos from '../components/FeaturedVideos.astro';
 import Process from '../components/Process.astro';
+import OverseasClient from '../components/OverseasClient.astro';
+import WhyUs from '../components/WhyUs.astro';
+import Testimonials from '../components/Testimonials.astro';
+import HomeCTA from '../components/HomeCTA.astro';
 import Footer from '../components/Footer.astro';
 ---
 
-<Layout>
+<Layout
+  title="LUXEhome — Luxury Renovations Sri Lanka | Bathrooms, Floors, Staircases, Kitchens"
+  description="Sri Lanka's premium design-and-build renovation brand. Luxury bathroom renovations, designer floors, designer staircases, and luxury kitchens across the Western Province."
+>
   <Nav />
   <Hero />
-
-  <!-- Trust stats bar -->
-  <section class="trust-bar">
-    <div class="trust-inner">
-      <div class="trust-stat">
-        <span class="trust-n">50+</span>
-        <span class="trust-l">Projects Completed</span>
-      </div>
-      <div class="trust-divider"></div>
-      <div class="trust-stat">
-        <span class="trust-n">3+</span>
-        <span class="trust-l">Years Experience</span>
-      </div>
-      <div class="trust-divider"></div>
-      <div class="trust-stat">
-        <span class="trust-n">4</span>
-        <span class="trust-l">Service Specialisms</span>
-      </div>
-      <div class="trust-divider"></div>
-      <div class="trust-stat">
-        <span class="trust-n">Western Province</span>
-        <span class="trust-l">Areas Served</span>
-      </div>
-    </div>
-  </section>
-
   <Services />
-  <WhyUs />
   <Projects />
-  <Testimonials />
+  <ProjectJourney />
+  <FeaturedVideos />
   <Process />
+  <OverseasClient />
+  <WhyUs />
+  <Testimonials />
+  <HomeCTA />
   <Footer />
 </Layout>
-
-<style>
-  .trust-bar {
-    background: rgba(184,137,42,.08);
-    border-bottom: 1px solid rgba(184,137,42,.15);
-    padding: 1.4rem 4rem;
-  }
-
-  .trust-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    flex-wrap: wrap;
-  }
-
-  .trust-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: .5rem 2.5rem;
-    text-align: center;
-  }
-
-  .trust-n {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--clay, #b8892a);
-    line-height: 1;
-    margin-bottom: .2rem;
-  }
-
-  .trust-l {
-    font-size: .68rem;
-    font-weight: 500;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: rgba(240,236,224,.65);
-  }
-
-  .trust-divider {
-    width: 1px;
-    height: 2.2rem;
-    background: rgba(184,137,42,.2);
-  }
-
-  @media (max-width: 768px) {
-    .trust-bar { padding: 1.2rem 1.5rem; }
-    .trust-stat { padding: .5rem 1.2rem; }
-    .trust-n { font-size: 1.1rem; }
-    .trust-divider { display: none; }
-    .trust-inner { gap: .5rem 0; justify-content: space-around; }
-  }
-</style>

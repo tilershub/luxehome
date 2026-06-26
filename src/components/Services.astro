@@ -1,107 +1,119 @@
 ---
+const services = [
+  {
+    num: '01',
+    name: 'Luxury Bathroom Renovation',
+    desc: 'Complete end-to-end renovation — design, civil work, waterproofing, tiling, plumbing, electrical, fixtures, and handover.',
+    inclusions: ['3D Design + Civil Plan', 'Laticrete Waterproofing', 'All Materials Included'],
+    href: '/services/bathroom',
+    img: '/hero-bathroom.png',
+    imgAlt: 'Luxury bathroom renovation with premium tiles and fixtures',
+  },
+  {
+    num: '02',
+    name: 'Designer Floors',
+    desc: 'Precision tile installation for any floor area. Up to 4×2 size tiles with leveling system, adhesive, and grout all included.',
+    inclusions: ['Mega & Rocell Tiles', 'Swisstek Grout', 'All Materials Included'],
+    href: '/services/flooring',
+    img: 'https://images.pexels.com/photos/1144871/pexels-photo-1144871.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&fit=crop',
+    imgAlt: 'Designer floor tiling with large format tiles',
+  },
+  {
+    num: '03',
+    name: 'Designer Staircases',
+    desc: 'Every step finished with double nosing, router edge detail, side elevation tiling, and skirting — a staircase that commands attention.',
+    inclusions: ['Double Nosing Finish', 'Router Edge Detail', 'Side Elevation + Skirting'],
+    href: '/services/staircase-tiling',
+    img: 'https://images.pexels.com/photos/10991408/pexels-photo-10991408.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&fit=crop',
+    imgAlt: 'Premium staircase tiling with elegant finishes',
+  },
+  {
+    num: '04',
+    name: 'Luxury Kitchens',
+    desc: 'Custom kitchen wall tiling and cupboard work — precision layout, premium materials, and finishes that elevate the heart of your home.',
+    inclusions: ['Custom Wall Tiling', 'Cupboard & Pantry Work', 'Premium Design Consultation'],
+    href: '/services/kitchen',
+    img: 'https://images.pexels.com/photos/2724749/pexels-photo-2724749.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&fit=crop',
+    imgAlt: 'Luxury kitchen with custom tiling and cabinetry',
+  },
+];
 ---
 
-<section id="shop">
-  <div class="inner">
+<section id="shop" class="services-section">
+  <div class="services-inner">
 
     <div class="section-head reveal">
       <div class="stag">What We Do</div>
-      <h2>Two Services.<br />One Standard of Excellence.</h2>
+      <h2>Four Specialisms.<br /><em>One Standard of Excellence.</em></h2>
     </div>
 
     <div class="svc-grid">
-
-      <a class="svc-card reveal" href="/services/bathroom">
-        <div class="svc-img">
-          <img src="/hero-bathroom.png" alt="Luxury bathroom renovation" fetchpriority="auto" width="900" height="600" />
-          <div class="svc-scrim"></div>
-        </div>
-        <div class="svc-body">
-          <div class="svc-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 19v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2"/><path d="M5 9V4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+      {services.map((s) => (
+        <a class="svc-card reveal" href={s.href}>
+          <div class="svc-img">
+            <img src={s.img} alt={s.imgAlt} loading="lazy" width="900" height="600" />
+            <div class="svc-scrim" aria-hidden="true"></div>
+            <div class="svc-num" aria-hidden="true">{s.num}</div>
           </div>
-          <div class="svc-label">Service 01</div>
-          <h3>Bathroom Construction<br />&amp; Renovation</h3>
-          <p>Complete end-to-end bathroom renovation — design, civil work, waterproofing, tiling, plumbing, electrical, fixtures, and handover. All materials included.</p>
-          <div class="svc-pills">
-            <span>3D Design Included</span>
-            <span>Laticrete Waterproofing</span>
-            <span>All Materials</span>
-            <span>From LKR 985,000</span>
+          <div class="svc-body">
+            <h3>{s.name}</h3>
+            <p>{s.desc}</p>
+            <ul class="svc-inclusions" aria-label="Inclusions">
+              {s.inclusions.map((inc) => (
+                <li>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <circle cx="6" cy="6" r="6" fill="rgba(184,137,42,.15)"/>
+                    <path d="M3.5 6L5.2 7.7L8.5 4.5" stroke="#b8892a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  {inc}
+                </li>
+              ))}
+            </ul>
+            <div class="svc-cta">
+              Explore Service
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
           </div>
-          <div class="svc-cta">
-            View Packages
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-        </div>
-      </a>
-
-      <a class="svc-card reveal" href="/services/flooring">
-        <div class="svc-img">
-          <img src="/floor-tiling-hero.svg" alt="Floor tiling" loading="lazy" width="900" height="600" />
-          <div class="svc-scrim"></div>
-        </div>
-        <div class="svc-body">
-          <div class="svc-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          </div>
-          <div class="svc-label">Service 02</div>
-          <h3>Floor Tiling</h3>
-          <p>Precision tile installation for any floor — up to 4×2 size tiles. All materials included: tiles, leveling system, Tokyo HP cement, and Swisstek grout.</p>
-          <div class="svc-pills">
-            <span>Mega Tiles</span>
-            <span>Rocell Tiles</span>
-            <span>All Materials</span>
-            <span>From Rs. 1,000 /sq.ft</span>
-          </div>
-          <div class="svc-cta">
-            View Pricing
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-        </div>
-      </a>
-
+        </a>
+      ))}
     </div>
+
   </div>
 </section>
 
 <style>
-  section {
-    background: var(--charcoal);
+  .services-section {
+    background: var(--charcoal, #1e1a17);
     padding: 5.5rem 4rem;
     position: relative;
     overflow: hidden;
   }
 
-  section::before {
+  .services-section::before {
     content: '';
     position: absolute;
     inset: 0;
     background:
-      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,.012) 60px, rgba(255,255,255,.012) 61px),
-      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.012) 60px, rgba(255,255,255,.012) 61px);
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,.011) 60px, rgba(255,255,255,.011) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,.011) 60px, rgba(255,255,255,.011) 61px);
     pointer-events: none;
   }
 
-  .inner {
+  .services-inner {
     max-width: 1280px;
     margin: 0 auto;
     position: relative;
     z-index: 1;
   }
 
-  /* ── Header ── */
-
-  .section-head {
-    margin-bottom: 3rem;
-  }
+  .section-head { margin-bottom: 3rem; }
 
   .stag {
     font-size: .72rem;
     font-weight: 600;
     letter-spacing: .16em;
     text-transform: uppercase;
-    color: var(--clay);
+    color: var(--clay, #b8892a);
     margin-bottom: .75rem;
   }
 
@@ -109,12 +121,17 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.9rem, 3vw, 2.8rem);
     font-weight: 700;
-    color: var(--cream);
+    color: var(--cream, #f0ece0);
     line-height: 1.15;
   }
 
-  /* ── Grid: 2 equal columns ── */
+  h2 em {
+    font-style: italic;
+    font-weight: 400;
+    color: rgba(240,236,224,.72);
+  }
 
+  /* ── Grid: 2×2 ── */
   .svc-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -122,7 +139,6 @@
   }
 
   /* ── Card ── */
-
   .svc-card {
     display: flex;
     flex-direction: column;
@@ -139,8 +155,8 @@
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--clay);
+    height: 2px;
+    background: var(--clay, #b8892a);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform .4s ease;
@@ -148,20 +164,17 @@
   }
 
   .svc-card:hover {
-    transform: translateY(-7px);
-    box-shadow: 0 28px 64px rgba(0,0,0,.45);
-    border-color: rgba(184,148,90,.3);
+    transform: translateY(-6px);
+    box-shadow: 0 32px 72px rgba(0,0,0,.5);
+    border-color: rgba(184,137,42,.28);
   }
 
-  .svc-card:hover::after {
-    transform: scaleX(1);
-  }
+  .svc-card:hover::after { transform: scaleX(1); }
 
   /* ── Image ── */
-
   .svc-img {
     position: relative;
-    height: 340px;
+    height: 260px;
     overflow: hidden;
     flex-shrink: 0;
   }
@@ -171,131 +184,111 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    filter: brightness(.82) saturate(.9);
-    transition: transform .55s ease, filter .45s ease;
+    filter: brightness(.75) saturate(.85);
+    transition: transform .6s ease, filter .45s ease;
   }
 
   .svc-card:hover .svc-img img {
-    transform: scale(1.06);
-    filter: brightness(.92) saturate(1);
+    transform: scale(1.07);
+    filter: brightness(.88) saturate(.95);
   }
 
   .svc-scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(22,28,26,.7) 100%);
+    background: linear-gradient(to bottom, transparent 35%, rgba(17,14,11,.75) 100%);
+  }
+
+  .svc-num {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.4rem;
+    font-family: 'Playfair Display', serif;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    color: rgba(184,137,42,.9);
+    text-transform: uppercase;
+    z-index: 1;
   }
 
   /* ── Body ── */
-
   .svc-body {
-    padding: 2.2rem 2rem 2.4rem;
+    padding: 1.8rem 1.8rem 2rem;
     display: flex;
     flex-direction: column;
-    gap: .85rem;
+    gap: .8rem;
     flex: 1;
-  }
-
-  .svc-icon {
-    width: 3rem;
-    height: 3rem;
-    background: rgba(184,148,90,.12);
-    border: 1px solid rgba(184,148,90,.22);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--clay);
-    flex-shrink: 0;
-    transition: background .3s, border-color .3s;
-  }
-
-  .svc-card:hover .svc-icon {
-    background: rgba(184,148,90,.22);
-    border-color: rgba(184,148,90,.45);
-  }
-
-  .svc-label {
-    font-size: .68rem;
-    font-weight: 600;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: rgba(184,148,90,.65);
   }
 
   h3 {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(1.3rem, 2vw, 1.65rem);
+    font-size: clamp(1.15rem, 1.8vw, 1.5rem);
     font-weight: 700;
-    color: var(--cream);
+    color: var(--cream, #f0ece0);
     line-height: 1.2;
   }
 
   p {
-    font-size: .9rem;
+    font-size: .85rem;
     font-weight: 300;
-    color: rgba(240,236,224,.75);
-    line-height: 1.8;
-    max-width: 48ch;
+    color: rgba(240,236,224,.7);
+    line-height: 1.78;
+    max-width: 50ch;
   }
 
-  /* ── Pills ── */
-
-  .svc-pills {
+  /* ── Inclusions ── */
+  .svc-inclusions {
+    list-style: none;
     display: flex;
-    flex-wrap: wrap;
-    gap: .4rem;
+    flex-direction: column;
+    gap: .45rem;
     margin-top: .2rem;
   }
 
-  .svc-pills span {
-    font-size: .68rem;
-    font-weight: 500;
-    letter-spacing: .05em;
+  .svc-inclusions li {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    font-size: .78rem;
     color: rgba(240,236,224,.72);
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.09);
-    padding: .22rem .7rem;
-    border-radius: 20px;
   }
 
-  /* ── CTA ── */
+  .svc-inclusions svg { flex-shrink: 0; }
 
+  /* ── CTA ── */
   .svc-cta {
     display: inline-flex;
     align-items: center;
     gap: .5rem;
-    font-size: .78rem;
+    font-size: .75rem;
     font-weight: 600;
     letter-spacing: .09em;
     text-transform: uppercase;
-    color: var(--clay);
+    color: var(--clay, #b8892a);
     border-top: 1px solid rgba(255,255,255,.07);
-    padding-top: .9rem;
+    padding-top: 1rem;
     margin-top: auto;
     transition: gap .25s;
   }
 
-  .svc-card:hover .svc-cta {
-    gap: .85rem;
-  }
+  .svc-card:hover .svc-cta { gap: .9rem; }
 
   /* ── Responsive ── */
-
   @media (max-width: 1100px) {
-    section { padding-left: 2.5rem; padding-right: 2.5rem; }
-    .svc-img { height: 280px; }
+    .services-section { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .svc-img { height: 220px; }
   }
 
   @media (max-width: 768px) {
-    section { padding: 4rem 1.5rem; }
+    .services-section { padding: 4rem 1.5rem; }
     .svc-grid { grid-template-columns: 1fr; }
-    .svc-img { height: 260px; }
-    .svc-body { padding: 1.8rem 1.5rem 2rem; }
+    .svc-img { height: 240px; }
+    .svc-body { padding: 1.5rem 1.5rem 1.8rem; }
   }
 
   @media (max-width: 480px) {
-    section { padding: 3.5rem 1.2rem; }
-    .svc-img { height: 220px; }
+    .services-section { padding: 3.5rem 1.2rem; }
+    .svc-img { height: 200px; }
   }
 </style>

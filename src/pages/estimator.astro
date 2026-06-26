@@ -1,0 +1,163 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import FloorTilingCalculator from '../components/FloorTilingCalculator.astro';
+import BathroomCalculator from '../components/BathroomCalculator.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Project Estimator — LUXEhome Sri Lanka"
+  description="Estimate the cost of your floor tiling or bathroom renovation with LUXEhome's free calculators. Get instant area calculations and price ranges before booking a site visit."
+>
+  <Nav />
+
+  <section class="estimator-hero">
+    <div class="estimator-hero-inner reveal">
+      <div class="stag">Free Estimator</div>
+      <h1>Get an Instant Estimate</h1>
+      <p class="hero-sub">
+        Use our calculators to get a rough idea of what your project might cost.
+        For a fixed written quotation, book a site visit — it's credited against your project.
+      </p>
+    </div>
+  </section>
+
+  <div class="calculators-wrap">
+    <FloorTilingCalculator />
+    <BathroomCalculator />
+  </div>
+
+  <section class="estimator-note reveal">
+    <div class="note-inner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+      <p>
+        These calculators give indicative estimates only. Final pricing depends on material selection,
+        site conditions, and scope. Book a site visit for a fixed written quotation — the Rs. 10,000
+        fee is fully credited against your project.
+      </p>
+      <a href="/contact" class="note-cta">Book a Site Visit →</a>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  .estimator-hero {
+    background: var(--charcoal, #1e1a17);
+    padding: 7rem 4rem 4.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .estimator-hero::before {
+    content: '';
+    position: absolute;
+    bottom: -4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50rem;
+    height: 50rem;
+    background: radial-gradient(circle, rgba(184,137,42,.05) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .estimator-hero-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stag {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--clay, #b8892a);
+    margin-bottom: .85rem;
+  }
+
+  .estimator-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    font-weight: 700;
+    color: var(--cream, #f0ece0);
+    line-height: 1.12;
+    margin-bottom: 1.2rem;
+  }
+
+  .hero-sub {
+    font-size: .98rem;
+    font-weight: 300;
+    color: rgba(240,236,224,.68);
+    line-height: 1.85;
+    max-width: 54ch;
+  }
+
+  .calculators-wrap {
+    background: var(--off-white, #fbfbf9);
+  }
+
+  /* ── Disclaimer note ── */
+  .estimator-note {
+    background: var(--off-white, #fbfbf9);
+    padding: 0 4rem 4rem;
+  }
+
+  .note-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+    background: rgba(184,137,42,.07);
+    border: 1px solid rgba(184,137,42,.2);
+    border-left: 3px solid var(--clay, #b8892a);
+    border-radius: 0 6px 6px 0;
+    padding: 1.3rem 1.6rem;
+  }
+
+  .note-inner svg {
+    color: var(--clay, #b8892a);
+    flex-shrink: 0;
+    margin-top: .15rem;
+  }
+
+  .note-inner p {
+    font-size: .84rem;
+    color: var(--warm-gray, #6f6f6f);
+    line-height: 1.75;
+    flex: 1;
+  }
+
+  .note-cta {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    color: var(--clay, #b8892a);
+    font-size: .82rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(184,137,42,.35);
+    padding-bottom: .1rem;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+    align-self: center;
+  }
+
+  .note-cta:hover { color: #9a7222; border-color: #9a7222; }
+
+  @media (max-width: 1100px) {
+    .estimator-hero { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .estimator-note { padding-left: 2.5rem; padding-right: 2.5rem; }
+  }
+
+  @media (max-width: 768px) {
+    .estimator-hero { padding: 5rem 1.5rem 3.5rem; }
+    .estimator-note { padding: 0 1.5rem 3rem; }
+    .note-inner { flex-direction: column; gap: .8rem; }
+    .note-cta { align-self: flex-start; }
+  }
+</style>

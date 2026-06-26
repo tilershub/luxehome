@@ -1,100 +1,58 @@
 ---
+const reasons = [
+  {
+    title: 'Premium Design',
+    desc: '3D visualisations, civil plans, and curated material palettes — every project is designed before a single tile is laid.',
+  },
+  {
+    title: 'Expert Craftsmanship',
+    desc: 'Skilled tradespeople with proven track records delivering precision finishes on every project.',
+  },
+  {
+    title: 'Dedicated Project Management',
+    desc: 'One project manager oversees your renovation from start to finish — so nothing falls through the cracks.',
+  },
+  {
+    title: 'Transparent Pricing',
+    desc: 'Fixed written quotations before work begins. No hidden charges, no surprises at handover.',
+  },
+  {
+    title: 'Daily Progress Updates',
+    desc: 'Photos and updates shared daily — whether you\'re down the road or on the other side of the world.',
+  },
+  {
+    title: 'Quality Assurance',
+    desc: 'A formal quality inspection and snagging process before every handover — we don\'t consider a job done until it\'s done right.',
+  },
+];
 ---
 
-<section id="why-us">
-  <div class="inner">
+<section id="why-us" class="whyus-section">
+  <div class="whyus-inner">
 
     <div class="wu-left reveal">
-      <div class="stag">Why LUXEHOME</div>
-      <h2>Built Around You —<br />Wherever You Are</h2>
+      <div class="stag">Why LUXEhome</div>
+      <h2>Why Homeowners<br />Choose LUXEhome</h2>
       <p class="wu-intro">
-        LUXEHOME manages every aspect of your renovation from start to finish,
-        so you can focus on the dream result — not the construction process.
-        Trusted by homeowners across Sri Lanka and abroad.
+        From the first consultation to the final handover, every detail is managed, every
+        decision is documented, and every finish is inspected. That's the LUXEhome standard.
       </p>
-      <div class="wu-stats">
-        <div class="stat">
-          <strong>500+</strong>
-          <span>Projects Completed</span>
-        </div>
-        <div class="stat-sep"></div>
-        <div class="stat">
-          <strong>5★</strong>
-          <span>Client Rating</span>
-        </div>
-        <div class="stat-sep"></div>
-        <div class="stat">
-          <strong>Island-wide</strong>
-          <span>Coverage</span>
-        </div>
-      </div>
+      <a href="/contact" class="wu-cta">Start Your Project →</a>
     </div>
 
     <div class="wu-right reveal">
       <ul class="checklist" role="list">
-        <li>
-          <div class="check-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="check-text">
-            <strong>Complete Bathroom Renovation Solution</strong>
-            <span>One team handles everything — design, civil, plumbing, tiling, fixtures, and handover.</span>
-          </div>
-        </li>
-        <li>
-          <div class="check-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="check-text">
-            <strong>Premium Materials & Finishes</strong>
-            <span>Laticrete waterproofing, Swisstek grout, and grade-A fixtures — no substitutions.</span>
-          </div>
-        </li>
-        <li>
-          <div class="check-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="check-text">
-            <strong>Professional Project Management</strong>
-            <span>A dedicated project manager oversees every stage so nothing falls through the cracks.</span>
-          </div>
-        </li>
-        <li>
-          <div class="check-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="check-text">
-            <strong>Weekly Progress Updates</strong>
-            <span>Photos and status reports sent every week — stay informed from anywhere in the world.</span>
-          </div>
-        </li>
-        <li>
-          <div class="check-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="check-text">
-            <strong>Transparent Pricing</strong>
-            <span>Fixed quotes before work begins. No hidden charges, no surprises on completion.</span>
-          </div>
-        </li>
-        <li>
-          <div class="check-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="check-text">
-            <strong>Quality Workmanship</strong>
-            <span>Skilled tradespeople with a proven track record delivering premium results consistently.</span>
-          </div>
-        </li>
-        <li>
-          <div class="check-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div class="check-text">
-            <strong>Designed for Sri Lankans Living Abroad</strong>
-            <span>Manage your renovation remotely with full confidence — we handle everything on the ground.</span>
-          </div>
-        </li>
+        {reasons.map((r) => (
+          <li>
+            <div class="check-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="check-text">
+              <strong>{r.title}</strong>
+              <span>{r.desc}</span>
+            </div>
+          </li>
+        ))}
       </ul>
     </div>
 
@@ -102,45 +60,43 @@
 </section>
 
 <style>
-  section {
-    background: var(--off-white);
+  .whyus-section {
+    background: var(--off-white, #fbfbf9);
     padding: 5.5rem 4rem;
     position: relative;
     overflow: hidden;
   }
 
-  section::after {
+  .whyus-section::after {
     content: '◆';
     position: absolute;
-    right: -1.5rem;
-    bottom: -2.5rem;
-    font-size: 20rem;
-    color: rgba(61, 79, 66, .035);
+    right: -2rem;
+    bottom: -3rem;
+    font-size: 22rem;
+    color: rgba(184,137,42,.03);
     line-height: 1;
     pointer-events: none;
     font-family: serif;
     user-select: none;
   }
 
-  .inner {
+  .whyus-inner {
     max-width: 1280px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.1fr;
     gap: 6rem;
     align-items: center;
     position: relative;
     z-index: 1;
   }
 
-  /* ── Left ── */
-
   .stag {
     font-size: .72rem;
     font-weight: 600;
     letter-spacing: .16em;
     text-transform: uppercase;
-    color: var(--clay);
+    color: var(--clay, #b8892a);
     margin-bottom: .75rem;
   }
 
@@ -148,7 +104,7 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.9rem, 3vw, 2.6rem);
     font-weight: 700;
-    color: var(--charcoal);
+    color: var(--charcoal, #1e1a17);
     line-height: 1.15;
     margin-bottom: 1.2rem;
   }
@@ -157,57 +113,31 @@
     font-size: .92rem;
     font-weight: 300;
     line-height: 1.85;
-    color: var(--warm-gray);
+    color: var(--warm-gray, #6f6f6f);
     max-width: 44ch;
-    margin-bottom: 2.4rem;
+    margin-bottom: 2rem;
   }
 
-  .wu-stats {
-    display: flex;
+  .wu-cta {
+    display: inline-flex;
     align-items: center;
-    gap: 0;
+    color: var(--clay, #b8892a);
+    text-decoration: none;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    border-bottom: 1px solid rgba(184,137,42,.35);
+    padding-bottom: .1rem;
+    transition: color .2s, border-color .2s;
   }
 
-  .stat {
-    display: flex;
-    flex-direction: column;
-    gap: .2rem;
-    padding-right: 1.8rem;
-  }
+  .wu-cta:hover { color: #9a7222; border-color: #9a7222; }
 
-  .stat:not(:first-child) {
-    padding-left: 1.8rem;
-  }
-
-  .stat strong {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--charcoal);
-    line-height: 1;
-  }
-
-  .stat span {
-    font-size: .7rem;
-    text-transform: uppercase;
-    letter-spacing: .09em;
-    color: var(--warm-gray);
-  }
-
-  .stat-sep {
-    width: 1px;
-    height: 2.2rem;
-    background: var(--stone);
-    flex-shrink: 0;
-  }
-
-  /* ── Right: checklist ── */
-
+  /* ── Checklist ── */
   .checklist {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0;
   }
 
   .checklist li {
@@ -215,23 +145,21 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 1.1rem 0;
-    border-bottom: 1px solid var(--stone);
+    border-bottom: 1px solid var(--stone, #e7e7e7);
   }
 
-  .checklist li:first-child {
-    border-top: 1px solid var(--stone);
-  }
+  .checklist li:first-child { border-top: 1px solid var(--stone, #e7e7e7); }
 
   .check-icon {
     width: 1.75rem;
     height: 1.75rem;
-    background: rgba(184,148,90,.12);
-    border: 1px solid rgba(184,148,90,.25);
+    background: rgba(184,137,42,.1);
+    border: 1px solid rgba(184,137,42,.22);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--clay);
+    color: var(--clay, #b8892a);
     flex-shrink: 0;
     margin-top: .1rem;
   }
@@ -245,27 +173,26 @@
   .check-text strong {
     font-size: .88rem;
     font-weight: 600;
-    color: var(--charcoal);
+    color: var(--charcoal, #1e1a17);
     line-height: 1.3;
   }
 
   .check-text span {
     font-size: .8rem;
     font-weight: 300;
-    color: var(--warm-gray);
+    color: var(--warm-gray, #6f6f6f);
     line-height: 1.65;
   }
 
   /* ── Responsive ── */
-
   @media (max-width: 1100px) {
-    section { padding-left: 2.5rem; padding-right: 2.5rem; }
-    .inner { gap: 3.5rem; }
+    .whyus-section { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .whyus-inner { gap: 3.5rem; }
   }
 
   @media (max-width: 768px) {
-    section { padding: 4rem 1.5rem; }
-    .inner { grid-template-columns: 1fr; gap: 3rem; }
+    .whyus-section { padding: 4rem 1.5rem; }
+    .whyus-inner { grid-template-columns: 1fr; gap: 3rem; }
     .wu-intro { max-width: none; }
   }
 </style>

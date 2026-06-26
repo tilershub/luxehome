@@ -1,0 +1,139 @@
+---
+---
+
+<section class="home-cta-section">
+  <div class="home-cta-inner">
+    <div class="stag">Start Your Project</div>
+    <h2>Ready to Start Your Transformation?</h2>
+    <p class="cta-desc">
+      Take the first step. We'll visit your space, understand your vision, and deliver
+      a detailed custom quotation — all within 48 hours.
+    </p>
+    <div class="cta-btns">
+      <a href="/contact" class="btn-primary">Book a Site Visit</a>
+      <a href="https://wa.me/94774503744" target="_blank" rel="noopener noreferrer" class="btn-wa">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.143.566 4.148 1.553 5.887L0 24l6.296-1.529A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.001-1.368l-.36-.213-3.733.906.946-3.643-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
+        Chat on WhatsApp
+      </a>
+    </div>
+    <p class="cta-note">Site visit fee: Rs. 10,000 · Assessment + custom quotation within 48 hours</p>
+  </div>
+</section>
+
+<style>
+  .home-cta-section {
+    background: var(--charcoal, #1e1a17);
+    padding: 6rem 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+
+  .home-cta-section::before {
+    content: '';
+    position: absolute;
+    top: -8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60rem;
+    height: 60rem;
+    background: radial-gradient(circle, rgba(184,137,42,.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .home-cta-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .stag {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--clay, #b8892a);
+    margin-bottom: .9rem;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    color: var(--cream, #f0ece0);
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+
+  .cta-desc {
+    font-size: .95rem;
+    font-weight: 300;
+    color: rgba(240,236,224,.72);
+    line-height: 1.82;
+    margin-bottom: 2.2rem;
+  }
+
+  .cta-btns {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    background: var(--clay, #b8892a);
+    color: #fff;
+    padding: .95rem 2.2rem;
+    border-radius: 3px;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    min-height: 52px;
+    transition: background .2s, transform .2s;
+  }
+
+  .btn-primary:hover { background: #9a7222; transform: translateY(-2px); }
+
+  .btn-wa {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    background: rgba(37,211,102,.12);
+    color: #25d366;
+    border: 1px solid rgba(37,211,102,.3);
+    padding: .95rem 2.2rem;
+    border-radius: 3px;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-decoration: none;
+    min-height: 52px;
+    transition: background .2s, border-color .2s;
+  }
+
+  .btn-wa:hover { background: rgba(37,211,102,.2); border-color: rgba(37,211,102,.5); }
+
+  .cta-note {
+    font-size: .74rem;
+    color: rgba(240,236,224,.4);
+    letter-spacing: .04em;
+  }
+
+  @media (max-width: 1100px) {
+    .home-cta-section { padding-left: 2.5rem; padding-right: 2.5rem; }
+  }
+
+  @media (max-width: 768px) {
+    .home-cta-section { padding: 4rem 1.5rem; }
+    .cta-btns { flex-direction: column; align-items: stretch; }
+    .btn-primary, .btn-wa { justify-content: center; }
+  }
+</style>

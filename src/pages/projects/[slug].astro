@@ -249,6 +249,35 @@ const jsonLd = JSON.stringify({
       font-weight: 600; font-size: .9rem; background: none;
     }
 
+    /* YouTube embed */
+    .yt-embed {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #0d0b09;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .yt-embed img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(.8); display: block;
+    }
+    .yt-embed iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+    }
+    .yt-play-btn {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 72px; height: 72px;
+      background: rgba(184,137,42,.9);
+      border-radius: 50%; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .2s;
+      backdrop-filter: blur(4px);
+    }
+    .yt-play-btn svg { margin-left: 4px; }
+    .yt-play-btn:hover { background: var(--clay); transform: translate(-50%,-50%) scale(1.1); }
+
     .footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; font-size: .8rem; color: var(--muted); }
 
     @media (max-width: 768px) {
@@ -305,10 +334,12 @@ const jsonLd = JSON.stringify({
   <!-- Key facts bar -->
   <div class="facts-bar">
     <div class="fact"><div class="fact-label">Location</div><div class="fact-val">{p.location}</div></div>
-    {p.completion_year && <div class="fact"><div class="fact-label">Year</div><div class="fact-val">{p.completion_year}</div></div>}
+    {p.area_label && <div class="fact"><div class="fact-label">Area</div><div class="fact-val">{p.area_label}</div></div>}
+    {p.completion_year && <div class="fact"><div class="fact-label">Year</div><div class="fact-val">{p.completion_year}{p.completion_month ? ` · ${new Date(2000, p.completion_month - 1).toLocaleString('en', {month: 'short'})}` : ''}</div></div>}
     {p.design_style && <div class="fact"><div class="fact-label">Design Style</div><div class="fact-val">{STYLE_LABELS[p.design_style] || p.design_style}</div></div>}
     <div class="fact"><div class="fact-label">Service</div><div class="fact-val">{CAT_LABELS[p.category]}</div></div>
     {p.cost_range && <div class="fact"><div class="fact-label">Cost Range</div><div class="fact-val">{p.cost_range}</div></div>}
+    {p.reference_id && <div class="fact"><div class="fact-label">Project Ref</div><div class="fact-val">{p.reference_id}</div></div>}
   </div>
 
   <div class="case-body">
@@ -343,6 +374,19 @@ const jsonLd = JSON.stringify({
               ))}
             </div>
           )}
+        </div>
+      </section>
+    )}
+
+    <!-- Episode 01 — Old Space to 3D Design -->
+    {p.episode_01_youtube && (
+      <section class="section">
+        <div class="section-tag">Episode 01 · Old Space to 3D Design</div>
+        <div class="section-title">The Journey Begins</div>
+        <div class="yt-embed" data-yt-url={p.episode_01_youtube} data-yt-thumb={p.episode_01_thumbnail || ''}>
+          <button class="yt-play-btn" aria-label="Play Episode 01">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="white" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
         </div>
       </section>
     )}
@@ -432,6 +476,19 @@ const jsonLd = JSON.stringify({
       </section>
     )}
 
+    <!-- Episode 02 — Completed Project Tour -->
+    {p.episode_02_youtube && (
+      <section class="section">
+        <div class="section-tag">Episode 02 · Completed Project Tour</div>
+        <div class="section-title">The Final Reveal</div>
+        <div class="yt-embed" data-yt-url={p.episode_02_youtube} data-yt-thumb={p.episode_02_thumbnail || ''}>
+          <button class="yt-play-btn" aria-label="Play Episode 02">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="white" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+        </div>
+      </section>
+    )}
+
     <!-- Challenges & Solutions -->
     {p.challenges_solutions && (
       <section class="section">
@@ -515,6 +572,39 @@ const jsonLd = JSON.stringify({
     <p>© {new Date().getFullYear()} LUXEHOME · Premium Renovation Sri Lanka</p>
     <p style="margin-top:6px"><a href="/">Home</a> · <a href="/projects">Projects</a> · <a href="/contact">Contact</a></p>
   </footer>
+
+  <script>
+    function ytIdFromUrl(url) {
+      if (!url) return null;
+      const m = url.match(/(?:youtu\.be\/|v=|embed\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
+    document.querySelectorAll('.yt-embed').forEach(embed => {
+      const url = embed.dataset.ytUrl;
+      const customThumb = embed.dataset.ytThumb;
+      const id = ytIdFromUrl(url);
+      if (!id) return;
+
+      const thumb = customThumb || `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+      const img = document.createElement('img');
+      img.src = thumb;
+      img.alt = 'Video thumbnail';
+      img.loading = 'lazy';
+      embed.insertBefore(img, embed.firstChild);
+
+      embed.querySelector('.yt-play-btn')?.addEventListener('click', () => {
+        embed.innerHTML = `<iframe
+          src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0"
+          allow="autoplay; encrypted-media; fullscreen"
+          allowfullscreen
+          frameborder="0"
+          loading="lazy"
+          title="LUXEhome project video"
+        ></iframe>`;
+      });
+    });
+  </script>
 
 </body>
 </html>
