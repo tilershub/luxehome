@@ -1,0 +1,520 @@
+---
+export const prerender = false;
+import { createServerSupabase } from '../../lib/supabase';
+import type { Project } from '../../lib/supabase';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/projects');
+
+const sb = createServerSupabase(import.meta.env as Record<string, string | undefined>);
+if (!sb) return Astro.redirect('/projects');
+
+const { data: project, error } = await sb
+  .from('projects')
+  .select('*')
+  .eq('slug', slug)
+  .in('status', ['published', 'featured'])
+  .single();
+
+if (error || !project) return Astro.redirect('/projects');
+
+const p = project as Project;
+
+// Fetch related projects
+const relatedSlugs: string[] = p.related_projects || [];
+let related: Pick<Project, 'slug' | 'title' | 'cover_image' | 'category' | 'location'>[] = [];
+if (relatedSlugs.length) {
+  const { data } = await sb
+    .from('projects')
+    .select('slug,title,cover_image,category,location')
+    .in('slug', relatedSlugs)
+    .in('status', ['published', 'featured'])
+    .limit(3);
+  related = data || [];
+}
+
+const CAT_LABELS: Record<string, string> = {
+  bathroom: 'Luxury Bathroom Renovation',
+  flooring: 'Designer Floors',
+  staircase: 'Designer Staircases',
+  kitchen: 'Luxury Kitchens',
+};
+const STYLE_LABELS: Record<string, string> = {
+  modern: 'Modern', minimalist: 'Minimalist', luxury: 'Luxury', contemporary: 'Contemporary',
+};
+
+const pageTitle    = p.meta_title    || `${p.title} — LUXEHOME`;
+const pageDesc     = p.meta_description || p.project_overview || '';
+const ogImage      = p.og_image || p.cover_image || '';
+const canonicalURL = p.canonical_url || `https://luxehome.com/projects/${p.slug}`;
+const breadTitle   = p.breadcrumb_title || p.title;
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "name": p.title,
+  "description": pageDesc,
+  "url": canonicalURL,
+  "image": p.cover_image || undefined,
+  "dateCreated": p.completion_date || undefined,
+  "locationCreated": {
+    "@type": "Place",
+    "name": p.location + ", Sri Lanka"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "LUXEHOME",
+    "url": "https://luxehome.com",
+    "telephone": "+94774503744"
+  },
+  ...(p.testimonial_text ? {
+    "review": {
+      "@type": "Review",
+      "reviewBody": p.testimonial_text,
+      "author": { "@type": "Person", "name": p.testimonial_author || "Client" }
+    }
+  } : {})
+});
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{pageTitle}</title>
+  <meta name="description" content={pageDesc} />
+  <link rel="canonical" href={canonicalURL} />
+
+  <!-- Open Graph -->
+  <meta property="og:title"       content={pageTitle} />
+  <meta property="og:description" content={pageDesc} />
+  <meta property="og:url"         content={canonicalURL} />
+  <meta property="og:type"        content="article" />
+  {ogImage && <meta property="og:image" content={ogImage} />}
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json" set:html={jsonLd}></script>
+
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --charcoal: #161c1a; --cream: #f0ece0; --clay: #b8945a;
+      --muted: rgba(240,236,224,.65); --border: rgba(255,255,255,.08);
+    }
+    body { background: var(--charcoal); color: var(--cream); font-family: 'DM Sans', system-ui, sans-serif; line-height: 1.7; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* Nav */
+    .site-nav {
+      background: rgba(22,28,26,.95); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; display: flex; align-items: center; height: 64px; gap: 16px;
+      position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px);
+    }
+    .site-nav .logo { font-size: 1.1rem; font-weight: 800; letter-spacing: .04em; }
+    .site-nav .logo span { color: var(--clay); }
+    .nav-links { display: flex; gap: 24px; margin-left: auto; font-size: .85rem; color: var(--muted); }
+    .nav-links a:hover { color: var(--cream); }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      padding: .9rem 2rem; font-size: .78rem; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    }
+    .breadcrumb a:hover { color: var(--clay); }
+    .breadcrumb .sep { opacity: .4; }
+
+    /* Hero */
+    .hero {
+      position: relative; height: 520px; overflow: hidden;
+      background: #1a2020;
+    }
+    .hero-img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.6); }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(22,28,26,.9) 0%, transparent 55%);
+    }
+    .hero-content {
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 2.5rem 2rem;
+    }
+    .cat-tag {
+      display: inline-block; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em;
+      background: var(--clay); color: #fff; padding: 4px 10px; border-radius: 4px; margin-bottom: 1rem;
+    }
+    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.8rem,4vw,3rem); font-weight: 700; line-height: 1.15; }
+    .hero-meta { margin-top: .6rem; font-size: .88rem; color: rgba(240,236,224,.8); }
+
+    /* Key facts bar */
+    .facts-bar {
+      display: flex; flex-wrap: wrap; gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .fact {
+      padding: 1.1rem 1.8rem; border-right: 1px solid var(--border);
+      min-width: 140px;
+    }
+    .fact-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--clay); margin-bottom: 4px; }
+    .fact-val { font-size: .92rem; font-weight: 600; }
+
+    /* Content */
+    .case-body { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+    .section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+    .section:last-child { border-bottom: none; }
+    .section-tag {
+      font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .15em;
+      color: var(--clay); margin-bottom: .6rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.3rem,2.5vw,1.9rem);
+      font-weight: 700; line-height: 1.2; margin-bottom: 1.2rem;
+    }
+    .prose { font-size: .95rem; color: rgba(240,236,224,.85); line-height: 1.85; white-space: pre-wrap; }
+
+    /* Before/After */
+    .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .ba-col {}
+    .ba-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 6px; }
+    .ba-img { width: 100%; height: 280px; object-fit: cover; border-radius: 8px; }
+
+    /* Image gallery */
+    .img-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .gallery-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 7px; transition: transform .3s; cursor: zoom-in; }
+    .gallery-img:hover { transform: scale(1.03); }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .tl-item { display: flex; gap: 16px; padding: 16px 0; }
+    .tl-dot-col { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--clay); flex-shrink: 0; margin-top: 4px; }
+    .tl-line { flex: 1; width: 1px; background: var(--border); margin-top: 4px; }
+    .tl-item:last-child .tl-line { display: none; }
+    .tl-body { flex: 1; padding-bottom: 8px; }
+    .tl-phase { font-weight: 700; font-size: .9rem; }
+    .tl-duration { font-size: .75rem; color: var(--clay); margin-top: 2px; margin-bottom: 4px; }
+    .tl-desc { font-size: .85rem; color: var(--muted); }
+
+    /* Testimonial */
+    .testimonial-block {
+      background: rgba(184,148,90,.08); border: 1px solid rgba(184,148,90,.2);
+      border-left: 4px solid var(--clay); border-radius: 0 8px 8px 0;
+      padding: 1.8rem 2rem;
+    }
+    .testimonial-text { font-size: 1.05rem; font-style: italic; line-height: 1.75; margin-bottom: 1rem; }
+    .testimonial-author { font-size: .82rem; font-weight: 700; color: var(--clay); }
+
+    /* FAQs */
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      padding: 1rem 0; font-size: .92rem; font-weight: 600; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      list-style: none;
+    }
+    .faq-q::after { content: '+'; color: var(--clay); font-size: 1.2rem; flex-shrink: 0; }
+    details[open] .faq-q::after { content: '−'; }
+    .faq-a { padding: 0 0 1rem; font-size: .88rem; color: var(--muted); line-height: 1.75; }
+
+    /* Related */
+    .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .related-card {
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+      transition: transform .3s, border-color .3s;
+    }
+    .related-card:hover { transform: translateY(-4px); border-color: rgba(184,148,90,.3); }
+    .related-img { width: 100%; height: 140px; object-fit: cover; }
+    .related-body { padding: .9rem 1rem; }
+    .related-title { font-size: .88rem; font-weight: 700; margin-bottom: 3px; }
+    .related-loc { font-size: .75rem; color: var(--muted); }
+
+    /* CTA */
+    .cta-section {
+      background: linear-gradient(135deg, #1e2422 0%, #161c1a 100%);
+      padding: 4rem 2rem; text-align: center; border-top: 1px solid var(--border);
+    }
+    .cta-section h2 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.4rem,3vw,2.2rem); margin-bottom: .8rem; }
+    .cta-section p { color: var(--muted); margin-bottom: 2rem; max-width: 440px; margin-left: auto; margin-right: auto; }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 14px 28px; border-radius: 8px; border: none;
+      background: var(--clay); color: #fff; font-weight: 700; font-size: .9rem; cursor: pointer;
+    }
+    .btn-secondary {
+      padding: 14px 28px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.2); color: var(--cream);
+      font-weight: 600; font-size: .9rem; background: none;
+    }
+
+    .footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; font-size: .8rem; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .ba-grid { grid-template-columns: 1fr; }
+      .img-gallery { grid-template-columns: repeat(2, 1fr); }
+      .related-grid { grid-template-columns: 1fr; }
+      .facts-bar { flex-direction: column; }
+      .fact { border-right: none; border-bottom: 1px solid var(--border); }
+      .hero { height: 380px; }
+      .site-nav { padding: 0 1rem; }
+      .nav-links { display: none; }
+      .case-body { padding: 0 1rem; }
+      .breadcrumb { padding: .9rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="/" class="logo">LUXE<span>HOME</span></a>
+    <div class="nav-links">
+      <a href="/services/bathroom">Bathrooms</a>
+      <a href="/services/flooring">Flooring</a>
+      <a href="/projects">Projects</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="/">Home</a>
+    <span class="sep">/</span>
+    <a href="/projects">Projects</a>
+    <span class="sep">/</span>
+    <a href={`/projects?category=${p.category}`}>{CAT_LABELS[p.category] || p.category}</a>
+    <span class="sep">/</span>
+    <span>{breadTitle}</span>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    {p.cover_image
+      ? <img class="hero-img" src={p.cover_image} alt={p.title} width="1400" height="600" />
+      : <div style="width:100%;height:100%;background:#1a2020;display:flex;align-items:center;justify-content:center;font-size:4rem;opacity:.2">🏗️</div>
+    }
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="cat-tag">{CAT_LABELS[p.category] || p.category}</span>
+      <h1 class="hero-title">{p.title}</h1>
+      <div class="hero-meta">{p.location}{p.completion_year ? ` · ${p.completion_year}` : ''}</div>
+    </div>
+  </div>
+
+  <!-- Key facts bar -->
+  <div class="facts-bar">
+    <div class="fact"><div class="fact-label">Location</div><div class="fact-val">{p.location}</div></div>
+    {p.completion_year && <div class="fact"><div class="fact-label">Year</div><div class="fact-val">{p.completion_year}</div></div>}
+    {p.design_style && <div class="fact"><div class="fact-label">Design Style</div><div class="fact-val">{STYLE_LABELS[p.design_style] || p.design_style}</div></div>}
+    <div class="fact"><div class="fact-label">Service</div><div class="fact-val">{CAT_LABELS[p.category]}</div></div>
+    {p.cost_range && <div class="fact"><div class="fact-label">Cost Range</div><div class="fact-val">{p.cost_range}</div></div>}
+  </div>
+
+  <div class="case-body">
+
+    <!-- Project Overview -->
+    {p.project_overview && (
+      <section class="section">
+        <div class="section-tag">Project Overview</div>
+        <p class="prose">{p.project_overview}</p>
+      </section>
+    )}
+
+    <!-- Before / After -->
+    {(p.before_images?.length > 0 || p.after_images?.length > 0) && (
+      <section class="section">
+        <div class="section-tag">Before &amp; After</div>
+        <div class="section-title">The Transformation</div>
+        <div class="ba-grid">
+          {p.before_images?.length > 0 && (
+            <div class="ba-col">
+              <div class="ba-label">Before</div>
+              {p.before_images.slice(0, 3).map((url: string) => (
+                <img class="ba-img" src={url} alt="Before" loading="lazy" style="margin-bottom:8px" />
+              ))}
+            </div>
+          )}
+          {p.after_images?.length > 0 && (
+            <div class="ba-col">
+              <div class="ba-label">After</div>
+              {p.after_images.slice(0, 3).map((url: string) => (
+                <img class="ba-img" src={url} alt="After" loading="lazy" style="margin-bottom:8px" />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    )}
+
+    <!-- Client Requirements -->
+    {p.client_requirements && (
+      <section class="section">
+        <div class="section-tag">Client Brief</div>
+        <div class="section-title">What the Client Needed</div>
+        <p class="prose">{p.client_requirements}</p>
+      </section>
+    )}
+
+    <!-- Design Concept -->
+    {p.design_concept && (
+      <section class="section">
+        <div class="section-tag">Design</div>
+        <div class="section-title">The Concept</div>
+        <p class="prose">{p.design_concept}</p>
+      </section>
+    )}
+
+    <!-- Scope of Work -->
+    {p.scope_of_work && (
+      <section class="section">
+        <div class="section-tag">Scope</div>
+        <div class="section-title">Work Included</div>
+        <p class="prose">{p.scope_of_work}</p>
+      </section>
+    )}
+
+    <!-- Materials & Brands -->
+    {p.materials_brands && (
+      <section class="section">
+        <div class="section-tag">Materials &amp; Brands</div>
+        <div class="section-title">What We Used</div>
+        <p class="prose">{p.materials_brands}</p>
+      </section>
+    )}
+
+    <!-- Construction Progress -->
+    {p.progress_images?.length > 0 && (
+      <section class="section">
+        <div class="section-tag">Construction</div>
+        <div class="section-title">Progress Gallery</div>
+        <div class="img-gallery">
+          {p.progress_images.map((url: string) => (
+            <img class="gallery-img" src={url} alt="Construction progress" loading="lazy" />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Timeline -->
+    {p.project_timeline?.length > 0 && (
+      <section class="section">
+        <div class="section-tag">Timeline</div>
+        <div class="section-title">Project Phases</div>
+        <div class="timeline">
+          {p.project_timeline.map((item: { phase: string; duration: string; description: string }) => (
+            <div class="tl-item">
+              <div class="tl-dot-col">
+                <div class="tl-dot"></div>
+                <div class="tl-line"></div>
+              </div>
+              <div class="tl-body">
+                <div class="tl-phase">{item.phase}</div>
+                {item.duration && <div class="tl-duration">{item.duration}</div>}
+                {item.description && <div class="tl-desc">{item.description}</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Gallery -->
+    {p.gallery_images?.length > 0 && (
+      <section class="section">
+        <div class="section-tag">Gallery</div>
+        <div class="section-title">Project Gallery</div>
+        <div class="img-gallery">
+          {p.gallery_images.map((url: string) => (
+            <img class="gallery-img" src={url} alt={p.title} loading="lazy" />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Challenges & Solutions -->
+    {p.challenges_solutions && (
+      <section class="section">
+        <div class="section-tag">Challenges &amp; Solutions</div>
+        <div class="section-title">How We Overcame Obstacles</div>
+        <p class="prose">{p.challenges_solutions}</p>
+      </section>
+    )}
+
+    <!-- Testimonial -->
+    {p.testimonial_text && (
+      <section class="section">
+        <div class="section-tag">Client Testimonial</div>
+        <div class="testimonial-block">
+          <p class="testimonial-text">&ldquo;{p.testimonial_text}&rdquo;</p>
+          <div class="testimonial-author">
+            — {p.testimonial_author || 'Client'}
+            {p.testimonial_role && <span style="font-weight:400;color:var(--muted)"> · {p.testimonial_role}</span>}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- FAQs -->
+    {p.faqs?.length > 0 && (
+      <section class="section">
+        <div class="section-tag">FAQ</div>
+        <div class="section-title">Frequently Asked Questions</div>
+        {p.faqs.map((faq: { question: string; answer: string }) => (
+          <details class="faq-item">
+            <summary class="faq-q">{faq.question}</summary>
+            <p class="faq-a">{faq.answer}</p>
+          </details>
+        ))}
+      </section>
+    )}
+
+    <!-- Related Projects -->
+    {related.length > 0 && (
+      <section class="section">
+        <div class="section-tag">Related Work</div>
+        <div class="section-title">You Might Also Like</div>
+        <div class="related-grid">
+          {related.map((r) => (
+            <a class="related-card" href={`/projects/${r.slug}`}>
+              {r.cover_image
+                ? <img class="related-img" src={r.cover_image} alt={r.title} loading="lazy" />
+                : <div style="height:140px;background:#252c29;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🏗️</div>
+              }
+              <div class="related-body">
+                <div class="related-title">{r.title}</div>
+                <div class="related-loc">{r.location} · {CAT_LABELS[r.category] || r.category}</div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+  </div>
+
+  <!-- CTA -->
+  {(p.cta_book_consultation || p.cta_whatsapp) && (
+    <section class="cta-section">
+      <h2>Ready to Start Your Project?</h2>
+      <p>Let's create something extraordinary together. Get in touch for a free consultation.</p>
+      <div class="cta-btns">
+        {p.cta_book_consultation && (
+          <a class="btn-primary" href="/contact">Book a Consultation</a>
+        )}
+        {p.cta_whatsapp && (
+          <a class="btn-secondary" href="https://wa.me/94774503744?text=Hi%20LUXEHOME%2C%20I%20saw%20your%20project%20%22{encodeURIComponent(p.title)}%22%20and%20would%20like%20to%20enquire." target="_blank" rel="noopener">
+            WhatsApp LUXEhome
+          </a>
+        )}
+      </div>
+    </section>
+  )}
+
+  <footer class="footer">
+    <p>© {new Date().getFullYear()} LUXEHOME · Premium Renovation Sri Lanka</p>
+    <p style="margin-top:6px"><a href="/">Home</a> · <a href="/projects">Projects</a> · <a href="/contact">Contact</a></p>
+  </footer>
+
+</body>
+</html>

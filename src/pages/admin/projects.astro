@@ -1,0 +1,1133 @@
+---
+// Project management SPA — client-side only, no server-side code
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects — LUXEHOME Admin</title>
+  <link rel="icon" href="/favicon.svg" />
+</head>
+<body>
+  <div id="app">
+    <header id="hdr">
+      <a href="/admin" class="back-lnk">← Admin</a>
+      <span id="hdr-title">Projects</span>
+      <button id="new-btn" class="hdr-action">＋ New</button>
+    </header>
+    <main id="main"></main>
+    <div id="toast" aria-live="polite"></div>
+  </div>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #161c1a;
+      --surface: #1e2422;
+      --surface2: #252c29;
+      --border: rgba(255,255,255,.08);
+      --cream: #f0ece0;
+      --muted: rgba(240,236,224,.6);
+      --clay: #b8945a;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue: #4a90d9;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--cream); font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; }
+    #app { display: flex; flex-direction: column; height: 100%; }
+    #hdr {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .back-lnk { color: var(--clay); text-decoration: none; font-size: .85rem; white-space: nowrap; }
+    #hdr-title { flex: 1; font-weight: 600; font-size: .95rem; }
+    .hdr-action {
+      padding: 7px 14px; border-radius: 6px; border: none;
+      background: var(--clay); color: #fff; font-weight: 600; font-size: .82rem;
+      cursor: pointer; white-space: nowrap;
+    }
+    .hdr-action:disabled { opacity: .5; }
+    #main { flex: 1; overflow-y: auto; }
+
+    /* ── List view ── */
+    .list-toolbar {
+      display: flex; gap: 8px; padding: 14px 16px;
+      border-bottom: 1px solid var(--border); background: var(--surface);
+      position: sticky; top: 57px; z-index: 40;
+    }
+    .search-box {
+      flex: 1; padding: 8px 12px; border-radius: 7px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--cream); font-size: .85rem;
+    }
+    .filter-sel {
+      padding: 8px 10px; border-radius: 7px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--cream); font-size: .82rem; cursor: pointer;
+    }
+    .project-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .proj-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+      transition: border-color .2s;
+    }
+    .proj-card:hover { border-color: var(--clay); }
+    .proj-thumb {
+      width: 52px; height: 52px; border-radius: 7px; object-fit: cover;
+      background: var(--surface2); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+    }
+    .proj-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
+    .proj-body { flex: 1; min-width: 0; }
+    .proj-title { font-weight: 600; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .proj-meta { font-size: .78rem; color: var(--muted); margin-top: 3px; }
+    .status-pill {
+      font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .empty-state .ei { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 1rem; margin-bottom: 6px; color: var(--cream); }
+
+    /* ── Editor ── */
+    .tab-bar {
+      display: flex; overflow-x: auto; gap: 2px;
+      padding: 10px 16px 0; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 57px; z-index: 40;
+      scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 8px 14px; border: none; background: none; color: var(--muted);
+      font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+      border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+    }
+    .tab-btn.active { color: var(--clay); border-bottom-color: var(--clay); }
+    .tab-btn.has-error { color: var(--red); }
+    .tab-content { padding: 20px 16px 80px; }
+
+    /* ── Form elements ── */
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+    .field label .req { color: var(--clay); }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 10px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--cream); font-size: .9rem; font-family: inherit;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--clay);
+    }
+    .field input.error, .field textarea.error { border-color: var(--red); }
+    .field textarea { min-height: 100px; resize: vertical; }
+    .field .hint { font-size: .72rem; color: var(--muted); margin-top: 5px; }
+    .field .char-count { font-size: .72rem; color: var(--muted); margin-top: 4px; text-align: right; }
+    .char-count.over { color: var(--red); }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    select option { background: var(--surface2); }
+
+    /* ── Image upload ── */
+    .img-upload-area {
+      border: 2px dashed var(--border); border-radius: 10px;
+      padding: 20px; text-align: center; cursor: pointer;
+      transition: border-color .2s;
+    }
+    .img-upload-area:hover { border-color: var(--clay); }
+    .img-preview {
+      width: 100%; max-height: 180px; object-fit: cover;
+      border-radius: 8px; margin-bottom: 8px;
+    }
+    .img-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .img-item {
+      position: relative; width: 80px; height: 80px; border-radius: 7px; overflow: hidden;
+      background: var(--surface2); flex-shrink: 0;
+    }
+    .img-item img { width: 100%; height: 100%; object-fit: cover; }
+    .img-rm {
+      position: absolute; top: 2px; right: 2px;
+      background: rgba(0,0,0,.7); border: none; color: #fff;
+      width: 20px; height: 20px; border-radius: 50%; font-size: .7rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .upload-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 7px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--cream); font-size: .82rem; cursor: pointer;
+    }
+    .upload-btn:hover { border-color: var(--clay); }
+    .upload-progress { font-size: .78rem; color: var(--clay); margin-top: 6px; }
+
+    /* ── Dynamic lists ── */
+    .dyn-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+    .dyn-row {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px;
+    }
+    .dyn-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .dyn-row-label { font-size: .78rem; font-weight: 600; color: var(--muted); }
+    .rm-row-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: .85rem; padding: 2px 6px; }
+    .add-row-btn {
+      width: 100%; padding: 9px; border-radius: 8px;
+      border: 1px dashed var(--border); background: none;
+      color: var(--clay); font-size: .82rem; cursor: pointer;
+    }
+    .add-row-btn:hover { border-color: var(--clay); background: rgba(184,148,90,.07); }
+
+    /* ── Toggle switch ── */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .toggle-label { font-size: .88rem; }
+    .toggle-sub { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .toggle {
+      position: relative; width: 44px; height: 24px; flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; border-radius: 24px;
+      background: var(--border); transition: background .2s; cursor: pointer;
+    }
+    .toggle-slider::after {
+      content: ''; position: absolute; width: 18px; height: 18px;
+      left: 3px; top: 3px; border-radius: 50%; background: #fff;
+      transition: transform .2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--clay); }
+    .toggle input:checked + .toggle-slider::after { transform: translateX(20px); }
+
+    /* ── Publishing / Save bar ── */
+    .save-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 12px 16px; display: flex; gap: 10px; z-index: 100;
+    }
+    .save-btn {
+      flex: 1; padding: 12px; border-radius: 8px; border: none;
+      background: var(--clay); color: #fff; font-weight: 700; font-size: .9rem; cursor: pointer;
+    }
+    .save-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .preview-btn {
+      padding: 12px 16px; border-radius: 8px;
+      border: 1px solid var(--border); background: none;
+      color: var(--cream); font-size: .85rem; cursor: pointer; white-space: nowrap;
+    }
+    .status-select {
+      padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--cream); font-size: .88rem; cursor: pointer;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: #333; color: var(--cream); padding: 10px 20px; border-radius: 8px;
+      font-size: .85rem; z-index: 200; opacity: 0; transition: opacity .25s;
+      pointer-events: none; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+    #toast.success { background: #1a472a; border: 1px solid var(--green); }
+    #toast.error { background: #4a1a1a; border: 1px solid var(--red); }
+
+    /* ── Delete confirm ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.6);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300; padding: 20px;
+    }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 24px; max-width: 340px; width: 100%;
+    }
+    .modal h3 { font-size: 1rem; margin-bottom: 8px; }
+    .modal p { font-size: .85rem; color: var(--muted); margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; }
+    .btn-danger { flex: 1; padding: 11px; border-radius: 8px; border: none; background: var(--red); color: #fff; font-weight: 600; cursor: pointer; }
+    .btn-cancel { flex: 1; padding: 11px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--cream); cursor: pointer; }
+
+    @media (min-width: 640px) {
+      .tab-content { max-width: 720px; margin: 0 auto; }
+      .project-list { max-width: 720px; margin: 0 auto; }
+      .list-toolbar { max-width: 720px; margin: 0 auto; }
+    }
+  </style>
+
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+
+    const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+    const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const BUCKET = 'project-media';
+
+    const CAT_LABELS = { bathroom: 'Luxury Bathroom Renovation', flooring: 'Designer Floors', staircase: 'Designer Staircases', kitchen: 'Luxury Kitchens' };
+    const STYLE_LABELS = { modern: 'Modern', minimalist: 'Minimalist', luxury: 'Luxury', contemporary: 'Contemporary' };
+    const STATUS_COLORS = { draft: '#888', published: '#22c55e', featured: '#b8945a' };
+    const TABS = ['Basic Details', 'Media', 'Story & Scope', 'Timeline', 'Testimonial', 'SEO', 'Publishing'];
+    const REQUIRED_FIELDS = { 0: ['title','category','location'], 1: ['cover_image'], 2: ['project_overview'], 5: ['meta_title','meta_description'] };
+
+    let sb, main, hdrTitle, newBtn;
+    let projects = [];
+    let proj = null; // current project being edited
+    let view = 'list';
+    let activeTab = 0;
+    let saving = false;
+    let filterStatus = 'all';
+    let filterSearch = '';
+
+    function blankProject() {
+      return {
+        id: null, title: '', slug: '', category: 'bathroom', location: '',
+        completion_date: '', completion_year: new Date().getFullYear(),
+        design_style: 'modern', status: 'draft',
+        cover_image: '', hero_video: '',
+        before_images: [], after_images: [], progress_images: [], gallery_images: [],
+        project_overview: '', client_requirements: '', design_concept: '',
+        scope_of_work: '', materials_brands: '',
+        project_timeline: [], challenges_solutions: '',
+        testimonial_text: '', testimonial_author: '', testimonial_role: '',
+        cost_range: '', faqs: [], related_projects: [],
+        cta_book_consultation: true, cta_whatsapp: true,
+        meta_title: '', meta_description: '', og_image: '', canonical_url: '',
+        breadcrumb_title: '', include_in_sitemap: true
+      };
+    }
+
+    // ── Supabase helpers ──────────────────────────────────────────────────
+
+    async function loadProjects() {
+      if (!sb) return;
+      const { data, error } = await sb.from('projects')
+        .select('id,title,slug,category,location,completion_year,status,cover_image,created_at')
+        .order('created_at', { ascending: false });
+      if (!error) projects = data || [];
+    }
+
+    async function saveProject() {
+      if (!sb || saving) return;
+      collectCurrentTab();
+      if (!validateProject()) return;
+      saving = true;
+      renderSaveBar();
+      const payload = { ...proj };
+      delete payload.id;
+      delete payload.created_at;
+      delete payload.updated_at;
+      let error;
+      if (proj.id) {
+        ({ error } = await sb.from('projects').update(payload).eq('id', proj.id));
+      } else {
+        const { data, error: e } = await sb.from('projects').insert(payload).select().single();
+        error = e;
+        if (data) proj.id = data.id;
+      }
+      saving = false;
+      if (error) {
+        toast('Save failed: ' + error.message, 'error');
+      } else {
+        toast('Project saved', 'success');
+        await loadProjects();
+      }
+      renderSaveBar();
+    }
+
+    async function deleteProject(id) {
+      if (!sb) return;
+      const { error } = await sb.from('projects').delete().eq('id', id);
+      if (error) { toast('Delete failed', 'error'); return; }
+      toast('Project deleted', 'success');
+      await loadProjects();
+      goList();
+    }
+
+    async function uploadImage(file, existingId) {
+      if (!sb) return null;
+      const pId = existingId || proj.id || 'new-' + Date.now();
+      const path = `${pId}/${Date.now()}-${file.name.replace(/[^a-z0-9.\-_]/gi,'_')}`;
+      const { data, error } = await sb.storage.from(BUCKET).upload(path, file, { upsert: false });
+      if (error) { toast('Upload failed: ' + error.message, 'error'); return null; }
+      const { data: { publicUrl } } = sb.storage.from(BUCKET).getPublicUrl(data.path);
+      return publicUrl;
+    }
+
+    // ── Validation ────────────────────────────────────────────────────────
+
+    function validateProject() {
+      const errors = [];
+      if (!proj.title.trim())          errors.push('Title is required (Basic Details)');
+      if (!proj.category)              errors.push('Category is required (Basic Details)');
+      if (!proj.location.trim())       errors.push('Location is required (Basic Details)');
+      if (!proj.cover_image)           errors.push('Cover image is required (Media)');
+      if (!proj.project_overview?.trim()) errors.push('Project overview is required (Story & Scope)');
+      if (!proj.meta_title?.trim())    errors.push('Meta title is required (SEO)');
+      if (!proj.meta_description?.trim()) errors.push('Meta description is required (SEO)');
+      if (errors.length) {
+        toast(errors[0], 'error', 4000);
+        return false;
+      }
+      return true;
+    }
+
+    // ── Slug generator ────────────────────────────────────────────────────
+
+    function toSlug(str) {
+      return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+
+    // ── View navigation ───────────────────────────────────────────────────
+
+    function goList() {
+      view = 'list';
+      proj = null;
+      activeTab = 0;
+      hdrTitle.textContent = 'Projects';
+      newBtn.style.display = '';
+      renderList();
+    }
+
+    function goEditor(p = null) {
+      view = 'editor';
+      proj = p ? { ...p, before_images: p.before_images || [], after_images: p.after_images || [], progress_images: p.progress_images || [], gallery_images: p.gallery_images || [], project_timeline: p.project_timeline || [], faqs: p.faqs || [], related_projects: p.related_projects || [] } : blankProject();
+      activeTab = 0;
+      hdrTitle.textContent = proj.id ? 'Edit Project' : 'New Project';
+      newBtn.style.display = 'none';
+      renderEditor();
+    }
+
+    // ── Collect helpers ───────────────────────────────────────────────────
+
+    function g(id) { return document.getElementById(id); }
+    function gv(id, fallback = '') { return g(id)?.value ?? fallback; }
+    function gc(id) { return g(id)?.checked ?? false; }
+
+    function collectCurrentTab() {
+      switch (activeTab) {
+        case 0: collectTab0(); break;
+        case 1: collectTab1(); break;
+        case 2: collectTab2(); break;
+        case 3: collectTab3(); break;
+        case 4: collectTab4(); break;
+        case 5: collectTab5(); break;
+        case 6: collectTab6(); break;
+      }
+    }
+
+    function collectTab0() {
+      proj.title          = gv('f-title');
+      proj.slug           = gv('f-slug');
+      proj.category       = gv('f-category');
+      proj.location       = gv('f-location');
+      proj.completion_date = gv('f-date');
+      proj.completion_year = parseInt(gv('f-year')) || new Date().getFullYear();
+      proj.design_style   = gv('f-style');
+    }
+
+    function collectTab1() {
+      proj.cover_image = gv('f-cover');
+      proj.hero_video  = gv('f-video');
+      // multi-image arrays are updated live via the add/remove handlers
+    }
+
+    function collectTab2() {
+      proj.project_overview    = gv('f-overview');
+      proj.client_requirements = gv('f-requirements');
+      proj.design_concept      = gv('f-concept');
+      proj.scope_of_work       = gv('f-scope');
+      proj.materials_brands    = gv('f-materials');
+    }
+
+    function collectTab3() {
+      const rows = document.querySelectorAll('.timeline-row');
+      proj.project_timeline = Array.from(rows).map(row => ({
+        phase:       row.querySelector('.tl-phase')?.value || '',
+        duration:    row.querySelector('.tl-duration')?.value || '',
+        description: row.querySelector('.tl-desc')?.value || ''
+      }));
+      proj.challenges_solutions = gv('f-challenges');
+    }
+
+    function collectTab4() {
+      proj.testimonial_text   = gv('f-testimonial');
+      proj.testimonial_author = gv('f-author');
+      proj.testimonial_role   = gv('f-role');
+      proj.cost_range         = gv('f-cost-range');
+      const faqRows = document.querySelectorAll('.faq-row');
+      proj.faqs = Array.from(faqRows).map(row => ({
+        question: row.querySelector('.faq-q')?.value || '',
+        answer:   row.querySelector('.faq-a')?.value || ''
+      })).filter(f => f.question.trim());
+      const relVal = gv('f-related').trim();
+      proj.related_projects = relVal ? relVal.split(',').map(s => s.trim()).filter(Boolean) : [];
+      proj.cta_book_consultation = gc('f-cta-book');
+      proj.cta_whatsapp          = gc('f-cta-wa');
+    }
+
+    function collectTab5() {
+      proj.meta_title         = gv('f-meta-title');
+      proj.meta_description   = gv('f-meta-desc');
+      proj.og_image           = gv('f-og-image');
+      proj.canonical_url      = gv('f-canonical');
+      proj.breadcrumb_title   = gv('f-breadcrumb');
+      proj.include_in_sitemap = gc('f-sitemap');
+    }
+
+    function collectTab6() {
+      proj.status = gv('f-status');
+    }
+
+    // ── List view ─────────────────────────────────────────────────────────
+
+    function renderList() {
+      const filtered = projects.filter(p => {
+        if (filterStatus !== 'all' && p.status !== filterStatus) return false;
+        if (filterSearch) {
+          const q = filterSearch.toLowerCase();
+          return p.title.toLowerCase().includes(q) || p.location?.toLowerCase().includes(q);
+        }
+        return true;
+      });
+
+      main.innerHTML = `
+        <div class="list-toolbar">
+          <input class="search-box" type="search" id="search-box" placeholder="Search…" value="${filterSearch}" />
+          <select class="filter-sel" id="status-filter">
+            <option value="all">All</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="featured">Featured</option>
+          </select>
+        </div>
+        <div class="project-list">
+          ${filtered.length === 0 ? `
+            <div class="empty-state">
+              <div class="ei">📁</div>
+              <h3>${projects.length === 0 ? 'No projects yet' : 'No results'}</h3>
+              <p>${projects.length === 0 ? 'Tap + New to create your first case study.' : 'Try a different filter.'}</p>
+            </div>
+          ` : filtered.map(p => `
+            <div class="proj-card" data-id="${p.id}">
+              <div class="proj-thumb">
+                ${p.cover_image ? `<img src="${p.cover_image}" alt="" loading="lazy" />` : '🏗️'}
+              </div>
+              <div class="proj-body">
+                <div class="proj-title">${p.title}</div>
+                <div class="proj-meta">${CAT_LABELS[p.category] || p.category} · ${p.location}${p.completion_year ? ' · ' + p.completion_year : ''}</div>
+              </div>
+              <span class="status-pill" style="background:${STATUS_COLORS[p.status]}22;color:${STATUS_COLORS[p.status]}">${p.status}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      g('search-box').value = filterSearch;
+      g('status-filter').value = filterStatus;
+
+      g('search-box').addEventListener('input', e => { filterSearch = e.target.value; renderList(); });
+      g('status-filter').addEventListener('change', e => { filterStatus = e.target.value; renderList(); });
+
+      document.querySelectorAll('.proj-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const p = projects.find(x => x.id === card.dataset.id);
+          if (p) goEditor(p);
+        });
+      });
+    }
+
+    // ── Editor shell ──────────────────────────────────────────────────────
+
+    function renderEditor() {
+      main.innerHTML = `
+        <div class="tab-bar" id="tab-bar">
+          ${TABS.map((t, i) => `<button class="tab-btn${i === activeTab ? ' active' : ''}" data-tab="${i}">${t}</button>`).join('')}
+        </div>
+        <div class="tab-content" id="tab-content"></div>
+        ${renderSaveBarHTML()}
+      `;
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          collectCurrentTab();
+          activeTab = parseInt(btn.dataset.tab);
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderTabContent();
+          document.getElementById('tab-content').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      });
+
+      renderTabContent();
+      attachSaveBarEvents();
+    }
+
+    function renderSaveBarHTML() {
+      return `
+        <div class="save-bar">
+          <select class="status-select" id="sb-status">
+            <option value="draft"${proj.status==='draft'?' selected':''}>Draft</option>
+            <option value="published"${proj.status==='published'?' selected':''}>Published</option>
+            <option value="featured"${proj.status==='featured'?' selected':''}>Featured</option>
+          </select>
+          ${proj.id && proj.status !== 'draft' ? `<a class="preview-btn" href="/projects/${proj.slug}" target="_blank">Preview ↗</a>` : ''}
+          <button class="save-btn" id="save-btn" ${saving ? 'disabled' : ''}>${saving ? 'Saving…' : 'Save Project'}</button>
+        </div>
+      `;
+    }
+
+    function renderSaveBar() {
+      const bar = document.querySelector('.save-bar');
+      if (!bar) return;
+      bar.outerHTML = renderSaveBarHTML();
+      attachSaveBarEvents();
+    }
+
+    function attachSaveBarEvents() {
+      g('sb-status')?.addEventListener('change', e => { proj.status = e.target.value; });
+      g('save-btn')?.addEventListener('click', saveProject);
+    }
+
+    // ── Tab 0: Basic Details ──────────────────────────────────────────────
+
+    function renderTab0() {
+      return `
+        <div class="field">
+          <label>Title <span class="req">*</span></label>
+          <input id="f-title" type="text" value="${esc(proj.title)}" placeholder="e.g. Modern Ensuite Bathroom" />
+        </div>
+        <div class="field">
+          <label>URL Slug <span class="req">*</span></label>
+          <input id="f-slug" type="text" value="${esc(proj.slug)}" placeholder="e.g. modern-ensuite-colombo" />
+          <div class="hint">Used in the URL: /projects/your-slug-here</div>
+        </div>
+        <div class="field">
+          <label>Category <span class="req">*</span></label>
+          <select id="f-category">
+            ${Object.entries(CAT_LABELS).map(([v,l]) => `<option value="${v}"${proj.category===v?' selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Location <span class="req">*</span></label>
+          <input id="f-location" type="text" value="${esc(proj.location)}" placeholder="e.g. Colombo 7" />
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Completion Date</label>
+            <input id="f-date" type="date" value="${proj.completion_date || ''}" />
+          </div>
+          <div class="field">
+            <label>Year</label>
+            <input id="f-year" type="number" value="${proj.completion_year || ''}" placeholder="${new Date().getFullYear()}" min="2000" max="2099" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Design Style</label>
+          <select id="f-style">
+            <option value="">— Select —</option>
+            ${Object.entries(STYLE_LABELS).map(([v,l]) => `<option value="${v}"${proj.design_style===v?' selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+      `;
+    }
+
+    // ── Tab 1: Media ──────────────────────────────────────────────────────
+
+    function renderTab1() {
+      return `
+        <div class="field">
+          <label>Cover Image <span class="req">*</span></label>
+          ${proj.cover_image ? `<img class="img-preview" src="${proj.cover_image}" alt="" />` : ''}
+          <input id="f-cover" type="url" value="${esc(proj.cover_image)}" placeholder="https://… or upload below" />
+          <div style="margin-top:8px">
+            <button class="upload-btn" id="cover-upload-btn">↑ Upload Image</button>
+            <input type="file" id="cover-file" accept="image/*" style="display:none" />
+          </div>
+          <div id="cover-progress" class="upload-progress" style="display:none"></div>
+        </div>
+        <div class="field">
+          <label>Hero Video URL</label>
+          <input id="f-video" type="url" value="${esc(proj.hero_video)}" placeholder="YouTube, Vimeo, or direct video URL" />
+        </div>
+        ${renderImageArrayField('Before Images', 'before_images')}
+        ${renderImageArrayField('After Images', 'after_images')}
+        ${renderImageArrayField('Construction Progress Images', 'progress_images')}
+        ${renderImageArrayField('Gallery Images', 'gallery_images')}
+      `;
+    }
+
+    function renderImageArrayField(label, key) {
+      const imgs = proj[key] || [];
+      return `
+        <div class="field">
+          <label>${label}</label>
+          <div class="img-grid" id="grid-${key}">
+            ${imgs.map((url, i) => `
+              <div class="img-item" data-key="${key}" data-idx="${i}">
+                <img src="${url}" alt="" loading="lazy" />
+                <button class="img-rm rm-img" data-key="${key}" data-idx="${i}">×</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="upload-btn arr-upload-btn" data-key="${key}">＋ Add Images</button>
+          <input type="file" class="arr-file-input" data-key="${key}" accept="image/*" multiple style="display:none" />
+          <div class="upload-progress" id="prog-${key}" style="display:none"></div>
+        </div>
+      `;
+    }
+
+    // ── Tab 2: Story & Scope ──────────────────────────────────────────────
+
+    function renderTab2() {
+      return `
+        <div class="field">
+          <label>Project Overview <span class="req">*</span></label>
+          <textarea id="f-overview" rows="5" placeholder="Summarise the project — what was done, the outcome, and why it's notable.">${esc(proj.project_overview)}</textarea>
+        </div>
+        <div class="field">
+          <label>Client Requirements</label>
+          <textarea id="f-requirements" rows="4" placeholder="What did the client need or request?">${esc(proj.client_requirements)}</textarea>
+        </div>
+        <div class="field">
+          <label>Design Concept</label>
+          <textarea id="f-concept" rows="4" placeholder="Describe the design concept and inspiration.">${esc(proj.design_concept)}</textarea>
+        </div>
+        <div class="field">
+          <label>Scope of Work</label>
+          <textarea id="f-scope" rows="4" placeholder="List all work items included in this project.">${esc(proj.scope_of_work)}</textarea>
+        </div>
+        <div class="field">
+          <label>Materials &amp; Brands Used</label>
+          <textarea id="f-materials" rows="3" placeholder="e.g. Rocell Tiles, Swisstek Grout, Swiss Bathware…">${esc(proj.materials_brands)}</textarea>
+        </div>
+      `;
+    }
+
+    // ── Tab 3: Timeline ───────────────────────────────────────────────────
+
+    function renderTab3() {
+      const tl = proj.project_timeline || [];
+      return `
+        <div class="field">
+          <label>Project Timeline Phases</label>
+          <div class="dyn-list" id="tl-list">
+            ${tl.map((item, i) => renderTimelineRow(item, i)).join('')}
+          </div>
+          <button class="add-row-btn" id="add-tl-btn">＋ Add Phase</button>
+        </div>
+        <div class="field">
+          <label>Challenges &amp; Solutions</label>
+          <textarea id="f-challenges" rows="5" placeholder="Describe any challenges encountered and how they were resolved.">${esc(proj.challenges_solutions)}</textarea>
+        </div>
+      `;
+    }
+
+    function renderTimelineRow(item = {}, i) {
+      return `
+        <div class="dyn-row timeline-row">
+          <div class="dyn-row-header">
+            <span class="dyn-row-label">Phase ${i + 1}</span>
+            <button class="rm-row-btn rm-tl" data-idx="${i}">Remove</button>
+          </div>
+          <div class="row-2" style="margin-bottom:8px">
+            <input class="tl-phase" type="text" value="${esc(item.phase)}" placeholder="Phase name (e.g. Waterproofing)" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--cream);font-size:.85rem;width:100%" />
+            <input class="tl-duration" type="text" value="${esc(item.duration)}" placeholder="Duration (e.g. 2 days)" style="padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--cream);font-size:.85rem;width:100%" />
+          </div>
+          <textarea class="tl-desc" rows="2" placeholder="Brief description of this phase." style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--cream);font-size:.85rem;resize:vertical">${esc(item.description)}</textarea>
+        </div>
+      `;
+    }
+
+    // ── Tab 4: Testimonial ────────────────────────────────────────────────
+
+    function renderTab4() {
+      const faqs = proj.faqs || [];
+      return `
+        <div class="field">
+          <label>Client Testimonial</label>
+          <textarea id="f-testimonial" rows="4" placeholder="&ldquo;The team transformed our bathroom beyond our expectations…&rdquo;">${esc(proj.testimonial_text)}</textarea>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Client Name</label>
+            <input id="f-author" type="text" value="${esc(proj.testimonial_author)}" placeholder="Mrs. Perera" />
+          </div>
+          <div class="field">
+            <label>Role / Location</label>
+            <input id="f-role" type="text" value="${esc(proj.testimonial_role)}" placeholder="Homeowner, Colombo" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Cost Range (optional)</label>
+          <input id="f-cost-range" type="text" value="${esc(proj.cost_range)}" placeholder="e.g. Rs. 1,200,000 – 1,500,000" />
+          <div class="hint">Shown publicly if filled. Leave blank to hide.</div>
+        </div>
+        <div class="field">
+          <label>FAQs</label>
+          <div class="dyn-list" id="faq-list">
+            ${faqs.map((faq, i) => renderFaqRow(faq, i)).join('')}
+          </div>
+          <button class="add-row-btn" id="add-faq-btn">＋ Add FAQ</button>
+        </div>
+        <div class="field">
+          <label>Related Projects (slugs)</label>
+          <input id="f-related" type="text" value="${esc((proj.related_projects || []).join(', '))}" placeholder="project-slug-1, project-slug-2" />
+          <div class="hint">Comma-separated slugs of related projects to show at the bottom of this page.</div>
+        </div>
+        <div class="field">
+          <label>Call-to-Action Buttons</label>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Book Consultation</div>
+              <div class="toggle-sub">Show "Book Consultation" CTA button</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="f-cta-book" ${proj.cta_book_consultation ? 'checked' : ''} /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">WhatsApp LUXEhome</div>
+              <div class="toggle-sub">Show "WhatsApp Us" CTA button</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="f-cta-wa" ${proj.cta_whatsapp ? 'checked' : ''} /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFaqRow(faq = {}, i) {
+      return `
+        <div class="dyn-row faq-row">
+          <div class="dyn-row-header">
+            <span class="dyn-row-label">FAQ ${i + 1}</span>
+            <button class="rm-row-btn rm-faq" data-idx="${i}">Remove</button>
+          </div>
+          <input class="faq-q" type="text" value="${esc(faq.question)}" placeholder="Question" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--cream);font-size:.85rem;margin-bottom:8px" />
+          <textarea class="faq-a" rows="3" placeholder="Answer" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--cream);font-size:.85rem;resize:vertical">${esc(faq.answer)}</textarea>
+        </div>
+      `;
+    }
+
+    // ── Tab 5: SEO ────────────────────────────────────────────────────────
+
+    function renderTab5() {
+      const metaTitleLen = (proj.meta_title || '').length;
+      const metaDescLen  = (proj.meta_description || '').length;
+      return `
+        <div class="field">
+          <label>Meta Title <span class="req">*</span></label>
+          <input id="f-meta-title" type="text" value="${esc(proj.meta_title)}" placeholder="e.g. Luxury Bathroom Renovation — Colombo 7 | LUXEHOME" maxlength="80" />
+          <div class="char-count${metaTitleLen > 60 ? ' over' : ''}">${metaTitleLen}/60 characters recommended</div>
+        </div>
+        <div class="field">
+          <label>Meta Description <span class="req">*</span></label>
+          <textarea id="f-meta-desc" rows="3" placeholder="Brief description for search results (120–160 characters)." maxlength="300">${esc(proj.meta_description)}</textarea>
+          <div class="char-count${metaDescLen > 160 ? ' over' : ''}">${metaDescLen}/160 characters recommended</div>
+        </div>
+        <div class="field">
+          <label>Open Graph Image URL</label>
+          <input id="f-og-image" type="url" value="${esc(proj.og_image)}" placeholder="URL to social sharing image (1200×630 recommended)" />
+          <div class="hint">Used when the project is shared on Facebook, WhatsApp, etc. Defaults to cover image if blank.</div>
+        </div>
+        <div class="field">
+          <label>Canonical URL</label>
+          <input id="f-canonical" type="url" value="${esc(proj.canonical_url)}" placeholder="https://luxehome.com/projects/your-slug (leave blank for default)" />
+        </div>
+        <div class="field">
+          <label>Breadcrumb Title</label>
+          <input id="f-breadcrumb" type="text" value="${esc(proj.breadcrumb_title)}" placeholder="Short title for breadcrumb (defaults to project title)" />
+        </div>
+        <div class="field">
+          <label>Sitemap</label>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Include in Sitemap</div>
+              <div class="toggle-sub">Published projects are submitted to search engines</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="f-sitemap" ${proj.include_in_sitemap !== false ? 'checked' : ''} /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      `;
+    }
+
+    // ── Tab 6: Publishing ─────────────────────────────────────────────────
+
+    function renderTab6() {
+      return `
+        <div class="field">
+          <label>Project Status</label>
+          <select id="f-status">
+            <option value="draft"${proj.status==='draft'?' selected':''}>Draft — Not visible to public</option>
+            <option value="published"${proj.status==='published'?' selected':''}>Published — Visible in project archive</option>
+            <option value="featured"${proj.status==='featured'?' selected':''}>Featured — Appears on homepage + archive</option>
+          </select>
+          <div class="hint">
+            ${proj.status === 'draft' ? 'Only you can see this project.' : ''}
+            ${proj.status === 'published' ? 'Visible at /projects and on service pages.' : ''}
+            ${proj.status === 'featured' ? 'Highlighted on the homepage, /projects, and service pages.' : ''}
+          </div>
+        </div>
+        ${proj.id ? `
+          <div class="field">
+            <label>Project URL</label>
+            <a href="/projects/${proj.slug}" target="_blank" style="color:var(--clay);font-size:.88rem">/projects/${proj.slug} ↗</a>
+          </div>
+        ` : ''}
+        ${proj.id ? `
+          <div class="field" style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border)">
+            <label style="color:var(--red)">Danger Zone</label>
+            <button id="delete-btn" style="margin-top:8px;padding:10px 16px;border-radius:8px;border:1px solid var(--red);background:none;color:var(--red);cursor:pointer;font-size:.88rem">
+              Delete This Project
+            </button>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    // ── Tab content renderer ──────────────────────────────────────────────
+
+    function renderTabContent() {
+      const tc = g('tab-content');
+      if (!tc) return;
+      switch (activeTab) {
+        case 0: tc.innerHTML = renderTab0(); attachTab0Events(); break;
+        case 1: tc.innerHTML = renderTab1(); attachTab1Events(); break;
+        case 2: tc.innerHTML = renderTab2(); break;
+        case 3: tc.innerHTML = renderTab3(); attachTab3Events(); break;
+        case 4: tc.innerHTML = renderTab4(); attachTab4Events(); break;
+        case 5: tc.innerHTML = renderTab5(); attachTab5Events(); break;
+        case 6: tc.innerHTML = renderTab6(); attachTab6Events(); break;
+      }
+    }
+
+    // ── Tab event handlers ────────────────────────────────────────────────
+
+    function attachTab0Events() {
+      g('f-title')?.addEventListener('input', e => {
+        if (!proj.slug) {
+          const slugEl = g('f-slug');
+          if (slugEl) slugEl.value = toSlug(e.target.value);
+        }
+      });
+    }
+
+    function attachTab1Events() {
+      // Cover image upload
+      g('cover-upload-btn')?.addEventListener('click', () => g('cover-file')?.click());
+      g('cover-file')?.addEventListener('change', async e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const prog = g('cover-progress');
+        prog.style.display = 'block';
+        prog.textContent = 'Uploading…';
+        const url = await uploadImage(file, proj.id);
+        if (url) {
+          proj.cover_image = url;
+          g('f-cover').value = url;
+          prog.textContent = '✓ Uploaded';
+          // refresh preview
+          const prev = tc => { const el = g('tab-content'); if (el) el.querySelector('.img-preview')?.remove(); };
+          const img = document.createElement('img');
+          img.className = 'img-preview'; img.src = url; img.alt = '';
+          g('f-cover')?.parentNode?.insertBefore(img, g('f-cover'));
+        } else {
+          prog.textContent = 'Upload failed.';
+        }
+      });
+
+      // Array image uploads
+      document.querySelectorAll('.arr-upload-btn').forEach(btn => {
+        const key = btn.dataset.key;
+        btn.addEventListener('click', () => document.querySelector(`.arr-file-input[data-key="${key}"]`)?.click());
+      });
+      document.querySelectorAll('.arr-file-input').forEach(input => {
+        const key = input.dataset.key;
+        input.addEventListener('change', async e => {
+          const files = Array.from(e.target.files || []);
+          const prog = g('prog-' + key);
+          prog.style.display = 'block';
+          for (let i = 0; i < files.length; i++) {
+            prog.textContent = `Uploading ${i+1}/${files.length}…`;
+            const url = await uploadImage(files[i], proj.id);
+            if (url) {
+              if (!Array.isArray(proj[key])) proj[key] = [];
+              proj[key].push(url);
+              const grid = g('grid-' + key);
+              if (grid) {
+                const idx = proj[key].length - 1;
+                const item = document.createElement('div');
+                item.className = 'img-item';
+                item.dataset.key = key;
+                item.dataset.idx = String(idx);
+                item.innerHTML = `<img src="${url}" alt="" loading="lazy" /><button class="img-rm rm-img" data-key="${key}" data-idx="${idx}">×</button>`;
+                item.querySelector('.rm-img')?.addEventListener('click', handleImgRemove);
+                grid.appendChild(item);
+              }
+            }
+          }
+          prog.textContent = `✓ ${files.length} image${files.length>1?'s':''} uploaded`;
+          input.value = '';
+        });
+      });
+
+      // Remove image buttons (existing)
+      document.querySelectorAll('.rm-img').forEach(btn => btn.addEventListener('click', handleImgRemove));
+    }
+
+    function handleImgRemove(e) {
+      const btn = e.currentTarget;
+      const key = btn.dataset.key;
+      const idx = parseInt(btn.dataset.idx);
+      if (!Array.isArray(proj[key])) return;
+      proj[key].splice(idx, 1);
+      // Re-render all image grids for this key
+      const grid = g('grid-' + key);
+      if (grid) {
+        grid.innerHTML = proj[key].map((url, i) => `
+          <div class="img-item" data-key="${key}" data-idx="${i}">
+            <img src="${url}" alt="" loading="lazy" />
+            <button class="img-rm rm-img" data-key="${key}" data-idx="${i}">×</button>
+          </div>
+        `).join('');
+        grid.querySelectorAll('.rm-img').forEach(b => b.addEventListener('click', handleImgRemove));
+      }
+    }
+
+    function attachTab3Events() {
+      g('add-tl-btn')?.addEventListener('click', () => {
+        collectTab3();
+        proj.project_timeline.push({ phase: '', duration: '', description: '' });
+        const list = g('tl-list');
+        if (list) {
+          const i = proj.project_timeline.length - 1;
+          const div = document.createElement('div');
+          div.innerHTML = renderTimelineRow({}, i);
+          const row = div.firstElementChild;
+          row.querySelector('.rm-tl')?.addEventListener('click', () => removeTlRow(i));
+          list.appendChild(row);
+        }
+      });
+      document.querySelectorAll('.rm-tl').forEach(btn => {
+        btn.addEventListener('click', () => removeTlRow(parseInt(btn.dataset.idx)));
+      });
+    }
+
+    function removeTlRow(idx) {
+      collectTab3();
+      proj.project_timeline.splice(idx, 1);
+      const list = g('tl-list');
+      if (list) {
+        list.innerHTML = proj.project_timeline.map((item, i) => renderTimelineRow(item, i)).join('');
+        attachTab3Events();
+      }
+    }
+
+    function attachTab4Events() {
+      g('add-faq-btn')?.addEventListener('click', () => {
+        collectTab4();
+        proj.faqs.push({ question: '', answer: '' });
+        const list = g('faq-list');
+        if (list) {
+          const i = proj.faqs.length - 1;
+          const div = document.createElement('div');
+          div.innerHTML = renderFaqRow({}, i);
+          const row = div.firstElementChild;
+          row.querySelector('.rm-faq')?.addEventListener('click', () => removeFaqRow(i));
+          list.appendChild(row);
+        }
+      });
+      document.querySelectorAll('.rm-faq').forEach(btn => {
+        btn.addEventListener('click', () => removeFaqRow(parseInt(btn.dataset.idx)));
+      });
+    }
+
+    function removeFaqRow(idx) {
+      collectTab4();
+      proj.faqs.splice(idx, 1);
+      const list = g('faq-list');
+      if (list) {
+        list.innerHTML = proj.faqs.map((faq, i) => renderFaqRow(faq, i)).join('');
+        attachTab4Events();
+      }
+    }
+
+    function attachTab5Events() {
+      g('f-meta-title')?.addEventListener('input', e => {
+        const cc = e.target.parentNode.querySelector('.char-count');
+        if (cc) { const l = e.target.value.length; cc.textContent = `${l}/60 characters recommended`; cc.className = 'char-count' + (l > 60 ? ' over' : ''); }
+      });
+      g('f-meta-desc')?.addEventListener('input', e => {
+        const cc = e.target.parentNode.querySelector('.char-count');
+        if (cc) { const l = e.target.value.length; cc.textContent = `${l}/160 characters recommended`; cc.className = 'char-count' + (l > 160 ? ' over' : ''); }
+      });
+    }
+
+    function attachTab6Events() {
+      g('f-status')?.addEventListener('change', e => {
+        proj.status = e.target.value;
+        const sbSel = g('sb-status');
+        if (sbSel) sbSel.value = e.target.value;
+      });
+      g('delete-btn')?.addEventListener('click', () => showDeleteModal());
+    }
+
+    // ── Delete modal ──────────────────────────────────────────────────────
+
+    function showDeleteModal() {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal">
+          <h3>Delete Project?</h3>
+          <p>This will permanently delete "${proj.title}" and cannot be undone.</p>
+          <div class="modal-btns">
+            <button class="btn-cancel" id="cancel-del">Cancel</button>
+            <button class="btn-danger" id="confirm-del">Delete</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      g('cancel-del')?.addEventListener('click', () => overlay.remove());
+      g('confirm-del')?.addEventListener('click', async () => {
+        overlay.remove();
+        await deleteProject(proj.id);
+      });
+    }
+
+    // ── Toast ─────────────────────────────────────────────────────────────
+
+    let toastTimer;
+    function toast(msg, type = '', duration = 2500) {
+      const el = g('toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `show ${type}`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.className = ''; }, duration);
+    }
+
+    // ── Escape HTML ───────────────────────────────────────────────────────
+
+    function esc(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      main     = document.getElementById('main');
+      hdrTitle = document.getElementById('hdr-title');
+      newBtn   = document.getElementById('new-btn');
+
+      if (!SB_URL || !SB_KEY) {
+        main.innerHTML = `<div class="empty-state"><div class="ei">⚠️</div><h3>Supabase not configured</h3><p>Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY environment variables.</p></div>`;
+        return;
+      }
+
+      sb = createClient(SB_URL, SB_KEY);
+      main.innerHTML = `<div class="empty-state"><div class="ei">⏳</div><h3>Loading…</h3></div>`;
+      await loadProjects();
+      renderList();
+
+      newBtn.addEventListener('click', () => goEditor());
+    });
+  </script>
+</body>
+</html>

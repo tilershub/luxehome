@@ -4,14 +4,15 @@
 <section id="projects">
   <div class="inner">
 
-    <div class="section-head reveal">
+    <div class="section-head reveal" id="proj-head">
       <div class="stag">Featured Projects</div>
-      <h2>Completed Bathrooms<br />We're Proud Of</h2>
+      <h2>Completed Work<br />We're Proud Of</h2>
       <p class="sdesc">Every project shown is a real completed renovation — the final result delivered to our clients.</p>
     </div>
 
-    <div class="projects-grid">
+    <div class="projects-grid" id="projects-grid">
 
+      <!-- Static fallback cards shown until Supabase loads -->
       <div class="project-card reveal">
         <div class="card-media">
           <div class="media-split">
@@ -27,14 +28,8 @@
         </div>
         <div class="card-body">
           <div class="card-meta">
-            <span class="meta-pill">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Colombo 7
-            </span>
-            <span class="meta-pill">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              21 Days
-            </span>
+            <span class="meta-pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Colombo 7</span>
+            <span class="meta-pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>21 Days</span>
           </div>
           <h3>Master Ensuite Renovation</h3>
           <p>Complete transformation of a master ensuite — freestanding bath, frameless shower, custom vanity, and large-format porcelain tiles throughout.</p>
@@ -58,14 +53,8 @@
         </div>
         <div class="card-body">
           <div class="card-meta">
-            <span class="meta-pill">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Nugegoda
-            </span>
-            <span class="meta-pill">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              18 Days
-            </span>
+            <span class="meta-pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Nugegoda</span>
+            <span class="meta-pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>18 Days</span>
           </div>
           <h3>Family Bathroom Remodel</h3>
           <p>Full remodel of a family bathroom — waterproofed shower area, new tiling throughout, vanity cupboard, and updated fixtures from a clean-slate start.</p>
@@ -89,14 +78,8 @@
         </div>
         <div class="card-body">
           <div class="card-meta">
-            <span class="meta-pill">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Battaramulla
-            </span>
-            <span class="meta-pill">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              14 Days
-            </span>
+            <span class="meta-pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Battaramulla</span>
+            <span class="meta-pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>14 Days</span>
           </div>
           <h3>Apartment Bathroom Makeover</h3>
           <p>High-impact apartment bathroom makeover — new vanity, glass shower partition, sleek wall tiles, and designer mirror all within a compact footprint.</p>
@@ -108,11 +91,111 @@
     </div>
 
     <div class="projects-footer reveal">
-      <a href="/contact" class="btn-ghost">Discuss Your Project →</a>
+      <a href="/projects" class="btn-ghost" id="proj-cta">View All Projects →</a>
     </div>
 
   </div>
 </section>
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+
+  const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  const CAT_LABELS = {
+    bathroom: 'Luxury Bathroom Renovation',
+    flooring: 'Designer Floors',
+    staircase: 'Designer Staircases',
+    kitchen: 'Luxury Kitchens',
+  };
+
+  const SERVICE_LINKS = {
+    bathroom: '/services/bathroom',
+    flooring: '/services/flooring',
+    staircase: '/services/staircase-tiling',
+    kitchen: '/services/kitchen',
+  };
+
+  function locationIcon() {
+    return `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+  }
+
+  function renderCard(p) {
+    const hasBefore = p.before_images && p.before_images.length > 0;
+    const hasAfter  = p.after_images  && p.after_images.length  > 0;
+    const coverImg  = p.cover_image || '';
+    const serviceLink = SERVICE_LINKS[p.category] || '/services/bathroom';
+
+    let mediaHTML;
+    if (hasBefore || hasAfter) {
+      const beforeSrc = hasBefore ? p.before_images[0] : coverImg;
+      const afterSrc  = hasAfter  ? p.after_images[0]  : coverImg;
+      mediaHTML = `
+        <div class="media-split">
+          <div class="media-before">
+            <img src="${beforeSrc}" alt="Before — ${p.title}" loading="lazy" width="700" height="520" />
+            <span class="media-label">Before</span>
+          </div>
+          <div class="media-after">
+            <img src="${afterSrc}" alt="After — ${p.title}" loading="lazy" width="700" height="520" />
+            <span class="media-label after-label">After</span>
+          </div>
+        </div>`;
+    } else if (coverImg) {
+      mediaHTML = `
+        <div class="media-single">
+          <img src="${coverImg}" alt="${p.title}" loading="lazy" width="1400" height="520" />
+        </div>`;
+    } else {
+      mediaHTML = `<div class="media-placeholder">🏗️</div>`;
+    }
+
+    const year = p.completion_year ? p.completion_year : '';
+    const excerpt = (p.project_overview || '').slice(0, 140) + (p.project_overview?.length > 140 ? '…' : '');
+
+    return `
+      <div class="project-card reveal">
+        <a href="/projects/${p.slug}" class="card-link">
+          <div class="card-media">${mediaHTML}</div>
+          <div class="card-body">
+            <div class="card-meta">
+              <span class="meta-pill">${locationIcon()}${p.location}</span>
+              ${year ? `<span class="meta-pill">${year}</span>` : ''}
+            </div>
+            <h3>${p.title}</h3>
+            ${excerpt ? `<p>${excerpt}</p>` : ''}
+            <div class="card-type">${CAT_LABELS[p.category] || p.category}</div>
+            <span class="card-btn">View Project →</span>
+          </div>
+        </a>
+      </div>`;
+  }
+
+  async function loadFeaturedProjects() {
+    if (!SB_URL || !SB_KEY) return;
+    try {
+      const sb = createClient(SB_URL, SB_KEY);
+      const { data, error } = await sb
+        .from('projects')
+        .select('slug,title,category,location,completion_year,cover_image,before_images,after_images,project_overview')
+        .eq('status', 'featured')
+        .order('completion_year', { ascending: false })
+        .limit(3);
+
+      if (error || !data || data.length === 0) return;
+
+      const grid = document.getElementById('projects-grid');
+      if (!grid) return;
+
+      grid.innerHTML = data.map(renderCard).join('');
+    } catch {
+      // Silently fall back to static cards on any error
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadFeaturedProjects);
+</script>
 
 <style>
   section {
@@ -179,6 +262,14 @@
     box-shadow: 0 18px 48px rgba(0,0,0,.4);
   }
 
+  .card-link {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+  }
+
   /* ── Before/After split ── */
 
   .card-media {
@@ -217,8 +308,32 @@
     filter: brightness(.88) saturate(.95);
   }
 
+  .media-single {
+    height: 240px;
+    overflow: hidden;
+  }
+
+  .media-single img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(.85) saturate(.9);
+    transition: transform .5s ease;
+  }
+
+  .media-placeholder {
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    background: rgba(255,255,255,.04);
+    opacity: .5;
+  }
+
   .project-card:hover .media-before img,
-  .project-card:hover .media-after img {
+  .project-card:hover .media-after img,
+  .project-card:hover .media-single img {
     transform: scale(1.05);
   }
 
@@ -356,5 +471,6 @@
     section { padding: 4rem 1.5rem; }
     .projects-grid { grid-template-columns: 1fr; }
     .media-split { height: 200px; }
+    .media-single { height: 200px; }
   }
 </style>
