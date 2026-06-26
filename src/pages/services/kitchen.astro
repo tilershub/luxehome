@@ -70,6 +70,46 @@ import Footer from '../../components/Footer.astro';
     </div>
   </section>
 
+  <section id="recent-projects" class="recent-proj-section">
+    <div class="recent-proj-inner">
+      <div class="stag">Our Work</div>
+      <h2>Recent Kitchen Projects</h2>
+      <div id="proj-grid" class="mini-proj-row"></div>
+      <a href="/projects?category=kitchen" class="view-all-link">View All Kitchen Projects →</a>
+    </div>
+  </section>
+
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+    const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+    const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    if (SB_URL && SB_KEY) {
+      const sb = createClient(SB_URL, SB_KEY);
+      (async () => {
+        const { data } = await sb.from('projects')
+          .select('slug,title,cover_image,location')
+          .eq('category', 'kitchen')
+          .in('status', ['published', 'featured'])
+          .order('completion_year', { ascending: false })
+          .limit(3);
+        if (!data?.length) return;
+        const section = document.getElementById('recent-projects');
+        const grid = document.getElementById('proj-grid');
+        if (!section || !grid) return;
+        grid.innerHTML = data.map(p => `
+          <a href="/projects/${p.slug}" class="mini-card">
+            <div class="mini-img">${p.cover_image ? `<img src="${p.cover_image}" alt="${p.title}" loading="lazy">` : ''}</div>
+            <div class="mini-body">
+              <div class="mini-title">${p.title}</div>
+              ${p.location ? `<div class="mini-loc">${p.location}</div>` : ''}
+            </div>
+          </a>
+        `).join('');
+        section.style.display = '';
+      })();
+    }
+  </script>
+
   <Footer />
 </Layout>
 
@@ -310,5 +350,49 @@ import Footer from '../../components/Footer.astro';
     .page-hero { padding: 0 1.5rem 3rem; min-height: 60vh; }
     .pricing-section { padding: 4rem 1.5rem; }
     .what-included { grid-template-columns: 1fr; }
+  }
+
+  /* ── Recent Projects ── */
+  .recent-proj-section {
+    display: none;
+    background: rgba(255,255,255,.02);
+    border-top: 1px solid rgba(255,255,255,.07);
+    padding: 4rem 4rem 5rem;
+  }
+  .recent-proj-inner { max-width: 1100px; margin: 0 auto; }
+  .recent-proj-inner h2 { margin-bottom: 1.8rem; }
+  .mini-proj-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+    margin-bottom: 1.8rem;
+  }
+  .mini-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .25s, border-color .25s;
+    background: rgba(255,255,255,.03);
+  }
+  .mini-card:hover { transform: translateY(-4px); border-color: rgba(184,148,90,.35); }
+  .mini-img { height: 180px; overflow: hidden; background: rgba(255,255,255,.05); }
+  .mini-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+  .mini-card:hover .mini-img img { transform: scale(1.05); }
+  .mini-body { padding: 1rem 1.1rem 1.2rem; }
+  .mini-title { font-size: .88rem; font-weight: 600; color: var(--cream); line-height: 1.35; margin-bottom: .3rem; }
+  .mini-loc { font-size: .72rem; color: rgba(240,236,224,.55); }
+  .view-all-link {
+    font-size: .8rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--clay); text-decoration: none; transition: opacity .2s;
+  }
+  .view-all-link:hover { opacity: .75; }
+  @media (max-width: 900px) { .mini-proj-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 580px) {
+    .recent-proj-section { padding: 3rem 1rem 4rem; }
+    .mini-proj-row { grid-template-columns: 1fr; }
   }
 </style>
