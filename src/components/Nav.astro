@@ -73,7 +73,7 @@
   <div class="mobile-overlay" id="mobile-overlay" aria-hidden="true"></div>
   <div class="mobile-panel" id="mobile-panel" aria-hidden="true">
     <div class="mobile-header">
-      <a href="/" class="logo" style="color:#fff" onclick="closeMobileMenu()">LUXE<em>home</em></a>
+      <a href="/" class="logo" id="mob-logo" style="color:#fff">LUXE<em>home</em></a>
       <button class="mobile-close" id="mobile-close" aria-label="Close navigation">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -127,21 +127,24 @@
   const hasDropdown = document.querySelector('.has-dropdown');
 
   if (svcToggle && svcDropdown) {
-    // Show on hover (desktop)
     hasDropdown.addEventListener('mouseenter', () => {
-      if (window.innerWidth > 900) svcDropdown.classList.add('open');
+      if (window.innerWidth > 900) {
+        svcDropdown.classList.add('open');
+        svcToggle.setAttribute('aria-expanded', 'true');
+      }
     });
     hasDropdown.addEventListener('mouseleave', () => {
-      if (window.innerWidth > 900) svcDropdown.classList.remove('open');
+      if (window.innerWidth > 900) {
+        svcDropdown.classList.remove('open');
+        svcToggle.setAttribute('aria-expanded', 'false');
+      }
     });
-    // Also toggle on button click
     svcToggle.addEventListener('click', () => {
       const isOpen = svcDropdown.classList.toggle('open');
       svcToggle.setAttribute('aria-expanded', String(isOpen));
     });
   }
 
-  // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
     if (!hasDropdown?.contains(e.target)) {
       svcDropdown?.classList.remove('open');
@@ -149,26 +152,60 @@
     }
   });
 
+  // Focus trap helper
+  function getFocusable() {
+    return Array.from(mobilePanel.querySelectorAll(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+  }
+
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+    const els = getFocusable();
+    const first = els[0];
+    const last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
+  }
+
+  function onEscape(e) {
+    if (e.key === 'Escape') closeMobileMenu();
+  }
+
   // Mobile panel
   function openMobileMenu() {
     mobilePanel.classList.add('open');
     overlay.classList.add('open');
+    toggle.classList.add('is-open');
     mobilePanel.setAttribute('aria-hidden', 'false');
     overlay.setAttribute('aria-hidden', 'false');
     toggle.setAttribute('aria-expanded', 'true');
     toggle.setAttribute('aria-label', 'Close navigation menu');
     document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onEscape);
+    mobilePanel.addEventListener('keydown', trapFocus);
+    closeBtn.focus();
   }
 
   window.closeMobileMenu = function () {
     mobilePanel.classList.remove('open');
     overlay.classList.remove('open');
+    toggle.classList.remove('is-open');
     mobilePanel.setAttribute('aria-hidden', 'true');
     overlay.setAttribute('aria-hidden', 'true');
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-label', 'Open navigation menu');
     document.body.style.overflow = '';
+    document.removeEventListener('keydown', onEscape);
+    mobilePanel.removeEventListener('keydown', trapFocus);
+    toggle.focus();
   };
+
+  // Mobile logo closes menu (navigating away)
+  document.getElementById('mob-logo')?.addEventListener('click', closeMobileMenu);
 
   toggle.addEventListener('click', openMobileMenu);
   closeBtn.addEventListener('click', closeMobileMenu);
@@ -181,6 +218,15 @@
     const isOpen = mobSvcSub.classList.toggle('open');
     mobSvcToggle.setAttribute('aria-expanded', String(isOpen));
     mobSvcToggle.classList.toggle('expanded', isOpen);
+  });
+
+  // Active page indicator
+  const currentPath = window.location.pathname;
+  document.querySelectorAll('#nav-menu a[href]').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href === currentPath || (href !== '/' && currentPath.startsWith(href))) {
+      link.classList.add('nav-active');
+    }
   });
 
   // Close on mobile link click
@@ -384,8 +430,35 @@
     height: 1.5px;
     background: rgba(240,236,224,.88);
     border-radius: 2px;
-    transition: transform .3s, opacity .3s;
+    transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .25s;
     transform-origin: center;
+  }
+
+  /* Bars → X when menu is open */
+  .menu-toggle.is-open .bar:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+  .menu-toggle.is-open .bar:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  .menu-toggle.is-open .bar:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+
+  /* Active page indicator */
+  #nav-menu a.nav-active {
+    color: var(--clay, #b8892a);
+  }
+  #nav-menu a.nav-active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: .7rem;
+    right: .7rem;
+    height: 1.5px;
+    background: var(--clay, #b8892a);
+    border-radius: 2px;
   }
 
   /* ── Mobile overlay + panel ── */

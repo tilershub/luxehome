@@ -1,0 +1,465 @@
+---
+// Blog admin SPA — client-side only
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — LUXEHOME Admin</title>
+  <link rel="icon" href="/favicon.svg" />
+</head>
+<body>
+  <div id="app">
+    <header id="hdr">
+      <a href="/admin" class="back-lnk" id="back-lnk">← Admin</a>
+      <span id="hdr-title">Blog Posts</span>
+      <button id="new-btn" class="hdr-action">＋ New</button>
+    </header>
+    <main id="main"></main>
+    <div id="toast" aria-live="polite"></div>
+  </div>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #161c1a; --surface: #1e2422; --surface2: #252c29;
+      --border: rgba(255,255,255,.08); --cream: #f0ece0;
+      --muted: rgba(240,236,224,.6); --clay: #b8945a;
+      --green: #22c55e; --red: #ef4444;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--cream); font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; }
+    #app { display: flex; flex-direction: column; height: 100%; }
+    #hdr { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+    .back-lnk { color: var(--clay); text-decoration: none; font-size: .85rem; white-space: nowrap; }
+    #hdr-title { flex: 1; font-weight: 600; font-size: .95rem; }
+    .hdr-action { padding: 7px 14px; border-radius: 6px; border: none; background: var(--clay); color: #fff; font-weight: 600; font-size: .82rem; cursor: pointer; white-space: nowrap; }
+    #main { flex: 1; overflow-y: auto; }
+    .list-toolbar { display: flex; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 57px; z-index: 40; }
+    .search-box { flex: 1; padding: 8px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); color: var(--cream); font-size: .85rem; }
+    .filter-sel { padding: 8px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); color: var(--cream); font-size: .82rem; cursor: pointer; }
+    .post-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .post-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color .2s; }
+    .post-card:hover { border-color: var(--clay); }
+    .post-body { flex: 1; min-width: 0; }
+    .post-title-row { font-weight: 600; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .post-meta-row { font-size: .78rem; color: var(--muted); margin-top: 3px; }
+    .status-pill { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .empty-state .ei { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 1rem; margin-bottom: 6px; color: var(--cream); }
+    .tab-bar { display: flex; overflow-x: auto; gap: 2px; padding: 10px 16px 0; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 57px; z-index: 40; scrollbar-width: none; }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 8px 14px; border: none; background: none; color: var(--muted); font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+    .tab-btn.active { color: var(--clay); border-bottom-color: var(--clay); }
+    .tab-content { padding: 20px 16px 80px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+    .field label .req { color: var(--clay); }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--cream); font-size: .9rem; font-family: inherit; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--clay); }
+    .field textarea { min-height: 100px; resize: vertical; }
+    .field .hint { font-size: .72rem; color: var(--muted); margin-top: 5px; }
+    .field .char-count { font-size: .72rem; color: var(--muted); margin-top: 4px; text-align: right; }
+    .char-count.over { color: var(--red); }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    select option { background: var(--surface2); }
+    .img-preview { width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+    .upload-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface2); color: var(--cream); font-size: .82rem; cursor: pointer; }
+    .upload-btn:hover { border-color: var(--clay); }
+    .upload-progress { font-size: .78rem; color: var(--clay); margin-top: 6px; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .toggle-label { font-size: .88rem; }
+    .toggle-sub { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; border-radius: 24px; background: var(--border); transition: background .2s; cursor: pointer; }
+    .toggle-slider::after { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: transform .2s; }
+    .toggle input:checked + .toggle-slider { background: var(--clay); }
+    .toggle input:checked + .toggle-slider::after { transform: translateX(20px); }
+    .save-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; z-index: 100; }
+    .save-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; background: var(--clay); color: #fff; font-weight: 700; font-size: .9rem; cursor: pointer; }
+    .save-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .status-select { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--cream); font-size: .88rem; cursor: pointer; }
+    #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: var(--cream); padding: 10px 20px; border-radius: 8px; font-size: .85rem; z-index: 200; opacity: 0; transition: opacity .25s; pointer-events: none; white-space: nowrap; }
+    #toast.show { opacity: 1; }
+    #toast.success { background: #1a472a; border: 1px solid var(--green); }
+    #toast.error { background: #4a1a1a; border: 1px solid var(--red); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; max-width: 340px; width: 100%; }
+    .modal h3 { font-size: 1rem; margin-bottom: 8px; }
+    .modal p { font-size: .85rem; color: var(--muted); margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; }
+    .btn-danger { flex: 1; padding: 11px; border-radius: 8px; border: none; background: var(--red); color: #fff; font-weight: 600; cursor: pointer; }
+    .btn-cancel { flex: 1; padding: 11px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--cream); cursor: pointer; }
+    .preview-pane { background: #fff; color: #1e1a17; border-radius: 10px; padding: 24px; margin-top: 12px; font-size: .92rem; line-height: 1.75; }
+    .preview-pane h2, .preview-pane h3 { font-family: serif; margin: 1.2rem 0 .5rem; }
+    .preview-pane p { margin-bottom: .9rem; }
+    .preview-pane ul, .preview-pane ol { padding-left: 1.4rem; margin-bottom: .9rem; }
+    @media (min-width: 640px) {
+      .tab-content, .post-list, .list-toolbar { max-width: 720px; margin-left: auto; margin-right: auto; }
+    }
+  </style>
+
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+
+    const SB_URL  = import.meta.env.PUBLIC_SUPABASE_URL;
+    const SB_KEY  = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const BUCKET  = 'project-media';
+    const TABS    = ['Basic Info', 'Content', 'SEO', 'Publishing'];
+    const STATUS_COLORS = { draft: '#888', published: '#22c55e' };
+
+    let sb, mainEl, hdrTitle, newBtn;
+    let posts = [];
+    let post  = null;
+    let view  = 'list';
+    let activeTab   = 0;
+    let saving      = false;
+    let filterStatus = 'all';
+    let filterSearch = '';
+    let showPreview  = false;
+
+    function blankPost() {
+      return {
+        id: null, title: '', slug: '', author: 'LUXEhome Team',
+        category: '', reading_time: '',
+        pub_date: new Date().toISOString().split('T')[0],
+        status: 'draft', cover_image: '',
+        excerpt: '', content: '',
+        meta_title: '', meta_description: '', og_image: '',
+        include_in_sitemap: true,
+      };
+    }
+
+    function toSlug(s) {
+      return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    }
+    function esc(s) {
+      return String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function gv(id) { return document.getElementById(id)?.value?.trim() ?? ''; }
+    function g(id)  { return document.getElementById(id); }
+    function showToast(msg, type='') {
+      const t=g('toast'); t.textContent=msg; t.className='show '+type;
+      setTimeout(()=>{ t.className=''; }, 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      mainEl   = g('main');
+      hdrTitle = g('hdr-title');
+      newBtn   = g('new-btn');
+      if (!SB_URL || !SB_KEY) {
+        mainEl.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Supabase not configured</h3></div>`;
+        return;
+      }
+      sb = createClient(SB_URL, SB_KEY);
+      newBtn.addEventListener('click', ()=>goEditor(null));
+      g('back-lnk').addEventListener('click', e=>{ if(view==='editor'){e.preventDefault();loadList();} });
+      await loadList();
+    });
+
+    async function loadList() {
+      view='list'; hdrTitle.textContent='Blog Posts'; newBtn.style.display='';
+      mainEl.innerHTML=`<div class="empty-state"><div class="ei">⏳</div><h3>Loading…</h3></div>`;
+      try {
+        const {data,error} = await sb.from('blog_posts')
+          .select('id,title,slug,category,status,pub_date,created_at')
+          .order('created_at',{ascending:false});
+        if (error) throw error;
+        posts = data||[];
+        renderList();
+      } catch(e) {
+        mainEl.innerHTML=`<div class="empty-state"><div class="ei">❌</div><h3>Failed to load</h3><p>${esc(e.message)}</p></div>`;
+      }
+    }
+
+    function renderList() {
+      const filtered = posts.filter(p=>{
+        if (filterStatus!=='all' && p.status!==filterStatus) return false;
+        if (filterSearch && !p.title.toLowerCase().includes(filterSearch.toLowerCase())) return false;
+        return true;
+      });
+      mainEl.innerHTML=`
+        <div class="list-toolbar">
+          <input class="search-box" id="search-box" placeholder="Search posts…" value="${esc(filterSearch)}" />
+          <select class="filter-sel" id="filter-status">
+            <option value="all"${filterStatus==='all'?' selected':''}>All</option>
+            <option value="draft"${filterStatus==='draft'?' selected':''}>Draft</option>
+            <option value="published"${filterStatus==='published'?' selected':''}>Published</option>
+          </select>
+        </div>
+        <div class="post-list">
+          ${filtered.length===0 ? `<div class="empty-state"><div class="ei">✍️</div>
+            <h3>${posts.length===0?'No blog posts yet':'No posts match filter'}</h3>
+            <p>${posts.length===0?'Tap ＋ New to write your first post.':'Try a different filter.'}</p></div>`
+          : filtered.map(p=>{
+              const col=STATUS_COLORS[p.status]||'#888';
+              const d=p.pub_date?new Date(p.pub_date).toLocaleDateString('en-LK',{year:'numeric',month:'short',day:'numeric'}):'';
+              return `<div class="post-card" data-id="${esc(p.id)}">
+                <div class="post-body">
+                  <div class="post-title-row">${esc(p.title)}</div>
+                  <div class="post-meta-row">${esc(p.category||'—')} · ${d}</div>
+                </div>
+                <span class="status-pill" style="background:${col}22;color:${col}">${p.status}</span>
+              </div>`;
+            }).join('')}
+        </div>`;
+      g('search-box')?.addEventListener('input',e=>{filterSearch=e.target.value;renderList();});
+      g('filter-status')?.addEventListener('change',e=>{filterStatus=e.target.value;renderList();});
+      mainEl.querySelectorAll('.post-card[data-id]').forEach(card=>{
+        card.addEventListener('click',()=>{
+          const found=posts.find(x=>x.id===card.dataset.id);
+          if(found) goEditor(found);
+        });
+      });
+    }
+
+    async function goEditor(p) {
+      view='editor';
+      if (p&&p.id) {
+        const {data}=await sb.from('blog_posts').select('*').eq('id',p.id).single();
+        post=data?{...blankPost(),...data}:{...blankPost(),...p};
+      } else { post=blankPost(); }
+      activeTab=0; showPreview=false;
+      hdrTitle.textContent=post.id?'Edit Post':'New Post';
+      newBtn.style.display='none';
+      renderEditor();
+    }
+
+    function renderEditor() {
+      mainEl.innerHTML=`
+        <div class="tab-bar" id="tab-bar">
+          ${TABS.map((t,i)=>`<button class="tab-btn${i===activeTab?' active':''}" data-tab="${i}">${t}</button>`).join('')}
+        </div>
+        <div class="tab-content" id="tab-content"></div>
+        <div class="save-bar">
+          <select class="status-select" id="status-sel">
+            <option value="draft"${post.status==='draft'?' selected':''}>Draft</option>
+            <option value="published"${post.status==='published'?' selected':''}>Published</option>
+          </select>
+          <button class="save-btn" id="save-btn">${post.id?'Save Changes':'Create Post'}</button>
+        </div>`;
+      g('tab-bar').querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          collectCurrentTab();
+          activeTab=parseInt(btn.dataset.tab);
+          g('tab-bar').querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===activeTab));
+          renderTabContent();
+        });
+      });
+      g('status-sel').addEventListener('change',e=>{post.status=e.target.value;});
+      g('save-btn').addEventListener('click',savePost);
+      renderTabContent();
+    }
+
+    function renderTabContent() {
+      const tc=g('tab-content'); if(!tc) return;
+      switch(activeTab){
+        case 0: tc.innerHTML=renderTab0(); attachTab0Events(); break;
+        case 1: tc.innerHTML=renderTab1(); attachTab1Events(); break;
+        case 2: tc.innerHTML=renderTab2(); attachTab2Events(); break;
+        case 3: tc.innerHTML=renderTab3(); attachTab3Events(); break;
+      }
+    }
+
+    function collectCurrentTab() {
+      switch(activeTab){ case 0:collectTab0();break; case 1:collectTab1();break; case 2:collectTab2();break; case 3:collectTab3();break; }
+    }
+
+    function renderTab0() {
+      return `
+        <div class="field"><label>Title <span class="req">*</span></label>
+          <input id="f-title" type="text" value="${esc(post.title)}" placeholder="Post title" /></div>
+        <div class="field"><label>Slug <span class="req">*</span></label>
+          <input id="f-slug" type="text" value="${esc(post.slug)}" placeholder="url-friendly-slug" />
+          <div class="hint">URL: /blog/<strong id="slug-preview">${esc(post.slug)||'…'}</strong></div></div>
+        <div class="row-2">
+          <div class="field"><label>Author <span class="req">*</span></label>
+            <input id="f-author" type="text" value="${esc(post.author)}" /></div>
+          <div class="field"><label>Category</label>
+            <input id="f-category" type="text" value="${esc(post.category)}" placeholder="Tiling Tips" /></div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Reading Time</label>
+            <input id="f-reading-time" type="text" value="${esc(post.reading_time)}" placeholder="5 min read" /></div>
+          <div class="field"><label>Publish Date</label>
+            <input id="f-pub-date" type="date" value="${esc(post.pub_date)}" /></div>
+        </div>
+        <div class="field"><label>Cover Image URL</label>
+          ${post.cover_image?`<img class="img-preview" src="${esc(post.cover_image)}" alt="" />`:''}
+          <input id="f-cover" type="url" value="${esc(post.cover_image)}" placeholder="https://…" style="margin-bottom:8px" />
+          <label class="upload-btn" for="cover-file">⬆ Upload Image</label>
+          <input type="file" id="cover-file" accept="image/*" style="display:none" />
+          <div id="cover-progress" class="upload-progress" style="display:none"></div></div>`;
+    }
+
+    function attachTab0Events() {
+      const titleEl=g('f-title'), slugEl=g('f-slug'), preview=g('slug-preview');
+      titleEl?.addEventListener('input',()=>{
+        if(!post.id && !slugEl.dataset.manual){ const s=toSlug(titleEl.value); slugEl.value=s; if(preview)preview.textContent=s||'…'; }
+      });
+      slugEl?.addEventListener('input',()=>{ slugEl.dataset.manual='1'; if(preview)preview.textContent=slugEl.value||'…'; });
+      g('cover-file')?.addEventListener('change',async e=>{
+        const file=e.target.files?.[0]; if(!file)return;
+        const prog=g('cover-progress'); prog.style.display=''; prog.textContent='Uploading…';
+        try {
+          const path=`blog/${post.id||'new'}/${file.name}`;
+          const {error}=await sb.storage.from(BUCKET).upload(path,file,{upsert:true});
+          if(error)throw error;
+          const {data:{publicUrl}}=sb.storage.from(BUCKET).getPublicUrl(path);
+          g('f-cover').value=publicUrl; prog.textContent='✓ Uploaded';
+        } catch(err){ prog.textContent='❌ '+err.message; }
+      });
+    }
+
+    function collectTab0() {
+      post.title=gv('f-title'); post.slug=gv('f-slug'); post.author=gv('f-author');
+      post.category=gv('f-category'); post.reading_time=gv('f-reading-time');
+      post.pub_date=gv('f-pub-date'); post.cover_image=gv('f-cover');
+    }
+
+    function renderTab1() {
+      return `
+        <div class="field"><label>Excerpt <span class="req">*</span></label>
+          <textarea id="f-excerpt" rows="3" placeholder="2–3 sentence summary for the blog listing">${esc(post.excerpt)}</textarea></div>
+        <div class="field">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label style="margin:0">Content (Markdown) <span class="req">*</span></label>
+            <button id="preview-toggle" style="font-size:.78rem;color:var(--clay);background:none;border:none;cursor:pointer">${showPreview?'← Edit':'👁 Preview'}</button>
+          </div>
+          ${showPreview
+            ?`<div class="preview-pane" id="preview-pane">Loading…</div>`
+            :`<textarea id="f-content" rows="22" placeholder="Write in Markdown…">${esc(post.content)}</textarea>`
+          }
+        </div>`;
+    }
+
+    function attachTab1Events() {
+      g('preview-toggle')?.addEventListener('click',()=>{
+        collectTab1(); showPreview=!showPreview; renderTabContent(); if(showPreview)loadPreview();
+      });
+    }
+
+    async function loadPreview() {
+      const pane=g('preview-pane'); if(!pane)return;
+      try { const {marked}=await import('marked'); pane.innerHTML=marked(post.content||''); }
+      catch { pane.innerHTML='<em>Preview unavailable</em>'; }
+    }
+
+    function collectTab1() {
+      if(!showPreview){ post.excerpt=gv('f-excerpt'); post.content=g('f-content')?.value??post.content; }
+    }
+
+    function renderTab2() {
+      const mtl=(post.meta_title||'').length, mdl=(post.meta_description||'').length;
+      return `
+        <div class="field"><label>Meta Title <span class="req">*</span></label>
+          <input id="f-meta-title" type="text" value="${esc(post.meta_title)}" placeholder="50–60 chars" maxlength="80" />
+          <div class="char-count${mtl>60?' over':''}" id="mt-count">${mtl} / 60</div></div>
+        <div class="field"><label>Meta Description <span class="req">*</span></label>
+          <textarea id="f-meta-desc" rows="3" placeholder="150–160 chars" maxlength="200">${esc(post.meta_description)}</textarea>
+          <div class="char-count${mdl>160?' over':''}" id="md-count">${mdl} / 160</div></div>
+        <div class="field"><label>OG Image URL</label>
+          <input id="f-og-image" type="url" value="${esc(post.og_image)}" placeholder="1200×630 image" /></div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Include in Sitemap</div><div class="toggle-sub">Add to XML sitemap</div></div>
+          <label class="toggle"><input type="checkbox" id="f-sitemap" ${post.include_in_sitemap?'checked':''} /><span class="toggle-slider"></span></label>
+        </div>`;
+    }
+
+    function attachTab2Events() {
+      g('f-meta-title')?.addEventListener('input',e=>{ const l=e.target.value.length,el=g('mt-count'); if(el){el.textContent=`${l} / 60`;el.className='char-count'+(l>60?' over':'');} });
+      g('f-meta-desc')?.addEventListener('input',e=>{ const l=e.target.value.length,el=g('md-count'); if(el){el.textContent=`${l} / 160`;el.className='char-count'+(l>160?' over':'');} });
+    }
+
+    function collectTab2() {
+      post.meta_title=gv('f-meta-title'); post.meta_description=gv('f-meta-desc');
+      post.og_image=gv('f-og-image'); post.include_in_sitemap=g('f-sitemap')?.checked??post.include_in_sitemap;
+    }
+
+    function renderTab3() {
+      const url=post.slug?`/blog/${post.slug}`:null;
+      return `
+        <div class="field"><label>Status</label>
+          <select id="f-pub-status">
+            <option value="draft"${post.status==='draft'?' selected':''}>Draft — not visible to public</option>
+            <option value="published"${post.status==='published'?' selected':''}>Published — live on /blog</option>
+          </select></div>
+        <div class="field"><label>Publish Date</label>
+          <input id="f-pub-date2" type="date" value="${esc(post.pub_date)}" /></div>
+        ${url&&post.status==='published'?`<div class="field"><label>Live URL</label>
+          <a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--clay);font-size:.88rem">${esc(url)} ↗</a></div>`:''}
+        ${post.id?`<div style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border)">
+          <button id="delete-btn" class="btn-danger" style="width:100%">Delete Post</button></div>`:''}`;
+    }
+
+    function attachTab3Events() {
+      g('f-pub-status')?.addEventListener('change',e=>{ post.status=e.target.value; const sel=g('status-sel'); if(sel)sel.value=post.status; });
+      g('delete-btn')?.addEventListener('click',()=>{
+        const overlay=document.createElement('div'); overlay.className='modal-overlay';
+        overlay.innerHTML=`<div class="modal"><h3>Delete Post?</h3>
+          <p>Permanently delete "${esc(post.title)}"? This cannot be undone.</p>
+          <div class="modal-btns">
+            <button class="btn-cancel" id="cancel-del">Cancel</button>
+            <button class="btn-danger" id="confirm-del">Delete</button>
+          </div></div>`;
+        document.body.appendChild(overlay);
+        overlay.querySelector('#cancel-del').addEventListener('click',()=>overlay.remove());
+        overlay.querySelector('#confirm-del').addEventListener('click',async()=>{
+          overlay.remove();
+          try { const {error}=await sb.from('blog_posts').delete().eq('id',post.id); if(error)throw error; showToast('Post deleted','success'); setTimeout(loadList,800); }
+          catch(e){ showToast(e.message,'error'); }
+        });
+      });
+    }
+
+    function collectTab3() {
+      const s=gv('f-pub-status'); if(s)post.status=s;
+      const d=gv('f-pub-date2'); if(d)post.pub_date=d;
+      const sel=g('status-sel'); if(sel)sel.value=post.status;
+    }
+
+    async function savePost() {
+      collectCurrentTab();
+      if(!post.title)           return showToast('Title is required','error');
+      if(!post.slug)            return showToast('Slug is required','error');
+      if(!post.author)          return showToast('Author is required','error');
+      if(!post.excerpt)         return showToast('Excerpt is required','error');
+      if(!post.content)         return showToast('Content is required','error');
+      if(!post.meta_title)      return showToast('Meta title is required','error');
+      if(!post.meta_description)return showToast('Meta description is required','error');
+
+      saving=true;
+      const btn=g('save-btn'); if(btn){btn.disabled=true;btn.textContent='Saving…';}
+
+      const payload={
+        title:post.title, slug:post.slug, author:post.author,
+        category:post.category||null, reading_time:post.reading_time||null,
+        pub_date:post.pub_date||new Date().toISOString().split('T')[0],
+        status:post.status, cover_image:post.cover_image||null,
+        excerpt:post.excerpt, content:post.content,
+        meta_title:post.meta_title, meta_description:post.meta_description,
+        og_image:post.og_image||null, include_in_sitemap:post.include_in_sitemap,
+      };
+
+      try {
+        let result;
+        if(post.id){ result=await sb.from('blog_posts').update(payload).eq('id',post.id).select().single(); }
+        else        { result=await sb.from('blog_posts').insert(payload).select().single(); }
+        if(result.error) throw result.error;
+        post={...blankPost(),...result.data};
+        showToast('Saved!','success');
+        hdrTitle.textContent='Edit Post';
+        if(btn)btn.textContent='Save Changes';
+        if(activeTab===3)renderTabContent();
+      } catch(e) {
+        showToast(e.message||'Save failed','error');
+        if(btn)btn.textContent=post.id?'Save Changes':'Create Post';
+      } finally {
+        saving=false; if(btn)btn.disabled=false;
+      }
+    }
+  </script>
+</body>
+</html>

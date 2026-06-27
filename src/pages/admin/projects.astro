@@ -282,7 +282,7 @@
         reference_id: '', area_label: '', completion_month: '',
         completion_date: '', completion_year: new Date().getFullYear(),
         design_style: 'modern', status: 'draft',
-        cover_image: '', hero_video: '',
+        cover_image: '', hero_video: '', youtube_short: '',
         before_images: [], after_images: [], progress_images: [], gallery_images: [],
         old_space_images: [], design_3d_images: [],
         episode_01_youtube: '', episode_02_youtube: '',
@@ -434,6 +434,7 @@
     function collectTab1() {
       proj.cover_image          = gv('f-cover');
       proj.hero_video           = gv('f-video');
+      proj.youtube_short        = gv('f-yt-short');
       proj.episode_01_youtube   = gv('f-ep1-yt');
       proj.episode_02_youtube   = gv('f-ep2-yt');
       proj.episode_01_thumbnail = gv('f-ep1-thumb');
@@ -676,6 +677,11 @@
         <div class="field">
           <label>Hero Video URL</label>
           <input id="f-video" type="url" value="${esc(proj.hero_video)}" placeholder="YouTube, Vimeo, or direct video URL" />
+        </div>
+        <div class="field">
+          <label>YouTube Short URL</label>
+          <input id="f-yt-short" type="url" value="${esc(proj.youtube_short)}" placeholder="https://youtube.com/shorts/{id} — shown in homepage story slider" />
+          <div class="hint">Vertical short video (9:16). Plays muted on hover in the homepage story cards.</div>
         </div>
         <div class="field" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
           <label>Episode 01 — Old Space to 3D Design</label>
