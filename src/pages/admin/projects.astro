@@ -95,17 +95,18 @@
 
     /* ── Editor ── */
     .tab-bar {
-      display: flex; overflow-x: auto; gap: 2px;
+      display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 2px;
       padding: 10px 16px 0; background: var(--surface);
       border-bottom: 1px solid var(--border);
       position: sticky; top: 57px; z-index: 40;
-      scrollbar-width: none;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
     }
     .tab-bar::-webkit-scrollbar { display: none; }
     .tab-btn {
-      padding: 8px 14px; border: none; background: none; color: var(--muted);
-      font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+      padding: 8px 10px; border: none; background: none; color: var(--muted);
+      font-size: .75rem; font-weight: 600; cursor: pointer; white-space: nowrap;
       border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+      flex-shrink: 0;
     }
     .tab-btn.active { color: var(--clay); border-bottom-color: var(--clay); }
     .tab-btn.has-error { color: var(--red); }
@@ -251,6 +252,11 @@
       .tab-content { max-width: 720px; margin: 0 auto; }
       .project-list { max-width: 720px; margin: 0 auto; }
       .list-toolbar { max-width: 720px; margin: 0 auto; }
+    }
+    @media (max-width: 480px) {
+      .row-2 { grid-template-columns: 1fr; }
+      .field input, .field select, .field textarea { font-size: .88rem; }
+      .img-item { width: 72px; height: 72px; }
     }
   </style>
 
@@ -662,6 +668,21 @@
 
     // ── Tab 1: Media ──────────────────────────────────────────────────────
 
+    function ytId(url) {
+      if (!url) return null;
+      const m = url.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+    function ytThumbHtml(url) {
+      const vid = ytId(url);
+      if (!vid) return '';
+      return '<a href="' + esc(url) + '" target="_blank" rel="noopener" style="display:block;margin-top:8px;border-radius:8px;overflow:hidden;position:relative">'
+        + '<img src="https://img.youtube.com/vi/' + vid + '/hqdefault.jpg" style="width:100%;display:block;border-radius:8px" alt="" />'
+        + '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
+        + '<svg width="48" height="48" viewBox="0 0 68 48" fill="none"><rect width="68" height="48" rx="10" fill="rgba(0,0,0,.55)"/><polygon points="28,16 28,32 46,24" fill="#fff"/></svg>'
+        + '</div></a>';
+    }
+
     function renderTab1() {
       return `
         <div class="field">
@@ -676,7 +697,8 @@
         </div>
         <div class="field">
           <label>Hero Video URL</label>
-          <input id="f-video" type="url" value="${esc(proj.hero_video)}" placeholder="YouTube, Vimeo, or direct video URL" />
+          <input id="f-video" type="url" value="${esc(proj.hero_video)}" placeholder="Paste YouTube URL" />
+          <div id="vid-preview">${ytThumbHtml(proj.hero_video)}</div>
         </div>
         <div class="field">
           <label>YouTube Short URL</label>
@@ -685,13 +707,13 @@
         </div>
         <div class="field" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
           <label>Episode 01 — Old Space to 3D Design</label>
-          <input id="f-ep1-yt" type="url" value="${esc(proj.episode_01_youtube)}" placeholder="https://youtu.be/… or https://youtube.com/watch?v=…" style="margin-bottom:8px" />
-          <input id="f-ep1-thumb" type="url" value="${esc(proj.episode_01_thumbnail)}" placeholder="Custom thumbnail URL (optional — auto-generated from YouTube if blank)" />
+          <input id="f-ep1-yt" type="url" value="${esc(proj.episode_01_youtube)}" placeholder="https://youtu.be/…" />
+          <div id="ep1-preview">${ytThumbHtml(proj.episode_01_youtube)}</div>
         </div>
         <div class="field">
           <label>Episode 02 — Completed Project Tour</label>
-          <input id="f-ep2-yt" type="url" value="${esc(proj.episode_02_youtube)}" placeholder="https://youtu.be/… or https://youtube.com/watch?v=…" style="margin-bottom:8px" />
-          <input id="f-ep2-thumb" type="url" value="${esc(proj.episode_02_thumbnail)}" placeholder="Custom thumbnail URL (optional — auto-generated from YouTube if blank)" />
+          <input id="f-ep2-yt" type="url" value="${esc(proj.episode_02_youtube)}" placeholder="https://youtu.be/…" />
+          <div id="ep2-preview">${ytThumbHtml(proj.episode_02_youtube)}</div>
         </div>
         <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)"></div>
         ${renderImageArrayField('Old Space Photos', 'old_space_images')}
@@ -716,8 +738,15 @@
               </div>
             `).join('')}
           </div>
-          <button class="upload-btn arr-upload-btn" data-key="${key}">＋ Add Images</button>
-          <input type="file" class="arr-file-input" data-key="${key}" accept="image/*" multiple style="display:none" />
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px">
+            <button class="upload-btn arr-upload-btn" data-key="${key}">📷 Upload</button>
+            <input type="file" class="arr-file-input" data-key="${key}" accept="image/*" multiple style="display:none" />
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <input type="url" class="arr-url-inp" data-key="${key}" placeholder="Paste image URL (Pinterest, etc.)" style="flex:1;padding:8px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--cream);font-size:.82rem" />
+            <button class="upload-btn arr-url-btn" data-key="${key}" style="white-space:nowrap;flex-shrink:0">Add</button>
+          </div>
+          <div class="hint">Right-click any Pinterest image → "Copy Image Address" and paste above</div>
           <div class="upload-progress" id="prog-${key}" style="display:none"></div>
         </div>
       `;
@@ -1028,6 +1057,41 @@
 
       // Remove image buttons (existing)
       document.querySelectorAll('.rm-img').forEach(btn => btn.addEventListener('click', handleImgRemove));
+
+      // YouTube live previews
+      function updateYtPreview(inputId, previewId) {
+        const inp = g(inputId), pv = g(previewId);
+        if (!inp || !pv) return;
+        inp.addEventListener('input', () => { pv.innerHTML = ytThumbHtml(inp.value.trim()); });
+      }
+      updateYtPreview('f-video',   'vid-preview');
+      updateYtPreview('f-ep1-yt',  'ep1-preview');
+      updateYtPreview('f-ep2-yt',  'ep2-preview');
+
+      // Pinterest / URL paste for image arrays
+      document.querySelectorAll('.arr-url-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.key;
+          const inp = document.querySelector('.arr-url-inp[data-key="' + key + '"]');
+          if (!inp) return;
+          const url = inp.value.trim();
+          if (!url) return;
+          if (!Array.isArray(proj[key])) proj[key] = [];
+          proj[key].push(url);
+          const grid = g('grid-' + key);
+          if (grid) {
+            const idx = proj[key].length - 1;
+            const item = document.createElement('div');
+            item.className = 'img-item';
+            item.dataset.key = key;
+            item.dataset.idx = String(idx);
+            item.innerHTML = '<img src="' + url + '" alt="" loading="lazy" /><button class="img-rm rm-img" data-key="' + key + '" data-idx="' + idx + '">×</button>';
+            item.querySelector('.rm-img')?.addEventListener('click', handleImgRemove);
+            grid.appendChild(item);
+          }
+          inp.value = '';
+        });
+      });
     }
 
     function handleImgRemove(e) {
