@@ -100,6 +100,19 @@ body {
 .stat-card { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid #e8e8e4; }
 .stat-val { font-size: 1.6rem; font-weight: 800; }
 .stat-lbl { font-size: .72rem; color: #666; margin-top: 2px; }
+.content-nav-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.content-nav-card {
+  background: #fff; border-radius: 12px; padding: 16px;
+  border: 1px solid #e8e8e4; display: flex; align-items: center; gap: 14px;
+  text-decoration: none; color: inherit; cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.content-nav-card:hover, .content-nav-card:active { border-color: #b8945a; box-shadow: 0 2px 8px rgba(184,148,90,.12); }
+.content-nav-icon { font-size: 1.6rem; flex-shrink: 0; }
+.content-nav-body { flex: 1; min-width: 0; }
+.content-nav-label { font-size: .95rem; font-weight: 700; color: #1a1a18; }
+.content-nav-sub { font-size: .75rem; color: #888; margin-top: 2px; }
+.content-nav-arrow { font-size: 1.1rem; color: #b8945a; font-weight: 600; flex-shrink: 0; }
 .recent-card {
   background: #fff; border-radius: 12px; padding: 16px;
   border: 1px solid #e8e8e4; margin-bottom: 10px;
