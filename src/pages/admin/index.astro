@@ -241,6 +241,26 @@ function renderDashboard() {
         </div>
       </div>
 
+      <div class="dash-title" style="margin-top:20px">Content Management</div>
+      <div class="content-nav-row">
+        <a href="/admin/projects" class="content-nav-card">
+          <span class="content-nav-icon">🏗️</span>
+          <div class="content-nav-body">
+            <div class="content-nav-label">Projects</div>
+            <div class="content-nav-sub">Add &amp; manage portfolio projects</div>
+          </div>
+          <span class="content-nav-arrow">→</span>
+        </a>
+        <a href="/admin/blog" class="content-nav-card">
+          <span class="content-nav-icon">✍️</span>
+          <div class="content-nav-body">
+            <div class="content-nav-label">Blog Posts</div>
+            <div class="content-nav-sub">Write &amp; publish blog articles</div>
+          </div>
+          <span class="content-nav-arrow">→</span>
+        </a>
+      </div>
+
       ${recent.length === 0 ? `
         <div class="empty-state">
           <div class="empty-icon">📋</div>
