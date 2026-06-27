@@ -235,6 +235,10 @@ function renderDashboard() {
           <div class="stat-val" style="color:#b8945a" id="proj-count">—</div>
           <div class="stat-lbl">Projects</div>
         </div>
+        <div class="stat-card" style="cursor:pointer" id="dash-blog-card">
+          <div class="stat-val" style="color:#4a90d9" id="blog-count">—</div>
+          <div class="stat-lbl">Blog Posts</div>
+        </div>
       </div>
 
       ${recent.length === 0 ? `
@@ -262,7 +266,8 @@ function renderDashboard() {
   document.getElementById('dash-new-qtn')!.addEventListener('click', () => startWizard());
   document.getElementById('dash-inq-card')?.addEventListener('click', () => navigate('inquiries'));
   document.getElementById('dash-proj-card')?.addEventListener('click', () => { window.location.href = '/admin/projects'; });
-  // Fetch project count from Supabase
+  document.getElementById('dash-blog-card')?.addEventListener('click', () => { window.location.href = '/admin/blog'; });
+  // Fetch counts from Supabase
   (async () => {
     try {
       const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
@@ -270,9 +275,14 @@ function renderDashboard() {
       if (!SB_URL || !SB_KEY) return;
       const { createClient } = await import('@supabase/supabase-js');
       const sb = createClient(SB_URL, SB_KEY);
-      const { count } = await sb.from('projects').select('*', { count: 'exact', head: true });
-      const el = document.getElementById('proj-count');
-      if (el) el.textContent = String(count ?? 0);
+      const [{ count: projCount }, { count: blogCount }] = await Promise.all([
+        sb.from('projects').select('*', { count: 'exact', head: true }),
+        sb.from('blog_posts').select('*', { count: 'exact', head: true }),
+      ]);
+      const projEl = document.getElementById('proj-count');
+      if (projEl) projEl.textContent = String(projCount ?? 0);
+      const blogEl = document.getElementById('blog-count');
+      if (blogEl) blogEl.textContent = String(blogCount ?? 0);
     } catch {}
   })();
   document.querySelectorAll<HTMLElement>('[data-qtn]').forEach(el => {

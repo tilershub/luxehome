@@ -1,14 +1,44 @@
 ---
+export const prerender = false;
 import { getCollection } from 'astro:content';
+import { createServerSupabase } from '../../lib/supabase';
 import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
 
-const posts = (await getCollection('blog')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+// Supabase published posts
+const sb = createServerSupabase(import.meta.env as unknown as Record<string, string>);
+const { data: sbPosts } = sb
+  ? await sb.from('blog_posts').select('*').eq('status', 'published').order('pub_date', { ascending: false })
+  : { data: [] };
 
-const categories = [...new Set(posts.map((p) => p.data.category))];
+// Markdown posts
+const mdRaw = await getCollection('blog');
+const mdPosts = mdRaw.map((p) => ({
+  slug: p.id.replace(/\.mdx?$/, ''),
+  title: p.data.title,
+  description: p.data.description,
+  pubDate: p.data.pubDate,
+  author: p.data.author,
+  category: p.data.category,
+  readingTime: p.data.readingTime,
+  source: 'md' as const,
+}));
+
+// DB posts mapped to same shape
+const dbPosts = (sbPosts || []).map((p: any) => ({
+  slug: p.slug,
+  title: p.title,
+  description: p.excerpt,
+  pubDate: new Date(p.pub_date),
+  author: p.author,
+  category: p.category,
+  readingTime: p.reading_time,
+  source: 'db' as const,
+}));
+
+const posts = [...dbPosts, ...mdPosts].sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf());
+const categories = [...new Set(posts.map((p) => p.category).filter(Boolean))];
 ---
 
 <Layout
@@ -62,17 +92,17 @@ const categories = [...new Set(posts.map((p) => p.data.category))];
         <div class="posts-grid">
           {posts.map((post, i) => (
             <article class={`post-card reveal ${i === 0 ? 'post-card--featured' : ''}`}>
-              <a href={`/blog/${post.id.replace(/\.mdx?$/, '')}`} class="post-card-link">
+              <a href={`/blog/${post.slug}`} class="post-card-link">
                 <div class="post-meta">
-                  <span class="post-cat">{post.data.category}</span>
+                  <span class="post-cat">{post.category}</span>
                   <span class="post-dot">·</span>
-                  <span class="post-time">{post.data.readingTime}</span>
+                  <span class="post-time">{post.readingTime}</span>
                 </div>
-                <h2 class="post-title">{post.data.title}</h2>
-                <p class="post-desc">{post.data.description}</p>
+                <h2 class="post-title">{post.title}</h2>
+                <p class="post-desc">{post.description}</p>
                 <div class="post-footer">
-                  <time class="post-date" datetime={post.data.pubDate.toISOString()}>
-                    {post.data.pubDate.toLocaleDateString('en-LK', {
+                  <time class="post-date" datetime={post.pubDate.toISOString()}>
+                    {post.pubDate.toLocaleDateString('en-LK', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',

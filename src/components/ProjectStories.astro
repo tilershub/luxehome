@@ -1,0 +1,473 @@
+---
+---
+
+<section id="project-stories" class="stories-section" style="display:none">
+  <div class="stories-header reveal">
+    <div class="stories-heading-row">
+      <div>
+        <div class="stag">Featured Projects</div>
+        <h2>Completed Work<br />We're Proud Of</h2>
+      </div>
+      <a href="/projects" class="view-all">View All Projects →</a>
+    </div>
+    <p class="sdesc">Each project is a complete transformation — from the original space through 3D design to the finished result.</p>
+  </div>
+
+  <div class="stories-wrapper">
+    <button class="slider-arrow slider-prev" id="slider-prev" aria-label="Previous projects">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <div class="slider-track" id="slider-track" role="list" aria-label="Featured projects">
+      <!-- Cards injected by JS -->
+    </div>
+
+    <button class="slider-arrow slider-next" id="slider-next" aria-label="Next projects">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+  <div class="slider-dots" id="slider-dots" role="tablist" aria-label="Project navigation"></div>
+</section>
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+
+  const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  const CAT_LABELS = {
+    bathroom: 'Luxury Bathroom',
+    flooring: 'Designer Floors',
+    staircase: 'Designer Staircases',
+    kitchen: 'Luxury Kitchens',
+  };
+
+  function ytShortId(url) {
+    if (!url) return null;
+    const m = url.match(/(?:youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+
+  function buildCard(p) {
+    const cat = CAT_LABELS[p.category] || p.category || '';
+    const shortId = ytShortId(p.youtube_short);
+    return `
+      <div class="ring-wrap" role="listitem">
+        <a class="story-card" href="/projects/${p.slug}"
+           data-yt-short="${shortId || ''}"
+           data-slug="${p.slug}"
+           aria-label="${p.title} — ${cat}">
+          <div class="story-media">
+            ${p.cover_image
+              ? `<img class="story-thumb" src="${p.cover_image}" alt="${p.title}" loading="lazy" />`
+              : `<div class="story-thumb story-thumb-empty"></div>`
+            }
+          </div>
+          <div class="story-overlay" aria-hidden="true"></div>
+          <div class="story-body">
+            <span class="story-cat">${cat}</span>
+            <span class="story-title">${p.title}</span>
+            <span class="story-location">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              ${p.location}${p.completion_year ? ' · ' + p.completion_year : ''}
+            </span>
+          </div>
+        </a>
+      </div>
+    `;
+  }
+
+  async function loadStories() {
+    if (!SB_URL || !SB_KEY) return;
+    try {
+      const sb = createClient(SB_URL, SB_KEY);
+      const { data } = await sb
+        .from('projects')
+        .select('slug,title,category,location,completion_year,cover_image,youtube_short')
+        .in('status', ['published', 'featured'])
+        .order('completion_year', { ascending: false })
+        .limit(8);
+
+      if (!data || data.length === 0) return;
+
+      const track = document.getElementById('slider-track');
+      const section = document.getElementById('project-stories');
+      if (!track || !section) return;
+
+      track.innerHTML = data.map(buildCard).join('');
+      section.style.display = '';
+
+      initSlider(data);
+      initShortHover();
+    } catch {
+      // silently fail
+    }
+  }
+
+  const CARD_W = 214; // card width (200px) + gap (14px)
+
+  function initSlider(data) {
+    const track = document.getElementById('slider-track');
+    const prev  = document.getElementById('slider-prev');
+    const next  = document.getElementById('slider-next');
+    const dots  = document.getElementById('slider-dots');
+    if (!track) return;
+
+    // Build dots
+    if (dots) {
+      dots.innerHTML = data.map((_, i) =>
+        `<button class="dot${i === 0 ? ' active' : ''}" data-idx="${i}" role="tab" aria-label="Project ${i + 1}"></button>`
+      ).join('');
+      dots.querySelectorAll('.dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+          track.scrollTo({ left: parseInt(dot.dataset.idx) * CARD_W, behavior: 'smooth' });
+        });
+      });
+    }
+
+    function updateControls() {
+      const atStart = track.scrollLeft <= 10;
+      const atEnd   = track.scrollLeft + track.clientWidth >= track.scrollWidth - 10;
+      if (prev) prev.style.opacity = atStart ? '0.3' : '1';
+      if (next) next.style.opacity = atEnd ? '0.3' : '1';
+
+      // Active dot
+      const idx = Math.round(track.scrollLeft / CARD_W);
+      dots?.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+
+    track.addEventListener('scroll', updateControls, { passive: true });
+    updateControls();
+
+    prev?.addEventListener('click', () => track.scrollBy({ left: -(CARD_W * 2), behavior: 'smooth' }));
+    next?.addEventListener('click', () => track.scrollBy({ left:  CARD_W * 2,  behavior: 'smooth' }));
+
+    // Pointer drag (desktop)
+    let isDragging = false, startX = 0, scrollStart = 0, moved = false;
+
+    track.addEventListener('pointerdown', e => {
+      isDragging = true;
+      moved = false;
+      startX = e.clientX;
+      scrollStart = track.scrollLeft;
+      track.setPointerCapture(e.pointerId);
+      track.style.cursor = 'grabbing';
+      track.style.scrollSnapType = 'none';
+    });
+
+    track.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) moved = true;
+      track.scrollLeft = scrollStart - dx;
+    });
+
+    track.addEventListener('pointerup', () => {
+      isDragging = false;
+      track.style.cursor = '';
+      setTimeout(() => { track.style.scrollSnapType = ''; }, 50);
+    });
+
+    // Suppress link clicks after drag
+    track.addEventListener('click', e => {
+      if (moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        moved = false;
+      }
+    }, true);
+  }
+
+  function initShortHover() {
+    document.querySelectorAll('.story-card[data-yt-short]').forEach(card => {
+      const id = card.dataset.ytShort;
+      if (!id) return;
+      const media = card.querySelector('.story-media');
+      const thumb = card.querySelector('.story-thumb');
+      let iframe = null;
+      let timer  = null;
+
+      card.addEventListener('mouseenter', () => {
+        timer = setTimeout(() => {
+          if (iframe) return;
+          iframe = document.createElement('iframe');
+          iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=${id}`;
+          iframe.allow = 'autoplay; encrypted-media';
+          iframe.frameBorder = '0';
+          iframe.className = 'short-iframe';
+          if (thumb) thumb.style.opacity = '0';
+          media.appendChild(iframe);
+        }, 350);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        clearTimeout(timer);
+        if (iframe) {
+          iframe.remove();
+          iframe = null;
+          if (thumb) thumb.style.opacity = '1';
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', loadStories);
+</script>
+
+<style>
+  .stories-section {
+    background: var(--off-white, #fbfbf9);
+    padding: 5.5rem 0 4rem;
+    overflow: hidden;
+  }
+
+  .stories-header {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 4rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stories-heading-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .6rem;
+  }
+
+  .stag {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--clay, #b8892a);
+    margin-bottom: .75rem;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem, 3vw, 2.6rem);
+    font-weight: 700;
+    color: var(--charcoal, #1e1a17);
+    line-height: 1.15;
+  }
+
+  .view-all {
+    flex-shrink: 0;
+    color: var(--clay, #b8892a);
+    font-size: .82rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(184,137,42,.35);
+    padding-bottom: .1rem;
+    margin-bottom: .4rem;
+    transition: color .2s, border-color .2s;
+    white-space: nowrap;
+  }
+  .view-all:hover { color: #9a7222; border-color: #9a7222; }
+
+  .sdesc {
+    font-size: .9rem;
+    color: var(--warm-gray, #6f6f6f);
+    line-height: 1.75;
+    max-width: 56ch;
+  }
+
+  /* ── Slider wrapper with arrows ── */
+  .stories-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .slider-arrow {
+    position: absolute;
+    z-index: 10;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    border: 1px solid rgba(30,26,23,.18);
+    background: rgba(255,255,255,.9);
+    backdrop-filter: blur(6px);
+    color: var(--charcoal, #1e1a17);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s, opacity .2s, transform .2s;
+    box-shadow: 0 2px 12px rgba(0,0,0,.1);
+  }
+  .slider-arrow:hover { background: var(--clay, #b8892a); color: #fff; border-color: transparent; transform: scale(1.08); }
+  .slider-prev { left: 1rem; }
+  .slider-next { right: 1rem; }
+
+  /* ── Track ── */
+  .slider-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 20px 4rem 28px;
+    cursor: grab;
+  }
+  .slider-track::-webkit-scrollbar { display: none; }
+
+  /* ── Ring wrapper ── */
+  .ring-wrap {
+    flex-shrink: 0;
+    border-radius: 18px;
+    padding: 3px;
+    background: transparent;
+    transition: background .3s;
+    scroll-snap-align: start;
+    position: relative;
+  }
+  .ring-wrap:hover {
+    background: linear-gradient(135deg, #b8892a 0%, #d4a84b 40%, #8a6220 70%, #b8892a 100%);
+  }
+
+  /* ── Story card ── */
+  .story-card {
+    position: relative;
+    display: block;
+    width: 200px;
+    height: 344px;
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    background: #1e1a17;
+    flex-shrink: 0;
+    transition: transform .25s;
+  }
+  .ring-wrap:hover .story-card { transform: scale(1.01); }
+
+  /* ── Media layer ── */
+  .story-media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .story-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity .3s;
+  }
+
+  .story-thumb-empty {
+    background: linear-gradient(160deg, #2a2520 0%, #1a1610 100%);
+  }
+
+  .short-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    pointer-events: none; /* clicks pass through to <a> */
+  }
+
+  /* ── Gradient overlay ── */
+  .story-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 30%,
+      rgba(10,8,6,.55) 60%,
+      rgba(10,8,6,.88) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ── Text body ── */
+  .story-body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .28rem;
+  }
+
+  .story-cat {
+    display: inline-block;
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--clay, #b8892a);
+    padding: 3px 7px;
+    border-radius: 2px;
+    align-self: flex-start;
+    margin-bottom: .15rem;
+  }
+
+  .story-title {
+    font-family: 'Playfair Display', serif;
+    font-size: .92rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .story-location {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .7rem;
+    color: rgba(255,255,255,.65);
+    font-weight: 400;
+  }
+
+  /* ── Dots ── */
+  .slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
+    padding-top: .5rem;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(30,26,23,.2);
+    cursor: pointer;
+    padding: 0;
+    transition: background .2s, transform .2s;
+  }
+
+  .dot.active {
+    background: var(--clay, #b8892a);
+    transform: scale(1.35);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .stories-header { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .slider-track { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .slider-prev { left: .25rem; }
+    .slider-next { right: .25rem; }
+  }
+
+  @media (max-width: 768px) {
+    .stories-section { padding: 4rem 0 3rem; }
+    .stories-header { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .slider-track { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .stories-heading-row { flex-direction: column; align-items: flex-start; gap: .5rem; }
+    .slider-arrow { display: none; }
+    .story-card { width: 175px; height: 302px; }
+    .ring-wrap { padding: 2px; border-radius: 16px; }
+  }
+</style>

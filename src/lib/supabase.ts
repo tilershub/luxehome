@@ -51,6 +51,7 @@ export interface Project {
   status: 'draft' | 'published' | 'featured';
   cover_image?: string;
   hero_video?: string;
+  youtube_short?: string;
   before_images: string[];
   after_images: string[];
   progress_images: string[];
@@ -79,3 +80,23 @@ export interface Project {
 }
 
 export type ProjectInsert = Omit<Project, 'id' | 'created_at' | 'updated_at'>;
+
+export interface BlogPost {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  cover_image?: string;
+  author: string;
+  category?: string;
+  reading_time?: string;
+  status: 'draft' | 'published';
+  pub_date: string;
+  meta_title?: string;
+  meta_description?: string;
+  og_image?: string;
+  include_in_sitemap: boolean;
+}
