@@ -57,12 +57,23 @@ import Footer from '../../components/Footer.astro';
         <span class="area-hint" id="areaHint"></span>
       </div>
 
+      <!-- Renovation toggle -->
+      <div class="renov-toggle reveal">
+        <span class="renov-q">Is this an existing bathroom?</span>
+        <div class="renov-btns" role="group" aria-label="Renovation type">
+          <button class="renov-btn renov-btn--active" id="renov-no" type="button">No — New Construction</button>
+          <button class="renov-btn" id="renov-yes" type="button">Yes — Needs Demolition</button>
+        </div>
+        <span class="renov-note" id="renov-note" style="display:none">Demolition &amp; Wall Plastering included in price</span>
+      </div>
+
       <div class="pkg-grid reveal">
 
         <!-- Starter -->
         <div class="pkg-card">
           <div class="pkg-badge pkg-badge--design">Free Design Included</div>
-          <div class="pkg-name">Starter</div>
+          <div class="pkg-badge pkg-badge--renov" style="display:none">Demolition + Plastering Included</div>
+          <div class="pkg-name" data-name="Starter">Starter</div>
           <div class="pkg-desc">Modern, fully-functional bathroom</div>
           <div class="pkg-price bath-price" data-base="985000" data-rate="7600">LKR 985,000</div>
           <div class="pkg-price-note bath-note">base price up to 40 sq.ft</div>
@@ -88,7 +99,8 @@ import Footer from '../../components/Footer.astro';
         <div class="pkg-card pkg-card--mid">
           <div class="pkg-badge">Most Popular</div>
           <div class="pkg-badge pkg-badge--design">Free Design Included</div>
-          <div class="pkg-name">Premium</div>
+          <div class="pkg-badge pkg-badge--renov" style="display:none">Demolition + Plastering Included</div>
+          <div class="pkg-name" data-name="Premium">Premium</div>
           <div class="pkg-desc">Elevated design with premium upgrades</div>
           <div class="pkg-price bath-price" data-base="1225000" data-rate="8600">LKR 1,225,000</div>
           <div class="pkg-price-note bath-note">base price up to 40 sq.ft</div>
@@ -113,7 +125,8 @@ import Footer from '../../components/Footer.astro';
         <!-- Signature -->
         <div class="pkg-card">
           <div class="pkg-badge pkg-badge--design">Free Design Included</div>
-          <div class="pkg-name">Signature</div>
+          <div class="pkg-badge pkg-badge--renov" style="display:none">Demolition + Plastering Included</div>
+          <div class="pkg-name" data-name="Signature">Signature</div>
           <div class="pkg-desc">Luxury hotel-grade bathroom experience</div>
           <div class="pkg-price bath-price" data-base="1570000" data-rate="9600">LKR 1,570,000</div>
           <div class="pkg-price-note bath-note">base price up to 40 sq.ft</div>
@@ -138,7 +151,7 @@ import Footer from '../../components/Footer.astro';
       </div>
 
       <!-- Add-ons -->
-      <div class="addons-section reveal">
+      <div class="addons-section reveal" id="addons-section">
         <div class="addons-head">Optional Add-ons</div>
         <div class="addons-grid addons-grid--single">
           <div class="addon-card">
@@ -224,6 +237,11 @@ import Footer from '../../components/Footer.astro';
 
 <script is:inline>
 (function () {
+  var renovMode = false;
+  var RENOV_BASE = 100000;
+  var RENOV_RATE = 1500;
+  var PKG_NAMES = { 'Starter': 'Starter Renovation', 'Premium': 'Premium Renovation', 'Signature': 'Signature Renovation' };
+
   function formatLKR(n) {
     return 'LKR\u00a0' + Math.round(n).toLocaleString('en-US');
   }
@@ -243,14 +261,18 @@ import Footer from '../../components/Footer.astro';
     return parseFloat((l * w).toFixed(2));
   }
 
-  function onDimensionChange() {
+  function updatePrices() {
     var area = getArea();
     var l    = parseFloat(lengthInput.value) || 0;
     var w    = parseFloat(widthInput.value)  || 0;
 
-    /* Package prices */
+    var renovAddon = renovMode ? calcPrice(RENOV_BASE, RENOV_RATE, area) : 0;
+
+    /* Package prices — add reno prep when renovation mode is on */
     document.querySelectorAll('.bath-price').forEach(function (el) {
-      el.textContent = formatLKR(calcPrice(parseInt(el.dataset.base, 10), parseInt(el.dataset.rate, 10), area));
+      var base = parseInt(el.dataset.base, 10);
+      var rate = parseInt(el.dataset.rate, 10);
+      el.textContent = formatLKR(calcPrice(base, rate, area) + renovAddon);
     });
 
     /* Package price notes */
@@ -258,7 +280,7 @@ import Footer from '../../components/Footer.astro';
       el.textContent = area > 0 ? 'Bathroom size: ' + area + ' sq.ft' : 'base price up to 40 sq.ft';
     });
 
-    /* Renovation prep add-on — base + surcharge logic */
+    /* Standalone add-on card price */
     document.querySelectorAll('.addon-calc-pkg').forEach(function (el) {
       var base = parseInt(el.dataset.base, 10);
       var rate = parseInt(el.dataset.rate, 10);
@@ -272,8 +294,41 @@ import Footer from '../../components/Footer.astro';
     }
   }
 
-  lengthInput.addEventListener('input', onDimensionChange);
-  widthInput.addEventListener('input',  onDimensionChange);
+  function applyRenovMode() {
+    /* Swap package names */
+    document.querySelectorAll('.pkg-name[data-name]').forEach(function (el) {
+      el.textContent = renovMode ? (PKG_NAMES[el.dataset.name] || el.dataset.name) : el.dataset.name;
+    });
+
+    /* Show/hide the "Demolition + Plastering Included" badge on each card */
+    document.querySelectorAll('.pkg-badge--renov').forEach(function (el) {
+      el.style.display = renovMode ? 'inline-block' : 'none';
+    });
+
+    /* Hide standalone add-ons section when reno is included in price */
+    var addons = document.getElementById('addons-section');
+    if (addons) addons.style.display = renovMode ? 'none' : '';
+
+    /* Active state on toggle buttons */
+    var btnNo  = document.getElementById('renov-no');
+    var btnYes = document.getElementById('renov-yes');
+    if (btnNo)  btnNo.classList.toggle('renov-btn--active', !renovMode);
+    if (btnYes) btnYes.classList.toggle('renov-btn--active',  renovMode);
+
+    /* Note line under toggle */
+    var note = document.getElementById('renov-note');
+    if (note) note.style.display = renovMode ? '' : 'none';
+
+    updatePrices();
+  }
+
+  var btnNo  = document.getElementById('renov-no');
+  var btnYes = document.getElementById('renov-yes');
+  if (btnNo)  btnNo.addEventListener('click',  function () { renovMode = false; applyRenovMode(); });
+  if (btnYes) btnYes.addEventListener('click', function () { renovMode = true;  applyRenovMode(); });
+
+  lengthInput.addEventListener('input', updatePrices);
+  widthInput.addEventListener('input',  updatePrices);
 
 })();
 </script>
@@ -478,6 +533,80 @@ import Footer from '../../components/Footer.astro';
     color: var(--clay);
     font-style: italic;
     margin-left: auto;
+  }
+
+  /* ── Renovation toggle ── */
+
+  .renov-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+    flex-wrap: wrap;
+  }
+
+  .renov-q {
+    font-size: .78rem;
+    font-weight: 500;
+    color: rgba(240,236,224,.72);
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+
+  .renov-btns {
+    display: flex;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .renov-btn {
+    background: rgba(255,255,255,.04);
+    border: none;
+    color: rgba(240,236,224,.65);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .78rem;
+    font-weight: 500;
+    padding: .5rem 1.1rem;
+    cursor: pointer;
+    min-height: 38px;
+    transition: background .18s, color .18s;
+    white-space: nowrap;
+  }
+
+  .renov-btn + .renov-btn {
+    border-left: 1px solid rgba(255,255,255,.1);
+  }
+
+  .renov-btn--active {
+    background: var(--clay);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .renov-btn:hover:not(.renov-btn--active) {
+    background: rgba(255,255,255,.09);
+    color: rgba(240,236,224,.9);
+  }
+
+  .renov-note {
+    font-size: .72rem;
+    color: var(--clay);
+    font-style: italic;
+  }
+
+  .pkg-badge--renov {
+    background: rgba(184,148,90,.15);
+    color: var(--clay);
+    border: 1px solid rgba(184,148,90,.3);
+    font-size: .6rem;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    padding: .18rem .6rem;
+    border-radius: 20px;
+    width: fit-content;
+    margin-bottom: .1rem;
   }
 
   /* ── Package grid ── */
