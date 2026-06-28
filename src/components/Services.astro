@@ -24,8 +24,9 @@ const services = [
     desc: 'Every step finished with double nosing, router edge detail, side elevation tiling, and skirting — a staircase that commands attention.',
     inclusions: ['Double Nosing Finish', 'Router Edge Detail', 'Side Elevation + Skirting'],
     href: '/services/staircase-tiling',
-    img: 'https://images.pexels.com/photos/10991408/pexels-photo-10991408.jpeg?auto=compress&cs=tinysrgb&w=900&h=600&fit=crop',
-    imgAlt: 'Premium staircase tiling with elegant finishes',
+    img: '/hero-staircase.png',
+    imgAlt: 'Premium staircase tiling with modern glass hand railing',
+    price: 'From Rs. 25,000 / step',
   },
   {
     num: '04',
@@ -69,6 +70,9 @@ const services = [
                 </li>
               ))}
             </ul>
+            {'price' in s && s.price && (
+              <div class="svc-price">{s.price}</div>
+            )}
             <div class="svc-cta">
               Explore Service
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -255,6 +259,20 @@ const services = [
   }
 
   .svc-inclusions svg { flex-shrink: 0; }
+
+  /* ── Price tag ── */
+  .svc-price {
+    display: inline-block;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: var(--clay, #b8892a);
+    background: rgba(184,137,42,.1);
+    border: 1px solid rgba(184,137,42,.25);
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin-bottom: .75rem;
+  }
 
   /* ── CTA ── */
   .svc-cta {

@@ -170,6 +170,10 @@
       background: var(--surface2); border: 1px solid var(--border);
       border-radius: 8px; padding: 12px;
     }
+    .vid-row-inputs { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .vid-row-inputs input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--cream); font-size: .85rem; }
+    .rm-vid-btn { margin-top: 8px; padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: .8rem; cursor: pointer; }
+    .rm-vid-btn:hover { color: var(--red); border-color: var(--red); }
     .dyn-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .dyn-row-label { font-size: .78rem; font-weight: 600; color: var(--muted); }
     .rm-row-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: .85rem; padding: 2px 6px; }
@@ -293,6 +297,7 @@
         old_space_images: [], design_3d_images: [],
         episode_01_youtube: '', episode_02_youtube: '',
         episode_01_thumbnail: '', episode_02_thumbnail: '',
+        project_videos: [],
         project_overview: '', client_requirements: '', design_concept: '',
         scope_of_work: '', materials_brands: '',
         project_timeline: [], challenges_solutions: '',
@@ -399,7 +404,7 @@
 
     function goEditor(p = null) {
       view = 'editor';
-      proj = p ? { ...p, before_images: p.before_images || [], after_images: p.after_images || [], progress_images: p.progress_images || [], gallery_images: p.gallery_images || [], old_space_images: p.old_space_images || [], design_3d_images: p.design_3d_images || [], project_timeline: p.project_timeline || [], faqs: p.faqs || [], related_projects: p.related_projects || [] } : blankProject();
+      proj = p ? { ...p, before_images: p.before_images || [], after_images: p.after_images || [], progress_images: p.progress_images || [], gallery_images: p.gallery_images || [], old_space_images: p.old_space_images || [], design_3d_images: p.design_3d_images || [], project_timeline: p.project_timeline || [], faqs: p.faqs || [], related_projects: p.related_projects || [], project_videos: p.project_videos || [] } : blankProject();
       activeTab = 0;
       hdrTitle.textContent = proj.id ? 'Edit Project' : 'New Project';
       newBtn.style.display = 'none';
@@ -445,6 +450,13 @@
       proj.episode_02_youtube   = gv('f-ep2-yt');
       proj.episode_01_thumbnail = gv('f-ep1-thumb');
       proj.episode_02_thumbnail = gv('f-ep2-thumb');
+      // Collect dynamic videos list
+      proj.project_videos = [];
+      document.querySelectorAll('.vid-row').forEach(row => {
+        const url = row.querySelector('.vid-url')?.value?.trim() || '';
+        const title = row.querySelector('.vid-title')?.value?.trim() || '';
+        if (url) proj.project_videos.push({ title, url });
+      });
       // multi-image arrays are updated live via the add/remove handlers
     }
 
@@ -714,6 +726,23 @@
           <label>Episode 02 — Completed Project Tour</label>
           <input id="f-ep2-yt" type="url" value="${esc(proj.episode_02_youtube)}" placeholder="https://youtu.be/…" />
           <div id="ep2-preview">${ytThumbHtml(proj.episode_02_youtube)}</div>
+        </div>
+        <div class="field" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+          <label>Additional Videos</label>
+          <div class="dyn-list" id="vid-list">
+            ${(proj.project_videos || []).map((v, idx) => `
+              <div class="vid-row dyn-row">
+                <div class="vid-row-inputs">
+                  <input class="vid-title" type="text" placeholder="Video title (optional)" value="${esc(v.title || '')}" />
+                  <input class="vid-url" type="url" placeholder="https://youtube.com/watch?v=… or /shorts/…" value="${esc(v.url || '')}" />
+                </div>
+                ${ytThumbHtml(v.url || '')}
+                <button class="rm-vid-btn" type="button">✕ Remove</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="add-row-btn" id="add-vid-btn" type="button">＋ Add Video</button>
+          <div class="hint">Each video will appear as an embedded YouTube player on the project page.</div>
         </div>
         <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)"></div>
         ${renderImageArrayField('Old Space Photos', 'old_space_images')}
@@ -1067,6 +1096,39 @@
       updateYtPreview('f-video',   'vid-preview');
       updateYtPreview('f-ep1-yt',  'ep1-preview');
       updateYtPreview('f-ep2-yt',  'ep2-preview');
+
+      // Additional videos — add/remove/preview
+      function updateVidRowPreview(row, url) {
+        const preview = row.querySelector('.vid-thumb-preview');
+        if (!preview) return;
+        const html = ytThumbHtml(url);
+        if (html) { preview.style.display = 'block'; preview.innerHTML = html; }
+        else { preview.style.display = 'none'; preview.innerHTML = ''; }
+      }
+
+      function wireVidRow(row) {
+        row.querySelector('.vid-url')?.addEventListener('input', e => updateVidRowPreview(row, e.target.value.trim()));
+        row.querySelector('.rm-vid-btn')?.addEventListener('click', () => row.remove());
+      }
+
+      document.querySelectorAll('#vid-list .vid-row').forEach(wireVidRow);
+
+      g('add-vid-btn')?.addEventListener('click', () => {
+        const list = g('vid-list');
+        if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'vid-row dyn-row';
+        row.innerHTML = `
+          <div class="vid-row-inputs">
+            <input class="vid-title" type="text" placeholder="Video title (optional)" />
+            <input class="vid-url" type="url" placeholder="https://youtube.com/watch?v=… or /shorts/…" />
+          </div>
+          <div class="vid-thumb-preview" style="display:none"></div>
+          <button class="rm-vid-btn" type="button">✕ Remove</button>`;
+        list.appendChild(row);
+        wireVidRow(row);
+        row.querySelector('.vid-url')?.focus();
+      });
 
       // Pinterest / URL paste for image arrays
       document.querySelectorAll('.arr-url-btn').forEach(btn => {
