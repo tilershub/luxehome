@@ -68,6 +68,11 @@
     .upload-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface2); color: var(--cream); font-size: .82rem; cursor: pointer; }
     .upload-btn:hover { border-color: var(--clay); }
     .upload-progress { font-size: .78rem; color: var(--clay); margin-top: 6px; }
+    .dyn-row { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+    .dyn-row input[type="url"] { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--cream); font-size: .85rem; margin-bottom: 6px; }
+    .rm-blog-img-btn, .rm-blog-vid-btn { margin-top: 4px; padding: 4px 10px; border-radius: 5px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: .78rem; cursor: pointer; }
+    .rm-blog-img-btn:hover, .rm-blog-vid-btn:hover { color: var(--red); border-color: var(--red); }
+    .arr-list { display: flex; flex-direction: column; }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
     .toggle-label { font-size: .88rem; }
     .toggle-sub { font-size: .75rem; color: var(--muted); margin-top: 2px; }
@@ -131,6 +136,7 @@
         pub_date: new Date().toISOString().split('T')[0],
         status: 'draft', cover_image: '',
         excerpt: '', content: '',
+        images: [], videos: [],
         meta_title: '', meta_description: '', og_image: '',
         include_in_sitemap: true,
       };
@@ -323,6 +329,21 @@
       post.pub_date=gv('f-pub-date'); post.cover_image=gv('f-cover');
     }
 
+    function ytId(url) {
+      if (!url) return null;
+      const m = url.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+    function ytThumbHtml(url) {
+      const vid = ytId(url);
+      if (!vid) return '';
+      return '<a href="' + esc(url) + '" target="_blank" rel="noopener" style="display:block;margin-top:8px;border-radius:8px;overflow:hidden;position:relative">'
+        + '<img src="https://img.youtube.com/vi/' + vid + '/hqdefault.jpg" style="width:100%;display:block;border-radius:8px" alt="" />'
+        + '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
+        + '<svg width="48" height="48" viewBox="0 0 68 48" fill="none"><rect width="68" height="48" rx="10" fill="rgba(0,0,0,.55)"/><polygon points="28,16 28,32 46,24" fill="#fff"/></svg>'
+        + '</div></a>';
+    }
+
     function renderTab1() {
       return `
         <div class="field"><label>Excerpt <span class="req">*</span></label>
@@ -336,12 +357,86 @@
             ?`<div class="preview-pane" id="preview-pane">Loading…</div>`
             :`<textarea id="f-content" rows="22" placeholder="Write in Markdown…">${esc(post.content)}</textarea>`
           }
+        </div>
+        <div class="field" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+          <label>Images</label>
+          <div class="arr-list" id="blog-img-list">
+            ${(post.images||[]).map(url=>`
+              <div class="blog-img-row dyn-row">
+                <input class="blog-img-url" type="url" value="${esc(url)}" placeholder="https://i.pinimg.com/… (right-click image → Copy Image Address)" />
+                ${url?`<img src="${esc(url)}" style="width:100%;max-height:140px;object-fit:cover;border-radius:6px;margin-top:6px" alt="" loading="lazy" />`:''}
+                <button class="rm-blog-img-btn" type="button">✕ Remove</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="add-row-btn" id="add-blog-img-btn" type="button">＋ Add Image URL</button>
+          <div class="hint">Paste direct image URLs. For Pinterest: right-click any image → Copy Image Address.</div>
+        </div>
+        <div class="field" style="margin-top:16px">
+          <label>Videos</label>
+          <div class="dyn-list" id="blog-vid-list">
+            ${(post.videos||[]).map(url=>`
+              <div class="blog-vid-row dyn-row">
+                <input class="blog-vid-url" type="url" value="${esc(url)}" placeholder="https://youtube.com/watch?v=…" />
+                ${ytThumbHtml(url)}
+                <button class="rm-blog-vid-btn" type="button">✕ Remove</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="add-row-btn" id="add-blog-vid-btn" type="button">＋ Add Video</button>
+          <div class="hint">YouTube video URLs. Each will appear as an embedded player in the published post.</div>
         </div>`;
     }
 
     function attachTab1Events() {
       g('preview-toggle')?.addEventListener('click',()=>{
         collectTab1(); showPreview=!showPreview; renderTabContent(); if(showPreview)loadPreview();
+      });
+
+      // Image rows — add / remove
+      function wireBlogImgRow(row) {
+        row.querySelector('.rm-blog-img-btn')?.addEventListener('click', () => row.remove());
+        row.querySelector('.blog-img-url')?.addEventListener('input', e => {
+          const url = e.target.value.trim();
+          let img = row.querySelector('.img-live-preview');
+          if (url) {
+            if (!img) { img = document.createElement('img'); img.className='img-live-preview'; img.style.cssText='width:100%;max-height:140px;object-fit:cover;border-radius:6px;margin-top:6px'; img.alt=''; img.loading='lazy'; e.target.after(img); }
+            img.src = url;
+          } else if (img) { img.remove(); }
+        });
+      }
+      document.querySelectorAll('#blog-img-list .blog-img-row').forEach(wireBlogImgRow);
+      g('add-blog-img-btn')?.addEventListener('click', () => {
+        const list = g('blog-img-list'); if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'blog-img-row dyn-row';
+        row.innerHTML = '<input class="blog-img-url" type="url" placeholder="https://i.pinimg.com/… (right-click image → Copy Image Address)" /><button class="rm-blog-img-btn" type="button">✕ Remove</button>';
+        list.appendChild(row);
+        wireBlogImgRow(row);
+        row.querySelector('.blog-img-url')?.focus();
+      });
+
+      // Video rows — add / remove / preview
+      function wireBlogVidRow(row) {
+        row.querySelector('.rm-blog-vid-btn')?.addEventListener('click', () => row.remove());
+        row.querySelector('.blog-vid-url')?.addEventListener('input', e => {
+          const url = e.target.value.trim();
+          let pv = row.querySelector('.vid-thumb-pv');
+          if (!pv) { pv = document.createElement('div'); pv.className = 'vid-thumb-pv'; row.querySelector('.blog-vid-url').after(pv); }
+          const html = ytThumbHtml(url);
+          pv.style.display = html ? 'block' : 'none';
+          pv.innerHTML = html;
+        });
+      }
+      document.querySelectorAll('#blog-vid-list .blog-vid-row').forEach(wireBlogVidRow);
+      g('add-blog-vid-btn')?.addEventListener('click', () => {
+        const list = g('blog-vid-list'); if (!list) return;
+        const row = document.createElement('div');
+        row.className = 'blog-vid-row dyn-row';
+        row.innerHTML = '<input class="blog-vid-url" type="url" placeholder="https://youtube.com/watch?v=…" /><div class="vid-thumb-pv" style="display:none"></div><button class="rm-blog-vid-btn" type="button">✕ Remove</button>';
+        list.appendChild(row);
+        wireBlogVidRow(row);
+        row.querySelector('.blog-vid-url')?.focus();
       });
     }
 
@@ -353,6 +448,14 @@
 
     function collectTab1() {
       if(!showPreview){ post.excerpt=gv('f-excerpt'); post.content=g('f-content')?.value??post.content; }
+      post.images = [];
+      document.querySelectorAll('#blog-img-list .blog-img-url').forEach(inp => {
+        const v = inp.value.trim(); if (v) post.images.push(v);
+      });
+      post.videos = [];
+      document.querySelectorAll('#blog-vid-list .blog-vid-url').forEach(inp => {
+        const v = inp.value.trim(); if (v) post.videos.push(v);
+      });
     }
 
     function renderTab2() {
@@ -443,6 +546,7 @@
         pub_date:post.pub_date||new Date().toISOString().split('T')[0],
         status:post.status, cover_image:post.cover_image||null,
         excerpt:post.excerpt, content:post.content,
+        images:post.images||[], videos:post.videos||[],
         meta_title:post.meta_title, meta_description:post.meta_description,
         og_image:post.og_image||null, include_in_sitemap:post.include_in_sitemap,
       };

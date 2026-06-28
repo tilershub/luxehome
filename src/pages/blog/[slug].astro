@@ -118,6 +118,34 @@ const jsonLd = JSON.stringify({
           ? <div set:html={postData.bodyHtml} />
           : Content && <Content />
         }
+
+        {postData.source === 'db' && postData.images?.length > 0 && (
+          <div class="post-gallery">
+            {(postData.images as string[]).map((url: string) => (
+              <img src={url} alt="" loading="lazy" class="gallery-img" />
+            ))}
+          </div>
+        )}
+
+        {postData.source === 'db' && postData.videos?.length > 0 && (
+          <div class="post-videos">
+            {(postData.videos as string[]).map((url: string) => {
+              const m = url?.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+              const id = m ? m[1] : null;
+              return id ? (
+                <div class="video-ratio">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${id}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"
+                    title="Video"
+                  />
+                </div>
+              ) : null;
+            })}
+          </div>
+        )}
       </article>
 
       <aside class="post-sidebar">
@@ -337,6 +365,39 @@ const jsonLd = JSON.stringify({
     color: var(--warm-gray);
     font-style: italic;
     margin: 1.5rem 0;
+  }
+
+  /* ── Post images & videos ── */
+  .post-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+  .post-gallery .gallery-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  .post-videos {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin: 1.5rem 0;
+  }
+  .video-ratio {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+  }
+  .video-ratio iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 6px;
   }
 
   /* ── Sidebar ── */
