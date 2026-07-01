@@ -14,11 +14,12 @@ function normalizePhone(raw: string): string {
   return raw.replace(/\D/g, '');
 }
 
+const PIXEL_ID = '1904211696933513';
+
 export const POST: APIRoute = async ({ request }) => {
-  const pixelId = import.meta.env.META_PIXEL_ID;
   const accessToken = import.meta.env.META_ACCESS_TOKEN;
 
-  if (!pixelId || !accessToken) {
+  if (!accessToken) {
     return new Response(JSON.stringify({ ok: false, error: 'CAPI not configured' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -86,7 +87,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const res = await fetch(
-      `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${PIXEL_ID}/events?access_token=${accessToken}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
