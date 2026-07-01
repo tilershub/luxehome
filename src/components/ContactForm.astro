@@ -586,6 +586,26 @@ const { service: defaultService = '' } = Astro.props;
       });
     }
 
+    // ── Meta Pixel + CAPI (hybrid, deduplicated) ──
+    const metaEventId = crypto.randomUUID();
+    if (typeof (window as any).fbq === 'function') {
+      (window as any).fbq('track', 'Lead', {
+        content_name: 'Site Inspection Request',
+        content_category: svc,
+      }, { eventID: metaEventId });
+    }
+    fetch('/api/meta-capi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_id:         metaEventId,
+        event_source_url: window.location.href,
+        phone:            data.get('phone')?.toString().trim() ?? '',
+        name:             data.get('name')?.toString().trim() ?? '',
+        service:          svc,
+      }),
+    }).catch(() => {});
+
     // ── Open WhatsApp ──
     const SERVICE_NUMBERS: Record<string, string> = {
       'Shower Cubicle': '94710111506',
