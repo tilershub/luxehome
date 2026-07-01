@@ -9,7 +9,7 @@ interface Props {
 
 const {
   title = 'LUXEHOME — Premium Tiling & Renovation Sri Lanka',
-  description = 'Premium tiling and bathroom renovation specialists across Sri Lanka. Craft, quality, and clean finishes — every time.',
+  description = 'Sri Lanka\'s premium bathroom renovation and floor tiling specialists. Complete home transformations across Colombo, Kandy, Galle & all Sri Lanka. Trusted by Sri Lankans worldwide.',
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -43,6 +43,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="LUXEHOME" />
     <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content="https://images.pexels.com/photos/16249146/pexels-photo-16249146.jpeg?auto=compress&cs=tinysrgb&w=1200" />
+    <meta property="og:locale" content="en_LK" />
+    <meta name="geo.region" content="LK" />
+    <meta name="geo.placename" content="Sri Lanka" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
@@ -51,19 +55,82 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "LUXEHOME",
-        "description": "Premium tiling and bathroom renovation specialists across Sri Lanka.",
-        "url": "https://luxehome.com",
-        "telephone": "+94774503744",
-        "email": "luxehome@gmail.com",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "LK"
-        },
-        "areaServed": "Sri Lanka",
-        "priceRange": "Rs. 350 – Rs. 40,000",
-        "sameAs": []
+        "@graph": [
+          {
+            "@type": "HomeAndConstructionBusiness",
+            "@id": "https://luxehome.lk/#business",
+            "name": "LUXEHOME",
+            "alternateName": ["Luxe Home Sri Lanka", "LuxeHome Renovations"],
+            "description": "Sri Lanka's premium bathroom renovation and floor tiling specialists. Trusted by Sri Lankans worldwide — complete home transformations across Colombo, Kandy, Galle, Negombo, Kurunegala and all of Sri Lanka.",
+            "url": "https://luxehome.lk",
+            "telephone": "+94774503744",
+            "email": "luxehome@gmail.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://luxehome.lk/favicon.svg"
+            },
+            "image": "https://images.pexels.com/photos/16249146/pexels-photo-16249146.jpeg?auto=compress&cs=tinysrgb&w=1200",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "LK",
+              "addressRegion": "Western Province",
+              "addressLocality": "Colombo"
+            },
+            "areaServed": [
+              {"@type": "City", "name": "Colombo"},
+              {"@type": "City", "name": "Kandy"},
+              {"@type": "City", "name": "Galle"},
+              {"@type": "City", "name": "Negombo"},
+              {"@type": "City", "name": "Kurunegala"},
+              {"@type": "City", "name": "Matara"},
+              {"@type": "City", "name": "Jaffna"},
+              {"@type": "Country", "name": "Sri Lanka"}
+            ],
+            "priceRange": "LKR 985,000 – LKR 1,570,000",
+            "hasOfferCatalog": {
+              "@type": "OfferCatalog",
+              "name": "Home Renovation Services — Sri Lanka",
+              "itemListElement": [
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Bathroom Renovation Sri Lanka",
+                    "description": "Complete bathroom renovation packages from LKR 985,000 including waterproofing, tiling, plumbing, electrical, fixtures and free 3D design. Serving all Sri Lanka.",
+                    "url": "https://luxehome.lk/services/bathroom"
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Floor Tiling Sri Lanka",
+                    "description": "Professional floor tiling across Sri Lanka from Rs. 350 per sq.ft using Swisstek grout and Tokyo cement.",
+                    "url": "https://luxehome.lk/services/flooring"
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Staircase Tiling Sri Lanka",
+                    "description": "Precision staircase tiling with double-nosing from Rs. 2,400 per linear ft. Serving all Sri Lanka.",
+                    "url": "https://luxehome.lk/services/staircase-tiling"
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Kitchen Renovation Sri Lanka",
+                    "description": "Kitchen pantry tiling and cupboard installation across Sri Lanka.",
+                    "url": "https://luxehome.lk/services/kitchen"
+                  }
+                }
+              ]
+            }
+          }
+        ]
       }
     </script>
 
