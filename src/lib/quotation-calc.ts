@@ -9,6 +9,24 @@ export type VanityType      = 'none' | 'vanity-top' | 'vanity-cupboard';
 export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'converted';
 export type InvoiceStatus   = 'draft' | 'sent' | 'partially-paid' | 'paid' | 'cancelled';
 
+/* ── Bathroom package base prices (public page "starting from") ── */
+/** Base price for a 4 sqm new-construction bathroom, difficulty 1.00, no add-ons */
+export const BATHROOM_PACKAGES = {
+  standard:  { basePrice: 1_120_000, baseSqm: 4, perSqmAboveBase: 105_000 },
+  premium:   { basePrice: 1_330_000, baseSqm: 4, perSqmAboveBase: 125_000 },
+  signature: { basePrice: 1_590_000, baseSqm: 4, perSqmAboveBase: 155_000 },
+} as const;
+
+/** Add-on combos and renovation rate */
+export const BATHROOM_ADDONS = {
+  renovationPerSqm: 20_000,
+  premiumCombo:    154_000,  // Swisstek aluminum door + aluminum window + pressure pump
+  signatureCombo:  176_000,  // Wood door + wood window + pressure pump
+} as const;
+
+/** Valid difficulty factor values */
+export const DIFFICULTY_FACTORS = [1.00, 1.02, 1.05, 1.08, 1.10] as const;
+
 /* ── All editable rates (change prices here) ─────────────── */
 export const RATES = {
   wallNiche:     { each: 10_000 },
