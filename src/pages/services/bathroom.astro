@@ -173,7 +173,8 @@ import Footer from '../../components/Footer.astro';
       <!-- Renovation add-on -->
       <div class="addons-section reveal">
         <div class="addons-head">Renovation Preparation — Optional Add-on</div>
-        <div class="addon-card">
+        <div class="addon-card" id="addon-renov">
+          <button class="addon-toggle" id="renov-toggle" aria-pressed="false">+ Add</button>
           <div class="addon-name">Existing Bathroom — Demolition &amp; Plastering</div>
           <div class="addon-price" id="renov-price">Rs.&nbsp;80,000</div>
           <div class="addon-desc">For existing bathrooms requiring demolition, debris removal, and surface preparation before new works begin. Price is based on bathroom size and updates when you enter dimensions above.</div>
@@ -185,7 +186,7 @@ import Footer from '../../components/Footer.astro';
         <div class="combos-head">Optional Door, Window &amp; Pressure Pump Combos</div>
         <p class="combos-note">Starting prices do not include door, window, or pressure pump. Add a combo to your package at a discounted bundle rate.</p>
         <div class="combos-grid">
-          <div class="combo-card">
+          <div class="combo-card" data-combo-key="premium" data-combo-price="154000">
             <div class="combo-name">Premium Combo</div>
             <ul class="combo-items">
               <li>Swisstek aluminum door</li>
@@ -194,7 +195,7 @@ import Footer from '../../components/Footer.astro';
             </ul>
             <div class="combo-price">Rs.&nbsp;154,000</div>
           </div>
-          <div class="combo-card combo-card--sig">
+          <div class="combo-card combo-card--sig" data-combo-key="signature" data-combo-price="176000">
             <div class="combo-badge">Signature</div>
             <div class="combo-name">Signature Combo</div>
             <ul class="combo-items">
@@ -223,6 +224,22 @@ import Footer from '../../components/Footer.astro';
           <li>Outside plumbing, structural changes, and major layout changes are quoted separately if required.</li>
           <li>1 year workmanship warranty included.</li>
         </ol>
+      </div>
+
+      <!-- Estimate panel -->
+      <div class="estimate-panel" id="estimate-panel" hidden>
+        <div class="est-head">Your Estimate</div>
+        <div class="est-items" id="est-items"></div>
+        <hr class="est-divider" />
+        <div class="est-total-row">
+          <span class="est-total-label">Estimated Total</span>
+          <span class="est-total-val" id="est-total"></span>
+        </div>
+        <p class="est-note">Final price confirmed after site inspection. This estimate covers selected scope only.</p>
+        <div class="est-actions">
+          <a href="/contact" class="pkg-btn pkg-btn--primary est-contact-btn">Request a Quote</a>
+          <a id="est-wa-btn" href="https://wa.me/94774503744" class="pkg-btn pkg-btn--wa" target="_blank" rel="noopener noreferrer">Send via WhatsApp</a>
+        </div>
       </div>
 
     </div>
@@ -276,13 +293,21 @@ import Footer from '../../components/Footer.astro';
 (function () {
   var SQM_PER_SQFT = 0.0929;
   var BASE_SQM     = 4;
-  var RENOV_RATE   = 20000; // Rs. per sqm
+  var RENOV_RATE   = 20000;
+
+  var state = {
+    selectedPkg:   null,
+    renovSelected: false,
+    renovPrice:    BASE_SQM * RENOV_RATE,
+    selectedCombo: null
+  };
 
   var lengthInput = document.getElementById('bathLength');
   var widthInput  = document.getElementById('bathWidth');
+  var panel       = document.getElementById('estimate-panel');
 
   function fmtRs(n) {
-    return 'Rs. ' + Math.round(n).toLocaleString('en-US');
+    return 'Rs. ' + Math.round(n).toLocaleString('en-US');
   }
 
   function getSqm() {
@@ -292,42 +317,158 @@ import Footer from '../../components/Footer.astro';
     return parseFloat((l * w * SQM_PER_SQFT).toFixed(3));
   }
 
+  function getCardPrice(card, sqm) {
+    var base = parseInt(card.dataset.base, 10);
+    var rate = parseInt(card.dataset.rate, 10);
+    return base + Math.max(0, sqm - BASE_SQM) * rate;
+  }
+
+  function getPkgLabel(pkg) {
+    var names = { standard: 'Standard', premium: 'Premium', signature: 'Signature' };
+    return (names[pkg] || pkg) + ' Bathroom Package';
+  }
+
   function updateAll() {
-    var sqm    = getSqm();
-    var sqft   = parseFloat((sqm / SQM_PER_SQFT).toFixed(1));
-    var hint   = document.getElementById('areaHint');
+    var sqm  = getSqm();
+    var sqft = parseFloat((sqm / SQM_PER_SQFT).toFixed(1));
+    var hint = document.getElementById('areaHint');
 
     if (hint) {
-      hint.textContent = (sqm > 0) ? 'Floor area: ' + sqft.toFixed(1) + ' sq.ft (' + sqm.toFixed(2) + ' sqm)' : '';
+      hint.textContent = sqm > 0 ? 'Floor area: ' + sqft.toFixed(1) + ' sq.ft (' + sqm.toFixed(2) + ' sqm)' : '';
     }
 
     document.querySelectorAll('[data-pkg]').forEach(function (card) {
-      var base = parseInt(card.dataset.base, 10);
-      var rate = parseInt(card.dataset.rate, 10);
-      var pkg  = card.dataset.pkg;
-
-      var price  = base + Math.max(0, sqm - BASE_SQM) * rate;
+      var effSqm  = sqm > 0 ? sqm : BASE_SQM;
+      var price   = getCardPrice(card, effSqm);
+      var pkg     = card.dataset.pkg;
       var priceEl = document.getElementById('price-' + pkg);
       var noteEl  = document.getElementById('note-'  + pkg);
       var fromEl  = document.getElementById('from-'  + pkg);
 
       if (priceEl) priceEl.textContent = fmtRs(price);
       if (noteEl) {
-        noteEl.textContent = (sqm > 0)
+        noteEl.textContent = sqm > 0
           ? 'for ' + sqm.toFixed(2) + ' sqm (' + sqft.toFixed(1) + ' sq.ft)'
           : 'base price — 4 sqm';
       }
-      if (fromEl) {
-        fromEl.textContent = (sqm > 0) ? 'Total Investment' : 'Total Investment From';
+      if (fromEl) fromEl.textContent = sqm > 0 ? 'Total Investment' : 'Total Investment From';
+
+      if (state.selectedPkg && state.selectedPkg.pkg === pkg) {
+        state.selectedPkg.price = price;
       }
     });
 
+    var renovSqm = sqm > 0 ? sqm : BASE_SQM;
+    state.renovPrice = renovSqm * RENOV_RATE;
     var renovEl = document.getElementById('renov-price');
-    if (renovEl) {
-      var renovSqm  = sqm > 0 ? sqm : BASE_SQM;
-      renovEl.textContent = fmtRs(renovSqm * RENOV_RATE);
+    if (renovEl) renovEl.textContent = fmtRs(state.renovPrice);
+
+    updateEstimate();
+  }
+
+  function updateEstimate() {
+    if (!panel) return;
+    if (!state.selectedPkg) { panel.hidden = true; return; }
+    panel.hidden = false;
+
+    var items = [{ label: state.selectedPkg.name, price: state.selectedPkg.price }];
+    if (state.renovSelected) {
+      items.push({ label: 'Renovation — Demo &amp; Plastering', price: state.renovPrice });
+    }
+    if (state.selectedCombo) {
+      items.push({ label: state.selectedCombo.name + ' Combo', price: state.selectedCombo.price });
+    }
+
+    var total   = items.reduce(function (s, i) { return s + i.price; }, 0);
+    var itemsEl = document.getElementById('est-items');
+    if (itemsEl) {
+      itemsEl.innerHTML = items.map(function (i) {
+        return '<div class="est-item">'
+          + '<span class="est-item-label">' + i.label + '</span>'
+          + '<span class="est-item-price">' + fmtRs(i.price) + '</span>'
+          + '</div>';
+      }).join('');
+    }
+
+    var totalEl = document.getElementById('est-total');
+    if (totalEl) totalEl.textContent = fmtRs(total);
+
+    var waBtn = document.getElementById('est-wa-btn');
+    if (waBtn) {
+      var msg = 'Hi, I\'m interested in a bathroom renovation:\n\n';
+      items.forEach(function (i) {
+        msg += '• ' + i.label.replace(/&amp;/g, '&') + ' — ' + fmtRs(i.price) + '\n';
+      });
+      msg += '\nEstimated Total: ' + fmtRs(total) + '\n\nPlease get in touch.';
+      waBtn.href = 'https://wa.me/94774503744?text=' + encodeURIComponent(msg);
+    }
+
+    if (panel.dataset.shown !== '1') {
+      panel.dataset.shown = '1';
+      setTimeout(function () { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 80);
     }
   }
+
+  // Package card click
+  document.querySelectorAll('[data-pkg]').forEach(function (card) {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('a, button')) return;
+      var wasSelected = card.classList.contains('pkg-card--selected');
+      document.querySelectorAll('[data-pkg]').forEach(function (c) {
+        c.classList.remove('pkg-card--selected');
+      });
+      if (wasSelected) {
+        state.selectedPkg = null;
+        if (panel) panel.dataset.shown = '';
+      } else {
+        card.classList.add('pkg-card--selected');
+        var effSqm = getSqm();
+        effSqm = effSqm > 0 ? effSqm : BASE_SQM;
+        state.selectedPkg = {
+          pkg:   card.dataset.pkg,
+          name:  getPkgLabel(card.dataset.pkg),
+          price: getCardPrice(card, effSqm)
+        };
+      }
+      updateEstimate();
+    });
+  });
+
+  // Renovation toggle
+  var renovToggle = document.getElementById('renov-toggle');
+  var renovCard   = document.getElementById('addon-renov');
+  if (renovToggle) {
+    renovToggle.addEventListener('click', function () {
+      state.renovSelected = !state.renovSelected;
+      renovToggle.textContent = state.renovSelected ? '✓ Added' : '+ Add';
+      renovToggle.setAttribute('aria-pressed', state.renovSelected ? 'true' : 'false');
+      renovToggle.classList.toggle('is-selected', state.renovSelected);
+      if (renovCard) renovCard.classList.toggle('addon-card--selected', state.renovSelected);
+      updateEstimate();
+    });
+  }
+
+  // Combo card click
+  document.querySelectorAll('[data-combo-key]').forEach(function (card) {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function () {
+      var key         = card.dataset.comboKey;
+      var price       = parseInt(card.dataset.comboPrice, 10);
+      var label       = key.charAt(0).toUpperCase() + key.slice(1);
+      var wasSelected = card.classList.contains('combo-card--selected');
+      document.querySelectorAll('[data-combo-key]').forEach(function (c) {
+        c.classList.remove('combo-card--selected');
+      });
+      if (wasSelected) {
+        state.selectedCombo = null;
+      } else {
+        card.classList.add('combo-card--selected');
+        state.selectedCombo = { name: label, price: price };
+      }
+      updateEstimate();
+    });
+  });
 
   if (lengthInput) lengthInput.addEventListener('input', updateAll);
   if (widthInput)  widthInput.addEventListener('input',  updateAll);
@@ -1014,5 +1155,130 @@ import Footer from '../../components/Footer.astro';
   @media (max-width: 580px) {
     .recent-proj-section { padding: 3rem 1rem 4rem; }
     .mini-proj-row { grid-template-columns: 1fr; }
+  }
+
+  /* ── Package card selection ── */
+
+  .pkg-card { transition: border-color .2s, box-shadow .2s; }
+
+  .pkg-card--selected {
+    border-color: var(--clay) !important;
+    box-shadow: 0 0 0 2px rgba(184,148,90,.28);
+    position: relative;
+  }
+
+  .pkg-card--selected::after {
+    content: '✓ Selected';
+    position: absolute;
+    top: .65rem; right: .8rem;
+    font-size: .58rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .09em;
+    color: var(--clay);
+    background: rgba(184,148,90,.14);
+    border: 1px solid rgba(184,148,90,.35);
+    padding: .18rem .55rem; border-radius: 20px;
+  }
+
+  /* ── Renovation toggle ── */
+
+  .addon-card { position: relative; }
+
+  .addon-toggle {
+    position: absolute; top: 0; right: 0;
+    background: rgba(184,148,90,.10);
+    border: 1px solid rgba(184,148,90,.30);
+    color: var(--clay);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .63rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: .28rem .75rem; border-radius: 3px;
+    cursor: pointer; transition: background .15s;
+    min-height: 32px;
+  }
+  .addon-toggle:hover, .addon-toggle.is-selected {
+    background: rgba(184,148,90,.22);
+  }
+
+  .addon-card--selected {
+    border-color: rgba(184,148,90,.5) !important;
+    background: rgba(184,148,90,.07);
+  }
+
+  /* ── Combo card selection ── */
+
+  .combo-card { transition: border-color .15s, box-shadow .15s; }
+  .combo-card:hover { border-color: rgba(184,148,90,.35); }
+
+  .combo-card--selected {
+    border-color: var(--clay) !important;
+    box-shadow: 0 0 0 1px rgba(184,148,90,.22);
+  }
+
+  .combo-card--selected .combo-price::before { content: '✓ '; }
+
+  /* ── Estimate panel ── */
+
+  .estimate-panel {
+    background: rgba(184,148,90,.07);
+    border: 1px solid rgba(184,148,90,.38);
+    border-radius: 6px;
+    padding: 1.8rem 2rem;
+    margin-top: 2rem;
+  }
+
+  .est-head {
+    font-size: .63rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .15em;
+    color: var(--clay); margin-bottom: 1rem;
+  }
+
+  .est-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06);
+    gap: 1rem;
+  }
+
+  .est-item-label { font-size: .82rem; color: rgba(240,236,224,.85); }
+  .est-item-price {
+    font-size: .88rem; font-weight: 600;
+    color: var(--cream); white-space: nowrap;
+  }
+
+  .est-divider {
+    border: none; border-top: 1px solid rgba(184,148,90,.28);
+    margin: 1rem 0;
+  }
+
+  .est-total-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 1rem; margin-bottom: .85rem;
+  }
+
+  .est-total-label {
+    font-size: .7rem; text-transform: uppercase;
+    letter-spacing: .1em; color: rgba(240,236,224,.62);
+  }
+
+  .est-total-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem; font-weight: 800;
+    background: linear-gradient(90deg, #b8945a, #d4a96b);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .est-note {
+    font-size: .7rem; color: rgba(240,236,224,.42);
+    line-height: 1.55; margin-bottom: 1.2rem;
+  }
+
+  .est-actions { display: flex; gap: .8rem; flex-wrap: wrap; }
+  .est-contact-btn { flex: 1; min-width: 0; }
+
+  @media (max-width: 480px) {
+    .estimate-panel { padding: 1.3rem 1.1rem; }
+    .est-total-val { font-size: 1.4rem; }
+    .est-actions { flex-direction: column; }
+    .est-contact-btn { flex: unset; }
   }
 </style>
