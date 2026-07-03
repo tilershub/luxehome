@@ -77,7 +77,7 @@ import {
   fmtRs, fmtDate, fmtDateShort, qtnNumber, invNumber,
   defaultInputs, statusColor,
   DEFAULT_BRANDS, DEFAULT_PAYMENT_TERMS,
-  RATES,
+  RATES, BATHROOM_PACKAGES, BATHROOM_ADDONS, DIFFICULTY_FACTORS,
 } from '../../lib/quotation-calc';
 import type {
   QuotationInputs, QuotationBreakdown, Quotation, Invoice,
@@ -1059,24 +1059,43 @@ function renderStep8() {
         </div>
       </div>
 
-      <div>
-        ${toggle('Door', 'If No: Rs. 0', 'door', wizardData.hasDoor)}
-        <div id="door-input-wrap" style="${wizardData.hasDoor ? '' : 'display:none'}">
-          <div class="field-group" style="margin:0 0 12px">
-            <label class="field-label">Door Cost (Rs.)</label>
-            <input class="field-input" id="f-door-cost" type="number" min="0" step="500"
-              placeholder="e.g. 45,000" value="${(wizardData as any).doorCostManual || ''}">
-          </div>
+      <div class="step-q" style="margin-top:.5rem">Door, Window &amp; Pressure Pump</div>
+      <div class="step-hint">Select a bundle combo, or add door/window separately below.</div>
+      <div class="option-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem">
+        <div class="opt-card ${!(wizardData as any).selectedCombo?'selected':''}" data-combo="">
+          <span class="opt-label" style="font-size:.78rem">Manual</span>
+          <span class="opt-sub" style="font-size:.65rem;color:rgba(240,236,224,.55)">Enter below</span>
+        </div>
+        <div class="opt-card ${(wizardData as any).selectedCombo==='premium-combo'?'selected':''}" data-combo="premium-combo">
+          <span class="opt-label" style="font-size:.78rem">Premium Combo</span>
+          <span class="opt-sub" style="font-size:.65rem;color:rgba(240,236,224,.55)">${fmtRs(BATHROOM_ADDONS.premiumCombo)}</span>
+        </div>
+        <div class="opt-card ${(wizardData as any).selectedCombo==='signature-combo'?'selected':''}" data-combo="signature-combo">
+          <span class="opt-label" style="font-size:.78rem">Signature Combo</span>
+          <span class="opt-sub" style="font-size:.65rem;color:rgba(240,236,224,.55)">${fmtRs(BATHROOM_ADDONS.signatureCombo)}</span>
         </div>
       </div>
 
-      <div>
-        ${toggle('Window', 'If No: Rs. 0', 'window', wizardData.hasWindow)}
-        <div id="window-input-wrap" style="${wizardData.hasWindow ? '' : 'display:none'}">
-          <div class="field-group" style="margin:0 0 12px">
-            <label class="field-label">Window Cost (Rs.)</label>
-            <input class="field-input" id="f-window-cost" type="number" min="0" step="500"
-              placeholder="e.g. 30,000" value="${(wizardData as any).windowCostManual || ''}">
+      <div id="door-window-manual" style="${(wizardData as any).selectedCombo ? 'display:none' : ''}">
+        <div>
+          ${toggle('Door', 'If No: Rs. 0', 'door', wizardData.hasDoor)}
+          <div id="door-input-wrap" style="${wizardData.hasDoor ? '' : 'display:none'}">
+            <div class="field-group" style="margin:0 0 12px">
+              <label class="field-label">Door Cost (Rs.)</label>
+              <input class="field-input" id="f-door-cost" type="number" min="0" step="500"
+                placeholder="e.g. 45,000" value="${(wizardData as any).doorCostManual || ''}">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          ${toggle('Window', 'If No: Rs. 0', 'window', wizardData.hasWindow)}
+          <div id="window-input-wrap" style="${wizardData.hasWindow ? '' : 'display:none'}">
+            <div class="field-group" style="margin:0 0 12px">
+              <label class="field-label">Window Cost (Rs.)</label>
+              <input class="field-input" id="f-window-cost" type="number" min="0" step="500"
+                placeholder="e.g. 30,000" value="${(wizardData as any).windowCostManual || ''}">
+            </div>
           </div>
         </div>
       </div>
@@ -1213,10 +1232,31 @@ function renderStep8() {
   document.querySelector<HTMLElement>('[data-toggle="geyser"]')!.addEventListener('click', () => {
     document.getElementById('geyser-input-wrap')!.style.display = wizardData.hasGeyser ? '' : 'none';
   });
-  document.querySelector<HTMLElement>('[data-toggle="door"]')!.addEventListener('click', () => {
+  // Combo picker — show/hide manual door/window section
+  document.querySelectorAll<HTMLElement>('[data-combo]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('[data-combo]').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      const combo = card.dataset.combo || '';
+      (wizardData as any).selectedCombo = combo;
+      const manualWrap = document.getElementById('door-window-manual');
+      if (manualWrap) manualWrap.style.display = combo ? 'none' : '';
+      if (combo === 'premium-combo') {
+        (wizardData as any).otherCostLabel = 'Door, Window & Pump — Premium Combo';
+        (wizardData as any).otherCost = BATHROOM_ADDONS.premiumCombo;
+      } else if (combo === 'signature-combo') {
+        (wizardData as any).otherCostLabel = 'Door, Window & Pump — Signature Combo';
+        (wizardData as any).otherCost = BATHROOM_ADDONS.signatureCombo;
+      } else {
+        (wizardData as any).otherCostLabel = '';
+        (wizardData as any).otherCost = 0;
+      }
+    });
+  });
+  document.querySelector<HTMLElement>('[data-toggle="door"]')?.addEventListener('click', () => {
     document.getElementById('door-input-wrap')!.style.display = wizardData.hasDoor ? '' : 'none';
   });
-  document.querySelector<HTMLElement>('[data-toggle="window"]')!.addEventListener('click', () => {
+  document.querySelector<HTMLElement>('[data-toggle="window"]')?.addEventListener('click', () => {
     document.getElementById('window-input-wrap')!.style.display = wizardData.hasWindow ? '' : 'none';
   });
   document.querySelector<HTMLElement>('[data-toggle="dummy-wall"]')!.addEventListener('click', () => {
@@ -1254,8 +1294,11 @@ function collectStep8(): boolean {
   (wizardData as any).designPlanningCost    = parseFloat(g('f-design-planning-cost')) || 0;
   (wizardData as any).ceilingCostManual     = parseFloat(g('f-ceiling-cost'))         || 0;
   (wizardData as any).geyserCostManual      = parseFloat(g('f-geyser-cost'))          || 0;
-  (wizardData as any).doorCostManual        = parseFloat(g('f-door-cost'))            || 0;
-  (wizardData as any).windowCostManual      = parseFloat(g('f-window-cost'))          || 0;
+  // Skip individual door/window costs when a combo is selected (combo cost is in otherCost)
+  if (!(wizardData as any).selectedCombo) {
+    (wizardData as any).doorCostManual   = parseFloat(g('f-door-cost'))   || 0;
+    (wizardData as any).windowCostManual = parseFloat(g('f-window-cost')) || 0;
+  }
   (wizardData as any).dummyWallCostManual   = parseFloat(g('f-dummy-wall-cost'))      || 0;
   (wizardData as any).floorConcreteCostManual = parseFloat(g('f-floor-concrete-cost'))|| 0;
   wizardData.vanityAmount         = parseFloat(g('f-vanity-amount'))   || 0;
@@ -1279,34 +1322,31 @@ function renderStep9() {
   const tier = (wizardData as any).packageTier || '';
   main.innerHTML = `
     <div class="step-content">
-      <div class="step-q">Package tier (optional)</div>
-      <div class="step-hint">Selected tier appears on the PDF quotation.</div>
-      <div class="option-grid" style="grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.4rem">
-        <div class="opt-card ${!tier ? 'selected' : ''}" data-tier="">
-          <span class="opt-label" style="font-size:.8rem">None</span>
-        </div>
-        <div class="opt-card ${tier==='economy' ? 'selected' : ''}" data-tier="economy">
-          <span class="opt-label" style="font-size:.8rem">Economy</span>
+      <div class="step-q">Package tier</div>
+      <div class="step-hint">Selected tier appears on the PDF. Public starting prices shown for reference.</div>
+      <div class="option-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.4rem">
+        <div class="opt-card ${tier==='standard' ? 'selected' : ''}" data-tier="standard">
+          <span class="opt-label" style="font-size:.8rem">Standard</span>
+          <span class="opt-sub" style="font-size:.68rem;color:rgba(240,236,224,.55)">From ${fmtRs(BATHROOM_PACKAGES.standard.basePrice)}</span>
         </div>
         <div class="opt-card ${tier==='premium' ? 'selected' : ''}" data-tier="premium">
           <span class="opt-label" style="font-size:.8rem">Premium</span>
+          <span class="opt-sub" style="font-size:.68rem;color:rgba(240,236,224,.55)">From ${fmtRs(BATHROOM_PACKAGES.premium.basePrice)}</span>
         </div>
         <div class="opt-card ${tier==='signature' ? 'selected' : ''}" data-tier="signature">
           <span class="opt-label" style="font-size:.8rem">Signature</span>
+          <span class="opt-sub" style="font-size:.68rem;color:rgba(240,236,224,.55)">From ${fmtRs(BATHROOM_PACKAGES.signature.basePrice)}</span>
         </div>
       </div>
 
       <div class="step-q">Difficulty / complexity</div>
-      <div class="step-hint">Adjust for site challenges. 1.00 = standard. Applied to all costs before profit.</div>
-      <div class="slider-current" id="diff-display">${(val / 100).toFixed(2)}×</div>
-      <div class="slider-wrap">
-        <input type="range" class="slider-inp" id="diff-slider"
-          min="80" max="150" step="1" value="${val}">
-        <div class="slider-labels">
-          <span>0.80× Easy</span>
-          <span>1.00× Standard</span>
-          <span>1.50× Complex</span>
-        </div>
+      <div class="step-hint">Applied to all costs before profit margin.</div>
+      <div class="option-grid" style="grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.4rem">
+        ${DIFFICULTY_FACTORS.map(f => `
+          <div class="opt-card ${Math.abs((wizardData.difficultyScore||1)-f)<0.001?'selected':''}" data-diff="${f}">
+            <span class="opt-label" style="font-size:.85rem">${f.toFixed(2)}×</span>
+          </div>
+        `).join('')}
       </div>
 
       <div class="step-q" style="margin-top:2rem">Profit margin (%)</div>
@@ -1323,12 +1363,12 @@ function renderStep9() {
         value="${(wizardData as any).otherCost || ''}" placeholder="Amount (Rs.)">
     </div>
   `;
-  const slider = document.getElementById('diff-slider') as HTMLInputElement;
-  const display = document.getElementById('diff-display')!;
-  slider.addEventListener('input', () => {
-    const score = parseInt(slider.value, 10) / 100;
-    wizardData.difficultyScore = score;
-    display.textContent = `${score.toFixed(2)}×`;
+  document.querySelectorAll<HTMLElement>('[data-diff]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('[data-diff]').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      wizardData.difficultyScore = parseFloat(card.dataset.diff || '1');
+    });
   });
   document.querySelectorAll<HTMLElement>('[data-tier]').forEach(card => {
     card.addEventListener('click', () => {
@@ -1340,9 +1380,10 @@ function renderStep9() {
 }
 
 function collectStep9(): boolean {
-  const raw = parseInt((document.getElementById('diff-slider') as HTMLInputElement | null)?.value || '100', 10);
-  const score = Math.max(80, Math.min(150, isNaN(raw) ? 100 : raw)) / 100;
-  wizardData.difficultyScore = score;
+  // difficultyScore is set live by the discrete button click handler in renderStep9
+  if (!wizardData.difficultyScore || !DIFFICULTY_FACTORS.includes(wizardData.difficultyScore as any)) {
+    wizardData.difficultyScore = 1.00;
+  }
   const pct = parseFloat((document.getElementById('profit-input') as HTMLInputElement | null)?.value || '15');
   wizardData.profitMargin = Math.max(0, Math.min(0.5, (isNaN(pct) ? 15 : pct) / 100));
   const ocLabel = (document.getElementById('other-cost-label') as HTMLInputElement | null)?.value?.trim() || '';
