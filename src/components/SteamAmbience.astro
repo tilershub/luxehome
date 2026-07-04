@@ -1,0 +1,126 @@
+---
+---
+
+<!-- Site-wide steam/mist ambience — pointer-transparent, screen-blended so it
+     glows on dark sections and vanishes on light ones. -->
+<div class="steam-layer" aria-hidden="true">
+  <div class="steam steam-1"></div>
+  <div class="steam steam-2"></div>
+  <div class="steam steam-3"></div>
+  <div class="steam steam-4"></div>
+</div>
+
+<script is:inline>
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var root = document.documentElement;
+  var lastY = window.scrollY;
+  var velocity = 0;
+  var running = false;
+
+  function tick() {
+    velocity *= 0.92;
+    if (velocity < 0.5) {
+      velocity = 0;
+      root.style.setProperty('--steam-boost', '0');
+      root.style.setProperty('--steam-shift', '0px');
+      running = false;
+      return;
+    }
+    // Map velocity (px/frame, capped) to a gentle opacity boost and upward drift
+    var t = Math.min(1, velocity / 120);
+    root.style.setProperty('--steam-boost', (t * 0.05).toFixed(4));
+    root.style.setProperty('--steam-shift', (-t * 28).toFixed(1) + 'px');
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('scroll', function () {
+    var y = window.scrollY;
+    velocity = Math.min(240, velocity + Math.abs(y - lastY));
+    lastY = y;
+    if (!running) {
+      running = true;
+      requestAnimationFrame(tick);
+    }
+  }, { passive: true });
+})();
+</script>
+
+<style>
+  .steam-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 150;
+    overflow: hidden;
+    mix-blend-mode: screen;
+    transform: translateY(var(--steam-shift, 0px));
+    transition: transform 1.2s ease-out;
+  }
+
+  .steam {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(240,236,224,.85) 0%, rgba(240,236,224,.25) 45%, transparent 70%);
+    filter: blur(48px);
+    opacity: calc(var(--steam-o, .06) + var(--steam-boost, 0));
+    will-change: transform;
+  }
+
+  .steam-1 {
+    --steam-o: .07;
+    width: 80vw; height: 50vh;
+    left: -25vw; bottom: -18vh;
+    animation: steamDrift1 34s ease-in-out infinite alternate;
+  }
+
+  .steam-2 {
+    --steam-o: .05;
+    width: 65vw; height: 42vh;
+    right: -20vw; top: 8vh;
+    animation: steamDrift2 46s ease-in-out infinite alternate;
+    animation-delay: -12s;
+  }
+
+  .steam-3 {
+    --steam-o: .06;
+    width: 55vw; height: 38vh;
+    left: 15vw; top: -14vh;
+    animation: steamDrift3 40s ease-in-out infinite alternate;
+    animation-delay: -25s;
+  }
+
+  .steam-4 {
+    --steam-o: .045;
+    width: 70vw; height: 45vh;
+    right: -12vw; bottom: -22vh;
+    animation: steamDrift1 52s ease-in-out infinite alternate-reverse;
+    animation-delay: -30s;
+  }
+
+  @keyframes steamDrift1 {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(9vw, -7vh) scale(1.15); }
+  }
+
+  @keyframes steamDrift2 {
+    from { transform: translate(0, 0) scale(1.1); }
+    to   { transform: translate(-8vw, 6vh) scale(1); }
+  }
+
+  @keyframes steamDrift3 {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(-6vw, 8vh) scale(1.18); }
+  }
+
+  @media (max-width: 768px) {
+    .steam { filter: blur(32px); }
+    .steam-3, .steam-4 { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .steam { animation: none; }
+    .steam-layer { transition: none; }
+  }
+</style>
