@@ -12,7 +12,6 @@ export type InvoiceStatus   = 'draft' | 'sent' | 'partially-paid' | 'paid' | 'ca
 /* ── Bathroom package base prices (public page "starting from") ── */
 /** Base price for a 4 sqm new-construction bathroom, difficulty 1.00, no add-ons */
 export const BATHROOM_PACKAGES = {
-  standard:  { basePrice: 1_120_000, baseSqm: 4, perSqmAboveBase: 105_000 },
   premium:   { basePrice: 1_330_000, baseSqm: 4, perSqmAboveBase: 125_000 },
   signature: { basePrice: 1_590_000, baseSqm: 4, perSqmAboveBase: 155_000 },
 } as const;
