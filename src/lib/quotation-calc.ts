@@ -152,6 +152,31 @@ export function calculatePackageQuote(q: PackageQuoteInputs): PackageQuoteBreakd
   };
 }
 
+/* ── Comparison quote: both packages in one quotation ─────── */
+
+export interface ComparisonQuoteBreakdown {
+  compare: true;
+  areaSqm: number;
+  premium: PackageQuoteBreakdown;     // renovation & difficulty included, no combo
+  signature: PackageQuoteBreakdown;   // renovation & difficulty included, no combo
+  finalAmount: number;                // premium total — the "from" price
+}
+
+export function calculatePackageComparison(
+  q: Omit<PackageQuoteInputs, 'pkg' | 'combo'>
+): ComparisonQuoteBreakdown {
+  const base = { ...q, combo: '' as const, finalPriceOverride: null };
+  const premium   = calculatePackageQuote({ ...base, pkg: 'premium' });
+  const signature = calculatePackageQuote({ ...base, pkg: 'signature' });
+  return {
+    compare: true,
+    areaSqm: premium.areaSqm,
+    premium,
+    signature,
+    finalAmount: premium.finalSellingPrice,
+  };
+}
+
 /* ── All editable rates (change prices here) ─────────────── */
 export const RATES = {
   wallNiche:     { each: 10_000 },

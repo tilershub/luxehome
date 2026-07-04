@@ -73,7 +73,7 @@
 
 <script>
 import {
-  calculateQuotation, calculatePackageQuote, generateScopeOfWork,
+  calculateQuotation, calculatePackageQuote, calculatePackageComparison, generateScopeOfWork,
   fmtRs, fmtDate, fmtDateShort, qtnNumber, invNumber,
   defaultInputs, statusColor,
   DEFAULT_BRANDS, DEFAULT_PAYMENT_TERMS,
@@ -1497,6 +1497,7 @@ function renderStep10() {
         Total: ${termsTotal}% ${termsTotal===100?'✓':'(must equal 100%)'}
       </div>
 
+      ${(quoteMode() === 'package' && (wizardData as any).pkg === 'compare') ? '' : `
       <div class="dash-title" style="margin-top:24px;margin-bottom:8px">Final Price Override</div>
       <div class="override-section" style="padding:0">
         <input class="field-input" id="f-override" type="number" min="0" step="1000"
@@ -1504,6 +1505,7 @@ function renderStep10() {
           value="${wizardData.finalPriceOverride ?? ''}">
         <div class="override-note">If set, this replaces the calculated selling price on the PDF.</div>
       </div>
+      `}
     </div>
   `;
 
@@ -1550,8 +1552,13 @@ function renderStep10() {
 function collectStep10(): boolean {
   const total = wizardData.paymentTerms.reduce((s, t) => s + t.percentage, 0);
   if (total !== 100) { toast('Payment terms must total 100%'); return false; }
-  const ov = parseFloat((document.getElementById('f-override') as HTMLInputElement).value);
-  wizardData.finalPriceOverride = isNaN(ov) || ov <= 0 ? null : ov;
+  const ovInput = document.getElementById('f-override') as HTMLInputElement | null;
+  if (ovInput) {
+    const ov = parseFloat(ovInput.value);
+    wizardData.finalPriceOverride = isNaN(ov) || ov <= 0 ? null : ov;
+  } else {
+    wizardData.finalPriceOverride = null; // compare quotes have no single price to override
+  }
   return true;
 }
 
@@ -1617,7 +1624,7 @@ function pkgInputs() {
     projectLocation: wizardData.projectLocation, projectName: wizardData.projectName,
     quotationDate: wizardData.quotationDate,
     pkg: w.pkg || 'premium',
-    areaSqft: w.areaSqft || 0,
+    areaSqft: (w.areaSqm || 0) / SQM_PER_SQFT,
     isRenovation: !!w.isRenovation,
     combo: w.combo || '',
     difficultyScore: wizardData.difficultyScore || 1,
@@ -1645,13 +1652,17 @@ function renderPkgStep2() {
       <div class="option-grid" style="grid-template-columns:1fr;gap:10px">
         ${card('premium', 'Premium Bathroom', 'Rocell 450×900 · Swiss premium bathware')}
         ${card('signature', 'Signature Bathroom', 'Rocell 600×1200 · concealed bathware')}
+        <div class="opt-card ${sel==='compare'?'selected':''}" data-pkg="compare" style="align-items:flex-start;text-align:left;padding:16px">
+          <span class="opt-label" style="font-size:.9rem">⚖️ Compare Both Packages</span>
+          <span class="opt-sub" style="font-size:.72rem;color:rgba(240,236,224,.55)">One quote, both prices side-by-side — client selects · combos shown as optional add-ons</span>
+        </div>
       </div>
     </div>
   `;
   main.querySelectorAll<HTMLElement>('[data-pkg]').forEach(c => {
     c.addEventListener('click', () => {
       (wizardData as any).pkg = c.dataset.pkg;
-      wizardData.packageTier = c.dataset.pkg as any;
+      wizardData.packageTier = (c.dataset.pkg === 'compare' ? '' : c.dataset.pkg) as any;
       renderPkgStep2();
     });
   });
@@ -1665,17 +1676,22 @@ function collectPkgStep2(): boolean {
 /* Pkg Step 3 — Size, renovation, combo, difficulty */
 function renderPkgStep3() {
   const w = wizardData as any;
-  const areaSqft = w.areaSqft || '';
+  // Legacy package quotes stored the area in sq.ft — migrate on edit
+  if (w.areaSqm == null && w.areaSqft) {
+    w.areaSqm = +(w.areaSqft * SQM_PER_SQFT).toFixed(2);
+  }
+  const areaSqm = w.areaSqm || '';
   const combo = w.combo || '';
+  const isCompare = w.pkg === 'compare';
 
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Bathroom size</div>
-      <div class="step-hint">Floor area in square feet. Package base covers 4 sqm (≈ 43 sq.ft).</div>
+      <div class="step-hint">Floor area in square metres. Package base covers 4 sqm.</div>
       <div class="field-group">
-        <label class="field-label">Floor Area (sq.ft) *</label>
-        <input class="field-input" id="pk-area" type="number" min="1" step="0.5" inputmode="decimal"
-          placeholder="e.g. 45" value="${areaSqft}">
+        <label class="field-label">Floor Area (sqm) *</label>
+        <input class="field-input" id="pk-area" type="number" min="0.5" step="0.1" inputmode="decimal"
+          placeholder="e.g. 4.5" value="${areaSqm}">
         <div class="step-hint" id="pk-area-hint" style="margin-top:6px"></div>
       </div>
 
@@ -1692,6 +1708,9 @@ function renderPkgStep3() {
         </div>
       </div>
 
+      ${isCompare ? `
+      <div class="step-hint" style="margin-bottom:1.4rem">Door, window &amp; pump combos will appear on the quote as optional add-ons the client can choose.</div>
+      ` : `
       <div class="step-q">Door, Window &amp; Pressure Pump combo</div>
       <div class="option-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.4rem">
         <div class="opt-card ${!combo?'selected':''}" data-combo="">
@@ -1707,6 +1726,7 @@ function renderPkgStep3() {
           <span class="opt-sub">${fmtRs(BATHROOM_ADDONS.signatureCombo)}</span>
         </div>
       </div>
+      `}
 
       <div class="step-q">Difficulty / site complexity</div>
       <div class="step-hint">Applied to package and renovation portions.</div>
@@ -1729,13 +1749,26 @@ function renderPkgStep3() {
 
   function refresh() {
     const w2 = wizardData as any;
-    w2.areaSqft = parseFloat(areaInput.value) || 0;
-    const bd = calculatePackageQuote(pkgInputs() as any);
+    w2.areaSqm = parseFloat(areaInput.value) || 0;
 
+    if (isCompare) {
+      const cmp = calculatePackageComparison(pkgInputs() as any);
+      const hint = document.getElementById('pk-area-hint');
+      if (hint) {
+        hint.textContent = w2.areaSqm > 0 ? `≈ ${(w2.areaSqm / SQM_PER_SQFT).toFixed(1)} sq.ft` : '';
+      }
+      const rp = document.getElementById('pk-renov-price');
+      if (rp) rp.textContent = fmtRs(cmp.areaSqm * BATHROOM_ADDONS.renovationPerSqm);
+      const amt = document.getElementById('pk-live-amount');
+      if (amt) amt.innerHTML = `<span style="font-size:.85em">P ${fmtRs(cmp.premium.finalSellingPrice)} · S ${fmtRs(cmp.signature.finalSellingPrice)}</span>`;
+      return;
+    }
+
+    const bd = calculatePackageQuote(pkgInputs() as any);
     const hint = document.getElementById('pk-area-hint');
     if (hint) {
-      hint.textContent = w2.areaSqft > 0
-        ? `= ${(w2.areaSqft * SQM_PER_SQFT).toFixed(2)} sqm → package ${fmtRs(bd.packagePrice)}`
+      hint.textContent = w2.areaSqm > 0
+        ? `≈ ${(w2.areaSqm / SQM_PER_SQFT).toFixed(1)} sq.ft → package ${fmtRs(bd.packagePrice)}`
         : '';
     }
     const rp = document.getElementById('pk-renov-price');
@@ -1776,7 +1809,7 @@ function renderPkgStep3() {
 function collectPkgStep3(): boolean {
   const area = parseFloat((document.getElementById('pk-area') as HTMLInputElement).value);
   if (isNaN(area) || area <= 0) { toast('Enter the bathroom floor area'); return false; }
-  (wizardData as any).areaSqft = area;
+  (wizardData as any).areaSqm = area;
   wizardData.projectType = (wizardData as any).isRenovation ? 'renovation' : 'construction';
   if (!DIFFICULTY_FACTORS.some(f => Math.abs(f - (wizardData.difficultyScore || 1)) < 0.001)) {
     wizardData.difficultyScore = 1;
@@ -1787,6 +1820,53 @@ function collectPkgStep3(): boolean {
 /* Pkg Step 5 — Review */
 function renderPkgReview() {
   const w = wizardData as any;
+
+  if (w.pkg === 'compare') {
+    const cmp = calculatePackageComparison(pkgInputs() as any);
+    const infoRows: Array<[string, string]> = [
+      ['Client',     wizardData.clientName || '—'],
+      ['Phone',      wizardData.clientPhone || '—'],
+      ['Location',   wizardData.projectLocation || '—'],
+      ['Project',    wizardData.projectName || '—'],
+      ['Date',       fmtDate(wizardData.quotationDate)],
+      ['Size',       `${cmp.areaSqm.toFixed(2)} sqm (≈ ${(cmp.areaSqm / SQM_PER_SQFT).toFixed(1)} sq.ft)`],
+      ['Renovation', w.isRenovation ? 'Yes — included in both totals' : 'No'],
+      ['Difficulty', `${(wizardData.difficultyScore || 1).toFixed(2)}×`],
+    ];
+    main.innerHTML = `
+      <div class="step-content">
+        <div class="step-q">Review & Save — Package Comparison</div>
+        <div class="review-section">
+          ${infoRows.map(([k,v]) => `
+            <div class="review-row">
+              <span class="review-key">${k}</span>
+              <span class="review-val">${v}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="review-section" style="margin-top:12px">
+          <div class="review-row">
+            <span class="review-key">Premium Bathroom Package</span>
+            <span class="review-val">${fmtRs(cmp.premium.finalSellingPrice)}</span>
+          </div>
+          <div class="review-row">
+            <span class="review-key">Signature Bathroom Package</span>
+            <span class="review-val">${fmtRs(cmp.signature.finalSellingPrice)}</span>
+          </div>
+          <div class="review-row">
+            <span class="review-key">Optional add-ons on PDF</span>
+            <span class="review-val">Premium Combo ${fmtRs(BATHROOM_ADDONS.premiumCombo)} · Signature Combo ${fmtRs(BATHROOM_ADDONS.signatureCombo)}</span>
+          </div>
+        </div>
+        <div class="review-total">
+          <div class="review-total-label">Client selects one of</div>
+          <div class="review-total-amount" style="font-size:1.05rem">${fmtRs(cmp.premium.finalSellingPrice)} · ${fmtRs(cmp.signature.finalSellingPrice)}</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   const bd = calculatePackageQuote(pkgInputs() as any);
   const pkgName = w.pkg === 'signature' ? 'Signature' : 'Premium';
 
@@ -1796,7 +1876,7 @@ function renderPkgReview() {
     ['Location', wizardData.projectLocation || '—'],
     ['Project',  wizardData.projectName || '—'],
     ['Date',     fmtDate(wizardData.quotationDate)],
-    ['Size',     `${w.areaSqft} sq.ft (${bd.areaSqm.toFixed(2)} sqm)`],
+    ['Size',     `${bd.areaSqm.toFixed(2)} sqm (≈ ${(bd.areaSqm / SQM_PER_SQFT).toFixed(1)} sq.ft)`],
     ['Difficulty', `${(wizardData.difficultyScore || 1).toFixed(2)}×`],
   ];
 
@@ -1839,7 +1919,9 @@ function renderPkgReview() {
 /* ── Save quotation ──────────────────────────────────────── */
 function saveQuotation() {
   const bd: any = quoteMode() === 'package'
-    ? calculatePackageQuote(pkgInputs() as any)
+    ? ((wizardData as any).pkg === 'compare'
+        ? calculatePackageComparison(pkgInputs() as any)
+        : calculatePackageQuote(pkgInputs() as any))
     : calculateQuotation(wizardData);
   const qtns: Quotation[] = load(KEYS.qtns);
   const counters = getCounters();
@@ -1889,6 +1971,7 @@ function renderQtnDetail() {
   const bd = q.breakdown;
   const ref = (q as any).ref || 'LH-QTN';
   const isPkgQuote = (q as any).quoteMode === 'package';
+  const isCompareQuote = isPkgQuote && (bd as any).compare === true;
 
   const costRows: Array<[string, number]> = isPkgQuote ? [] : [
     ['Demolition Works',          (bd as any).demolitionCost    ?? (bd as any).renovationCost ?? 0],
@@ -1935,8 +2018,12 @@ function renderQtnDetail() {
       </div>
 
       <div class="review-total" style="margin-bottom:16px">
-        <div class="review-total-label">Final Amount</div>
-        <div class="review-total-amount">${fmtRs(bd.finalAmount)}</div>
+        <div class="review-total-label">${isCompareQuote ? 'Client selects one of' : 'Final Amount'}</div>
+        <div class="review-total-amount" ${isCompareQuote ? 'style="font-size:1.05rem"' : ''}>${
+          isCompareQuote
+            ? `${fmtRs((bd as any).premium.finalSellingPrice)} · ${fmtRs((bd as any).signature.finalSellingPrice)}`
+            : fmtRs(bd.finalAmount)
+        }</div>
       </div>
 
       <!-- Status change -->
@@ -1948,7 +2035,28 @@ function renderQtnDetail() {
         `).join('')}
       </div>
 
-      ${isPkgQuote ? `
+      ${isCompareQuote ? `
+      <!-- Comparison quotation lines -->
+      <div class="dash-title">Quotation Lines — Package Comparison</div>
+      <div class="section-card" style="margin:8px 0 16px">
+        <div class="inv-detail-row" style="padding:8px 16px">
+          <span class="inv-detail-key">Premium Bathroom Package (${((bd as any).areaSqm ?? 4).toFixed(2)} sqm)${(bd as any).premium.renovationCost > 0 ? ' incl. renovation' : ''}</span>
+          <span class="inv-detail-val">${fmtRs((bd as any).premium.finalSellingPrice)}</span>
+        </div>
+        <div class="inv-detail-row" style="padding:8px 16px">
+          <span class="inv-detail-key">Signature Bathroom Package (${((bd as any).areaSqm ?? 4).toFixed(2)} sqm)${(bd as any).signature.renovationCost > 0 ? ' incl. renovation' : ''}</span>
+          <span class="inv-detail-val">${fmtRs((bd as any).signature.finalSellingPrice)}</span>
+        </div>
+        <div class="inv-detail-row" style="padding:8px 16px">
+          <span class="inv-detail-key">Optional — Premium Combo (door, window &amp; pump)</span>
+          <span class="inv-detail-val">${fmtRs(BATHROOM_ADDONS.premiumCombo)}</span>
+        </div>
+        <div class="inv-detail-row" style="padding:8px 16px">
+          <span class="inv-detail-key">Optional — Signature Combo (door, window &amp; pump)</span>
+          <span class="inv-detail-val">${fmtRs(BATHROOM_ADDONS.signatureCombo)}</span>
+        </div>
+      </div>
+      ` : isPkgQuote ? `
       <!-- Package quotation lines -->
       <div class="dash-title">Quotation Lines</div>
       <div class="section-card" style="margin:8px 0 16px">
@@ -2250,11 +2358,68 @@ function printQuotationPDF(q: Quotation) {
   const bd: any = q.breakdown;
   const ref = (q as any).ref || 'LH-QTN';
   const isPkgQuote = (q as any).quoteMode === 'package';
+  const isCompareQuote = isPkgQuote && bd.compare === true;
 
-  let scope: string[];
+  let scope: string[] = [];
   let investmentHtml = '';
+  let comparisonHtml = '';
 
-  if (isPkgQuote) {
+  if (isCompareQuote) {
+    const p = bd.premium;
+    const s = bd.signature;
+    const sqmLabel = (bd.areaSqm ?? 4).toFixed(2).replace(/\.00$/, '');
+    const renovIncluded = (p.renovationCost ?? 0) > 0;
+
+    const featureRows = PACKAGE_FEATURES.premium.map((pf, i) => {
+      const sf = PACKAGE_FEATURES.signature[i];
+      return pf === sf
+        ? `<tr><td colspan="2" class="cmp-same">✓ &nbsp;${pf}</td></tr>`
+        : `<tr><td class="cmp-diff">✓ &nbsp;${pf}</td><td class="cmp-diff">✓ &nbsp;${sf}</td></tr>`;
+    }).join('');
+
+    comparisonHtml = `
+  <div class="section-title">Choose Your Package — ${sqmLabel} sqm Bathroom</div>
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>Premium Bathroom</th>
+        <th>Signature Bathroom</th>
+      </tr>
+    </thead>
+    <tbody>${featureRows}</tbody>
+    <tfoot>
+      <tr>
+        <td class="cmp-total">${fmtRs(p.finalSellingPrice)}</td>
+        <td class="cmp-total">${fmtRs(s.finalSellingPrice)}</td>
+      </tr>
+      <tr>
+        <td colspan="2" class="cmp-total-note">Total Investment — all inclusive${renovIncluded ? ' · includes renovation preparation (demolition &amp; plastering)' : ''}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="section-title">Optional Add-ons</div>
+  <div class="addon-grid">
+    ${(['premium-combo', 'signature-combo'] as const).map(key => `
+    <div class="addon-box">
+      <div class="addon-title">${COMBO_CONTENTS[key].label} — Door, Window &amp; Pressure Pump</div>
+      <div class="addon-items">${COMBO_CONTENTS[key].items.join(' · ')}</div>
+      <div class="addon-price">+ ${fmtRs(key === 'premium-combo' ? BATHROOM_ADDONS.premiumCombo : BATHROOM_ADDONS.signatureCombo)}</div>
+    </div>`).join('')}
+  </div>
+  <div style="font-size:7.5pt;color:#777;margin-top:4pt">Add-on prices are fixed and added to your selected package price.</div>
+
+  <div class="final-box" style="margin-top:12pt">
+    <div>
+      <div class="final-label">Your Selection</div>
+      <div class="final-sub">Final investment depends on the package you select — both prices are all-inclusive.</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:10.5pt;font-weight:800">Premium &nbsp;${fmtRs(p.finalSellingPrice)}</div>
+      <div style="font-size:10.5pt;font-weight:800;color:#b8892a;margin-top:3pt">Signature &nbsp;${fmtRs(s.finalSellingPrice)}</div>
+    </div>
+  </div>`;
+  } else if (isPkgQuote) {
     const pkgKey: 'premium' | 'signature' = (q as any).pkg === 'signature' ? 'signature' : 'premium';
     const pkgName = pkgKey === 'signature' ? 'Signature' : 'Premium';
     const comboKey = (q as any).combo as keyof typeof COMBO_CONTENTS | '';
@@ -2340,6 +2505,21 @@ function printQuotationPDF(q: Quotation) {
     .brand-dot { width: 3.5pt; height: 3.5pt; background: #b8892a; border-radius: 50%; flex-shrink: 0; }
     .note { font-size: 8pt; color: #999; font-style: italic; margin-top: 14pt; line-height: 1.5; }
     .footer { margin-top: 10pt; padding-top: 8pt; border-top: 1pt solid #e0e0e0; font-size: 7pt; color: #bbb; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+    .cmp-table thead th { width: 50%; font-size: 9.5pt; font-weight: 800; text-align: left; padding: 6pt 8pt; background: #111; color: #fff; }
+    .cmp-table thead th + th { border-left: 1pt solid #333; color: #b8892a; }
+    .cmp-table tbody td { padding: 3.5pt 8pt; border-bottom: .5pt solid #f2f2f2; vertical-align: top; }
+    .cmp-table tbody td + td { border-left: .5pt solid #eee; }
+    .cmp-same { color: #666; }
+    .cmp-diff { font-weight: 700; color: #111; }
+    .cmp-total { font-size: 13pt; font-weight: 900; color: #b8892a; padding: 8pt; border-top: 1.5pt solid #111; font-variant-numeric: tabular-nums; }
+    .cmp-total + .cmp-total { border-left: .5pt solid #eee; }
+    .cmp-total-note { font-size: 7.5pt; color: #777; padding: 0 8pt 6pt; }
+    .addon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; break-inside: avoid; }
+    .addon-box { border: 1pt solid #ddd; border-radius: 4pt; padding: 8pt 10pt; break-inside: avoid; }
+    .addon-title { font-size: 8.5pt; font-weight: 700; }
+    .addon-items { font-size: 7.5pt; color: #777; margin-top: 2pt; }
+    .addon-price { font-size: 10pt; font-weight: 800; color: #b8892a; margin-top: 4pt; }
   </style>
   </head><body>
 
@@ -2370,13 +2550,19 @@ function printQuotationPDF(q: Quotation) {
       ${q.projectName && q.projectLocation ? `<div class="info-detail">${q.projectLocation}</div>` : ''}
     </div>
   </div>
-  ${(q as any).packageTier ? `
+  ${isCompareQuote ? `
+  <div style="margin-bottom:10pt">
+    <span style="display:inline-block;background:#111;color:#b8892a;font-size:7pt;font-weight:800;text-transform:uppercase;letter-spacing:.14em;padding:3pt 9pt;border-radius:3pt">
+      Package Comparison
+    </span>
+  </div>` : (q as any).packageTier ? `
   <div style="margin-bottom:10pt">
     <span style="display:inline-block;background:#111;color:#b8892a;font-size:7pt;font-weight:800;text-transform:uppercase;letter-spacing:.14em;padding:3pt 9pt;border-radius:3pt">
       ${((q as any).packageTier as string).charAt(0).toUpperCase() + ((q as any).packageTier as string).slice(1)} Package
     </span>
   </div>` : ''}
 
+  ${isCompareQuote ? comparisonHtml : `
   <div class="section-title">Scope of Work</div>
   <div class="scope-grid">
     ${scope.map(s => `<div class="scope-item"><span class="scope-check">✓</span><span>${s}</span></div>`).join('')}
@@ -2391,6 +2577,7 @@ function printQuotationPDF(q: Quotation) {
     </div>
     <div class="final-amount">${fmtRs(bd.finalAmount)}</div>
   </div>
+  `}
 
   <div class="section-title">Package Benefits</div>
   <div style="font-size:8.5pt;color:#555;line-height:1.65;padding:4pt 0 2pt">
@@ -2404,7 +2591,11 @@ function printQuotationPDF(q: Quotation) {
       <div class="term-box">
         <div class="term-pct">${t.percentage}%</div>
         <div class="term-lbl">${t.label}</div>
-        <div class="term-amt">${fmtRs(bd.finalAmount * t.percentage / 100)}</div>
+        <div class="term-amt">${
+          isCompareQuote
+            ? `P ${fmtRs(bd.premium.finalSellingPrice * t.percentage / 100)}<br>S ${fmtRs(bd.signature.finalSellingPrice * t.percentage / 100)}`
+            : fmtRs(bd.finalAmount * t.percentage / 100)
+        }</div>
       </div>`).join('')}
   </div>
 
@@ -2538,8 +2729,9 @@ function printInvoicePDF(inv: Invoice) {
 
 /* ── WhatsApp sharing ────────────────────────────────────── */
 function shareQuotationWA(q: Quotation) {
-  const bd = q.breakdown;
+  const bd: any = q.breakdown;
   const ref = (q as any).ref || 'LH-QTN';
+  const isCompareQuote = (q as any).quoteMode === 'package' && bd.compare === true;
   const text = [
     `*LUXEHOME Quotation — ${ref}*`,
     ``,
@@ -2547,10 +2739,18 @@ function shareQuotationWA(q: Quotation) {
     `Project: ${q.projectName || q.projectLocation}`,
     `Date: ${fmtDate(q.quotationDate)}`,
     ``,
-    `*Total Investment: ${fmtRs(bd.finalAmount)}*`,
+    ...(isCompareQuote ? [
+      `*Premium Package: ${fmtRs(bd.premium.finalSellingPrice)}*`,
+      `*Signature Package: ${fmtRs(bd.signature.finalSellingPrice)}*`,
+      `_Optional combos: Premium ${fmtRs(BATHROOM_ADDONS.premiumCombo)} · Signature ${fmtRs(BATHROOM_ADDONS.signatureCombo)}_`,
+    ] : [
+      `*Total Investment: ${fmtRs(bd.finalAmount)}*`,
+    ]),
     ``,
     `Payment Terms:`,
-    ...q.paymentTerms.map(t => `• ${t.label}: ${t.percentage}% (${fmtRs(bd.finalAmount * t.percentage / 100)})`),
+    ...q.paymentTerms.map(t => isCompareQuote
+      ? `• ${t.label}: ${t.percentage}%`
+      : `• ${t.label}: ${t.percentage}% (${fmtRs(bd.finalAmount * t.percentage / 100)})`),
     ``,
     `_This quotation is valid for 30 days._`,
   ].join('\n');
