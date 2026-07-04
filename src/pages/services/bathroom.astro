@@ -6,8 +6,8 @@ import Footer from '../../components/Footer.astro';
 ---
 
 <Layout
-  title="Bathroom Renovation Sri Lanka — Packages from Rs. 1,120,000 | LUXEHOME"
-  description="Complete bathroom renovation packages across Sri Lanka. Standard from Rs. 1,120,000, Premium from Rs. 1,330,000, Signature from Rs. 1,590,000 — tiles, bathware, waterproofing, plumbing, electrical & design included. Colombo, Kandy, Galle & all Sri Lanka."
+  title="Bathroom Renovation Sri Lanka — Packages from Rs. 1,330,000 | LUXEHOME"
+  description="Complete bathroom renovation packages across Sri Lanka. Premium from Rs. 1,330,000, Signature from Rs. 1,590,000 — tiles, bathware, waterproofing, plumbing, electrical & design included. Colombo, Kandy, Galle & all Sri Lanka."
 >
   <Nav />
 
@@ -36,7 +36,7 @@ import Footer from '../../components/Footer.astro';
   <section class="pricing-section">
     <div class="pricing-inner">
       <div class="stag reveal">Packages</div>
-      <h2 class="reveal">Three Packages. Complete Scope. Every One.</h2>
+      <h2 class="reveal">Two Packages. Complete Scope. Every One.</h2>
       <p class="sdesc reveal">
         Each package covers the complete bathroom — tiles, waterproofing, bathware, plumbing,
         electrical, ceiling, vanity, and design. Starting prices are based on a 4&nbsp;sqm bathroom.
@@ -55,40 +55,6 @@ import Footer from '../../components/Footer.astro';
       </div>
 
       <div class="pkg-grid reveal">
-
-        <!-- Standard -->
-        <div class="pkg-card" data-pkg="standard" data-base="1120000" data-rate="105000">
-          <div class="pkg-name">Standard Bathroom</div>
-          <div class="pkg-desc">Modern, fully-functional bathroom with quality materials and complete scope</div>
-          <div class="pkg-from-label" id="from-standard">Total Investment From</div>
-          <div class="pkg-price" id="price-standard">Rs.&nbsp;1,120,000</div>
-          <div class="pkg-price-note" id="note-standard">base price — 4 sqm</div>
-          <ul class="pkg-features">
-            <li><span class="feat-tick">✓</span>Rocell 300×600 mm floor &amp; wall tiles</li>
-            <li><span class="feat-tick">✓</span>Swisstek Blue C2+ tile adhesive</li>
-            <li><span class="feat-tick">✓</span>Swisstek grout</li>
-            <li><span class="feat-tick">✓</span>Tokyo Super 2K waterproofing</li>
-            <li><span class="feat-tick">✓</span>Slon pipes &amp; accessories</li>
-            <li><span class="feat-tick">✓</span>ACL cables &amp; switches</li>
-            <li><span class="feat-tick">✓</span>Swiss bathware</li>
-            <li><span class="feat-tick">✓</span>Ferroli instant water heater</li>
-            <li><span class="feat-tick">✓</span>IPanel ceiling</li>
-            <li><span class="feat-tick">✓</span>Standard vanity</li>
-            <li><span class="feat-tick">✓</span>Standard mirror</li>
-            <li><span class="feat-tick">✓</span>Standard shower cubicle / glass partition</li>
-            <li><span class="feat-tick">✓</span>Wall niche</li>
-            <li><span class="feat-tick">✓</span>Bathroom design &amp; planning</li>
-            <li><span class="feat-tick">✓</span>Plumbing works</li>
-            <li><span class="feat-tick">✓</span>Electrical wiring works</li>
-            <li><span class="feat-tick">✓</span>Tiling &amp; grouting</li>
-            <li><span class="feat-tick">✓</span>Cleaning &amp; handover</li>
-          </ul>
-          <div class="pkg-ctas">
-            <a href="/contact" class="pkg-btn pkg-btn--primary">Request a Quote</a>
-            <a href="/contact" class="pkg-btn pkg-btn--ghost">Book a Site Visit</a>
-            <a href="https://wa.me/94774503744" class="pkg-btn pkg-btn--wa" target="_blank" rel="noopener noreferrer">WhatsApp Us</a>
-          </div>
-        </div>
 
         <!-- Premium -->
         <div class="pkg-card pkg-card--mid" data-pkg="premium" data-base="1330000" data-rate="125000">
@@ -314,7 +280,7 @@ import Footer from '../../components/Footer.astro';
   }
 
   function getPkgLabel(pkg) {
-    var names = { standard: 'Standard', premium: 'Premium', signature: 'Signature' };
+    var names = { premium: 'Premium', signature: 'Signature' };
     return (names[pkg] || pkg) + ' Bathroom Package';
   }
 
@@ -706,9 +672,12 @@ import Footer from '../../components/Footer.astro';
 
   .pkg-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
     margin-bottom: 2.5rem;
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .pkg-card {

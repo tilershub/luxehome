@@ -1324,11 +1324,7 @@ function renderStep9() {
     <div class="step-content">
       <div class="step-q">Package tier</div>
       <div class="step-hint">Selected tier appears on the PDF. Public starting prices shown for reference.</div>
-      <div class="option-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.4rem">
-        <div class="opt-card ${tier==='standard' ? 'selected' : ''}" data-tier="standard">
-          <span class="opt-label" style="font-size:.8rem">Standard</span>
-          <span class="opt-sub" style="font-size:.68rem;color:rgba(240,236,224,.55)">From ${fmtRs(BATHROOM_PACKAGES.standard.basePrice)}</span>
-        </div>
+      <div class="option-grid" style="grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1.4rem">
         <div class="opt-card ${tier==='premium' ? 'selected' : ''}" data-tier="premium">
           <span class="opt-label" style="font-size:.8rem">Premium</span>
           <span class="opt-sub" style="font-size:.68rem;color:rgba(240,236,224,.55)">From ${fmtRs(BATHROOM_PACKAGES.premium.basePrice)}</span>
