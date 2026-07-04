@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Cart from '../components/Cart.astro';
+import SteamAmbience from '../components/SteamAmbience.astro';
 
 interface Props {
   title?: string;
@@ -174,6 +175,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       <slot />
     </main>
 
+    <SteamAmbience />
     <Cart />
 
     <!-- Scroll-reveal: activates .reveal elements as they enter the viewport.
