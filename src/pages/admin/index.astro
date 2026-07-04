@@ -1624,7 +1624,7 @@ function pkgInputs() {
     projectLocation: wizardData.projectLocation, projectName: wizardData.projectName,
     quotationDate: wizardData.quotationDate,
     pkg: w.pkg || 'premium',
-    areaSqft: w.areaSqft || 0,
+    areaSqft: (w.areaSqm || 0) / SQM_PER_SQFT,
     isRenovation: !!w.isRenovation,
     combo: w.combo || '',
     difficultyScore: wizardData.difficultyScore || 1,
@@ -1676,18 +1676,22 @@ function collectPkgStep2(): boolean {
 /* Pkg Step 3 — Size, renovation, combo, difficulty */
 function renderPkgStep3() {
   const w = wizardData as any;
-  const areaSqft = w.areaSqft || '';
+  // Legacy package quotes stored the area in sq.ft — migrate on edit
+  if (w.areaSqm == null && w.areaSqft) {
+    w.areaSqm = +(w.areaSqft * SQM_PER_SQFT).toFixed(2);
+  }
+  const areaSqm = w.areaSqm || '';
   const combo = w.combo || '';
   const isCompare = w.pkg === 'compare';
 
   main.innerHTML = `
     <div class="step-content">
       <div class="step-q">Bathroom size</div>
-      <div class="step-hint">Floor area in square feet. Package base covers 4 sqm (≈ 43 sq.ft).</div>
+      <div class="step-hint">Floor area in square metres. Package base covers 4 sqm.</div>
       <div class="field-group">
-        <label class="field-label">Floor Area (sq.ft) *</label>
-        <input class="field-input" id="pk-area" type="number" min="1" step="0.5" inputmode="decimal"
-          placeholder="e.g. 45" value="${areaSqft}">
+        <label class="field-label">Floor Area (sqm) *</label>
+        <input class="field-input" id="pk-area" type="number" min="0.5" step="0.1" inputmode="decimal"
+          placeholder="e.g. 4.5" value="${areaSqm}">
         <div class="step-hint" id="pk-area-hint" style="margin-top:6px"></div>
       </div>
 
@@ -1745,13 +1749,13 @@ function renderPkgStep3() {
 
   function refresh() {
     const w2 = wizardData as any;
-    w2.areaSqft = parseFloat(areaInput.value) || 0;
+    w2.areaSqm = parseFloat(areaInput.value) || 0;
 
     if (isCompare) {
       const cmp = calculatePackageComparison(pkgInputs() as any);
       const hint = document.getElementById('pk-area-hint');
       if (hint) {
-        hint.textContent = w2.areaSqft > 0 ? `= ${(w2.areaSqft * SQM_PER_SQFT).toFixed(2)} sqm` : '';
+        hint.textContent = w2.areaSqm > 0 ? `≈ ${(w2.areaSqm / SQM_PER_SQFT).toFixed(1)} sq.ft` : '';
       }
       const rp = document.getElementById('pk-renov-price');
       if (rp) rp.textContent = fmtRs(cmp.areaSqm * BATHROOM_ADDONS.renovationPerSqm);
@@ -1763,8 +1767,8 @@ function renderPkgStep3() {
     const bd = calculatePackageQuote(pkgInputs() as any);
     const hint = document.getElementById('pk-area-hint');
     if (hint) {
-      hint.textContent = w2.areaSqft > 0
-        ? `= ${(w2.areaSqft * SQM_PER_SQFT).toFixed(2)} sqm → package ${fmtRs(bd.packagePrice)}`
+      hint.textContent = w2.areaSqm > 0
+        ? `≈ ${(w2.areaSqm / SQM_PER_SQFT).toFixed(1)} sq.ft → package ${fmtRs(bd.packagePrice)}`
         : '';
     }
     const rp = document.getElementById('pk-renov-price');
@@ -1805,7 +1809,7 @@ function renderPkgStep3() {
 function collectPkgStep3(): boolean {
   const area = parseFloat((document.getElementById('pk-area') as HTMLInputElement).value);
   if (isNaN(area) || area <= 0) { toast('Enter the bathroom floor area'); return false; }
-  (wizardData as any).areaSqft = area;
+  (wizardData as any).areaSqm = area;
   wizardData.projectType = (wizardData as any).isRenovation ? 'renovation' : 'construction';
   if (!DIFFICULTY_FACTORS.some(f => Math.abs(f - (wizardData.difficultyScore || 1)) < 0.001)) {
     wizardData.difficultyScore = 1;
@@ -1825,7 +1829,7 @@ function renderPkgReview() {
       ['Location',   wizardData.projectLocation || '—'],
       ['Project',    wizardData.projectName || '—'],
       ['Date',       fmtDate(wizardData.quotationDate)],
-      ['Size',       `${w.areaSqft} sq.ft (${cmp.areaSqm.toFixed(2)} sqm)`],
+      ['Size',       `${cmp.areaSqm.toFixed(2)} sqm (≈ ${(cmp.areaSqm / SQM_PER_SQFT).toFixed(1)} sq.ft)`],
       ['Renovation', w.isRenovation ? 'Yes — included in both totals' : 'No'],
       ['Difficulty', `${(wizardData.difficultyScore || 1).toFixed(2)}×`],
     ];
@@ -1872,7 +1876,7 @@ function renderPkgReview() {
     ['Location', wizardData.projectLocation || '—'],
     ['Project',  wizardData.projectName || '—'],
     ['Date',     fmtDate(wizardData.quotationDate)],
-    ['Size',     `${w.areaSqft} sq.ft (${bd.areaSqm.toFixed(2)} sqm)`],
+    ['Size',     `${bd.areaSqm.toFixed(2)} sqm (≈ ${(bd.areaSqm / SQM_PER_SQFT).toFixed(1)} sq.ft)`],
     ['Difficulty', `${(wizardData.difficultyScore || 1).toFixed(2)}×`],
   ];
 
