@@ -73,11 +73,12 @@
 
 <script>
 import {
-  calculateQuotation, generateScopeOfWork,
+  calculateQuotation, calculatePackageQuote, generateScopeOfWork,
   fmtRs, fmtDate, fmtDateShort, qtnNumber, invNumber,
   defaultInputs, statusColor,
   DEFAULT_BRANDS, DEFAULT_PAYMENT_TERMS,
   RATES, BATHROOM_PACKAGES, BATHROOM_ADDONS, DIFFICULTY_FACTORS,
+  PACKAGE_FEATURES, COMBO_CONTENTS, SQM_PER_SQFT,
 } from '../../lib/quotation-calc';
 import type {
   QuotationInputs, QuotationBreakdown, Quotation, Invoice,
@@ -678,27 +679,67 @@ function renderInquiryDetail() {
 /* ── WIZARD ──────────────────────────────────────────────── */
 let _currentQtnId: string | null = null;
 
+const WIZARD_STEPS_PKG = 5;
+
+function quoteMode(): 'package' | 'detailed' {
+  return (wizardData as any).quoteMode === 'package' ? 'package' : 'detailed';
+}
+
+function totalWizardSteps(): number {
+  return quoteMode() === 'package' ? WIZARD_STEPS_PKG : WIZARD_STEPS;
+}
+
 function startWizard(qtn?: Quotation) {
   editingId = qtn?.id || null;
   wizardData = qtn ? { ...defaultInputs(), ...qtn } : defaultInputs();
   wizardData.brands = [...(qtn?.brands ?? DEFAULT_BRANDS)];
   wizardData.paymentTerms = (qtn?.paymentTerms ?? DEFAULT_PAYMENT_TERMS).map(t => ({ ...t }));
-  wizardStep = 1;
+  if (qtn) {
+    // Legacy records without quoteMode are detailed build-ups
+    (wizardData as any).quoteMode = (qtn as any).quoteMode === 'package' ? 'package' : 'detailed';
+    wizardStep = 1;
+  } else {
+    delete (wizardData as any).quoteMode;
+    wizardStep = 0; // mode picker
+  }
   navigate('wizard');
 }
 
 function renderWizard() {
-  progressFill.style.width = `${(wizardStep / WIZARD_STEPS) * 100}%`;
-  stepLabel.textContent = `Step ${wizardStep} of ${WIZARD_STEPS}`;
+  const total = totalWizardSteps();
 
-  const stepNames = [
-    'Client Details', 'Project Type', 'Tiling', 'Areas', 'Quantities',
-    'Plumbing', 'Shower', 'Extras', 'Difficulty', 'Brands & Terms', 'Review',
-  ];
+  if (wizardStep === 0) {
+    progressFill.style.width = '0%';
+    stepLabel.textContent = 'Get Started';
+    stepName.textContent = 'Quotation Type';
+    document.getElementById('wizard-back-btn')!.textContent = 'Cancel';
+    document.getElementById('wizard-next-btn')!.textContent = 'Next →';
+    renderStep0();
+    return;
+  }
+
+  progressFill.style.width = `${(wizardStep / total) * 100}%`;
+  stepLabel.textContent = `Step ${wizardStep} of ${total}`;
+
+  const stepNames = quoteMode() === 'package'
+    ? ['Client Details', 'Package', 'Size & Add-ons', 'Brands & Terms', 'Review']
+    : ['Client Details', 'Project Type', 'Tiling', 'Areas', 'Quantities',
+       'Plumbing', 'Shower', 'Extras', 'Difficulty', 'Brands & Terms', 'Review'];
   stepName.textContent = stepNames[wizardStep - 1] || '';
 
-  document.getElementById('wizard-back-btn')!.textContent = wizardStep === 1 ? 'Cancel' : '← Back';
-  document.getElementById('wizard-next-btn')!.textContent = wizardStep === WIZARD_STEPS ? '✓ Save' : 'Next →';
+  document.getElementById('wizard-back-btn')!.textContent = (wizardStep === 1 && editingId) ? 'Cancel' : '← Back';
+  document.getElementById('wizard-next-btn')!.textContent = wizardStep === total ? '✓ Save' : 'Next →';
+
+  if (quoteMode() === 'package') {
+    switch (wizardStep) {
+      case 1: renderStep1(); break;
+      case 2: renderPkgStep2(); break;
+      case 3: renderPkgStep3(); break;
+      case 4: renderStep10(); break;
+      case 5: renderPkgReview(); break;
+    }
+    return;
+  }
 
   switch (wizardStep) {
     case 1:  renderStep1(); break;
@@ -713,6 +754,34 @@ function renderWizard() {
     case 10: renderStep10(); break;
     case 11: renderStep11(); break;
   }
+}
+
+/* Step 0 — Quotation type (new quotations only) */
+function renderStep0() {
+  const mode = (wizardData as any).quoteMode || '';
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">What kind of quotation?</div>
+      <div class="step-hint">Package quotations use the public bathroom package pricing. Detailed build-ups cost every line item manually.</div>
+      <div class="option-grid" style="grid-template-columns:1fr;gap:10px">
+        <div class="opt-card ${mode==='package'?'selected':''}" data-mode="package" style="align-items:flex-start;text-align:left;padding:16px">
+          <span class="opt-label" style="font-size:.9rem">📦 Package Quotation</span>
+          <span class="opt-sub" style="font-size:.72rem;color:rgba(240,236,224,.55)">Premium / Signature package · size, renovation, combo · fast</span>
+        </div>
+        <div class="opt-card ${mode==='detailed'?'selected':''}" data-mode="detailed" style="align-items:flex-start;text-align:left;padding:16px">
+          <span class="opt-label" style="font-size:.9rem">🛠 Detailed Build-up</span>
+          <span class="opt-sub" style="font-size:.72rem;color:rgba(240,236,224,.55)">Line-item costing with difficulty & profit margin · full control</span>
+        </div>
+      </div>
+    </div>
+  `;
+  main.querySelectorAll<HTMLElement>('[data-mode]').forEach(card => {
+    card.addEventListener('click', () => {
+      (wizardData as any).quoteMode = card.dataset.mode;
+      wizardStep = 1;
+      renderWizard();
+    });
+  });
 }
 
 /* Step 1 — Client Details */
@@ -1539,9 +1608,239 @@ function renderStep11() {
   `;
 }
 
+/* ── Package mode steps ──────────────────────────────────── */
+
+function pkgInputs() {
+  const w = wizardData as any;
+  return {
+    clientName: wizardData.clientName, clientPhone: wizardData.clientPhone,
+    projectLocation: wizardData.projectLocation, projectName: wizardData.projectName,
+    quotationDate: wizardData.quotationDate,
+    pkg: w.pkg || 'premium',
+    areaSqft: w.areaSqft || 0,
+    isRenovation: !!w.isRenovation,
+    combo: w.combo || '',
+    difficultyScore: wizardData.difficultyScore || 1,
+    finalPriceOverride: wizardData.finalPriceOverride ?? null,
+    brands: wizardData.brands, paymentTerms: wizardData.paymentTerms,
+  };
+}
+
+/* Pkg Step 2 — Package selection */
+function renderPkgStep2() {
+  const sel = (wizardData as any).pkg || '';
+  const card = (key: 'premium' | 'signature', name: string, sub: string) => `
+    <div class="opt-card ${sel===key?'selected':''}" data-pkg="${key}" style="align-items:flex-start;text-align:left;padding:16px">
+      <span class="opt-label" style="font-size:.9rem">${name}</span>
+      <span class="opt-sub" style="font-size:.72rem;color:rgba(240,236,224,.55)">${sub} · From ${fmtRs(BATHROOM_PACKAGES[key].basePrice)} (4 sqm)</span>
+      <div style="font-size:.68rem;color:rgba(240,236,224,.45);margin-top:8px;line-height:1.6">
+        ${PACKAGE_FEATURES[key].slice(0, 6).join(' · ')} · +${PACKAGE_FEATURES[key].length - 6} more
+      </div>
+    </div>
+  `;
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Which package?</div>
+      <div class="step-hint">Same packages and pricing as the public bathroom page. +${fmtRs(BATHROOM_PACKAGES.premium.perSqmAboveBase)}/sqm (Premium) or +${fmtRs(BATHROOM_PACKAGES.signature.perSqmAboveBase)}/sqm (Signature) above 4 sqm.</div>
+      <div class="option-grid" style="grid-template-columns:1fr;gap:10px">
+        ${card('premium', 'Premium Bathroom', 'Rocell 450×900 · Swiss premium bathware')}
+        ${card('signature', 'Signature Bathroom', 'Rocell 600×1200 · concealed bathware')}
+      </div>
+    </div>
+  `;
+  main.querySelectorAll<HTMLElement>('[data-pkg]').forEach(c => {
+    c.addEventListener('click', () => {
+      (wizardData as any).pkg = c.dataset.pkg;
+      wizardData.packageTier = c.dataset.pkg as any;
+      renderPkgStep2();
+    });
+  });
+}
+
+function collectPkgStep2(): boolean {
+  if (!(wizardData as any).pkg) { toast('Select a package'); return false; }
+  return true;
+}
+
+/* Pkg Step 3 — Size, renovation, combo, difficulty */
+function renderPkgStep3() {
+  const w = wizardData as any;
+  const areaSqft = w.areaSqft || '';
+  const combo = w.combo || '';
+
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Bathroom size</div>
+      <div class="step-hint">Floor area in square feet. Package base covers 4 sqm (≈ 43 sq.ft).</div>
+      <div class="field-group">
+        <label class="field-label">Floor Area (sq.ft) *</label>
+        <input class="field-input" id="pk-area" type="number" min="1" step="0.5" inputmode="decimal"
+          placeholder="e.g. 45" value="${areaSqft}">
+        <div class="step-hint" id="pk-area-hint" style="margin-top:6px"></div>
+      </div>
+
+      <div class="step-q" style="margin-top:1.4rem">Renovation preparation</div>
+      <div class="step-hint">Demolition &amp; plastering for existing bathrooms — ${fmtRs(BATHROOM_ADDONS.renovationPerSqm)}/sqm.</div>
+      <div class="option-grid" style="grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1.4rem">
+        <div class="opt-card ${!w.isRenovation?'selected':''}" data-renov="0">
+          <span class="opt-label" style="font-size:.8rem">New Construction</span>
+          <span class="opt-sub">No prep needed</span>
+        </div>
+        <div class="opt-card ${w.isRenovation?'selected':''}" data-renov="1">
+          <span class="opt-label" style="font-size:.8rem">Renovation</span>
+          <span class="opt-sub" id="pk-renov-price"></span>
+        </div>
+      </div>
+
+      <div class="step-q">Door, Window &amp; Pressure Pump combo</div>
+      <div class="option-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.4rem">
+        <div class="opt-card ${!combo?'selected':''}" data-combo="">
+          <span class="opt-label" style="font-size:.8rem">None</span>
+          <span class="opt-sub">Not included</span>
+        </div>
+        <div class="opt-card ${combo==='premium-combo'?'selected':''}" data-combo="premium-combo">
+          <span class="opt-label" style="font-size:.8rem">Premium</span>
+          <span class="opt-sub">${fmtRs(BATHROOM_ADDONS.premiumCombo)}</span>
+        </div>
+        <div class="opt-card ${combo==='signature-combo'?'selected':''}" data-combo="signature-combo">
+          <span class="opt-label" style="font-size:.8rem">Signature</span>
+          <span class="opt-sub">${fmtRs(BATHROOM_ADDONS.signatureCombo)}</span>
+        </div>
+      </div>
+
+      <div class="step-q">Difficulty / site complexity</div>
+      <div class="step-hint">Applied to package and renovation portions.</div>
+      <div class="option-grid" style="grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.4rem">
+        ${DIFFICULTY_FACTORS.map(f => `
+          <div class="opt-card ${Math.abs((wizardData.difficultyScore||1)-f)<0.001?'selected':''}" data-diff="${f}">
+            <span class="opt-label" style="font-size:.85rem">${f.toFixed(2)}×</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="review-total" id="pk-live-total" style="margin-top:.5rem">
+        <div class="review-total-label">Running Total</div>
+        <div class="review-total-amount" id="pk-live-amount"></div>
+      </div>
+    </div>
+  `;
+
+  const areaInput = document.getElementById('pk-area') as HTMLInputElement;
+
+  function refresh() {
+    const w2 = wizardData as any;
+    w2.areaSqft = parseFloat(areaInput.value) || 0;
+    const bd = calculatePackageQuote(pkgInputs() as any);
+
+    const hint = document.getElementById('pk-area-hint');
+    if (hint) {
+      hint.textContent = w2.areaSqft > 0
+        ? `= ${(w2.areaSqft * SQM_PER_SQFT).toFixed(2)} sqm → package ${fmtRs(bd.packagePrice)}`
+        : '';
+    }
+    const rp = document.getElementById('pk-renov-price');
+    if (rp) rp.textContent = fmtRs(bd.areaSqm * BATHROOM_ADDONS.renovationPerSqm);
+    const amt = document.getElementById('pk-live-amount');
+    if (amt) amt.textContent = fmtRs(bd.finalSellingPrice);
+  }
+
+  areaInput.addEventListener('input', refresh);
+
+  main.querySelectorAll<HTMLElement>('[data-renov]').forEach(c => {
+    c.addEventListener('click', () => {
+      (wizardData as any).isRenovation = c.dataset.renov === '1';
+      main.querySelectorAll('[data-renov]').forEach(x => x.classList.toggle('selected', x === c));
+      refresh();
+    });
+  });
+
+  main.querySelectorAll<HTMLElement>('[data-combo]').forEach(c => {
+    c.addEventListener('click', () => {
+      (wizardData as any).combo = c.dataset.combo || '';
+      main.querySelectorAll('[data-combo]').forEach(x => x.classList.toggle('selected', x === c));
+      refresh();
+    });
+  });
+
+  main.querySelectorAll<HTMLElement>('[data-diff]').forEach(c => {
+    c.addEventListener('click', () => {
+      wizardData.difficultyScore = parseFloat(c.dataset.diff!);
+      main.querySelectorAll('[data-diff]').forEach(x => x.classList.toggle('selected', x === c));
+      refresh();
+    });
+  });
+
+  refresh();
+}
+
+function collectPkgStep3(): boolean {
+  const area = parseFloat((document.getElementById('pk-area') as HTMLInputElement).value);
+  if (isNaN(area) || area <= 0) { toast('Enter the bathroom floor area'); return false; }
+  (wizardData as any).areaSqft = area;
+  wizardData.projectType = (wizardData as any).isRenovation ? 'renovation' : 'construction';
+  if (!DIFFICULTY_FACTORS.some(f => Math.abs(f - (wizardData.difficultyScore || 1)) < 0.001)) {
+    wizardData.difficultyScore = 1;
+  }
+  return true;
+}
+
+/* Pkg Step 5 — Review */
+function renderPkgReview() {
+  const w = wizardData as any;
+  const bd = calculatePackageQuote(pkgInputs() as any);
+  const pkgName = w.pkg === 'signature' ? 'Signature' : 'Premium';
+
+  const infoRows: Array<[string, string]> = [
+    ['Client',   wizardData.clientName || '—'],
+    ['Phone',    wizardData.clientPhone || '—'],
+    ['Location', wizardData.projectLocation || '—'],
+    ['Project',  wizardData.projectName || '—'],
+    ['Date',     fmtDate(wizardData.quotationDate)],
+    ['Size',     `${w.areaSqft} sq.ft (${bd.areaSqm.toFixed(2)} sqm)`],
+    ['Difficulty', `${(wizardData.difficultyScore || 1).toFixed(2)}×`],
+  ];
+
+  const priceRows: Array<[string, string]> = [
+    [`${pkgName} Bathroom Package (${bd.areaSqm.toFixed(2)} sqm)`, fmtRs(bd.packagePrice)],
+    ...(bd.renovationCost > 0 ? [['Renovation — Demolition & Plastering', fmtRs(bd.renovationCost)] as [string, string]] : []),
+    ...((wizardData.difficultyScore || 1) > 1 ? [[`Difficulty adjustment (×${(wizardData.difficultyScore).toFixed(2)})`, fmtRs(bd.difficultyAdjusted - bd.packagePrice - bd.renovationCost)] as [string, string]] : []),
+    ...(bd.comboCost > 0 ? [[`${bd.comboLabel} — Door, Window & Pump`, fmtRs(bd.comboCost)] as [string, string]] : []),
+  ];
+
+  main.innerHTML = `
+    <div class="step-content">
+      <div class="step-q">Review & Save</div>
+      <div class="review-section">
+        ${infoRows.map(([k,v]) => `
+          <div class="review-row">
+            <span class="review-key">${k}</span>
+            <span class="review-val">${v}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="review-section" style="margin-top:12px">
+        ${priceRows.map(([k,v]) => `
+          <div class="review-row">
+            <span class="review-key">${k}</span>
+            <span class="review-val">${v}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="review-total">
+        <div class="review-total-label">
+          ${wizardData.finalPriceOverride != null ? 'Final Price (Override)' : 'Total Investment'}
+        </div>
+        <div class="review-total-amount">${fmtRs(bd.finalAmount)}</div>
+      </div>
+    </div>
+  `;
+}
+
 /* ── Save quotation ──────────────────────────────────────── */
 function saveQuotation() {
-  const bd = calculateQuotation(wizardData);
+  const bd: any = quoteMode() === 'package'
+    ? calculatePackageQuote(pkgInputs() as any)
+    : calculateQuotation(wizardData);
   const qtns: Quotation[] = load(KEYS.qtns);
   const counters = getCounters();
 
@@ -1589,8 +1888,9 @@ function renderQtnDetail() {
 
   const bd = q.breakdown;
   const ref = (q as any).ref || 'LH-QTN';
+  const isPkgQuote = (q as any).quoteMode === 'package';
 
-  const costRows: Array<[string, number]> = [
+  const costRows: Array<[string, number]> = isPkgQuote ? [] : [
     ['Demolition Works',          (bd as any).demolitionCost    ?? (bd as any).renovationCost ?? 0],
     ['Debris Removal',            (bd as any).debrisRemovalCost ?? 0],
     ['Wall Plastering',           (bd as any).wallPlasteringCost ?? 0],
@@ -1648,6 +1948,31 @@ function renderQtnDetail() {
         `).join('')}
       </div>
 
+      ${isPkgQuote ? `
+      <!-- Package quotation lines -->
+      <div class="dash-title">Quotation Lines</div>
+      <div class="section-card" style="margin:8px 0 16px">
+        <div class="inv-detail-row" style="padding:8px 16px">
+          <span class="inv-detail-key">${((q as any).pkg === 'signature' ? 'Signature' : 'Premium')} Bathroom Package (${((bd as any).areaSqm ?? 4).toFixed(2)} sqm)</span>
+          <span class="inv-detail-val">${fmtRs((bd as any).packagePrice ?? 0)}</span>
+        </div>
+        ${((bd as any).renovationCost ?? 0) > 0 ? `
+        <div class="inv-detail-row" style="padding:8px 16px">
+          <span class="inv-detail-key">Renovation — Demolition &amp; Plastering</span>
+          <span class="inv-detail-val">${fmtRs((bd as any).renovationCost)}</span>
+        </div>` : ''}
+        ${(q.difficultyScore || 1) > 1 ? `
+        <div class="inv-detail-row" style="padding:8px 16px">
+          <span class="inv-detail-key">Difficulty adjustment (×${(q.difficultyScore).toFixed(2)})</span>
+          <span class="inv-detail-val">${fmtRs(((bd as any).difficultyAdjusted ?? 0) - ((bd as any).packagePrice ?? 0) - ((bd as any).renovationCost ?? 0))}</span>
+        </div>` : ''}
+        ${((bd as any).comboCost ?? 0) > 0 ? `
+        <div class="inv-detail-row" style="padding:8px 16px">
+          <span class="inv-detail-key">${(bd as any).comboLabel} — Door, Window &amp; Pump</span>
+          <span class="inv-detail-val">${fmtRs((bd as any).comboCost)}</span>
+        </div>` : ''}
+      </div>
+      ` : `
       <!-- Cost breakdown (internal) -->
       <details style="margin-bottom:16px">
         <summary style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;cursor:pointer;padding:8px 0">
@@ -1678,6 +2003,7 @@ function renderQtnDetail() {
           </div>
         </div>
       </details>
+      `}
 
       <!-- Actions -->
       <div class="card-actions" style="margin-bottom:16px">
@@ -1921,9 +2247,49 @@ function convertToInvoice(q: Quotation) {
 
 /* ── PDF — Quotation ─────────────────────────────────────── */
 function printQuotationPDF(q: Quotation) {
-  const bd = q.breakdown;
+  const bd: any = q.breakdown;
   const ref = (q as any).ref || 'LH-QTN';
-  const scope = generateScopeOfWork(q);
+  const isPkgQuote = (q as any).quoteMode === 'package';
+
+  let scope: string[];
+  let investmentHtml = '';
+
+  if (isPkgQuote) {
+    const pkgKey: 'premium' | 'signature' = (q as any).pkg === 'signature' ? 'signature' : 'premium';
+    const pkgName = pkgKey === 'signature' ? 'Signature' : 'Premium';
+    const comboKey = (q as any).combo as keyof typeof COMBO_CONTENTS | '';
+
+    scope = [...PACKAGE_FEATURES[pkgKey]];
+    if ((bd.renovationCost ?? 0) > 0) scope.unshift('Demolition, debris removal & plastering');
+    if (comboKey && COMBO_CONTENTS[comboKey]) scope.push(...COMBO_CONTENTS[comboKey].items);
+
+    // Bake the difficulty factor into the package/renovation lines so the
+    // customer-facing lines sum exactly to the total.
+    const diff = q.difficultyScore || 1;
+    const renovLine = Math.round((bd.renovationCost ?? 0) * diff);
+    const pkgLine   = (bd.difficultyAdjusted ?? 0) - renovLine;
+
+    const lines: Array<[string, number]> = [
+      [`${pkgName} Bathroom Package — complete scope (${(bd.areaSqm ?? 4).toFixed(2).replace(/\.00$/, '')} sqm)`, pkgLine],
+      ...(renovLine > 0 ? [['Renovation Preparation — Demolition & Plastering', renovLine] as [string, number]] : []),
+      ...((bd.comboCost ?? 0) > 0 ? [[`${bd.comboLabel} — Door, Window & Pressure Pump`, bd.comboCost] as [string, number]] : []),
+    ];
+
+    investmentHtml = `
+  <div class="section-title">Your Investment</div>
+  <table class="cost-table">
+    <tbody>
+      ${lines.map(([k, v], i) => `
+      <tr>
+        <td class="row-no">${String(i + 1).padStart(2, '0')}</td>
+        <td>${k}</td>
+        <td class="row-amt">${fmtRs(v)}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+  } else {
+    scope = generateScopeOfWork(q);
+  }
 
   const html = `<!DOCTYPE html><html><head>
   <meta charset="utf-8">
@@ -2016,6 +2382,7 @@ function printQuotationPDF(q: Quotation) {
     ${scope.map(s => `<div class="scope-item"><span class="scope-check">✓</span><span>${s}</span></div>`).join('')}
   </div>
 
+  ${investmentHtml}
 
   <div class="final-box">
     <div>
@@ -2285,6 +2652,15 @@ function setupToggles(map: Record<string, keyof QuotationInputs>) {
 
 /* ── Collect step data ───────────────────────────────────── */
 function collectCurrentStep(): boolean {
+  if (quoteMode() === 'package') {
+    switch (wizardStep) {
+      case 1: return collectStep1();
+      case 2: return collectPkgStep2();
+      case 3: return collectPkgStep3();
+      case 4: return collectStep10();
+      default: return true;
+    }
+  }
   switch (wizardStep) {
     case 1:  return collectStep1();
     case 3:  return collectStep3();
@@ -2300,14 +2676,20 @@ function collectCurrentStep(): boolean {
 
 /* ── Wizard navigation ───────────────────────────────────── */
 document.getElementById('wizard-back-btn')!.addEventListener('click', () => {
-  if (wizardStep === 1) { viewHistory = []; navigate('quotations'); return; }
+  if (wizardStep === 0 || (wizardStep === 1 && editingId)) { viewHistory = []; navigate('quotations'); return; }
   wizardStep--;
   renderWizard();
 });
 
 document.getElementById('wizard-next-btn')!.addEventListener('click', () => {
+  if (wizardStep === 0) {
+    if (!(wizardData as any).quoteMode) { toast('Select a quotation type'); return; }
+    wizardStep = 1;
+    renderWizard();
+    return;
+  }
   if (!collectCurrentStep()) return;
-  if (wizardStep === WIZARD_STEPS) { saveQuotation(); return; }
+  if (wizardStep === totalWizardSteps()) { saveQuotation(); return; }
   wizardStep++;
   renderWizard();
 });

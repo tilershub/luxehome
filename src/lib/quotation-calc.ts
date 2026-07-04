@@ -26,6 +26,132 @@ export const BATHROOM_ADDONS = {
 /** Valid difficulty factor values */
 export const DIFFICULTY_FACTORS = [1.00, 1.02, 1.05, 1.08, 1.10] as const;
 
+export const SQM_PER_SQFT = 0.0929;
+
+/** Customer-facing package scope (mirrors the public bathroom page cards) */
+export const PACKAGE_FEATURES = {
+  premium: [
+    'Rocell 450×900 mm floor & wall tiles',
+    'Swisstek Blue C2+ tile adhesive',
+    'Swisstek grout',
+    'Tokyo Super 2K waterproofing',
+    'Slon pipes & accessories',
+    'ACL cables & switches',
+    'Swiss premium bathware range',
+    'Ferroli water heater',
+    'iPanel ceiling',
+    'Premium vanity',
+    'Premium mirror',
+    'Premium shower cubicle / glass partition',
+    'Wall niche',
+    'Bathroom design & planning',
+    'Plumbing works',
+    'Electrical wiring works',
+    'Tiling & grouting',
+    'Cleaning & handover',
+  ],
+  signature: [
+    'Rocell 600×1200 mm floor & wall tiles',
+    'Swisstek Blue C2+ tile adhesive',
+    'Swisstek grout',
+    'Tokyo Super 2K waterproofing',
+    'Slon pipes & accessories',
+    'ACL cables & switches',
+    'Swiss premium concealed bathware & taps',
+    'Ferroli water heater',
+    'iPanel ceiling',
+    'Signature vanity',
+    'Signature mirror',
+    'Premium shower cubicle / glass partition',
+    'Wall niche',
+    'Bathroom design & planning',
+    'Plumbing works',
+    'Electrical wiring works',
+    'Tiling & grouting',
+    'Cleaning & handover',
+  ],
+} as const;
+
+export const COMBO_CONTENTS = {
+  'premium-combo':   { label: 'Premium Combo',   items: ['Swisstek aluminum door', 'Aluminum window', 'Pressure pump'] },
+  'signature-combo': { label: 'Signature Combo', items: ['Wood door', 'Wood window', 'Pressure pump'] },
+} as const;
+
+/* ── Package-mode quotation (public pricing model) ────────── */
+
+export interface PackageQuoteInputs {
+  clientName: string;
+  clientPhone: string;
+  projectLocation: string;
+  projectName: string;
+  quotationDate: string;
+  pkg: 'premium' | 'signature';
+  areaSqft: number;                       // bathroom floor area in sq.ft
+  isRenovation: boolean;                  // demolition & plastering add-on
+  combo: '' | 'premium-combo' | 'signature-combo';
+  difficultyScore: number;                // one of DIFFICULTY_FACTORS
+  finalPriceOverride: number | null;
+  brands: string[];
+  paymentTerms: PaymentTerm[];
+}
+
+export interface PackageQuoteBreakdown {
+  areaSqm: number;                        // never below the 4 sqm package base
+  packagePrice: number;
+  renovationCost: number;
+  comboCost: number;
+  comboLabel: string;
+  difficultyAdjusted: number;             // (package + renovation) × difficulty
+  finalSellingPrice: number;              // difficultyAdjusted + combo
+  finalAmount: number;                    // override ?? finalSellingPrice
+}
+
+/**
+ * Package pricing: total = (packagePrice + renovation) × difficulty + combo.
+ * Difficulty applies to the labour-heavy scope; combos are fixed-price
+ * material bundles added flat.
+ */
+export function calculatePackageQuote(q: PackageQuoteInputs): PackageQuoteBreakdown {
+  const pkg = BATHROOM_PACKAGES[q.pkg] ?? BATHROOM_PACKAGES.premium;
+
+  const rawSqm  = Math.max(0, Number(q.areaSqft) || 0) * SQM_PER_SQFT;
+  const areaSqm = Math.max(pkg.baseSqm, Number(rawSqm.toFixed(3)));
+
+  const packagePrice   = pkg.basePrice + (areaSqm - pkg.baseSqm) * pkg.perSqmAboveBase;
+  const renovationCost = q.isRenovation ? areaSqm * BATHROOM_ADDONS.renovationPerSqm : 0;
+
+  let comboCost = 0;
+  let comboLabel = '';
+  if (q.combo === 'premium-combo') {
+    comboCost  = BATHROOM_ADDONS.premiumCombo;
+    comboLabel = COMBO_CONTENTS['premium-combo'].label;
+  } else if (q.combo === 'signature-combo') {
+    comboCost  = BATHROOM_ADDONS.signatureCombo;
+    comboLabel = COMBO_CONTENTS['signature-combo'].label;
+  }
+
+  const minF = DIFFICULTY_FACTORS[0];
+  const maxF = DIFFICULTY_FACTORS[DIFFICULTY_FACTORS.length - 1];
+  const difficulty = Math.max(minF, Math.min(maxF, Number(q.difficultyScore) || 1));
+
+  const difficultyAdjusted = Math.round((packagePrice + renovationCost) * difficulty);
+  const finalSellingPrice  = difficultyAdjusted + comboCost;
+
+  const override = q.finalPriceOverride;
+  const finalAmount = override != null && override > 0 ? override : finalSellingPrice;
+
+  return {
+    areaSqm,
+    packagePrice: Math.round(packagePrice),
+    renovationCost: Math.round(renovationCost),
+    comboCost,
+    comboLabel,
+    difficultyAdjusted,
+    finalSellingPrice,
+    finalAmount,
+  };
+}
+
 /* ── All editable rates (change prices here) ─────────────── */
 export const RATES = {
   wallNiche:     { each: 10_000 },
