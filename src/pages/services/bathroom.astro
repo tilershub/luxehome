@@ -45,19 +45,11 @@ import Footer from '../../components/Footer.astro';
 
       <!-- Area calculator -->
       <div class="area-input-row reveal">
-        <label class="area-label">Bathroom Size</label>
-        <div class="area-fields">
-          <div class="area-field">
-            <input type="number" id="bathLength" class="area-input" min="0.1" max="999"
-              placeholder="Length" inputmode="decimal" aria-label="Bathroom length in feet" />
-            <span class="area-unit">ft</span>
-          </div>
-          <span class="area-multiply">×</span>
-          <div class="area-field">
-            <input type="number" id="bathWidth" class="area-input" min="0.1" max="999"
-              placeholder="Width" inputmode="decimal" aria-label="Bathroom width in feet" />
-            <span class="area-unit">ft</span>
-          </div>
+        <label class="area-label" for="bathArea">Bathroom Size</label>
+        <div class="area-field">
+          <input type="number" id="bathArea" class="area-input area-input--single" min="1" max="9999"
+            placeholder="e.g. 45" inputmode="decimal" aria-label="Bathroom area in square feet" />
+          <span class="area-unit">sq.ft</span>
         </div>
         <span class="area-hint" id="areaHint"></span>
       </div>
@@ -302,19 +294,17 @@ import Footer from '../../components/Footer.astro';
     selectedCombo: null
   };
 
-  var lengthInput = document.getElementById('bathLength');
-  var widthInput  = document.getElementById('bathWidth');
-  var panel       = document.getElementById('estimate-panel');
+  var areaInput = document.getElementById('bathArea');
+  var panel     = document.getElementById('estimate-panel');
 
   function fmtRs(n) {
     return 'Rs. ' + Math.round(n).toLocaleString('en-US');
   }
 
   function getSqm() {
-    var l = parseFloat(lengthInput.value) || 0;
-    var w = parseFloat(widthInput.value)  || 0;
-    if (l <= 0 || w <= 0) return 0;
-    return parseFloat((l * w * SQM_PER_SQFT).toFixed(3));
+    var a = parseFloat(areaInput.value) || 0;
+    if (a <= 0) return 0;
+    return parseFloat((a * SQM_PER_SQFT).toFixed(3));
   }
 
   function getCardPrice(card, sqm) {
@@ -470,8 +460,7 @@ import Footer from '../../components/Footer.astro';
     });
   });
 
-  if (lengthInput) lengthInput.addEventListener('input', updateAll);
-  if (widthInput)  widthInput.addEventListener('input',  updateAll);
+  if (areaInput) areaInput.addEventListener('input', updateAll);
 })();
 </script>
 
@@ -606,23 +595,13 @@ import Footer from '../../components/Footer.astro';
     min-width: 120px;
   }
 
-  .area-fields {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    flex-wrap: wrap;
-  }
-
-  .area-multiply {
-    color: rgba(240,236,224,.68);
-    font-size: 1rem;
-  }
-
   .area-field {
     display: flex;
     align-items: center;
     gap: .45rem;
   }
+
+  .area-input--single { width: 110px; }
 
   .area-input {
     width: 90px;
@@ -1088,7 +1067,6 @@ import Footer from '../../components/Footer.astro';
     .page-hero { padding: 0 1.5rem 3rem; min-height: 60vh; }
     .pricing-section { padding: 4rem 1.5rem; }
     .combos-grid { grid-template-columns: 1fr; }
-    .area-input-row { flex-direction: column; align-items: flex-start; gap: .6rem; }
     .area-hint { margin-left: 0; }
   }
 
@@ -1104,7 +1082,8 @@ import Footer from '../../components/Footer.astro';
     .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
 
     .area-input-row { padding: .65rem .9rem; }
-    .area-input { min-height: 44px; width: 80px; font-size: 1.1rem; }
+    .area-input { min-height: 44px; font-size: 1.1rem; }
+    .area-input--single { width: 110px; }
 
     .pkg-card { padding: 1.4rem 1.1rem; }
     .pkg-price { font-size: 1.45rem; }
