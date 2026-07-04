@@ -128,6 +128,11 @@ import Footer from '../../components/Footer.astro';
 
       </div>
 
+      <div class="pkg-swipe-ui" aria-hidden="true">
+        <div class="pkg-dots" id="pkg-dots"></div>
+        <span class="pkg-swipe-hint">Swipe to compare packages</span>
+      </div>
+
       <!-- Renovation add-on -->
       <div class="addons-section reveal">
         <div class="addons-head">Renovation Preparation — Optional Add-on</div>
@@ -427,6 +432,43 @@ import Footer from '../../components/Footer.astro';
   });
 
   if (areaInput) areaInput.addEventListener('input', updateAll);
+
+  // Mobile package carousel — swipe dots
+  var pkgGrid = document.querySelector('.pkg-grid');
+  var dotsWrap = document.getElementById('pkg-dots');
+  if (pkgGrid && dotsWrap) {
+    var pkgCards = pkgGrid.querySelectorAll('.pkg-card');
+    pkgCards.forEach(function (card, i) {
+      var dot = document.createElement('button');
+      dot.className = 'pkg-dot' + (i === 0 ? ' is-active' : '');
+      dot.type = 'button';
+      dot.setAttribute('aria-label', 'Go to package ' + (i + 1));
+      dot.addEventListener('click', function () {
+        pkgGrid.scrollTo({ left: card.offsetLeft - pkgGrid.offsetLeft, behavior: 'smooth' });
+      });
+      dotsWrap.appendChild(dot);
+    });
+    var pkgDots = dotsWrap.querySelectorAll('.pkg-dot');
+
+    var dotTick = false;
+    pkgGrid.addEventListener('scroll', function () {
+      if (dotTick) return;
+      dotTick = true;
+      requestAnimationFrame(function () {
+        dotTick = false;
+        var mid = pkgGrid.scrollLeft + pkgGrid.clientWidth / 2;
+        var nearest = 0, best = Infinity;
+        pkgCards.forEach(function (card, i) {
+          var center = card.offsetLeft - pkgGrid.offsetLeft + card.offsetWidth / 2;
+          var d = Math.abs(center - mid);
+          if (d < best) { best = d; nearest = i; }
+        });
+        pkgDots.forEach(function (d, i) {
+          d.classList.toggle('is-active', i === nearest);
+        });
+      });
+    }, { passive: true });
+  }
 })();
 </script>
 
@@ -1024,12 +1066,71 @@ import Footer from '../../components/Footer.astro';
 
   .notes-list li { font-size: .78rem; color: rgba(240,236,224,.72); }
 
+  /* ── Swipe UI (mobile package carousel) ── */
+
+  .pkg-swipe-ui {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+    margin: -1.5rem 0 2.2rem;
+  }
+
+  .pkg-dots {
+    display: flex;
+    gap: .55rem;
+  }
+
+  .pkg-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(240,236,224,.3);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background .3s, transform .3s;
+  }
+
+  .pkg-dot.is-active {
+    background: #d4a96b;
+    transform: scale(1.35);
+  }
+
+  .pkg-swipe-hint {
+    font-size: .62rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(240,236,224,.45);
+  }
+
   /* ── Responsive ── */
 
   @media (max-width: 1100px) {
     .page-hero { padding: 0 2.5rem 3.5rem; }
     .pricing-section { padding: 4.5rem 2.5rem; }
-    .pkg-grid { grid-template-columns: 1fr; }
+
+    /* Packages become a horizontal swipe carousel */
+    .pkg-grid {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      gap: 1rem;
+      max-width: none;
+      scrollbar-width: none;
+      padding-bottom: .4rem;
+      margin-bottom: 1.8rem;
+    }
+    .pkg-grid::-webkit-scrollbar { display: none; }
+
+    .pkg-card {
+      flex: 0 0 86%;
+      max-width: 420px;
+      scroll-snap-align: center;
+    }
+
+    .pkg-swipe-ui { display: flex; }
   }
 
   @media (max-width: 768px) {
