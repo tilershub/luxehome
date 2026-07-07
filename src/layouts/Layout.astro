@@ -135,18 +135,29 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       }
     </script>
 
-    <!-- Meta Pixel — Lead event fired from ContactForm on submit -->
+    <!-- Meta Pixel — Lead event fired from ContactForm on submit.
+         fbq stub + queue are available immediately so events never drop;
+         the fbevents.js network fetch is deferred off the critical path. -->
     <script is:inline>
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '1904211696933513');
-      fbq('track', 'PageView');
+      (function (f, b) {
+        var n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+        fbq('init', '1904211696933513');
+        fbq('track', 'PageView');
+        function loadPixel() {
+          if (f.__fbLoaded) return;
+          f.__fbLoaded = true;
+          var t = b.createElement('script'); t.async = !0;
+          t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+          var s = b.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(t, s);
+        }
+        var idle = f.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };
+        f.addEventListener('load', function () { idle(loadPixel); });
+      })(window, document);
     </script>
     <noscript>
       <img height="1" width="1" style="display:none"
