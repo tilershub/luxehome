@@ -12,9 +12,9 @@
 /*.png
   Cache-Control: public, max-age=604800
 
-# HTML pages — always revalidate
-/*
-  Cache-Control: public, max-age=0, must-revalidate
+# HTML is left to the Cloudflare Pages default (public, max-age=0,
+# must-revalidate). A catch-all /* rule here would be appended to the
+# rules above, producing a conflicting double Cache-Control on assets.
 
 # robots.txt and sitemap — short cache
 /robots.txt
