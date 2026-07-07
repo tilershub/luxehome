@@ -1,8 +1,16 @@
 # Cloudflare Pages cache headers
 
 # Immutable hashed assets (JS, CSS, fonts) — cache 1 year
-/assets/*
+/_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Static images (not content-hashed) — cache 1 week
+/*.webp
+  Cache-Control: public, max-age=604800
+/*.svg
+  Cache-Control: public, max-age=604800
+/*.png
+  Cache-Control: public, max-age=604800
 
 # HTML pages — always revalidate
 /*
