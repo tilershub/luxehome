@@ -31,7 +31,7 @@ export const SQM_PER_SQFT = 0.0929;
 /** Customer-facing package scope (mirrors the public bathroom page cards) */
 export const PACKAGE_FEATURES = {
   premium: [
-    'Rocell 450×900 mm floor & wall tiles',
+    'Rocell floor & wall tiles',
     'Swisstek Blue C2+ tile adhesive',
     'Swisstek grout',
     'Tokyo Super 2K waterproofing',
@@ -51,7 +51,7 @@ export const PACKAGE_FEATURES = {
     'Cleaning & handover',
   ],
   signature: [
-    'Rocell 600×1200 mm floor & wall tiles',
+    'Rocell floor & wall tiles',
     'Swisstek Blue C2+ tile adhesive',
     'Swisstek grout',
     'Tokyo Super 2K waterproofing',
