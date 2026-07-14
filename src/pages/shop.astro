@@ -1,0 +1,346 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+const WA_NUMBER = '94774503744';
+
+const products = [
+  {
+    name: 'Vanity with Mirror',
+    price: 130_000,
+    priceLabel: 'Rs. 130,000',
+    img: '/shop/vanity-with-mirror.webp',
+    imgW: 900, imgH: 900,
+    desc: 'Premium floating vanity cupboard paired with an LED backlit asymmetrical mirror — the complete set.',
+    features: [
+      'Premium LED backlit mirror — soft ambient lighting',
+      'Floating vanity cupboard with spacious storage',
+      'Premium quality materials, built to last',
+      'Custom made for your space',
+      'Designed & installed by LUXEHOME',
+    ],
+  },
+  {
+    name: 'Premium Mirror',
+    price: 40_000,
+    priceLabel: 'Rs. 40,000',
+    img: '/shop/premium-mirror.webp',
+    imgW: 900, imgH: 1200,
+    desc: 'Asymmetrical premium mirror — fine craftsmanship and timeless design for any space.',
+    features: [
+      'Premium quality glass',
+      'Elegant asymmetrical shape',
+      'Durable & long lasting',
+      '1 year warranty',
+    ],
+  },
+];
+
+function waHref(p: (typeof products)[number]): string {
+  const msg = 'Hi, I would like to pre-order: ' + p.name + ' - ' + p.priceLabel +
+    '. Please share availability and delivery details.';
+  return 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg);
+}
+
+const productSchema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': products.map((p) => ({
+    '@type': 'Product',
+    name: p.name,
+    description: p.desc,
+    image: new URL(p.img, Astro.site ?? 'https://luxehome.lk').href,
+    brand: { '@type': 'Brand', name: 'LUXEHOME' },
+    offers: {
+      '@type': 'Offer',
+      price: p.price,
+      priceCurrency: 'LKR',
+      availability: 'https://schema.org/PreOrder',
+      url: new URL('/shop', Astro.site ?? 'https://luxehome.lk').href,
+    },
+  })),
+});
+---
+
+<Layout
+  title="Shop — Premium Bathroom Vanities & Mirrors | Pre-Order | LUXEHOME Sri Lanka"
+  description="Pre-order LUXEHOME premium bathroom products in Sri Lanka. Floating vanity with LED backlit mirror Rs. 130,000, asymmetrical premium mirror Rs. 40,000. Order via WhatsApp — made to order, island-wide."
+>
+  <Nav />
+
+  <script is:inline type="application/ld+json" set:html={productSchema}></script>
+
+  <section class="shop-hero">
+    <div class="shop-hero-inner">
+      <div class="stag reveal">Premium Collection</div>
+      <h1 class="reveal">Shop</h1>
+      <p class="shop-desc reveal">
+        Designer bathroom products, made to order by LUXEHOME. Pre-order on WhatsApp —
+        our team confirms your details, timeline, and delivery.
+      </p>
+    </div>
+  </section>
+
+  <section class="shop-section">
+    <div class="shop-inner">
+      <div class="product-grid">
+        {products.map((p) => (
+          <div class="product-card reveal">
+            <div class="product-img">
+              <span class="preorder-badge">Pre-Order</span>
+              <img src={p.img} alt={p.name} width={p.imgW} height={p.imgH} loading="lazy" />
+            </div>
+            <div class="product-body">
+              <div class="product-name">{p.name}</div>
+              <p class="product-desc">{p.desc}</p>
+              <ul class="product-features">
+                {p.features.map((f) => (
+                  <li><span class="feat-tick">✓</span>{f}</li>
+                ))}
+              </ul>
+              <div class="product-price">{p.priceLabel}</div>
+              <a href={waHref(p)} class="product-wa-btn" target="_blank" rel="noopener noreferrer">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Pre-Order on WhatsApp
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="shop-note reveal">
+        All products are made to order. Pre-order via WhatsApp
+        <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noopener noreferrer">0774 503 744</a>
+        — no online payment required. Our team will confirm your order, timeline, and delivery details.
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* ── Hero ── */
+
+  .shop-hero {
+    background: var(--charcoal, #1e2820);
+    padding: 9rem 4rem 3rem;
+  }
+
+  .shop-hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .stag {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #b8945a;
+    margin-bottom: .75rem;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 700;
+    color: #f0ece0;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .shop-desc {
+    font-size: .95rem;
+    color: rgba(240,236,224,.85);
+    line-height: 1.72;
+    max-width: 58ch;
+  }
+
+  /* ── Products ── */
+
+  .shop-section {
+    background: var(--charcoal, #1e2820);
+    padding: 2rem 4rem 5rem;
+  }
+
+  .shop-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .product-card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .25s, transform .25s;
+  }
+
+  .product-card:hover {
+    border-color: rgba(184,148,90,.4);
+    transform: translateY(-3px);
+  }
+
+  .product-img {
+    position: relative;
+    background: rgba(255,255,255,.03);
+  }
+
+  .product-img img {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .preorder-badge {
+    position: absolute;
+    top: .9rem;
+    right: .9rem;
+    z-index: 1;
+    background: linear-gradient(90deg, #b8945a, #d4a96b);
+    color: #1e1a17;
+    font-size: .6rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: .3rem .75rem;
+    border-radius: 20px;
+  }
+
+  .product-body {
+    padding: 1.5rem 1.6rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .product-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #f0ece0;
+    margin-bottom: .45rem;
+  }
+
+  .product-desc {
+    font-size: .82rem;
+    color: rgba(240,236,224,.68);
+    line-height: 1.6;
+    margin: 0 0 .9rem;
+  }
+
+  .product-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .product-features li {
+    font-size: .78rem;
+    color: rgba(240,236,224,.85);
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .32rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    line-height: 1.4;
+  }
+
+  .feat-tick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border-radius: 50%;
+    background: rgba(184,148,90,.15);
+    color: #b8945a;
+    font-size: .65rem;
+    font-weight: 700;
+  }
+
+  .product-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #b8945a, #d4a96b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+
+  .product-wa-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    background: #25d366;
+    color: #0b3d20;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .85rem 1.2rem;
+    min-height: 48px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .product-wa-btn:hover { background: #1fb355; }
+
+  /* ── Note ── */
+
+  .shop-note {
+    background: rgba(184,148,90,.08);
+    border-left: 3px solid rgba(184,148,90,.45);
+    border-radius: 0 4px 4px 0;
+    padding: 1rem 1.3rem;
+    font-size: .82rem;
+    line-height: 1.65;
+    color: rgba(240,236,224,.82);
+  }
+
+  .shop-note a {
+    color: #d4a96b;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .shop-note a:hover { text-decoration: underline; }
+
+  /* ── Responsive ── */
+
+  @media (max-width: 900px) {
+    .shop-hero { padding: 8rem 2rem 2.5rem; }
+    .shop-section { padding: 1.5rem 2rem 4rem; }
+  }
+
+  @media (max-width: 700px) {
+    .product-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .shop-hero { padding: calc(6.5rem + env(safe-area-inset-top, 0px)) 1rem 2rem; }
+    .shop-section { padding: 1rem 1rem 3rem; }
+    .product-body { padding: 1.2rem 1.1rem 1.4rem; }
+    .product-price { font-size: 1.45rem; }
+  }
+</style>
