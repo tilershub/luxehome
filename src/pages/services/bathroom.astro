@@ -22,7 +22,7 @@ import Footer from '../../components/Footer.astro';
       </div>
       <h1 class="reveal">Bathroom Renovation</h1>
       <p class="hero-desc reveal">
-        Full scope renovation — from structural preparation to handover. Three carefully crafted packages,
+        Full scope renovation — from structural preparation to handover. Two carefully crafted packages,
         each covering tiles, bathware, waterproofing, plumbing, electrical, ceiling, vanity, and design.
       </p>
       <div class="hero-cta reveal">
@@ -36,7 +36,7 @@ import Footer from '../../components/Footer.astro';
   <section class="pricing-section">
     <div class="pricing-inner">
       <div class="stag reveal">Packages</div>
-      <h2 class="reveal">Two Packages. Complete Scope. Every One.</h2>
+      <h2 class="reveal">Two Packages. Complete Scope.</h2>
       <p class="sdesc reveal">
         Each package covers the complete bathroom — tiles, waterproofing, bathware, plumbing,
         electrical, ceiling, vanity, and design. Starting prices are based on a 4&nbsp;sqm bathroom.
@@ -205,6 +205,35 @@ import Footer from '../../components/Footer.astro';
         </div>
       </div>
 
+    </div>
+  </section>
+
+  <!-- Diaspora / overseas clients -->
+  <section class="diaspora-section">
+    <div class="diaspora-inner">
+      <div class="stag reveal">For Overseas Clients</div>
+      <h2 class="reveal">Building from abroad?</h2>
+      <p class="sdesc reveal">
+        LUXEhome manages the entire renovation for Sri Lankan clients living in the UK, Australia,
+        the Gulf, the EU, and Japan. You approve the full design remotely, receive weekly WhatsApp
+        photo and video progress updates, and approve every milestone before payment — from your
+        first video call to handover, without flying home.
+      </p>
+
+      <ul class="diaspora-points reveal">
+        <li><span class="feat-tick">✓</span>Full design approval remotely — 3D design reviewed on a video call</li>
+        <li><span class="feat-tick">✓</span>Weekly WhatsApp photo &amp; video progress updates</li>
+        <li><span class="feat-tick">✓</span>You approve every milestone before each payment</li>
+      </ul>
+
+      <div class="diaspora-cta reveal">
+        <a
+          href="https://wa.me/94774503744?text=Hello%20LUXEhome%2C%20I%27m%20contacting%20from%20overseas%20about%20a%20bathroom%20renovation."
+          class="pkg-btn pkg-btn--wa diaspora-wa-btn"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Book a Video Consultation</a>
+      </div>
     </div>
   </section>
 
@@ -1329,5 +1358,59 @@ import Footer from '../../components/Footer.astro';
     .est-total-val { font-size: 1.4rem; }
     .est-actions { flex-direction: column; }
     .est-contact-btn { flex: unset; }
+  }
+
+  /* ── Diaspora / overseas section ── */
+
+  .diaspora-section {
+    background: linear-gradient(rgba(184,148,90,.06), rgba(184,148,90,.06)), var(--charcoal, #1e2820);
+    border-top: 1px solid rgba(184,148,90,.2);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    padding: 4.5rem 4rem;
+  }
+
+  .diaspora-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .diaspora-section .sdesc {
+    margin-bottom: 1.8rem;
+  }
+
+  .diaspora-points {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    max-width: 60ch;
+  }
+
+  .diaspora-points li {
+    font-size: .84rem;
+    color: rgba(240,236,224,.88);
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    line-height: 1.45;
+  }
+
+  .diaspora-wa-btn {
+    display: inline-flex;
+    padding: .85rem 1.8rem;
+    font-size: .78rem;
+  }
+
+  @media (max-width: 900px) {
+    .diaspora-section { padding: 4rem 2rem; }
+  }
+
+  @media (max-width: 480px) {
+    .diaspora-section { padding: 3rem 1rem; }
+    .diaspora-wa-btn { width: 100%; justify-content: center; }
   }
 </style>

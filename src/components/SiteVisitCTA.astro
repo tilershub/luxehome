@@ -33,6 +33,9 @@ const { service = 'your project' } = Astro.props;
     <div class="svc-fee">
       Site visit fee: <strong>Rs. 10,000</strong>
     </div>
+    <div class="svc-overseas">
+      Overseas client? A <strong>free video consultation</strong> is available instead of the site visit.
+    </div>
 
     <div class="svc-btns">
       <a href="/contact" class="btn-primary">Book a Site Visit →</a>
@@ -104,8 +107,20 @@ const { service = 'your project' } = Astro.props;
   .svc-fee {
     font-size: .88rem;
     color: rgba(240,236,224,.65);
+    margin-bottom: .5rem;
+    letter-spacing: .02em;
+  }
+
+  .svc-overseas {
+    font-size: .8rem;
+    color: rgba(240,236,224,.55);
     margin-bottom: 2rem;
     letter-spacing: .02em;
+  }
+
+  .svc-overseas strong {
+    color: var(--clay, #b8892a);
+    font-weight: 600;
   }
 
   .svc-fee strong {

@@ -44,13 +44,16 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="LUXEHOME" />
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:image" content="https://images.pexels.com/photos/16249146/pexels-photo-16249146.jpeg?auto=compress&cs=tinysrgb&w=1200" />
+    <meta property="og:image" content={new URL('/og-bathroom.jpg', Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_LK" />
     <meta name="geo.region" content="LK" />
     <meta name="geo.placename" content="Sri Lanka" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL('/og-bathroom.jpg', Astro.site)} />
 
     <!-- LocalBusiness structured data -->
     <script type="application/ld+json">
@@ -70,7 +73,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
               "@type": "ImageObject",
               "url": "https://luxehome.lk/favicon.svg"
             },
-            "image": "https://images.pexels.com/photos/16249146/pexels-photo-16249146.jpeg?auto=compress&cs=tinysrgb&w=1200",
+            "image": "https://luxehome.lk/og-bathroom.jpg",
             "address": {
               "@type": "PostalAddress",
               "addressCountry": "LK",
@@ -157,6 +160,17 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         }
         var idle = f.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };
         f.addEventListener('load', function () { idle(loadPixel); });
+
+        // Contact event on WhatsApp / phone link clicks (fbq stub queues if
+        // the pixel script hasn't loaded yet, so no events are dropped)
+        b.addEventListener('click', function (e) {
+          var a = e.target && e.target.closest && e.target.closest('a[href]');
+          if (!a) return;
+          var href = a.getAttribute('href') || '';
+          if (href.indexOf('wa.me') !== -1 || href.indexOf('tel:') === 0) {
+            fbq('track', 'Contact');
+          }
+        }, true);
       })(window, document);
     </script>
     <noscript>
