@@ -4,7 +4,7 @@ import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   adapter: cloudflare(),
-  site: 'https://luxehome.com',
+  site: 'https://luxehome.lk',
   integrations: [
     sitemap({
       filter: (page) => !page.includes('/admin'),

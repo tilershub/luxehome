@@ -46,7 +46,7 @@ const STYLE_LABELS: Record<string, string> = {
 const pageTitle    = p.meta_title    || `${p.title} — LUXEHOME`;
 const pageDesc     = p.meta_description || p.project_overview || '';
 const ogImage      = p.og_image || p.cover_image || '';
-const canonicalURL = p.canonical_url || `https://luxehome.com/projects/${p.slug}`;
+const canonicalURL = p.canonical_url || `https://luxehome.lk/projects/${p.slug}`;
 const breadTitle   = p.breadcrumb_title || p.title;
 
 const jsonLd = JSON.stringify({
@@ -64,7 +64,7 @@ const jsonLd = JSON.stringify({
   "author": {
     "@type": "Organization",
     "name": "LUXEHOME",
-    "url": "https://luxehome.com",
+    "url": "https://luxehome.lk",
     "telephone": "+94774503744"
   },
   ...(p.testimonial_text ? {
