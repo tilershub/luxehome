@@ -1,643 +1,338 @@
 ---
-export const prerender = false;
-import { createServerSupabase } from '../../lib/supabase';
-import type { Project } from '../../lib/supabase';
+import LuxeLayout from '../../layouts/LuxeLayout.astro';
+import { getProjects, getProjectBySlug, youtubeEmbed } from '../../lib/luxe';
+import { cloudinary, waLink } from '../../lib/luxe-config';
 
-const { slug } = Astro.params;
-if (!slug) return Astro.redirect('/projects');
-
-const sb = createServerSupabase(import.meta.env as Record<string, string | undefined>);
-if (!sb) return Astro.redirect('/projects');
-
-const { data: project, error } = await sb
-  .from('projects')
-  .select('*')
-  .eq('slug', slug)
-  .in('status', ['published', 'featured'])
-  .single();
-
-if (error || !project) return Astro.redirect('/projects');
-
-const p = project as Project;
-
-// Fetch related projects
-const relatedSlugs: string[] = p.related_projects || [];
-let related: Pick<Project, 'slug' | 'title' | 'cover_image' | 'category' | 'location'>[] = [];
-if (relatedSlugs.length) {
-  const { data } = await sb
-    .from('projects')
-    .select('slug,title,cover_image,category,location')
-    .in('slug', relatedSlugs)
-    .in('status', ['published', 'featured'])
-    .limit(3);
-  related = data || [];
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((p) => ({ params: { slug: p.slug } }));
 }
 
-const CAT_LABELS: Record<string, string> = {
-  bathroom: 'Luxury Bathroom Renovation',
-  flooring: 'Designer Floors',
-  staircase: 'Designer Staircases',
-  kitchen: 'Luxury Kitchens',
-};
-const STYLE_LABELS: Record<string, string> = {
-  modern: 'Modern', minimalist: 'Minimalist', luxury: 'Luxury', contemporary: 'Contemporary',
-};
+const { slug } = Astro.params;
+const project = await getProjectBySlug(slug!);
+if (!project) return Astro.redirect('/projects');
 
-const pageTitle    = p.meta_title    || `${p.title} — LUXEHOME`;
-const pageDesc     = p.meta_description || p.project_overview || '';
-const ogImage      = p.og_image || p.cover_image || '';
-const canonicalURL = p.canonical_url || `https://luxehome.lk/projects/${p.slug}`;
-const breadTitle   = p.breadcrumb_title || p.title;
+const video = youtubeEmbed(project.video_url);
+const hasSlider = !!(project.before_image_url && project.after_image_url);
 
-const jsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "CreativeWork",
-  "name": p.title,
-  "description": pageDesc,
-  "url": canonicalURL,
-  "image": p.cover_image || undefined,
-  "dateCreated": p.completion_date || undefined,
-  "locationCreated": {
-    "@type": "Place",
-    "name": p.location + ", Sri Lanka"
+const waMessage = project.design
+  ? `Hi LUXEhome! I saw the "${project.title}" project and I'd like something like it for my home (the ${project.design.name} design).`
+  : `Hi LUXEhome! I saw the "${project.title}" project and I'd like something like it for my home.`;
+
+const reviewSchema = project.rating ? JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Review',
+  itemReviewed: {
+    '@type': 'LocalBusiness',
+    name: 'LUXEhome',
+    image: 'https://luxehome.lk/og-bathroom.jpg',
   },
-  "author": {
-    "@type": "Organization",
-    "name": "LUXEHOME",
-    "url": "https://luxehome.lk",
-    "telephone": "+94774503744"
-  },
-  ...(p.testimonial_text ? {
-    "review": {
-      "@type": "Review",
-      "reviewBody": p.testimonial_text,
-      "author": { "@type": "Person", "name": p.testimonial_author || "Client" }
-    }
-  } : {})
-});
+  reviewRating: { '@type': 'Rating', ratingValue: project.rating, bestRating: 5 },
+  ...(project.review_by ? { author: { '@type': 'Person', name: project.review_by } } : {}),
+  ...(project.review_text ? { reviewBody: project.review_text } : {}),
+}) : null;
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{pageTitle}</title>
-  <meta name="description" content={pageDesc} />
-  <link rel="canonical" href={canonicalURL} />
-
-  <!-- Open Graph -->
-  <meta property="og:title"       content={pageTitle} />
-  <meta property="og:description" content={pageDesc} />
-  <meta property="og:url"         content={canonicalURL} />
-  <meta property="og:type"        content="article" />
-  {ogImage && <meta property="og:image" content={ogImage} />}
-  <meta name="twitter:card" content="summary_large_image" />
-
-  <!-- JSON-LD -->
-  <script type="application/ld+json" set:html={jsonLd}></script>
-
-  <link rel="icon" href="/favicon.svg" />
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --charcoal: #161c1a; --cream: #f0ece0; --clay: #b8945a;
-      --muted: rgba(240,236,224,.65); --border: rgba(255,255,255,.08);
-    }
-    body { background: var(--charcoal); color: var(--cream); font-family: 'DM Sans', system-ui, sans-serif; line-height: 1.7; }
-    a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; display: block; }
-
-    /* Nav */
-    .site-nav {
-      background: rgba(22,28,26,.95); border-bottom: 1px solid var(--border);
-      padding: 0 2rem; display: flex; align-items: center; height: 64px; gap: 16px;
-      position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px);
-    }
-    .site-nav .logo { font-size: 1.1rem; font-weight: 800; letter-spacing: .04em; }
-    .site-nav .logo span { color: var(--clay); }
-    .nav-links { display: flex; gap: 24px; margin-left: auto; font-size: .85rem; color: var(--muted); }
-    .nav-links a:hover { color: var(--cream); }
-
-    /* Breadcrumb */
-    .breadcrumb {
-      padding: .9rem 2rem; font-size: .78rem; color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
-    }
-    .breadcrumb a:hover { color: var(--clay); }
-    .breadcrumb .sep { opacity: .4; }
-
-    /* Hero */
-    .hero {
-      position: relative; height: 520px; overflow: hidden;
-      background: #1a2020;
-    }
-    .hero-img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.6); }
-    .hero-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(22,28,26,.9) 0%, transparent 55%);
-    }
-    .hero-content {
-      position: absolute; bottom: 0; left: 0; right: 0; padding: 2.5rem 2rem;
-    }
-    .cat-tag {
-      display: inline-block; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em;
-      background: var(--clay); color: #fff; padding: 4px 10px; border-radius: 4px; margin-bottom: 1rem;
-    }
-    .hero-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.8rem,4vw,3rem); font-weight: 700; line-height: 1.15; }
-    .hero-meta { margin-top: .6rem; font-size: .88rem; color: rgba(240,236,224,.8); }
-
-    /* Key facts bar */
-    .facts-bar {
-      display: flex; flex-wrap: wrap; gap: 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .fact {
-      padding: 1.1rem 1.8rem; border-right: 1px solid var(--border);
-      min-width: 140px;
-    }
-    .fact-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--clay); margin-bottom: 4px; }
-    .fact-val { font-size: .92rem; font-weight: 600; }
-
-    /* Content */
-    .case-body { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
-    .section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
-    .section:last-child { border-bottom: none; }
-    .section-tag {
-      font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .15em;
-      color: var(--clay); margin-bottom: .6rem;
-    }
-    .section-title {
-      font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.3rem,2.5vw,1.9rem);
-      font-weight: 700; line-height: 1.2; margin-bottom: 1.2rem;
-    }
-    .prose { font-size: .95rem; color: rgba(240,236,224,.85); line-height: 1.85; white-space: pre-wrap; }
-
-    /* Before/After */
-    .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .ba-col {}
-    .ba-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 6px; }
-    .ba-img { width: 100%; height: 280px; object-fit: cover; border-radius: 8px; }
-
-    /* Image gallery */
-    .img-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-    .video-embed-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
-    .video-embed-title { font-size: .88rem; font-weight: 500; color: var(--charcoal); }
-    .video-embed-ratio { position: relative; padding-bottom: 56.25%; height: 0; }
-    .video-embed-ratio iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 6px; }
-    .gallery-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 7px; transition: transform .3s; cursor: zoom-in; }
-    .gallery-img:hover { transform: scale(1.03); }
-
-    /* Timeline */
-    .timeline { display: flex; flex-direction: column; gap: 0; }
-    .tl-item { display: flex; gap: 16px; padding: 16px 0; }
-    .tl-dot-col { display: flex; flex-direction: column; align-items: center; }
-    .tl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--clay); flex-shrink: 0; margin-top: 4px; }
-    .tl-line { flex: 1; width: 1px; background: var(--border); margin-top: 4px; }
-    .tl-item:last-child .tl-line { display: none; }
-    .tl-body { flex: 1; padding-bottom: 8px; }
-    .tl-phase { font-weight: 700; font-size: .9rem; }
-    .tl-duration { font-size: .75rem; color: var(--clay); margin-top: 2px; margin-bottom: 4px; }
-    .tl-desc { font-size: .85rem; color: var(--muted); }
-
-    /* Testimonial */
-    .testimonial-block {
-      background: rgba(184,148,90,.08); border: 1px solid rgba(184,148,90,.2);
-      border-left: 4px solid var(--clay); border-radius: 0 8px 8px 0;
-      padding: 1.8rem 2rem;
-    }
-    .testimonial-text { font-size: 1.05rem; font-style: italic; line-height: 1.75; margin-bottom: 1rem; }
-    .testimonial-author { font-size: .82rem; font-weight: 700; color: var(--clay); }
-
-    /* FAQs */
-    .faq-item { border-bottom: 1px solid var(--border); }
-    .faq-q {
-      padding: 1rem 0; font-size: .92rem; font-weight: 600; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      list-style: none;
-    }
-    .faq-q::after { content: '+'; color: var(--clay); font-size: 1.2rem; flex-shrink: 0; }
-    details[open] .faq-q::after { content: '−'; }
-    .faq-a { padding: 0 0 1rem; font-size: .88rem; color: var(--muted); line-height: 1.75; }
-
-    /* Related */
-    .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-    .related-card {
-      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
-      transition: transform .3s, border-color .3s;
-    }
-    .related-card:hover { transform: translateY(-4px); border-color: rgba(184,148,90,.3); }
-    .related-img { width: 100%; height: 140px; object-fit: cover; }
-    .related-body { padding: .9rem 1rem; }
-    .related-title { font-size: .88rem; font-weight: 700; margin-bottom: 3px; }
-    .related-loc { font-size: .75rem; color: var(--muted); }
-
-    /* CTA */
-    .cta-section {
-      background: linear-gradient(135deg, #1e2422 0%, #161c1a 100%);
-      padding: 4rem 2rem; text-align: center; border-top: 1px solid var(--border);
-    }
-    .cta-section h2 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.4rem,3vw,2.2rem); margin-bottom: .8rem; }
-    .cta-section p { color: var(--muted); margin-bottom: 2rem; max-width: 440px; margin-left: auto; margin-right: auto; }
-    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary {
-      padding: 14px 28px; border-radius: 8px; border: none;
-      background: var(--clay); color: #fff; font-weight: 700; font-size: .9rem; cursor: pointer;
-    }
-    .btn-secondary {
-      padding: 14px 28px; border-radius: 8px;
-      border: 1px solid rgba(255,255,255,.2); color: var(--cream);
-      font-weight: 600; font-size: .9rem; background: none;
-    }
-
-    /* YouTube embed */
-    .yt-embed {
-      position: relative;
-      aspect-ratio: 16/9;
-      background: #0d0b09;
-      border-radius: 8px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .yt-embed img {
-      width: 100%; height: 100%; object-fit: cover;
-      filter: brightness(.8); display: block;
-    }
-    .yt-embed iframe {
-      position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
-    }
-    .yt-play-btn {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 72px; height: 72px;
-      background: rgba(184,137,42,.9);
-      border-radius: 50%; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .2s, transform .2s;
-      backdrop-filter: blur(4px);
-    }
-    .yt-play-btn svg { margin-left: 4px; }
-    .yt-play-btn:hover { background: var(--clay); transform: translate(-50%,-50%) scale(1.1); }
-
-    .footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; font-size: .8rem; color: var(--muted); }
-
-    @media (max-width: 768px) {
-      .ba-grid { grid-template-columns: 1fr; }
-      .img-gallery { grid-template-columns: repeat(2, 1fr); }
-      .related-grid { grid-template-columns: 1fr; }
-      .facts-bar { flex-direction: column; }
-      .fact { border-right: none; border-bottom: 1px solid var(--border); }
-      .hero { height: 380px; }
-      .site-nav { padding: 0 1rem; }
-      .nav-links { display: none; }
-      .case-body { padding: 0 1rem; }
-      .breadcrumb { padding: .9rem 1rem; }
-    }
-  </style>
-</head>
-<body>
-
-  <nav class="site-nav">
-    <a href="/" class="logo">LUXE<span>HOME</span></a>
-    <div class="nav-links">
-      <a href="/services/bathroom">Bathrooms</a>
-      <a href="/services/flooring">Flooring</a>
-      <a href="/projects">Projects</a>
-      <a href="/contact">Contact</a>
-    </div>
-  </nav>
-
-  <!-- Breadcrumb -->
-  <div class="breadcrumb">
-    <a href="/">Home</a>
-    <span class="sep">/</span>
-    <a href="/projects">Projects</a>
-    <span class="sep">/</span>
-    <a href={`/projects?category=${p.category}`}>{CAT_LABELS[p.category] || p.category}</a>
-    <span class="sep">/</span>
-    <span>{breadTitle}</span>
-  </div>
+<LuxeLayout
+  title={`${project.title} — Project Story | LUXEhome`}
+  description={`${project.title}${project.location ? `, ${project.location}` : ''} — the full LUXEhome project story: before and after, the week-by-week journey, what we found on site and how we fixed it.`}
+  ogImage={project.after_image_url ? cloudinary(project.after_image_url, 1200) : undefined}
+>
+  <Fragment slot="head">
+    {reviewSchema && <script is:inline type="application/ld+json" set:html={reviewSchema}></script>}
+  </Fragment>
 
   <!-- Hero -->
-  <div class="hero">
-    {p.cover_image
-      ? <img class="hero-img" src={p.cover_image} alt={p.title} width="1400" height="600" />
-      : <div style="width:100%;height:100%;background:#1a2020;display:flex;align-items:center;justify-content:center;font-size:4rem;opacity:.2">🏗️</div>
-    }
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <span class="cat-tag">{CAT_LABELS[p.category] || p.category}</span>
-      <h1 class="hero-title">{p.title}</h1>
-      <div class="hero-meta">{p.location}{p.completion_year ? ` · ${p.completion_year}` : ''}</div>
-    </div>
-  </div>
+  <section class="ps-hero">
+    <p class="lx-eyebrow lxr">Project Story</p>
+    <h1 class="lxr">{project.title}</h1>
+    <p class="ps-meta lxr">
+      {project.location}
+      {project.duration_label && <span> · {project.duration_label}</span>}
+      {project.completed_label && <span> · Completed {project.completed_label}</span>}
+      {project.design && <span> · Built on the <a href={`/designs/${project.design.slug}`}>{project.design.name}</a> design</span>}
+    </p>
+  </section>
 
-  <!-- Key facts bar -->
-  <div class="facts-bar">
-    <div class="fact"><div class="fact-label">Location</div><div class="fact-val">{p.location}</div></div>
-    {p.area_label && <div class="fact"><div class="fact-label">Area</div><div class="fact-val">{p.area_label}</div></div>}
-    {p.completion_year && <div class="fact"><div class="fact-label">Year</div><div class="fact-val">{p.completion_year}{p.completion_month ? ` · ${new Date(2000, p.completion_month - 1).toLocaleString('en', {month: 'short'})}` : ''}</div></div>}
-    {p.design_style && <div class="fact"><div class="fact-label">Design Style</div><div class="fact-val">{STYLE_LABELS[p.design_style] || p.design_style}</div></div>}
-    <div class="fact"><div class="fact-label">Service</div><div class="fact-val">{CAT_LABELS[p.category]}</div></div>
-    {p.cost_range && <div class="fact"><div class="fact-label">Cost Range</div><div class="fact-val">{p.cost_range}</div></div>}
-    {p.reference_id && <div class="fact"><div class="fact-label">Project Ref</div><div class="fact-val">{p.reference_id}</div></div>}
-  </div>
-
-  <div class="case-body">
-
-    <!-- Project Overview -->
-    {p.project_overview && (
-      <section class="section">
-        <div class="section-tag">Project Overview</div>
-        <p class="prose">{p.project_overview}</p>
-      </section>
-    )}
-
-    <!-- Before / After -->
-    {(p.before_images?.length > 0 || p.after_images?.length > 0) && (
-      <section class="section">
-        <div class="section-tag">Before &amp; After</div>
-        <div class="section-title">The Transformation</div>
-        <div class="ba-grid">
-          {p.before_images?.length > 0 && (
-            <div class="ba-col">
-              <div class="ba-label">Before</div>
-              {p.before_images.slice(0, 3).map((url: string) => (
-                <img class="ba-img" src={url} alt="Before" loading="lazy" style="margin-bottom:8px" />
-              ))}
-            </div>
-          )}
-          {p.after_images?.length > 0 && (
-            <div class="ba-col">
-              <div class="ba-label">After</div>
-              {p.after_images.slice(0, 3).map((url: string) => (
-                <img class="ba-img" src={url} alt="After" loading="lazy" style="margin-bottom:8px" />
-              ))}
-            </div>
-          )}
+  <!-- Before / after -->
+  {hasSlider ? (
+    <section class="ps-slider-wrap lxr">
+      <div class="ps-slider" id="ba-slider" style={`--pos: 50%`}>
+        <img class="ps-after" src={cloudinary(project.after_image_url!, 1200)} alt={`${project.title} — after`} width="1200" height="800" />
+        <div class="ps-before-clip">
+          <img class="ps-before" src={cloudinary(project.before_image_url!, 1200)} alt={`${project.title} — before`} width="1200" height="800" />
         </div>
-      </section>
-    )}
+        <div class="ps-handle" aria-hidden="true"><span></span></div>
+        <span class="ps-label ps-label--before">Before</span>
+        <span class="ps-label ps-label--after">After</span>
+      </div>
+      <p class="ps-slider-hint">Drag to compare</p>
+    </section>
+  ) : project.after_image_url && (
+    <section class="ps-slider-wrap lxr">
+      <img class="ps-single" src={cloudinary(project.after_image_url, 1200)} alt={project.title} width="1200" height="800" />
+    </section>
+  )}
 
-    <!-- Episode 01 — Old Space to 3D Design -->
-    {p.episode_01_youtube && (
-      <section class="section">
-        <div class="section-tag">Episode 01 · Old Space to 3D Design</div>
-        <div class="section-title">The Journey Begins</div>
-        <div class="yt-embed" data-yt-url={p.episode_01_youtube} data-yt-thumb={p.episode_01_thumbnail || ''}>
-          <button class="yt-play-btn" aria-label="Play Episode 01">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="white" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </button>
+  <!-- Story -->
+  {project.story && (
+    <section class="ps-section">
+      <h2 class="lxr">The story</h2>
+      <div class="ps-story lxr">{project.story.split('\n\n').map((para) => <p>{para}</p>)}</div>
+    </section>
+  )}
+
+  <!-- Video + gallery -->
+  {(video || project.gallery.length > 0) && (
+    <section class="ps-section">
+      <h2 class="lxr">Inside the build</h2>
+      {video && (
+        <div class="ps-video lxr">
+          <iframe src={video} title={`${project.title} video`} loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
         </div>
-      </section>
-    )}
-
-    <!-- Client Requirements -->
-    {p.client_requirements && (
-      <section class="section">
-        <div class="section-tag">Client Brief</div>
-        <div class="section-title">What the Client Needed</div>
-        <p class="prose">{p.client_requirements}</p>
-      </section>
-    )}
-
-    <!-- Design Concept -->
-    {p.design_concept && (
-      <section class="section">
-        <div class="section-tag">Design</div>
-        <div class="section-title">The Concept</div>
-        <p class="prose">{p.design_concept}</p>
-      </section>
-    )}
-
-    <!-- Scope of Work -->
-    {p.scope_of_work && (
-      <section class="section">
-        <div class="section-tag">Scope</div>
-        <div class="section-title">Work Included</div>
-        <p class="prose">{p.scope_of_work}</p>
-      </section>
-    )}
-
-    <!-- Materials & Brands -->
-    {p.materials_brands && (
-      <section class="section">
-        <div class="section-tag">Materials &amp; Brands</div>
-        <div class="section-title">What We Used</div>
-        <p class="prose">{p.materials_brands}</p>
-      </section>
-    )}
-
-    <!-- Construction Progress -->
-    {p.progress_images?.length > 0 && (
-      <section class="section">
-        <div class="section-tag">Construction</div>
-        <div class="section-title">Progress Gallery</div>
-        <div class="img-gallery">
-          {p.progress_images.map((url: string) => (
-            <img class="gallery-img" src={url} alt="Construction progress" loading="lazy" />
+      )}
+      {project.gallery.length > 0 && (
+        <div class="ps-gallery">
+          {project.gallery.map((g, i) => (
+            <img class="lxr" src={cloudinary(g.image_url, 600)} alt={`${project.title} — photo ${i + 1}`} loading="lazy" width="600" height="450" />
           ))}
         </div>
-      </section>
-    )}
+      )}
+    </section>
+  )}
 
-    <!-- Timeline -->
-    {p.project_timeline?.length > 0 && (
-      <section class="section">
-        <div class="section-tag">Timeline</div>
-        <div class="section-title">Project Phases</div>
-        <div class="timeline">
-          {p.project_timeline.map((item: { phase: string; duration: string; description: string }) => (
-            <div class="tl-item">
-              <div class="tl-dot-col">
-                <div class="tl-dot"></div>
-                <div class="tl-line"></div>
+  <!-- The journey -->
+  {project.journey.length > 0 && (
+    <section class="ps-section">
+      <h2 class="lxr">The journey</h2>
+      <p class="ps-journey-intro lxr">From first message to handover — every stage, exactly as it happened.</p>
+      <ol class="ps-journey">
+        {project.journey.map((j) => (
+          <li class="lxr">
+            <span class="ps-j-dot" aria-hidden="true"></span>
+            {j.date_label && <div class="ps-j-date">{j.date_label}</div>}
+            <div class="ps-j-stage">{j.stage}</div>
+            {j.note && <p class="ps-j-note">{j.note}</p>}
+            {(j.issue || j.fix) && (
+              <div class="ps-callout">
+                <div class="ps-callout-title">What we found — and how we fixed it</div>
+                {j.issue && <p><strong>The issue:</strong> {j.issue}</p>}
+                {j.fix && <p><strong>The fix:</strong> {j.fix}</p>}
               </div>
-              <div class="tl-body">
-                <div class="tl-phase">{item.phase}</div>
-                {item.duration && <div class="tl-duration">{item.duration}</div>}
-                {item.description && <div class="tl-desc">{item.description}</div>}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Gallery -->
-    {p.gallery_images?.length > 0 && (
-      <section class="section">
-        <div class="section-tag">Gallery</div>
-        <div class="section-title">Project Gallery</div>
-        <div class="img-gallery">
-          {p.gallery_images.map((url: string) => (
-            <img class="gallery-img" src={url} alt={p.title} loading="lazy" />
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Episode 02 — Completed Project Tour -->
-    {p.episode_02_youtube && (
-      <section class="section">
-        <div class="section-tag">Episode 02 · Completed Project Tour</div>
-        <div class="section-title">The Final Reveal</div>
-        <div class="yt-embed" data-yt-url={p.episode_02_youtube} data-yt-thumb={p.episode_02_thumbnail || ''}>
-          <button class="yt-play-btn" aria-label="Play Episode 02">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="white" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </button>
-        </div>
-      </section>
-    )}
-
-    <!-- Additional Videos -->
-    {p.project_videos?.length > 0 && (
-      <section class="section">
-        <div class="section-tag">Videos</div>
-        <div class="section-title">Project Videos</div>
-        <div class="video-grid">
-          {(p.project_videos as {title?: string; url: string}[]).map((v) => {
-            const m = v.url?.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
-            const id = m ? m[1] : null;
-            return id ? (
-              <div class="video-embed-wrap">
-                {v.title && <div class="video-embed-title">{v.title}</div>}
-                <div class="video-embed-ratio">
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${id}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                    loading="lazy"
-                    title={v.title || 'Project video'}
-                  />
-                </div>
-              </div>
-            ) : null;
-          })}
-        </div>
-      </section>
-    )}
-
-    <!-- Challenges & Solutions -->
-    {p.challenges_solutions && (
-      <section class="section">
-        <div class="section-tag">Challenges &amp; Solutions</div>
-        <div class="section-title">How We Overcame Obstacles</div>
-        <p class="prose">{p.challenges_solutions}</p>
-      </section>
-    )}
-
-    <!-- Testimonial -->
-    {p.testimonial_text && (
-      <section class="section">
-        <div class="section-tag">Client Testimonial</div>
-        <div class="testimonial-block">
-          <p class="testimonial-text">&ldquo;{p.testimonial_text}&rdquo;</p>
-          <div class="testimonial-author">
-            — {p.testimonial_author || 'Client'}
-            {p.testimonial_role && <span style="font-weight:400;color:var(--muted)"> · {p.testimonial_role}</span>}
-          </div>
-        </div>
-      </section>
-    )}
-
-    <!-- FAQs -->
-    {p.faqs?.length > 0 && (
-      <section class="section">
-        <div class="section-tag">FAQ</div>
-        <div class="section-title">Frequently Asked Questions</div>
-        {p.faqs.map((faq: { question: string; answer: string }) => (
-          <details class="faq-item">
-            <summary class="faq-q">{faq.question}</summary>
-            <p class="faq-a">{faq.answer}</p>
-          </details>
+            )}
+          </li>
         ))}
-      </section>
-    )}
+      </ol>
+    </section>
+  )}
 
-    <!-- Related Projects -->
-    {related.length > 0 && (
-      <section class="section">
-        <div class="section-tag">Related Work</div>
-        <div class="section-title">You Might Also Like</div>
-        <div class="related-grid">
-          {related.map((r) => (
-            <a class="related-card" href={`/projects/${r.slug}`}>
-              {r.cover_image
-                ? <img class="related-img" src={r.cover_image} alt={r.title} loading="lazy" />
-                : <div style="height:140px;background:#252c29;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🏗️</div>
-              }
-              <div class="related-body">
-                <div class="related-title">{r.title}</div>
-                <div class="related-loc">{r.location} · {CAT_LABELS[r.category] || r.category}</div>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-  </div>
-
-  <!-- CTA -->
-  {(p.cta_book_consultation || p.cta_whatsapp) && (
-    <section class="cta-section">
-      <h2>Ready to Start Your Project?</h2>
-      <p>Let's create something extraordinary together. Get in touch for a free consultation.</p>
-      <div class="cta-btns">
-        {p.cta_book_consultation && (
-          <a class="btn-primary" href="/contact">Book a Consultation</a>
-        )}
-        {p.cta_whatsapp && (
-          <a class="btn-secondary" href="https://wa.me/94774503744?text=Hi%20LUXEHOME%2C%20I%20saw%20your%20project%20%22{encodeURIComponent(p.title)}%22%20and%20would%20like%20to%20enquire." target="_blank" rel="noopener">
-            WhatsApp LUXEhome
-          </a>
-        )}
+  <!-- Crew -->
+  {project.crew.length > 0 && (
+    <section class="ps-section">
+      <h2 class="lxr">The team that built this</h2>
+      <div class="ps-crew lxr">
+        {project.crew.map((c) => (
+          <div class="ps-crew-card">
+            <div class="ps-crew-photo">
+              {c.photo_url
+                ? <img src={cloudinary(c.photo_url, 200)} alt={c.name} loading="lazy" width="200" height="200" />
+                : <span>{c.name.charAt(0)}</span>}
+            </div>
+            <div>
+              <div class="ps-crew-name">{c.name}</div>
+              {c.role && <div class="ps-crew-role">{c.role}</div>}
+              {c.tilershub_verified && <div class="ps-verified">✓ TILERSHUB Verified</div>}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   )}
 
-  <footer class="footer">
-    <p>© {new Date().getFullYear()} LUXEHOME · Premium Renovation Sri Lanka</p>
-    <p style="margin-top:6px"><a href="/">Home</a> · <a href="/projects">Projects</a> · <a href="/contact">Contact</a></p>
-  </footer>
+  <!-- Review -->
+  {project.rating && (
+    <section class="ps-section">
+      <div class="ps-review lxr">
+        <div class="ps-stars" aria-label={`${project.rating} out of 5 stars`}>
+          {'★'.repeat(project.rating)}{'☆'.repeat(5 - project.rating)}
+        </div>
+        {project.review_text && <blockquote>“{project.review_text}”</blockquote>}
+        {project.review_by && <cite>— {project.review_by}</cite>}
+      </div>
+    </section>
+  )}
 
-  <script>
-    function ytIdFromUrl(url) {
-      if (!url) return null;
-      const m = url.match(/(?:youtu\.be\/|v=|embed\/)([a-zA-Z0-9_-]{11})/);
-      return m ? m[1] : null;
-    }
+  <!-- Closing CTA -->
+  <section class="ps-closing lxr">
+    <h2>Want this for your home?</h2>
+    <p>Message us on WhatsApp — we will send the design file and a fixed quotation for your space.</p>
+    <div class="ps-closing-btns">
+      <a href={waLink(waMessage)} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">WhatsApp Us</a>
+      {project.design && <a href={`/designs/${project.design.slug}`} class="lx-btn-ghost">See the {project.design.name} design</a>}
+    </div>
+  </section>
+</LuxeLayout>
 
-    document.querySelectorAll('.yt-embed').forEach(embed => {
-      const url = embed.dataset.ytUrl;
-      const customThumb = embed.dataset.ytThumb;
-      const id = ytIdFromUrl(url);
-      if (!id) return;
+<script is:inline>
+(function () {
+  var slider = document.getElementById('ba-slider');
+  if (!slider) return;
+  var dragging = false;
+  function setPos(clientX) {
+    var rect = slider.getBoundingClientRect();
+    var pct = Math.max(2, Math.min(98, ((clientX - rect.left) / rect.width) * 100));
+    slider.style.setProperty('--pos', pct + '%');
+  }
+  slider.addEventListener('pointerdown', function (e) {
+    dragging = true;
+    slider.setPointerCapture(e.pointerId);
+    setPos(e.clientX);
+  });
+  slider.addEventListener('pointermove', function (e) {
+    if (dragging) setPos(e.clientX);
+  });
+  slider.addEventListener('pointerup',    function () { dragging = false; });
+  slider.addEventListener('pointercancel', function () { dragging = false; });
+})();
+</script>
 
-      const thumb = customThumb || `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
-      const img = document.createElement('img');
-      img.src = thumb;
-      img.alt = 'Video thumbnail';
-      img.loading = 'lazy';
-      embed.insertBefore(img, embed.firstChild);
+<style>
+  .ps-hero { padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.2rem, 5vw, 4rem) 1.4rem; max-width: 1100px; margin: 0 auto; }
+  .ps-hero h1 { font-size: clamp(2.2rem, 5.5vw, 3.6rem); margin: .5rem 0 .6rem; }
+  .ps-meta { font-size: .92rem; color: color-mix(in srgb, var(--ink) 68%, transparent); }
+  .ps-meta a { color: var(--sage-deep); font-weight: 500; }
 
-      embed.querySelector('.yt-play-btn')?.addEventListener('click', () => {
-        embed.innerHTML = `<iframe
-          src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0"
-          allow="autoplay; encrypted-media; fullscreen"
-          allowfullscreen
-          frameborder="0"
-          loading="lazy"
-          title="LUXEhome project video"
-        ></iframe>`;
-      });
-    });
-  </script>
+  /* Before/after drag slider */
+  .ps-slider-wrap { max-width: 1100px; margin: 0 auto; padding: 0 clamp(1.2rem, 5vw, 4rem); }
+  .ps-slider {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    border-radius: 8px;
+    overflow: hidden;
+    touch-action: none;
+    cursor: ew-resize;
+    background: var(--sage-mist);
+    user-select: none;
+  }
+  .ps-slider img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  .ps-before-clip { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+  .ps-handle {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: var(--pos);
+    width: 2px;
+    background: var(--cream);
+    transform: translateX(-1px);
+    pointer-events: none;
+  }
+  .ps-handle span {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--cream);
+    box-shadow: 0 2px 12px rgba(43,50,42,.3);
+  }
+  .ps-handle span::before, .ps-handle span::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 0; height: 0;
+    border: 5px solid transparent;
+    transform: translateY(-50%);
+  }
+  .ps-handle span::before { left: 8px;  border-right-color: var(--sage-deep); }
+  .ps-handle span::after  { right: 8px; border-left-color:  var(--sage-deep); }
+  .ps-label {
+    position: absolute;
+    bottom: 1rem;
+    font-size: .66rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+    background: color-mix(in srgb, var(--ink) 78%, transparent); color: var(--cream);
+    padding: .3rem .75rem; border-radius: 999px;
+    pointer-events: none;
+  }
+  .ps-label--before { left: 1rem; }
+  .ps-label--after  { right: 1rem; }
+  .ps-slider-hint { text-align: center; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 50%, transparent); margin-top: .6rem; }
+  .ps-single { width: 100%; border-radius: 8px; display: block; }
 
-</body>
-</html>
+  .ps-section { max-width: 900px; margin: 0 auto; padding: 2.2rem clamp(1.2rem, 5vw, 4rem); }
+  .ps-section h2 { font-size: clamp(1.7rem, 4vw, 2.3rem); margin-bottom: 1rem; }
+
+  .ps-story p { margin-bottom: 1rem; max-width: 65ch; color: color-mix(in srgb, var(--ink) 82%, transparent); }
+
+  .ps-video iframe { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 8px; margin-bottom: 1.2rem; }
+  .ps-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
+  .ps-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; display: block; }
+
+  /* Journey */
+  .ps-journey-intro { color: color-mix(in srgb, var(--ink) 68%, transparent); margin: -0.4rem 0 1.6rem; }
+  .ps-journey { list-style: none; position: relative; padding-left: 1.7rem; }
+  .ps-journey::before { content: ''; position: absolute; left: 6px; top: 10px; bottom: 10px; width: 1px; background: var(--cream-deep); }
+  .ps-journey li { position: relative; padding-bottom: 1.8rem; }
+  .ps-j-dot { position: absolute; left: -1.7rem; top: .4rem; width: 13px; height: 13px; border-radius: 50%; background: var(--sage); border: 3px solid var(--cream); }
+  .ps-j-date { font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 55%, transparent); }
+  .ps-j-stage { font-family: var(--lx-serif); font-size: 1.25rem; font-weight: 600; }
+  .ps-j-note { font-size: .9rem; color: color-mix(in srgb, var(--ink) 75%, transparent); max-width: 58ch; margin-top: .2rem; }
+
+  /* Signature transparency callout */
+  .ps-callout {
+    margin-top: .9rem;
+    border: 1px solid var(--gold);
+    border-left-width: 4px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--gold-soft) 22%, #fff);
+    padding: 1rem 1.2rem;
+    max-width: 58ch;
+  }
+  .ps-callout-title {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .5rem;
+  }
+  .ps-callout p { font-size: .9rem; margin-bottom: .4rem; color: color-mix(in srgb, var(--ink) 85%, transparent); }
+  .ps-callout p:last-child { margin-bottom: 0; }
+  .ps-callout strong { font-weight: 600; color: var(--ink); }
+
+  /* Crew */
+  .ps-crew { display: flex; flex-wrap: wrap; gap: 1rem; }
+  .ps-crew-card {
+    display: flex; align-items: center; gap: .9rem;
+    background: #fff; border: 1px solid var(--cream-deep); border-radius: 999px;
+    padding: .5rem 1.3rem .5rem .5rem;
+  }
+  .ps-crew-photo {
+    width: 52px; height: 52px; border-radius: 50%; overflow: hidden;
+    background: var(--sage-mist); display: flex; align-items: center; justify-content: center;
+    font-family: var(--lx-serif); font-size: 1.3rem; color: var(--sage-deep);
+    flex-shrink: 0;
+  }
+  .ps-crew-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .ps-crew-name { font-weight: 500; font-size: .95rem; }
+  .ps-crew-role { font-size: .76rem; color: color-mix(in srgb, var(--ink) 60%, transparent); }
+  .ps-verified { font-size: .7rem; font-weight: 600; color: var(--sage-deep); letter-spacing: .04em; }
+
+  /* Review */
+  .ps-review { text-align: center; background: #fff; border: 1px solid var(--cream-deep); border-radius: 8px; padding: 2.2rem 1.6rem; }
+  .ps-stars { color: var(--gold); font-size: 1.4rem; letter-spacing: .2em; margin-bottom: .8rem; }
+  .ps-review blockquote { font-family: var(--lx-serif); font-size: 1.35rem; font-style: italic; max-width: 46ch; margin: 0 auto .6rem; }
+  .ps-review cite { font-style: normal; font-size: .85rem; color: color-mix(in srgb, var(--ink) 62%, transparent); }
+
+  /* Closing */
+  .ps-closing { text-align: center; background: var(--sage-mist); margin-top: 3rem; padding: 3.5rem clamp(1.2rem, 5vw, 4rem); }
+  .ps-closing h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); margin-bottom: .5rem; }
+  .ps-closing p { max-width: 46ch; margin: 0 auto 1.5rem; color: color-mix(in srgb, var(--ink) 75%, transparent); }
+  .ps-closing-btns { display: flex; gap: .9rem; justify-content: center; flex-wrap: wrap; }
+
+  @media (max-width: 720px) {
+    .ps-gallery { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .ps-gallery { grid-template-columns: 1fr; }
+    .ps-closing-btns { flex-direction: column; align-items: stretch; }
+  }
+</style>
