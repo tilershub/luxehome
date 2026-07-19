@@ -1,0 +1,375 @@
+---
+/* LUXEhome catalogue layout — the new brand system:
+   cream/sage/gold palette · Cormorant Garamond + Jost + Noto Sans Sinhala.
+   Keeps the site's Meta Pixel, Contact-event tracking, and SEO plumbing. */
+import { WHATSAPP_NUMBER } from '../lib/luxe-config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  /** Hide site nav/footer chrome (used by /start). */
+  bare?: boolean;
+}
+
+const {
+  title = 'LUXEhome — Custom Design & Build, Sri Lanka',
+  description = 'Choose a fully documented design — bathrooms, kitchens, staircases and floors — with a fixed quotation, verified teams, and WhatsApp progress updates. Sri Lanka & diaspora.',
+  ogImage = 'https://luxehome.lk/og-bathroom.jpg',
+  bare = false,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!DOCTYPE html>
+<html lang="en" class="luxe">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F7F3EB" />
+    <script>document.documentElement.classList.add('js');</script>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="LUXEhome" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="en_LK" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Fonts: Cormorant Garamond (display) · Jost (body) · Noto Sans Sinhala -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Jost:wght@300;400;500;600&family=Noto+Sans+Sinhala:wght@400;500&display=swap"
+    />
+
+    <slot name="head" />
+
+    <!-- Meta Pixel (same install as the rest of the site): stub + PageView
+         immediately, network fetch deferred; Contact on wa.me/tel clicks -->
+    <script is:inline>
+      (function (f, b) {
+        var n = f.fbq = f.fbq || function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = n.queue || [];
+        fbq('init', '1904211696933513');
+        fbq('track', 'PageView');
+        function loadPixel() {
+          if (f.__fbLoaded) return;
+          f.__fbLoaded = true;
+          var t = b.createElement('script'); t.async = !0;
+          t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+          var s = b.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(t, s);
+        }
+        var idle = f.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };
+        f.addEventListener('load', function () { idle(loadPixel); });
+        b.addEventListener('click', function (e) {
+          var a = e.target && e.target.closest && e.target.closest('a[href]');
+          if (!a) return;
+          var href = a.getAttribute('href') || '';
+          if (href.indexOf('wa.me') !== -1 || href.indexOf('tel:') === 0) {
+            fbq('track', 'Contact');
+          }
+        }, true);
+      })(window, document);
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=1904211696933513&ev=PageView&noscript=1" />
+    </noscript>
+  </head>
+  <body class="luxe-body">
+    {!bare && (
+      <header class="lx-nav">
+        <a href="/" class="lx-wordmark" aria-label="LUXEhome — Home"><strong>LUXE</strong><em>home</em></a>
+        <nav class="lx-nav-links" aria-label="Main">
+          <a href="/designs">Designs</a>
+          <a href="/projects">Projects</a>
+          <a href="/about">About</a>
+          <a href="/contact">Contact</a>
+        </nav>
+        <a
+          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a project.')}`}
+          class="lx-nav-wa" target="_blank" rel="noopener noreferrer"
+        >WhatsApp Us</a>
+        <button class="lx-nav-burger" id="lx-burger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </header>
+      <div class="lx-mobile-menu" id="lx-mobile-menu" hidden>
+        <a href="/designs">Designs</a>
+        <a href="/projects">Projects</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a
+          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a project.')}`}
+          class="lx-mobile-wa" target="_blank" rel="noopener noreferrer"
+        >WhatsApp Us</a>
+      </div>
+    )}
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    {!bare && (
+      <footer class="lx-footer">
+        <div class="lx-footer-inner">
+          <a href="/" class="lx-wordmark lx-wordmark--footer"><strong>LUXE</strong><em>home</em></a>
+          <p class="lx-footer-tag">Custom design &amp; build · Sri Lanka<br />A sister brand of TILERSHUB</p>
+          <div class="lx-footer-links">
+            <a href="/designs">Designs</a>
+            <a href="/projects">Projects</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+          </div>
+          <div class="lx-footer-contact">
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">077 450 3744</a>
+            <span>·</span>
+            <span>luxehome.lk</span>
+          </div>
+        </div>
+      </footer>
+    )}
+
+    <!-- Scroll reveal (respects prefers-reduced-motion via CSS) -->
+    <script is:inline>
+      (function () {
+        var els = document.querySelectorAll('.lxr');
+        if (!('IntersectionObserver' in window) || !els.length) {
+          els.forEach && els.forEach(function (el) { el.classList.add('lxr-in'); });
+          return;
+        }
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) { en.target.classList.add('lxr-in'); io.unobserve(en.target); }
+          });
+        }, { threshold: 0.08 });
+        els.forEach(function (el) {
+          var r = el.getBoundingClientRect();
+          if (r.top < window.innerHeight) el.classList.add('lxr-in');
+          else io.observe(el);
+        });
+      })();
+    </script>
+
+    <script is:inline>
+      (function () {
+        var burger = document.getElementById('lx-burger');
+        var menu = document.getElementById('lx-mobile-menu');
+        if (!burger || !menu) return;
+        burger.addEventListener('click', function () {
+          var open = !menu.hidden;
+          menu.hidden = open;
+          burger.setAttribute('aria-expanded', String(!open));
+          burger.classList.toggle('is-open', !open);
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  /* ── LUXEhome brand tokens ── */
+  html.luxe {
+    --cream:      #F7F3EB;
+    --cream-deep: #EFE8DB;
+    --sage:       #8A9A84;
+    --sage-deep:  #5C6B56;
+    --sage-mist:  #DFE5DB;
+    --gold:       #C9A24B;
+    --gold-soft:  #E4CE9C;
+    --ink:        #2B322A;
+    --lx-serif:   'Cormorant Garamond', Georgia, serif;
+    --lx-sans:    'Jost', system-ui, sans-serif;
+    --lx-sinhala: 'Noto Sans Sinhala', sans-serif;
+  }
+
+  html.luxe { scroll-behavior: smooth; }
+  html.luxe * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .luxe-body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--lx-sans);
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .luxe h1, .luxe h2, .luxe h3 { font-family: var(--lx-serif); font-weight: 600; line-height: 1.15; }
+  .luxe .sinhala { font-family: var(--lx-sinhala); }
+
+  /* ── Wordmark ── */
+  .lx-wordmark {
+    font-family: var(--lx-sans);
+    font-size: 1.3rem;
+    letter-spacing: .04em;
+    text-decoration: none;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .lx-wordmark strong { font-weight: 600; }
+  .lx-wordmark em { font-family: var(--lx-serif); font-style: italic; color: var(--sage-deep); font-size: 1.15em; }
+
+  /* ── Nav ── */
+  .lx-nav {
+    position: sticky;
+    top: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem clamp(1.2rem, 5vw, 4rem);
+    background: color-mix(in srgb, var(--cream) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--cream-deep);
+  }
+  .lx-nav-links { display: flex; gap: 1.6rem; margin-left: auto; }
+  .lx-nav-links a {
+    font-size: .82rem;
+    font-weight: 400;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .lx-nav-links a:hover { color: var(--sage-deep); }
+  .lx-nav-wa {
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--cream);
+    background: var(--sage-deep);
+    padding: .6rem 1.3rem;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .lx-nav-wa:hover { background: var(--ink); }
+
+  .lx-nav-burger { display: none; background: none; border: none; cursor: pointer; padding: .5rem; }
+  .lx-nav-burger span { display: block; width: 24px; height: 2px; background: var(--ink); margin: 5px 0; transition: transform .25s; }
+  .lx-nav-burger.is-open span:first-child { transform: translateY(3.5px) rotate(45deg); }
+  .lx-nav-burger.is-open span:last-child  { transform: translateY(-3.5px) rotate(-45deg); }
+
+  .lx-mobile-menu {
+    position: sticky;
+    top: 61px;
+    z-index: 290;
+    background: var(--cream);
+    border-bottom: 1px solid var(--cream-deep);
+    display: flex;
+    flex-direction: column;
+    padding: .6rem clamp(1.2rem, 5vw, 4rem) 1.2rem;
+  }
+  .lx-mobile-menu a {
+    padding: .8rem 0;
+    font-size: .95rem;
+    letter-spacing: .05em;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--cream-deep);
+  }
+  .lx-mobile-wa { color: var(--sage-deep) !important; font-weight: 500; border-bottom: none !important; }
+
+  @media (max-width: 820px) {
+    .lx-nav-links, .lx-nav-wa { display: none; }
+    .lx-nav-burger { display: block; margin-left: auto; }
+  }
+
+  /* ── Footer ── */
+  .lx-footer {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 3.5rem clamp(1.2rem, 5vw, 4rem);
+    margin-top: 5rem;
+  }
+  .lx-footer-inner { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.2rem; }
+  .lx-wordmark--footer { color: var(--cream); }
+  .lx-wordmark--footer em { color: var(--gold-soft); }
+  .lx-footer-tag { font-size: .85rem; color: color-mix(in srgb, var(--cream) 70%, transparent); }
+  .lx-footer-links { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+  .lx-footer-links a {
+    font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
+    color: color-mix(in srgb, var(--cream) 80%, transparent); text-decoration: none;
+  }
+  .lx-footer-links a:hover { color: var(--gold-soft); }
+  .lx-footer-contact { font-size: .85rem; display: flex; gap: .6rem; color: color-mix(in srgb, var(--cream) 70%, transparent); }
+  .lx-footer-contact a { color: var(--gold-soft); text-decoration: none; }
+
+  /* ── Shared primitives ── */
+  .lx-eyebrow {
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+  }
+  .lx-btn-wa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    background: var(--sage-deep);
+    color: var(--cream);
+    font-family: var(--lx-sans);
+    font-size: .82rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .9rem 1.8rem;
+    min-height: 48px;
+    border-radius: 2px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .lx-btn-wa:hover { background: var(--ink); }
+  .lx-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--ink);
+    font-size: .82rem;
+    font-weight: 400;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .9rem 1.8rem;
+    min-height: 48px;
+    border: 1px solid var(--sage);
+    border-radius: 2px;
+    text-decoration: none;
+    transition: border-color .2s, color .2s;
+  }
+  .lx-btn-ghost:hover { border-color: var(--sage-deep); color: var(--sage-deep); }
+
+  /* ── Scroll reveal ── */
+  html.js .lxr { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+  html.js .lxr.lxr-in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.luxe { scroll-behavior: auto; }
+    html.js .lxr { opacity: 1; transform: none; transition: none; }
+  }
+</style>
