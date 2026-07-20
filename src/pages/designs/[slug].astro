@@ -1,0 +1,407 @@
+---
+import LuxeLayout from '../../layouts/LuxeLayout.astro';
+import { getDesigns, getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture } from '../../lib/luxe';
+import { formatLKRM, cloudinary, waLink } from '../../lib/luxe-config';
+
+export async function getStaticPaths() {
+  const designs = await getDesigns();
+  return designs.map((d) => ({ params: { slug: d.slug } }));
+}
+
+const { slug } = Astro.params;
+const design = await getDesignBySlug(slug!);
+if (!design) return Astro.redirect('/designs');
+
+const collectionLabel = design.collection.charAt(0).toUpperCase() + design.collection.slice(1);
+const priceLabel = formatLKRM(design.starting_price_lkr);
+
+const waMessage = `Hi LUXEhome! I'm interested in the "${design.name}" design (${collectionLabel}, ${priceLabel.replace('From ', 'from ')}). Can you send me the full design file?`;
+
+const renders = (['render_1', 'render_2', 'render_3', 'render_4'] as const)
+  .map((k) => design.drawings.find((dr) => dr.kind === k) ?? null);
+
+const TECH = [
+  { kind: 'civil',          label: 'Civil Drawing' },
+  { kind: 'supply_water',   label: 'Supply Water' },
+  { kind: 'waste_drainage', label: 'Waste & Drainage' },
+  { kind: 'electrical',     label: 'Electrical' },
+] as const;
+
+const video3d   = youtubeEmbed(design.video_3d_url);
+const videoWork = youtubeEmbed(design.video_work_url);
+
+const fixtureGroups: Array<{ category: string; items: DesignFixture[] }> = [];
+for (const f of design.fixtures) {
+  const g = fixtureGroups.find((x) => x.category === f.category);
+  if (g) g.items.push(f);
+  else fixtureGroups.push({ category: f.category, items: [f] });
+}
+
+const related = design.id ? (await getProjects({ designId: design.id })).slice(0, 3) : [];
+
+const productSchema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: `${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design`,
+  description: design.tagline ?? design.description ?? '',
+  ...(design.cover_image_url ? { image: cloudinary(design.cover_image_url, 1200) } : {}),
+  brand: { '@type': 'Brand', name: 'LUXEhome' },
+  offers: {
+    '@type': 'Offer',
+    price: design.starting_price_lkr,
+    priceCurrency: 'LKR',
+    availability: 'https://schema.org/InStock',
+    url: new URL(`/designs/${design.slug}`, Astro.site ?? 'https://luxehome.lk').href,
+  },
+});
+---
+
+<LuxeLayout
+  title={`${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design | ${priceLabel} | LUXEhome`}
+  description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Complete fixture list, technical drawings, timeline and FAQ — the full design file on request.`}
+  ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
+>
+  <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={productSchema}></script>
+  </Fragment>
+
+  <!-- Hero -->
+  <section class="df-hero">
+    <div class="df-hero-text">
+      <p class="lx-eyebrow lxr">{collectionLabel} Collection · {design.space?.name}</p>
+      <h1 class="lxr">{design.name}</h1>
+      {design.tagline && <p class="df-tagline lxr">{design.tagline}</p>}
+      <div class="df-meta lxr">
+        <div class="df-price">{priceLabel}</div>
+        <div class="df-size">{design.min_sqm ? `Requires min. ${design.min_sqm} m²` : 'Fits any size'}</div>
+      </div>
+      {design.description && <p class="df-desc lxr">{design.description}</p>}
+      <div class="df-cta lxr">
+        <a href={waLink(waMessage)} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">Get This Design's Full File</a>
+      </div>
+    </div>
+    <div class="df-hero-img lxr">
+      {design.cover_image_url
+        ? <img src={cloudinary(design.cover_image_url, 1000)} alt={`${design.name} design`} width="1000" height="750" fetchpriority="high" />
+        : <div class="df-placeholder df-placeholder--hero"><strong>LUXE</strong><em>home</em><span>{design.name}</span></div>}
+    </div>
+  </section>
+
+  <!-- 3D renders -->
+  <section class="df-section">
+    <h2 class="lxr">The design, rendered</h2>
+    <div class="df-render-grid">
+      {renders.map((r, i) => (
+        <div class="df-render lxr">
+          {r
+            ? <img src={cloudinary(r.image_url, 800)} alt={`${design.name} — 3D render ${i + 1}`} loading="lazy" width="800" height="600" />
+            : <div class="df-placeholder"><span>Render {i + 1}</span><small>Coming soon</small></div>}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Videos -->
+  <section class="df-section">
+    <h2 class="lxr">See it move</h2>
+    <div class="df-video-grid">
+      <div class="df-video lxr">
+        <p class="lx-eyebrow">3D Walkthrough</p>
+        {video3d
+          ? <iframe src={video3d} title={`${design.name} 3D walkthrough`} loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+          : <div class="df-placeholder df-placeholder--video"><span>3D Walkthrough</span><small>Coming soon</small></div>}
+      </div>
+      <div class="df-video lxr">
+        <p class="lx-eyebrow">This Design, Built</p>
+        {videoWork
+          ? <iframe src={videoWork} title={`${design.name} recent work`} loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+          : <div class="df-placeholder df-placeholder--video"><span>Recent Work</span><small>Coming soon</small></div>}
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical drawings -->
+  <section class="df-section">
+    <h2 class="lxr">Technical drawings</h2>
+    <p class="df-note lxr">Samples — customised for your bathroom in your design file</p>
+    <div class="df-tech-grid">
+      {TECH.map((t) => {
+        const dr = design.drawings.find((d) => d.kind === t.kind);
+        return (
+          <figure class="df-tech lxr">
+            <div class="df-tech-img">
+              {dr
+                ? <img src={cloudinary(dr.image_url, 700)} alt={`${design.name} — ${t.label} sample`} loading="lazy" width="700" height="500" />
+                : <div class="df-placeholder"><span>{t.label}</span><small>Coming soon</small></div>}
+              <div class="df-watermark" aria-hidden="true"></div>
+            </div>
+            <figcaption>{t.label}</figcaption>
+          </figure>
+        );
+      })}
+    </div>
+  </section>
+
+  <!-- Fixtures -->
+  {fixtureGroups.length > 0 && (
+    <section class="df-section">
+      <h2 class="lxr">Every fixture, named</h2>
+      {fixtureGroups.map((g) => (
+        <div class="df-fix-group">
+          <h3 class="df-fix-cat lxr">{g.category}</h3>
+          <div class="df-fix-grid">
+            {g.items.map((f) => (
+              <div class="df-fix-card lxr">
+                <div class="df-fix-img">
+                  {f.image_url
+                    ? <img src={cloudinary(f.image_url, 400)} alt={f.name} loading="lazy" width="400" height="300" />
+                    : <div class="df-placeholder df-placeholder--sm"><span>{f.category}</span></div>}
+                </div>
+                <div class="df-fix-body">
+                  {f.brand && <p class="lx-eyebrow">{f.brand}</p>}
+                  <div class="df-fix-name">{f.name}</div>
+                  {f.spec && <div class="df-fix-spec">{f.spec}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  )}
+
+  <!-- Materials -->
+  {design.materials.length > 0 && (
+    <section class="df-section">
+      <h2 class="lxr">Construction materials</h2>
+      <div class="df-chips lxr">
+        {design.materials.map((m) => (
+          <span class="df-chip"><strong>{m.brand}</strong>{m.item ? ` · ${m.item}` : ''}</span>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Workflow + timeline -->
+  {(design.workflow_text || design.timeline.length > 0) && (
+    <section class="df-section">
+      <h2 class="lxr">How it gets built</h2>
+      {design.workflow_text && <p class="df-workflow lxr">{design.workflow_text}</p>}
+      {design.timeline.length > 0 && (
+        <ol class="df-timeline">
+          {design.timeline.map((t) => (
+            <li class="lxr">
+              <span class="df-tl-dot" aria-hidden="true"></span>
+              <div class="df-tl-week">{t.week_label}</div>
+              <div class="df-tl-title">{t.title}</div>
+              {t.description && <p class="df-tl-desc">{t.description}</p>}
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  )}
+
+  <!-- FAQ -->
+  {design.faq.length > 0 && (
+    <section class="df-section">
+      <h2 class="lxr">Questions about {design.name}</h2>
+      <div class="df-faq lxr">
+        {design.faq.map((f) => (
+          <details class="df-faq-item">
+            <summary>{f.question}</summary>
+            <p>{f.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Related projects -->
+  {related.length > 0 && (
+    <section class="df-section">
+      <h2 class="lxr">This design, built</h2>
+      <div class="df-related lxr">
+        {related.map((p) => (
+          <a href={`/projects/${p.slug}`} class="df-rel-card">
+            {p.after_image_url && <img src={cloudinary(p.after_image_url, 600)} alt={p.title} loading="lazy" width="600" height="420" />}
+            <div class="df-rel-body">
+              <div class="df-rel-title">{p.title}</div>
+              {p.location && <div class="df-rel-loc">{p.location}</div>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Closing CTA -->
+  <section class="df-closing lxr">
+    <h2>The {design.name}, in your home.</h2>
+    <p>Get the complete design file — renders, drawings, fixture list, and a fixed quotation for your exact space.</p>
+    <a href={waLink(waMessage)} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">Get This Design's Full File</a>
+  </section>
+</LuxeLayout>
+
+<style>
+  .df-hero {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.2rem, 5vw, 4rem) 2rem;
+  }
+  .df-hero h1 { font-size: clamp(2.8rem, 7vw, 4.6rem); margin: .4rem 0 .2rem; }
+  .df-tagline { font-family: var(--lx-serif); font-style: italic; font-size: 1.25rem; color: var(--sage-deep); margin-bottom: 1.2rem; }
+  .df-meta { display: flex; gap: 1.4rem; align-items: baseline; margin-bottom: 1rem; flex-wrap: wrap; }
+  .df-price { font-family: var(--lx-serif); font-size: 1.7rem; font-weight: 700; }
+  .df-size {
+    font-size: .72rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+    background: var(--sage-mist); color: var(--sage-deep);
+    padding: .35rem .8rem; border-radius: 999px;
+  }
+  .df-desc { max-width: 52ch; color: color-mix(in srgb, var(--ink) 78%, transparent); margin-bottom: 1.4rem; }
+
+  .df-hero-img { border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--sage-mist); }
+  .df-hero-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .df-section { max-width: 1100px; margin: 0 auto; padding: 2.2rem clamp(1.2rem, 5vw, 4rem); }
+  .df-section h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); margin-bottom: 1.2rem; }
+  .df-note { font-size: .85rem; font-style: italic; color: color-mix(in srgb, var(--ink) 60%, transparent); margin: -0.6rem 0 1.2rem; }
+
+  /* Placeholders — branded, never broken */
+  .df-placeholder {
+    width: 100%; height: 100%;
+    min-height: 180px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: .25rem;
+    background: repeating-linear-gradient(-45deg, var(--sage-mist), var(--sage-mist) 14px, var(--cream-deep) 14px, var(--cream-deep) 28px);
+    color: var(--sage-deep);
+  }
+  .df-placeholder span { font-family: var(--lx-serif); font-size: 1.15rem; font-style: italic; }
+  .df-placeholder small { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+  .df-placeholder--hero span { font-size: 2rem; }
+  .df-placeholder--sm { min-height: 120px; }
+  .df-placeholder--sm span { font-size: .9rem; }
+
+  .df-render-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+  .df-render { border-radius: 6px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--sage-mist); }
+  .df-render img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .df-video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+  .df-video iframe, .df-placeholder--video { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 6px; }
+  .df-video .lx-eyebrow { margin-bottom: .5rem; }
+
+  /* Technical drawings + SAMPLE watermark */
+  .df-tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+  .df-tech { margin: 0; }
+  .df-tech-img { position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 7 / 5; background: #fff; border: 1px solid var(--cream-deep); }
+  .df-tech-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .df-tech figcaption { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--sage-deep); margin-top: .5rem; }
+
+  .df-watermark {
+    position: absolute;
+    inset: -50%;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      -30deg,
+      transparent 0 90px,
+      rgba(43,50,42,.001) 90px 91px
+    );
+  }
+  .df-watermark::before {
+    content: 'SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome ';
+    position: absolute;
+    inset: 0;
+    display: block;
+    transform: rotate(-30deg);
+    font-family: var(--lx-sans);
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: .3em;
+    line-height: 3.2;
+    color: rgba(43,50,42,.13);
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+  }
+
+  /* Fixtures */
+  .df-fix-cat { font-size: 1.15rem; color: var(--sage-deep); margin: 1.6rem 0 .8rem; }
+  .df-fix-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .df-fix-card { background: #fff; border: 1px solid var(--cream-deep); border-radius: 6px; overflow: hidden; }
+  .df-fix-img { aspect-ratio: 4 / 3; background: var(--sage-mist); }
+  .df-fix-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .df-fix-body { padding: .8rem .9rem 1rem; }
+  .df-fix-name { font-weight: 500; font-size: .95rem; margin-top: .15rem; }
+  .df-fix-spec { font-size: .78rem; color: color-mix(in srgb, var(--ink) 62%, transparent); margin-top: .2rem; }
+
+  /* Materials chips */
+  .df-chips { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .df-chip {
+    font-size: .82rem;
+    background: #fff;
+    border: 1px solid var(--cream-deep);
+    border-radius: 999px;
+    padding: .45rem 1rem;
+  }
+  .df-chip strong { font-weight: 500; color: var(--sage-deep); }
+
+  /* Timeline */
+  .df-workflow { max-width: 60ch; margin-bottom: 1.6rem; color: color-mix(in srgb, var(--ink) 80%, transparent); }
+  .df-timeline { list-style: none; position: relative; padding-left: 1.6rem; }
+  .df-timeline::before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1px; background: var(--cream-deep); }
+  .df-timeline li { position: relative; padding: 0 0 1.4rem; }
+  .df-tl-dot { position: absolute; left: -1.6rem; top: .45rem; width: 13px; height: 13px; border-radius: 50%; background: var(--gold); border: 3px solid var(--cream); }
+  .df-tl-week { font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+  .df-tl-title { font-family: var(--lx-serif); font-size: 1.2rem; font-weight: 600; }
+  .df-tl-desc { font-size: .88rem; color: color-mix(in srgb, var(--ink) 72%, transparent); max-width: 56ch; }
+
+  /* FAQ */
+  .df-faq-item { border-bottom: 1px solid var(--cream-deep); }
+  .df-faq-item summary {
+    font-family: var(--lx-serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 1rem 0;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    padding-right: 2rem;
+  }
+  .df-faq-item summary::after { content: '+'; position: absolute; right: .2rem; top: .85rem; font-size: 1.3rem; color: var(--gold); transition: transform .2s; }
+  .df-faq-item[open] summary::after { transform: rotate(45deg); }
+  .df-faq-item p { padding: 0 0 1.1rem; max-width: 62ch; color: color-mix(in srgb, var(--ink) 78%, transparent); font-size: .92rem; }
+
+  /* Related */
+  .df-related { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+  .df-rel-card { display: block; border-radius: 6px; overflow: hidden; background: #fff; border: 1px solid var(--cream-deep); text-decoration: none; color: var(--ink); }
+  .df-rel-card img { width: 100%; aspect-ratio: 10 / 7; object-fit: cover; display: block; }
+  .df-rel-body { padding: .8rem 1rem 1rem; }
+  .df-rel-title { font-family: var(--lx-serif); font-size: 1.1rem; font-weight: 600; }
+  .df-rel-loc { font-size: .78rem; color: color-mix(in srgb, var(--ink) 60%, transparent); }
+
+  /* Closing */
+  .df-closing {
+    text-align: center;
+    background: var(--sage-mist);
+    margin: 3rem auto 0;
+    padding: 3.5rem clamp(1.2rem, 5vw, 4rem);
+  }
+  .df-closing h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); margin-bottom: .6rem; }
+  .df-closing p { max-width: 48ch; margin: 0 auto 1.5rem; color: color-mix(in srgb, var(--ink) 75%, transparent); }
+
+  @media (max-width: 860px) {
+    .df-hero { grid-template-columns: 1fr; }
+    .df-hero-img { order: -1; }
+    .df-render-grid, .df-video-grid, .df-tech-grid { grid-template-columns: 1fr; }
+    .df-fix-grid { grid-template-columns: repeat(2, 1fr); }
+    .df-related { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .df-fix-grid { grid-template-columns: 1fr; }
+    .df-cta .lx-btn-wa { width: 100%; }
+  }
+</style>

@@ -1,0 +1,343 @@
+---
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+import { getDesigns, getProjects } from '../lib/luxe';
+import { formatLKRM, cloudinary, waLink, BRAND_STRIP, PLANNER, WHATSAPP_NUMBER } from '../lib/luxe-config';
+
+const featured = (await getDesigns({ featured: true })).slice(0, 3);
+const heroProject = (await getProjects({ featured: true })).find((p) => p.before_image_url && p.after_image_url) ?? null;
+
+const DELIVERABLES = [
+  ['4× 3D renders', 'See your finished space before a single tile is bought.'],
+  ['Civil drawing', 'Structural layout, dimensions, and levels.'],
+  ['Supply water drawing', 'Every line, valve, and connection point.'],
+  ['Waste & drainage drawing', 'Falls, traps, and outlets — engineered, not improvised.'],
+  ['Electrical drawing', 'Points, circuits, and switch positions.'],
+  ['Complete fixture list', 'Every product named with brand and spec.'],
+  ['Fixed quotation', 'One price for your exact space. It does not change.'],
+  ['Week-by-week plan', 'What happens, when, and what you approve at each step.'],
+];
+
+const FAQ = [
+  ['Is the price really fixed?', 'Yes. Once we measure your space and you approve the design file, the quotation is fixed. The only changes are ones you request.'],
+  ['I live overseas — can you manage everything?', 'Most of our clients are abroad. Design approval happens on a video call, you get weekly WhatsApp photo and video updates, and you approve every milestone before payment.'],
+  ['How long does a bathroom take?', 'Typically 3–5 weeks depending on the design and site condition. Your design file includes a week-by-week plan.'],
+  ['What warranty do I get?', 'One year on workmanship, in writing, on every project.'],
+];
+---
+
+<LuxeLayout
+  bare={true}
+  title="Start Your Project — LUXEhome | Fixed-Price Designs, Built Without Stress"
+  description="Choose a named LUXEhome design with a complete file and fixed price. Message us on WhatsApp to start — Sri Lanka and overseas clients welcome."
+>
+  <!-- Minimal header -->
+  <header class="st-hdr">
+    <span class="lx-wordmark"><strong>LUXE</strong><em>home</em></span>
+    <a href={waLink("Hi LUXEhome! I'd like to start a project.")} class="st-hdr-wa" target="_blank" rel="noopener noreferrer">WhatsApp Us</a>
+  </header>
+
+  <!-- Hero -->
+  <section class="st-hero">
+    <p class="lx-eyebrow lxr">Fixed price · Verified teams · 1-year warranty</p>
+    <h1 class="lxr">Your dream bathroom,<br /><em>built without the stress.</em></h1>
+    <p class="st-sub lxr">
+      Choose a named design with a complete file — renders, drawings, every fixture, and one
+      fixed price. Then watch it built with weekly WhatsApp updates.
+    </p>
+
+    {heroProject ? (
+      <div class="st-slider lxr" id="st-slider" style="--pos: 50%">
+        <img class="st-after" src={cloudinary(heroProject.after_image_url!, 1000)} alt="After" width="1000" height="670" />
+        <div class="st-before-clip"><img src={cloudinary(heroProject.before_image_url!, 1000)} alt="Before" width="1000" height="670" /></div>
+        <div class="st-handle" aria-hidden="true"><span></span></div>
+        <span class="st-lb st-lb--b">Before</span>
+        <span class="st-lb st-lb--a">After</span>
+      </div>
+    ) : (
+      <div class="st-hero-img lxr">
+        <img src="/hero-bathroom.webp" srcset="/hero-bathroom-mobile.webp 860w, /hero-bathroom.webp 1717w" sizes="(max-width: 860px) 100vw, 860px" alt="LUXEhome bathroom" width="1717" height="916" fetchpriority="high" />
+      </div>
+    )}
+  </section>
+
+  <!-- Featured designs -->
+  {featured.length > 0 && (
+    <section class="st-sec">
+      <h2 class="lxr">Three designs to start with</h2>
+      <div class="st-designs">
+        {featured.map((d) => (
+          <a href={`/designs/${d.slug}`} class="st-design lxr">
+            <div class="st-design-img">
+              {d.cover_image_url
+                ? <img src={cloudinary(d.cover_image_url, 600)} alt={d.name} loading="lazy" width="600" height="430" />
+                : <div class="st-ph"><em>{d.name}</em></div>}
+            </div>
+            <div class="st-design-body">
+              <p class="lx-eyebrow">{d.collection}</p>
+              <h3>{d.name}</h3>
+              <div class="st-design-price">{formatLKRM(d.starting_price_lkr)}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Design file explainer -->
+  <section class="st-sec st-file">
+    <h2 class="lxr">What you get before work begins</h2>
+    <p class="st-file-sub lxr">Every LUXEhome design comes as a complete file — eight deliverables, no guesswork:</p>
+    <ol class="st-deliv">
+      {DELIVERABLES.map(([t, d], i) => (
+        <li class="lxr">
+          <span class="st-deliv-n">{String(i + 1).padStart(2, '0')}</span>
+          <div><strong>{t}</strong><p>{d}</p></div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- Whole-house planner -->
+  <section class="st-sec">
+    <h2 class="lxr">Planning more than one bathroom?</h2>
+    <div class="st-planner lxr">
+      <div class="st-plan-row">
+        <label>Bathrooms</label>
+        <div class="st-count">
+          <button type="button" id="pl-minus">−</button>
+          <span id="pl-count">2</span>
+          <button type="button" id="pl-plus">+</button>
+        </div>
+      </div>
+      <div class="st-plan-row">
+        <label>Collection</label>
+        <div class="st-collections" id="pl-collections">
+          {Object.entries(PLANNER.collections).map(([key, c], i) => (
+            <button type="button" data-col={key} data-base={c.basePrice} class={i === 0 ? 'on' : ''}>{c.label}</button>
+          ))}
+        </div>
+      </div>
+      <div class="st-plan-row">
+        <label>Typical size</label>
+        <div class="st-collections" id="pl-sizes">
+          {Object.entries(PLANNER.sizeMultipliers).map(([key, s], i) => (
+            <button type="button" data-size={key} data-factor={s.factor} class={i === 1 ? 'on' : ''}>{s.label}</button>
+          ))}
+        </div>
+      </div>
+      <div class="st-plan-total">
+        <span>Estimated from</span>
+        <strong id="pl-total"></strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- Brands -->
+  <section class="st-sec">
+    <h2 class="lxr">Built with brands you know</h2>
+    <div class="st-brands lxr">{BRAND_STRIP.map((b) => <span>{b}</span>)}</div>
+  </section>
+
+  <!-- Lead form -->
+  <section class="st-sec st-lead">
+    <h2 class="lxr">Start on WhatsApp</h2>
+    <p class="st-lead-sub lxr">Tell us a little and we will reply with designs that fit — usually within the hour.</p>
+    <form id="lead-form" class="st-form lxr">
+      <input type="text" id="lf-name" placeholder="Your name" required />
+      <input type="text" id="lf-location" placeholder="Property location (e.g. Kandy)" required />
+      <select id="lf-project">
+        <option value="a bathroom">Bathroom</option>
+        <option value="a kitchen">Kitchen</option>
+        <option value="a staircase">Staircase</option>
+        <option value="floors">Floors</option>
+        <option value="a whole house">Whole house</option>
+      </select>
+      <select id="lf-where">
+        <option value="in Sri Lanka">I live in Sri Lanka</option>
+        <option value="overseas">I live overseas</option>
+      </select>
+      <button type="submit" class="lx-btn-wa">Continue on WhatsApp →</button>
+    </form>
+  </section>
+
+  <!-- FAQ -->
+  <section class="st-sec">
+    <h2 class="lxr">Common questions</h2>
+    {FAQ.map(([q, a]) => (
+      <details class="st-faq lxr"><summary>{q}</summary><p>{a}</p></details>
+    ))}
+  </section>
+
+  <footer class="st-footer">
+    <span class="lx-wordmark"><strong>LUXE</strong><em>home</em></span>
+    <p>Custom design &amp; build · Sri Lanka · 077 450 3744</p>
+  </footer>
+
+  <!-- Sticky mobile WhatsApp bar -->
+  <div class="st-sticky">
+    <a href={waLink("Hi LUXEhome! I'd like to start a project.")} target="_blank" rel="noopener noreferrer">WhatsApp Us — replies within the hour</a>
+  </div>
+</LuxeLayout>
+
+<script is:inline define:vars={{ WHATSAPP_NUMBER }}>
+(function () {
+  // Before/after slider
+  var slider = document.getElementById('st-slider');
+  if (slider) {
+    var dragging = false;
+    function setPos(x) {
+      var r = slider.getBoundingClientRect();
+      slider.style.setProperty('--pos', Math.max(2, Math.min(98, ((x - r.left) / r.width) * 100)) + '%');
+    }
+    slider.addEventListener('pointerdown', function (e) { dragging = true; slider.setPointerCapture(e.pointerId); setPos(e.clientX); });
+    slider.addEventListener('pointermove', function (e) { if (dragging) setPos(e.clientX); });
+    slider.addEventListener('pointerup', function () { dragging = false; });
+    slider.addEventListener('pointercancel', function () { dragging = false; });
+  }
+
+  // Whole-house planner
+  var count = 2;
+  function fmtM(n) {
+    var m = n / 1e6;
+    return 'LKR ' + (m >= 10 ? m.toFixed(0) : (Math.round(m * 100) / 100)) + 'M';
+  }
+  function planTotal() {
+    var col = document.querySelector('#pl-collections .on');
+    var size = document.querySelector('#pl-sizes .on');
+    if (!col || !size) return;
+    var total = count * parseFloat(col.dataset.base) * parseFloat(size.dataset.factor);
+    document.getElementById('pl-count').textContent = count;
+    document.getElementById('pl-total').textContent = fmtM(total);
+  }
+  document.getElementById('pl-minus')?.addEventListener('click', function () { count = Math.max(1, count - 1); planTotal(); });
+  document.getElementById('pl-plus')?.addEventListener('click', function () { count = Math.min(10, count + 1); planTotal(); });
+  ['pl-collections', 'pl-sizes'].forEach(function (id) {
+    var wrap = document.getElementById(id);
+    wrap?.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        wrap.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+        planTotal();
+      });
+    });
+  });
+  planTotal();
+
+  // Lead form → WhatsApp with prefilled details
+  document.getElementById('lead-form')?.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('lf-name').value.trim();
+    var loc = document.getElementById('lf-location').value.trim();
+    var proj = document.getElementById('lf-project').value;
+    var where = document.getElementById('lf-where').value;
+    var msg = 'Hi LUXEhome! I\'m ' + name + ', living ' + where +
+      '. I\'m planning ' + proj + ' for my property in ' + loc +
+      '. Can you send me designs that would fit?';
+    window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+  });
+})();
+</script>
+
+<style>
+  .st-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem clamp(1.2rem, 5vw, 3rem);
+    border-bottom: 1px solid var(--cream-deep);
+  }
+  .st-hdr-wa {
+    font-size: .78rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--cream); background: var(--sage-deep);
+    padding: .55rem 1.2rem; border-radius: 2px; text-decoration: none;
+  }
+
+  .st-hero { max-width: 860px; margin: 0 auto; padding: clamp(2.5rem, 7vw, 4.5rem) clamp(1.2rem, 5vw, 3rem) 1rem; text-align: center; }
+  .st-hero h1 { font-size: clamp(2.4rem, 7vw, 4rem); margin: .6rem 0 1rem; }
+  .st-hero h1 em { color: var(--sage-deep); }
+  .st-sub { max-width: 52ch; margin: 0 auto 1.8rem; color: color-mix(in srgb, var(--ink) 78%, transparent); }
+
+  .st-slider {
+    position: relative; aspect-ratio: 3 / 2; border-radius: 8px; overflow: hidden;
+    touch-action: none; cursor: ew-resize; background: var(--sage-mist); user-select: none;
+  }
+  .st-slider img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  .st-before-clip { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+  .st-handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; background: var(--cream); transform: translateX(-1px); pointer-events: none; }
+  .st-handle span { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 40px; height: 40px; border-radius: 50%; background: var(--cream); box-shadow: 0 2px 10px rgba(43,50,42,.3); }
+  .st-lb { position: absolute; bottom: .8rem; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; background: color-mix(in srgb, var(--ink) 78%, transparent); color: var(--cream); padding: .25rem .65rem; border-radius: 999px; pointer-events: none; }
+  .st-lb--b { left: .8rem; } .st-lb--a { right: .8rem; }
+  .st-hero-img img { width: 100%; border-radius: 8px; }
+
+  .st-sec { max-width: 860px; margin: 0 auto; padding: 2.4rem clamp(1.2rem, 5vw, 3rem); }
+  .st-sec h2 { font-size: clamp(1.7rem, 4.5vw, 2.3rem); margin-bottom: 1.2rem; }
+
+  .st-designs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .st-design { background: #fff; border: 1px solid var(--cream-deep); border-radius: 6px; overflow: hidden; text-decoration: none; color: var(--ink); }
+  .st-design-img { aspect-ratio: 7 / 5; background: var(--sage-mist); }
+  .st-design-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .st-ph { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--sage-deep); }
+  .st-ph em { font-family: var(--lx-serif); font-size: 1.3rem; }
+  .st-design-body { padding: .8rem 1rem 1rem; }
+  .st-design-body .lx-eyebrow { text-transform: capitalize; }
+  .st-design-body h3 { font-size: 1.35rem; }
+  .st-design-price { font-family: var(--lx-serif); font-weight: 600; margin-top: .2rem; }
+
+  .st-file { background: var(--sage-mist); border-radius: 10px; }
+  .st-file-sub { margin: -0.6rem 0 1.4rem; color: color-mix(in srgb, var(--ink) 72%, transparent); }
+  .st-deliv { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .st-deliv li { display: flex; gap: .8rem; }
+  .st-deliv-n { font-family: var(--lx-serif); font-size: 1.4rem; color: var(--gold); font-weight: 700; }
+  .st-deliv strong { font-weight: 500; }
+  .st-deliv p { font-size: .84rem; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+
+  .st-planner { background: #fff; border: 1px solid var(--cream-deep); border-radius: 10px; padding: 1.4rem; }
+  .st-plan-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .st-plan-row label { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--sage-deep); min-width: 90px; }
+  .st-count { display: flex; align-items: center; gap: .8rem; }
+  .st-count button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--cream-deep); background: var(--cream); font-size: 1.1rem; cursor: pointer; }
+  .st-count span { font-family: var(--lx-serif); font-size: 1.3rem; font-weight: 700; min-width: 1.4ch; text-align: center; }
+  .st-collections { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .st-collections button {
+    font-family: var(--lx-sans); font-size: .78rem; padding: .5rem 1rem;
+    border: 1px solid var(--cream-deep); border-radius: 999px; background: var(--cream); cursor: pointer;
+  }
+  .st-collections button.on { background: var(--sage-deep); border-color: var(--sage-deep); color: var(--cream); }
+  .st-plan-total { display: flex; align-items: baseline; gap: .8rem; border-top: 1px solid var(--cream-deep); padding-top: 1rem; }
+  .st-plan-total span { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: color-mix(in srgb, var(--ink) 60%, transparent); }
+  .st-plan-total strong { font-family: var(--lx-serif); font-size: 1.7rem; }
+
+  .st-brands { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .st-brands span { font-size: .8rem; background: #fff; border: 1px solid var(--cream-deep); border-radius: 999px; padding: .45rem 1rem; }
+
+  .st-lead { text-align: center; }
+  .st-lead-sub { max-width: 46ch; margin: -0.6rem auto 1.4rem; color: color-mix(in srgb, var(--ink) 72%, transparent); }
+  .st-form { display: grid; gap: .7rem; max-width: 460px; margin: 0 auto; }
+  .st-form input, .st-form select {
+    font-family: var(--lx-sans); font-size: .95rem; padding: .85rem 1rem;
+    border: 1px solid var(--cream-deep); border-radius: 6px; background: #fff; color: var(--ink);
+  }
+
+  .st-faq { border-bottom: 1px solid var(--cream-deep); }
+  .st-faq summary { font-family: var(--lx-serif); font-size: 1.1rem; font-weight: 600; padding: .9rem 0; cursor: pointer; list-style: none; }
+  .st-faq p { padding: 0 0 1rem; max-width: 60ch; font-size: .9rem; color: color-mix(in srgb, var(--ink) 78%, transparent); }
+
+  .st-footer { text-align: center; padding: 2.5rem 1rem 7rem; color: color-mix(in srgb, var(--ink) 60%, transparent); font-size: .85rem; }
+
+  .st-sticky {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    padding: .7rem 1rem calc(.7rem + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--cream) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--cream-deep);
+  }
+  .st-sticky a {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--sage-deep); color: var(--cream);
+    font-size: .85rem; font-weight: 500; letter-spacing: .05em;
+    min-height: 50px; border-radius: 6px; text-decoration: none;
+  }
+
+  @media (min-width: 861px) { .st-sticky { display: none; } .st-footer { padding-bottom: 2.5rem; } }
+  @media (max-width: 720px) {
+    .st-designs { grid-template-columns: 1fr; }
+    .st-deliv { grid-template-columns: 1fr; }
+  }
+</style>
