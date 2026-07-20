@@ -6,8 +6,9 @@ const { module }=Astro.props as {module:CmsModule};
 <div id="cms-modal"></div><div id="toast"></div>
 <script>
   import {createClient} from '@supabase/supabase-js';
+  import {LUXE_SUPABASE_KEY as key,LUXE_SUPABASE_URL as url} from '../../lib/luxe-supabase';
   const root=document.getElementById('manager'),modal=document.getElementById('cms-modal'),cfg=JSON.parse(root.dataset.module);
-  const url=import.meta.env.PUBLIC_SUPABASE_URL,key=import.meta.env.PUBLIC_SUPABASE_ANON_KEY;let sb,rows=[],lookups={spaces:[],designs:[]};
+  let sb,rows=[],lookups={spaces:[],designs:[]};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const toast=m=>{const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)};
   const slugify=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
