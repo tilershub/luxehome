@@ -11,6 +11,8 @@ const catalogueFallbacks = CATALOGUE_DESIGNS.map((item, index) => ({
   id: `catalogue-${item.space}-${item.slug}`, slug: item.slug, name: item.name,
   space_id: item.space, collection: item.collection, tagline: item.tagline,
   description: null, starting_price_lkr: item.startingPrice ?? 0, min_sqm: item.minSqm,
+  new_starting_price_lkr: item.startingPrice ?? null,
+  renovation_starting_price_lkr: item.renovationStartingPrice ?? null,
   cover_image_url: null, video_3d_url: null, video_work_url: null, workflow_text: null,
   highlights: [], featured: false, sort_order: index,
   space: spaces.find((space) => space.slug === item.space),

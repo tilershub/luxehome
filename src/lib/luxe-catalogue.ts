@@ -7,14 +7,16 @@ export interface CatalogueDesign {
   collection: Collection;
   tagline: string;
   startingPrice: number | null;
+  renovationStartingPrice?: number | null;
   minSqm: number | null;
 }
 
 const design = (
   space: CatalogueDesign['space'], collection: Collection, name: string,
   tagline: string, startingPrice: number | null = null, minSqm: number | null = null,
+  renovationStartingPrice: number | null = null,
 ): CatalogueDesign => ({
-  space, collection, name, tagline, startingPrice, minSqm,
+  space, collection, name, tagline, startingPrice, minSqm, renovationStartingPrice,
   slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
 });
 
@@ -25,7 +27,7 @@ export const CATALOGUE_DESIGNS: CatalogueDesign[] = [
   design('bathrooms', 'premium', 'Nelum', 'Calm, considered and quietly luxurious.', 1_600_000, 4),
   design('bathrooms', 'premium', 'Sandun', 'Natural warmth with a tailored finish.', 1_850_000, 4.5),
   design('bathrooms', 'premium', 'Orchid', 'Refined contrast with hotel-like comfort.', 2_100_000, 5),
-  design('bathrooms', 'signature', 'Manel', 'Sculptural, serene and unmistakably special.', 2_500_000, 6),
+  design('bathrooms', 'signature', 'Manel', 'Sculptural, serene and unmistakably special.', 2_060_000, 5, 2_175_000),
   design('bathrooms', 'signature', 'Binara', 'A generous retreat built around ritual.', 3_000_000, 7),
   design('bathrooms', 'signature', 'Idda', 'Our most complete expression of private luxury.', 3_600_000, 8),
 

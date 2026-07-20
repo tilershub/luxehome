@@ -18,7 +18,10 @@ const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
   collection: catalogueDesign.collection, tagline: catalogueDesign.tagline,
   description: 'A complete LUXEhome design file, customised for your room and documented before construction begins.',
   starting_price_lkr: catalogueDesign.startingPrice ?? 0, min_sqm: catalogueDesign.minSqm,
+  new_starting_price_lkr: catalogueDesign.startingPrice ?? null,
+  renovation_starting_price_lkr: catalogueDesign.renovationStartingPrice ?? null,
   cover_image_url: null, video_3d_url: null, video_work_url: null,
+  inspiration_image_url: null,
   workflow_text: 'We inspect, customise and approve the complete design file before procurement and construction begin.',
   highlights: [], featured: false, sort_order: 0,
   space: { id: catalogueDesign.space, slug: catalogueDesign.space, name: SPACE_PRESENTATION[catalogueDesign.space].name, sinhala_name: null, sort_order: 0 },
@@ -33,8 +36,36 @@ const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
 } : null);
 if (!design) return Astro.redirect('/designs');
 
+// Repository-backed Manel samples keep the canonical page complete even before
+// the same assets are uploaded through the CMS. CMS values always win.
+if (design.slug === 'manel') {
+  design.starting_price_lkr = 2_060_000;
+  design.new_starting_price_lkr = 2_060_000;
+  design.renovation_starting_price_lkr = 2_175_000;
+  design.min_sqm = 5;
+  design.cover_image_url ||= '/images/designs/manel/cover.jpeg';
+  design.inspiration_image_url ||= '/images/designs/manel/manel-flower.jpeg';
+  const samples = {
+    render_1: '/images/designs/manel/render-1.jpeg',
+    render_2: '/images/designs/manel/render-2.jpeg',
+    render_3: '/images/designs/manel/render-3.jpeg',
+    render_4: '/images/designs/manel/render-4.jpeg',
+    civil: '/images/designs/manel/sample-civil.svg',
+    supply_water: '/images/designs/manel/sample-supply-water.svg',
+    waste_drainage: '/images/designs/manel/sample-waste-drainage.svg',
+    electrical: '/images/designs/manel/sample-electrical.svg',
+  } as const;
+  for (const [kind, image_url] of Object.entries(samples)) {
+    if (!design.drawings.some((drawing) => drawing.kind === kind)) {
+      design.drawings.push({ kind: kind as keyof typeof samples, image_url });
+    }
+  }
+}
+
 const collectionLabel = design.collection.charAt(0).toUpperCase() + design.collection.slice(1);
 const priceLabel = design.starting_price_lkr > 0 ? formatLKRM(design.starting_price_lkr) : 'Starting price to be confirmed';
+const newPriceLabel = design.new_starting_price_lkr ? formatLKRM(design.new_starting_price_lkr) : null;
+const renovationPriceLabel = design.renovation_starting_price_lkr ? formatLKRM(design.renovation_starting_price_lkr) : null;
 
 const waMessage = `Hi LUXEhome! I'm interested in the "${design.name}" design (${collectionLabel}, ${priceLabel.replace('From ', 'from ')}). Can you send me the full design file?`;
 
@@ -93,7 +124,12 @@ const productSchema = JSON.stringify({
       <h1 class="lxr">{design.name}</h1>
       {design.tagline && <p class="df-tagline lxr">{design.tagline}</p>}
       <div class="df-meta lxr">
-        <div class="df-price">{priceLabel}</div>
+        {newPriceLabel && renovationPriceLabel ? (
+          <div class="df-price-options">
+            <div><span>New bathroom</span><strong>{newPriceLabel}</strong></div>
+            <div><span>Renovation</span><strong>{renovationPriceLabel}</strong></div>
+          </div>
+        ) : <div class="df-price">{priceLabel}</div>}
         <div class="df-size">{design.min_sqm ? `Requires min. ${design.min_sqm} m²` : 'Fits any size'}</div>
       </div>
       {design.description && <p class="df-desc lxr">{design.description}</p>}
@@ -107,6 +143,13 @@ const productSchema = JSON.stringify({
         : <div class="df-placeholder df-placeholder--hero"><strong>LUXE</strong><em>home</em><span>{design.name}</span></div>}
     </div>
   </section>
+
+  {design.inspiration_image_url && (
+    <section class="df-inspiration df-section lxr">
+      <img src={cloudinary(design.inspiration_image_url, 480)} alt={`${design.name} flower — the inspiration behind this design`} loading="lazy" width="480" height="420" />
+      <div><p class="lx-eyebrow">The name behind the design</p><h2>Inspired by the Manel flower.</h2><p>Named after Sri Lanka’s blue water lily, this design translates its deep blue character and quiet symmetry into a composed Signature bathroom.</p></div>
+    </section>
+  )}
 
   <!-- 3D renders -->
   <section class="df-section">
@@ -144,7 +187,7 @@ const productSchema = JSON.stringify({
   <!-- Technical drawings -->
   <section class="df-section">
     <h2 class="lxr">Technical drawings</h2>
-    <p class="df-note lxr">Samples — customised for your bathroom in your design file</p>
+    <p class="df-note lxr">Samples for a 2.5 m × 2 m (5 m²) bathroom — customised for your bathroom in your design file. Illustrative only; not for construction.</p>
     <div class="df-tech-grid">
       {TECH.map((t) => {
         const dr = design.drawings.find((d) => d.kind === t.kind);
@@ -299,6 +342,11 @@ const productSchema = JSON.stringify({
   .df-tagline { font-family: var(--lx-serif); font-style: italic; font-size: 1.25rem; color: var(--sage-deep); margin-bottom: 1.2rem; }
   .df-meta { display: flex; gap: 1.4rem; align-items: baseline; margin-bottom: 1rem; flex-wrap: wrap; }
   .df-price { font-family: var(--lx-serif); font-size: 1.7rem; font-weight: 700; }
+  .df-price-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .65rem; width: min(100%,480px); }
+  .df-price-options>div { padding: .75rem .9rem; border: 1px solid var(--cream-deep); border-radius: 7px; background: #fff; }
+  .df-price-options span,.df-price-options strong { display: block; }
+  .df-price-options span { margin-bottom: .18rem; color: var(--sage-deep); font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .df-price-options strong { font-family: var(--lx-serif); font-size: 1.25rem; }
   .df-size {
     font-size: .72rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
     background: var(--sage-mist); color: var(--sage-deep);
@@ -311,6 +359,10 @@ const productSchema = JSON.stringify({
 
   .df-section { max-width: 1100px; margin: 0 auto; padding: 2.2rem clamp(1.2rem, 5vw, 4rem); }
   .df-section h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); margin-bottom: 1.2rem; }
+  .df-inspiration { display:grid; grid-template-columns:minmax(180px,320px) 1fr; gap:clamp(1.2rem,4vw,3rem); align-items:center; }
+  .df-inspiration img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:50%; }
+  .df-inspiration h2 { margin:.25rem 0 .55rem; }
+  .df-inspiration p:last-child { max-width:58ch; color:color-mix(in srgb,var(--ink) 72%,transparent); }
   .df-note { font-size: .85rem; font-style: italic; color: color-mix(in srgb, var(--ink) 60%, transparent); margin: -0.6rem 0 1.2rem; }
 
   /* Placeholders — branded, never broken */
@@ -466,6 +518,9 @@ const productSchema = JSON.stringify({
     .df-related { grid-template-columns: 1fr; }
   }
   @media (max-width: 480px) {
+    .df-inspiration { grid-template-columns:1fr; text-align:center; }
+    .df-inspiration img { width:min(72vw,280px); margin:0 auto; }
+    .df-price-options { grid-template-columns: 1fr; width: 100%; }
     .df-fixture-intro { display: grid; gap: 1rem; }
     .df-fixture-count { display: flex; align-items: center; gap: .65rem; min-width: 0; width: max-content; text-align: left; padding: .75rem 1rem; }
     .df-fixture-count span { margin: 0; }
