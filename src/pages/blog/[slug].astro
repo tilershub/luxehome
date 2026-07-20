@@ -1,11 +1,26 @@
 ---
-export const prerender = false;
 import { getCollection, render } from 'astro:content';
 import { createServerSupabase } from '../../lib/supabase';
 import { marked } from 'marked';
 import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const mdPosts = await getCollection('blog');
+  const sb = createServerSupabase(import.meta.env as unknown as Record<string, string>);
+  const { data: dbPosts } = sb
+    ? await sb.from('blog_posts').select('slug').eq('status', 'published')
+    : { data: [] };
+  const slugs = new Set([
+    'what-a-fixed-bathroom-quotation-should-include', 'before-the-first-tile',
+    'bathroom-under-4sqm', 'kitchen-storage-first', 'large-format-tile-wall-ready',
+    'what-we-found-avissawella', 'when-to-book-site-inspection',
+    ...mdPosts.map((post) => post.id.replace(/\.mdx?$/, '')),
+    ...(dbPosts ?? []).map((post: { slug: string }) => post.slug),
+  ]);
+  return [...slugs].map((slug) => ({ params: { slug } }));
+}
 
 const { slug } = Astro.params;
 
