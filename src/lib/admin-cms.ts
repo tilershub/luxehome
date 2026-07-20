@@ -1,10 +1,23 @@
-export interface CmsField { key:string; label:string; type?:'text'|'textarea'|'number'|'checkbox'|'date'|'select'|'lines'|'relation'; options?:string[]; required?:boolean; relation?:'spaces'|'designs'; }
+export interface CmsField { key:string; label:string; type?:'text'|'textarea'|'number'|'checkbox'|'date'|'select'|'datalist'|'image'|'lines'|'relation'; options?:string[]; required?:boolean; relation?:'spaces'|'designs'; }
 export interface CmsChild { label:string; table:string; foreignKey:string; titleKey:string; fields:CmsField[]; }
 export interface CmsModule { slug:string; label:string; table:string; titleKey:string; statusKey?:string; fields:CmsField[]; children?:CmsChild[]; }
 
 const designChildren:CmsChild[]=[
   {label:'Drawings & renders',table:'lx_design_drawings',foreignKey:'design_id',titleKey:'kind',fields:[{key:'kind',label:'Slot',type:'select',options:['render_1','render_2','render_3','render_4','civil','supply_water','waste_drainage','electrical']},{key:'image_url',label:'Image URL',required:true}]},
-  {label:'Fixtures',table:'lx_design_fixtures',foreignKey:'design_id',titleKey:'name',fields:[{key:'category',label:'Category',required:true},{key:'name',label:'Name',required:true},{key:'brand',label:'Brand'},{key:'spec',label:'Specification',type:'textarea'},{key:'image_url',label:'Image URL'},{key:'sort_order',label:'Sort order',type:'number'}]},
+  {label:'Fixtures & finishes',table:'lx_design_fixtures',foreignKey:'design_id',titleKey:'name',fields:[
+    {key:'category',label:'Category',type:'datalist',required:true},
+    {key:'name',label:'Fixture / finish name',required:true},
+    {key:'brand',label:'Brand'},
+    {key:'model_code',label:'Model / item code'},
+    {key:'finish',label:'Colour / finish'},
+    {key:'quantity',label:'Quantity',type:'number',required:true},
+    {key:'spec',label:'Specification',type:'textarea'},
+    {key:'notes',label:'Selection notes',type:'textarea'},
+    {key:'image_url',label:'Fixture image',type:'image'},
+    {key:'image_alt',label:'Image description'},
+    {key:'included',label:'Included in starting specification',type:'checkbox'},
+    {key:'sort_order',label:'Display order',type:'number'},
+  ]},
   {label:'Materials',table:'lx_design_materials',foreignKey:'design_id',titleKey:'brand',fields:[{key:'category',label:'Category',required:true},{key:'brand',label:'Brand',required:true},{key:'item',label:'Item'},{key:'sort_order',label:'Sort order',type:'number'}]},
   {label:'Workflow timeline',table:'lx_design_timeline',foreignKey:'design_id',titleKey:'title',fields:[{key:'week_label',label:'Week',required:true},{key:'title',label:'Title',required:true},{key:'description',label:'Description',type:'textarea'},{key:'sort_order',label:'Sort order',type:'number'}]},
   {label:'Questions & answers',table:'lx_design_faq',foreignKey:'design_id',titleKey:'question',fields:[{key:'question',label:'Question',required:true},{key:'answer',label:'Answer',type:'textarea',required:true},{key:'sort_order',label:'Sort order',type:'number'}]},
