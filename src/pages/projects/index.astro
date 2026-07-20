@@ -1,10 +1,16 @@
 ---
 export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
-import { getProjects } from '../../lib/luxe';
+import { getProjects, type LuxeProject } from '../../lib/luxe';
 import { cloudinary, waLink } from '../../lib/luxe-config';
 
-const projects = await getProjects();
+const storedProjects = await getProjects();
+const fallbackProjects = [
+  ['kotte-family-bathroom','Kotte Family Bathroom','Kotte','Nelum','6 weeks'],
+  ['avissawella-ensuite','Avissawella Ensuite','Avissawella','Araliya','5 weeks'],
+  ['matara-bathroom-makeover','Matara Bathroom Makeover','Matara','Manel','7 weeks'],
+].map(([slug,title,location,name,duration],index) => ({ id:'',slug,title,location,project_ref:`LX-STORY-00${index+1}`,area_label:'Family bathroom',design_id:null,duration_label:duration,completed_label:'Project story',story:'A family project documented from the old space through design, construction and final reveal.',before_image_url:null,after_image_url:null,video_url:null,episode_1_url:null,episode_2_url:null,rating:null,review_text:null,review_by:null,featured:index===0,design:{slug:name.toLowerCase(),name,collection:'premium'} })) as LuxeProject[];
+const projects = storedProjects.length ? storedProjects : fallbackProjects;
 ---
 
 <LuxeLayout
@@ -12,8 +18,8 @@ const projects = await getProjects();
   description="Every LUXEhome project published in full — before and after, the week-by-week journey, the problems we found and how we fixed them, and the team that built it."
 >
   <section class="pj-hero">
-    <p class="lx-eyebrow lxr">Project Stories</p>
-    <h1 class="lxr">Built, documented,<br /><em>nothing hidden.</em></h1>
+    <p class="lx-eyebrow lxr">Real homes · Honest stories</p>
+    <h1 class="lxr">What we built—and<br /><em>what we learned.</em></h1>
     <p class="pj-intro lxr">
       Every completed project is published in full — including the problems we found on site
       and exactly how we fixed them. That is the LUXEhome difference.

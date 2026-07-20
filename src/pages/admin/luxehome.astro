@@ -94,6 +94,16 @@
       font-family: inherit;
     }
     .fld textarea { min-height: 90px; resize: vertical; }
+    .media-field { display: grid; grid-template-columns: 1fr auto; gap: 7px; }
+    .media-field input[type="url"], .media-field input[type="text"] { min-width: 0; }
+    .upload-label {
+      display: inline-flex !important; align-items: center; justify-content: center;
+      margin: 0 !important; padding: 9px 12px; border: 1px solid var(--clay);
+      border-radius: 6px; color: var(--clay) !important; cursor: pointer;
+      text-transform: none !important; letter-spacing: 0 !important; white-space: nowrap;
+    }
+    .upload-label.busy { opacity: .55; pointer-events: none; }
+    .upload-label input { display: none; }
     .fld-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .chk { display: flex; align-items: center; gap: 8px; font-size: .85rem; margin-bottom: 10px; }
     .chk input { width: auto; }
@@ -132,10 +142,12 @@
 
     const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
     const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const MEDIA_BUCKET = 'luxehome-media';
 
     let sb = null;
     let main, newBtn;
-    let tab = 'designs';
+    const routeParams = new URLSearchParams(location.search);
+    let tab = ['designs', 'projects', 'team'].includes(routeParams.get('tab')) ? routeParams.get('tab') : 'designs';
     let spaces = [], designs = [], projects = [], team = [];
     let childCounts = {}; // design_id -> {drawings, fixtures, materials, timeline, faq}
 
@@ -144,6 +156,47 @@
     const gc = (id) => !!document.getElementById(id)?.checked;
     const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const ytId = (u) => { const m = String(u || '').match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/) || String(u || '').match(/^([a-zA-Z0-9_-]{11})$/); return m ? m[1] : null; };
+
+    function mediaField(id, label, value, folder = 'misc', multiple = false) {
+      return `<div class="fld"><label>${esc(label)}</label><div class="media-field">
+        ${multiple
+          ? `<textarea id="${id}">${esc(value)}</textarea>`
+          : `<input id="${id}" type="url" value="${esc(value)}" placeholder="Paste a URL or upload an image" />`}
+        <label class="upload-label">Upload<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" ${multiple ? 'multiple' : ''} data-media-target="${id}" data-media-folder="${folder}" /></label>
+      </div></div>`;
+    }
+
+    async function uploadMedia(file, folder) {
+      if (!file.type.startsWith('image/')) throw new Error('Please choose an image file.');
+      if (file.size > 10 * 1024 * 1024) throw new Error('Images must be 10 MB or smaller.');
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const stem = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'image';
+      const path = `${folder}/${Date.now()}-${crypto.randomUUID()}-${stem}.${ext}`;
+      const { error } = await sb.storage.from(MEDIA_BUCKET).upload(path, file, { cacheControl: '31536000', upsert: false });
+      if (error) throw error;
+      return sb.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+    }
+
+    function bindMediaUploads(root = main) {
+      root.querySelectorAll('[data-media-target]').forEach((input) => input.addEventListener('change', async () => {
+        const files = [...(input.files || [])];
+        if (!files.length) return;
+        const target = document.getElementById(input.dataset.mediaTarget);
+        const label = input.closest('.upload-label');
+        label.classList.add('busy'); label.firstChild.textContent = 'Uploading…';
+        try {
+          const urls = [];
+          for (const file of files) urls.push(await uploadMedia(file, input.dataset.mediaFolder || 'misc'));
+          if (input.multiple) target.value = [target.value.trim(), ...urls].filter(Boolean).join('\n');
+          else target.value = urls[0];
+          toast(`${urls.length} image${urls.length === 1 ? '' : 's'} uploaded`);
+        } catch (error) {
+          toast(error.message || 'Upload failed');
+        } finally {
+          label.classList.remove('busy'); label.firstChild.textContent = 'Upload'; input.value = '';
+        }
+      }));
+    }
 
     function toast(msg) {
       const t = document.getElementById('toast');
@@ -324,6 +377,7 @@
       d = d || {
         name: '', slug: '', space_id: spaces[0]?.id ?? '', collection: 'standard',
         tagline: '', description: '', starting_price_lkr: 0, min_sqm: null,
+        highlights: [],
         cover_image_url: '', video_3d_url: '', video_work_url: '', workflow_text: '',
         featured: false, published: false, sort_order: designs.length + 1,
       };
@@ -361,14 +415,15 @@
             <div class="fld"><label>Starting price (LKR, full rupees) *</label><input id="f-price" type="number" value="${d.starting_price_lkr || ''}" /></div>
             <div class="fld"><label>Min size (m², blank = any)</label><input id="f-minsqm" type="number" step="0.5" value="${d.min_sqm ?? ''}" /></div>
           </div>
-          <div class="fld"><label>Cover image URL (Cloudinary)</label><input id="f-cover" value="${esc(d.cover_image_url)}" /></div>
+          <div class="fld"><label>Highlights (one per line, first 3 appear on cards)</label><textarea id="f-highlights">${esc((d.highlights ?? []).join('\n'))}</textarea></div>
+          ${mediaField('f-cover', 'Cover image', d.cover_image_url, 'designs/covers')}
           <label class="chk"><input type="checkbox" id="f-featured" ${d.featured ? 'checked' : ''} /> ★ Featured</label>
           <label class="chk"><input type="checkbox" id="f-published" ${d.published ? 'checked' : ''} /> Published</label>`;
 
         if (subTab === 'media') return `
           ${DRAWING_SLOTS.map(([kind, label]) => {
             const row = children.drawings.find((x) => x.kind === kind);
-            return `<div class="fld"><label>${label} — image URL</label><input data-drawing="${kind}" value="${esc(row?.image_url ?? '')}" /></div>`;
+            return mediaField(`drawing-${kind}`, label, row?.image_url ?? '', `designs/drawings/${kind}`).replace(`id="drawing-${kind}"`, `id="drawing-${kind}" data-drawing="${kind}"`);
           }).join('')}
           <div class="fld"><label>3D walkthrough — YouTube URL</label><input id="f-video3d" value="${esc(d.video_3d_url)}" /></div>
           <div class="fld"><label>"This design, built" — YouTube URL</label><input id="f-videowork" value="${esc(d.video_work_url)}" /></div>
@@ -441,6 +496,7 @@
           d.tagline = gv('f-tagline'); d.description = gv('f-desc');
           d.starting_price_lkr = parseFloat(gv('f-price')) || 0;
           d.min_sqm = gv('f-minsqm') ? parseFloat(gv('f-minsqm')) : null;
+          d.highlights = gv('f-highlights').split('\n').map((s) => s.trim()).filter(Boolean);
           d.cover_image_url = gv('f-cover');
           d.featured = gc('f-featured'); d.published = gc('f-published');
         } else if (subTab === 'media') {
@@ -486,6 +542,7 @@
 
         main.querySelectorAll('[data-sub]').forEach((b) => b.addEventListener('click', () => { collectSubTab(); subTab = b.dataset.sub; render(); }));
         bindRowButtons();
+        bindMediaUploads();
         document.getElementById('d-save').addEventListener('click', save);
         document.getElementById('d-cancel').addEventListener('click', () => { boot(); });
         document.getElementById('d-del')?.addEventListener('click', async () => {
@@ -527,6 +584,7 @@
           cover_image_url: d.cover_image_url || null,
           video_3d_url: d.video_3d_url || null, video_work_url: d.video_work_url || null,
           workflow_text: d.workflow_text || null,
+          highlights: d.highlights ?? [],
           featured: d.featured, published: d.published, sort_order: d.sort_order ?? 0,
         };
 
@@ -569,6 +627,7 @@
       const isNew = !p;
       p = p || {
         title: '', slug: '', location: '', design_id: null, duration_label: '',
+        project_ref: '', area_label: '', episode_1_url: '', episode_2_url: '',
         completed_label: '', story: '', before_image_url: '', after_image_url: '',
         video_url: '', rating: null, review_text: '', review_by: '',
         featured: false, published: false,
@@ -601,11 +660,19 @@
           </div>
           <div class="fld"><label>Completed label</label><input id="p-completed" value="${esc(p.completed_label)}" placeholder="March 2026" /></div>
           <div class="fld-row">
-            <div class="fld"><label>Before image URL</label><input id="p-before" value="${esc(p.before_image_url)}" /></div>
-            <div class="fld"><label>After image URL</label><input id="p-after" value="${esc(p.after_image_url)}" /></div>
+            <div class="fld"><label>Project reference</label><input id="p-ref" value="${esc(p.project_ref)}" placeholder="LX-2026-001" /></div>
+            <div class="fld"><label>Area label</label><input id="p-area" value="${esc(p.area_label)}" placeholder="Main family bathroom" /></div>
+          </div>
+          <div class="fld-row">
+            ${mediaField('p-before', 'Before image', p.before_image_url, 'projects/before')}
+            ${mediaField('p-after', 'After image', p.after_image_url, 'projects/after')}
           </div>
           <div class="fld"><label>Video URL (YouTube)</label><input id="p-video" value="${esc(p.video_url)}" /></div>
-          <div class="fld"><label>Gallery image URLs (one per line)</label><textarea id="p-gallery">${esc(gallery.map((g) => g.image_url).join('\n'))}</textarea></div>
+          <div class="fld-row">
+            <div class="fld"><label>Episode 01 — old space to 3D design</label><input id="p-episode1" value="${esc(p.episode_1_url)}" /></div>
+            <div class="fld"><label>Episode 02 — completed tour</label><input id="p-episode2" value="${esc(p.episode_2_url)}" /></div>
+          </div>
+          ${mediaField('p-gallery', 'Gallery images (one URL per line)', gallery.map((g) => g.image_url).join('\n'), 'projects/gallery', true)}
           <div class="fld"><label>Story — written about the family</label><textarea id="p-story" style="min-height:130px">${esc(p.story)}</textarea></div>
 
           <div class="fld"><label>The journey</label></div>
@@ -662,6 +729,7 @@
               x.classList.toggle('on', rating >= parseInt(x.dataset.n)));
           });
         });
+        bindMediaUploads();
         document.getElementById('add-journey').addEventListener('click', () => { collect(); journey.push({ stage: '', date_label: '', note: '', issue: '', fix: '' }); render(); });
         document.getElementById('add-crew').addEventListener('click', () => { collect(); crew.push({ name: '', role: '', photo_url: '', tilershub_verified: false }); render(); });
         main.querySelectorAll('.sub-del').forEach((btn) => btn.addEventListener('click', () => {
@@ -685,8 +753,10 @@
         p.title = gv('p-title'); p.location = gv('p-location');
         p.design_id = gv('p-design') || null;
         p.duration_label = gv('p-duration'); p.completed_label = gv('p-completed');
+        p.project_ref = gv('p-ref'); p.area_label = gv('p-area');
         p.before_image_url = gv('p-before'); p.after_image_url = gv('p-after');
         p.video_url = gv('p-video'); p.story = gv('p-story');
+        p.episode_1_url = gv('p-episode1'); p.episode_2_url = gv('p-episode2');
         p.review_text = gv('p-review'); p.review_by = gv('p-reviewby');
         p.featured = gc('p-featured'); p.published = gc('p-published');
         gallery = gv('p-gallery').split('\n').map((s) => s.trim()).filter(Boolean).map((u, i) => ({ image_url: u, sort_order: i }));
@@ -713,9 +783,11 @@
         const row = {
           slug: p.slug || slugify(p.title), title: p.title, location: p.location || null,
           design_id: p.design_id, duration_label: p.duration_label || null,
+          project_ref: p.project_ref || null, area_label: p.area_label || null,
           completed_label: p.completed_label || null, story: p.story || null,
           before_image_url: p.before_image_url || null, after_image_url: p.after_image_url || null,
           video_url: p.video_url || null, rating: rating || null,
+          episode_1_url: p.episode_1_url || null, episode_2_url: p.episode_2_url || null,
           review_text: p.review_text || null, review_by: p.review_by || null,
           featured: p.featured, published: p.published,
         };
@@ -759,7 +831,7 @@
           <div class="fld"><label>Role</label><input id="t-role" value="${esc(m.role)}" /></div>
         </div>
         <div class="fld"><label>Bio</label><textarea id="t-bio">${esc(m.bio)}</textarea></div>
-        <div class="fld"><label>Photo URL (Cloudinary)</label><input id="t-photo" value="${esc(m.photo_url)}" /></div>
+        ${mediaField('t-photo', 'Photo', m.photo_url, 'team')}
         <label class="chk"><input type="checkbox" id="t-permanent" ${m.permanent ? 'checked' : ''} /> Permanent team (shown on home)</label>
         <label class="chk"><input type="checkbox" id="t-verified" ${m.tilershub_verified ? 'checked' : ''} /> ✓ TILERSHUB Verified</label>
         <label class="chk"><input type="checkbox" id="t-published" ${m.published ? 'checked' : ''} /> Published</label>
@@ -782,6 +854,7 @@
         if (res.error) return toast(res.error.message);
         toast('Saved'); boot();
       });
+      bindMediaUploads();
       document.getElementById('t-cancel').addEventListener('click', () => boot());
       document.getElementById('t-del')?.addEventListener('click', async () => {
         if (!confirm(`Remove ${m.name}?`)) return;
@@ -796,6 +869,14 @@
       if (!(await ensureAuth())) return;
       main.innerHTML = `<div class="empty-state"><div class="ei">⏳</div><h3>Loading…</h3></div>`;
       await loadAll();
+      document.querySelectorAll('.tab-btn').forEach((button) => button.classList.toggle('active', button.dataset.tab === tab));
+      if (routeParams.get('action') === 'new') {
+        routeParams.delete('action');
+        history.replaceState({}, '', `${location.pathname}?${new URLSearchParams({ tab })}`);
+        if (tab === 'designs') return designEditor(null);
+        if (tab === 'projects') return projectEditor(null);
+        return teamEditor(null);
+      }
       renderList();
     }
 
@@ -812,6 +893,7 @@
 
       document.querySelectorAll('.tab-btn').forEach((b) => b.addEventListener('click', () => {
         tab = b.dataset.tab;
+        history.replaceState({}, '', `${location.pathname}?${new URLSearchParams({ tab })}`);
         document.querySelectorAll('.tab-btn').forEach((x) => x.classList.toggle('active', x === b));
         renderList();
       }));

@@ -1,0 +1,15 @@
+---
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+import { PUBLIC_INFO_PAGES, type PublicInfoPage } from '../lib/luxe-pages';
+import { waLink } from '../lib/luxe-config';
+export function getStaticPaths() { return PUBLIC_INFO_PAGES.map((page) => ({ params: { page: page.slug }, props: { page } })); }
+const { page } = Astro.props as { page: PublicInfoPage };
+---
+<LuxeLayout title={`${page.title} — LUXEhome`} description={page.lead}>
+  <section class="info-hero"><p class="lx-eyebrow">{page.eyebrow}</p><h1>{page.title}</h1><p>{page.lead}</p><div class="actions"><a class="lx-btn-wa" href="/book-site-inspection">Book site inspection</a><a class="lx-btn-ghost" href="/designs">Browse designs</a></div></section>
+  <section class="info-section"><div class="info-grid">{page.cards.map((card) => <article><h2>{card.title}</h2><p>{card.copy}</p></article>)}</div></section>
+  <section class="info-cta"><div><p class="lx-eyebrow">Start with clarity</p><h2>Ready to discuss your home?</h2></div><a href={waLink(`Hi LUXEhome! I am interested in ${page.title}`)} target="_blank" rel="noopener noreferrer">Talk on WhatsApp</a></section>
+</LuxeLayout>
+<style>
+  .info-hero,.info-section,.info-cta{width:min(1100px,calc(100% - 34px));margin:auto}.info-hero{padding:clamp(3.5rem,8vw,6rem) 0 3rem}.info-hero h1{font-size:clamp(3.4rem,8vw,5.6rem);max-width:900px;margin:.7rem 0 1.3rem}.info-hero>p:not(.lx-eyebrow){font:500 1.35rem/1.45 var(--lx-serif);max-width:700px}.actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.7rem}.info-section{padding:1.5rem 0 4rem}.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.info-grid article{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:24px}.info-grid h2{font-size:1.7rem;margin-bottom:.7rem}.info-grid p{color:#586057}.info-cta{margin-bottom:4rem;background:var(--sage-deep);color:#fff;border-radius:14px;padding:42px;display:flex;justify-content:space-between;align-items:center;gap:25px}.info-cta .lx-eyebrow{color:var(--gold-soft)}.info-cta h2{font-size:clamp(2.2rem,5vw,3.4rem);margin:.3rem 0}.info-cta a{background:var(--gold);color:#fff;padding:12px 18px;border-radius:99px;text-decoration:none;white-space:nowrap}@media(max-width:800px){.info-grid{grid-template-columns:1fr}.info-cta{display:block;padding:30px 24px}.info-cta a{display:inline-flex;margin-top:15px}.actions a{width:100%}}
+</style>

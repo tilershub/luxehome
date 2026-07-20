@@ -3,9 +3,21 @@ export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getSpaces, getDesigns, type Design } from '../../lib/luxe';
 import { formatLKRM, cloudinary, waLink } from '../../lib/luxe-config';
+import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
-const spaces = await getSpaces();
-const designs = await getDesigns();
+const dbSpaces = await getSpaces();
+const spaces = dbSpaces.length ? dbSpaces : Object.entries(SPACE_PRESENTATION).map(([slug, value], index) => ({ id: slug, slug, name: value.name, sinhala_name: null, sort_order: index }));
+const dbDesigns = await getDesigns();
+const catalogueFallbacks = CATALOGUE_DESIGNS.map((item, index) => ({
+  id: `catalogue-${item.space}-${item.slug}`, slug: item.slug, name: item.name,
+  space_id: item.space, collection: item.collection, tagline: item.tagline,
+  description: null, starting_price_lkr: item.startingPrice ?? 0, min_sqm: item.minSqm,
+  cover_image_url: null, video_3d_url: null, video_work_url: null, workflow_text: null,
+  highlights: [], featured: false, sort_order: index,
+  space: spaces.find((space) => space.slug === item.space),
+})) as Design[];
+const catalogueKeys = new Set(dbDesigns.map((item) => `${item.space?.slug}:${item.slug}`));
+const designs = [...dbDesigns, ...catalogueFallbacks.filter((item) => !catalogueKeys.has(`${item.space?.slug}:${item.slug}`))];
 
 const COLLECTIONS = [
   { key: 'standard',  label: 'Standard Collection' },
@@ -14,7 +26,7 @@ const COLLECTIONS = [
 ] as const;
 
 function highlights(d: Design): string[] {
-  const hl: string[] = [];
+  const hl: string[] = [...(d.highlights ?? [])];
   if (d.tagline) hl.push(d.tagline);
   hl.push('Complete documented design file');
   hl.push('Fixed quotation before work begins');
@@ -38,9 +50,8 @@ function highlights(d: Design): string[] {
   <section class="dz-body">
     {spaces.length > 0 && (
       <div class="dz-tabs lxr" role="tablist" aria-label="Filter by space">
-        <button class="dz-tab is-active" data-space="">All Spaces</button>
-        {spaces.map((s) => (
-          <button class="dz-tab" data-space={s.slug}>{s.name}</button>
+        {spaces.map((s, index) => (
+          <button class:list={["dz-tab", { "is-active": index === 0 }]} data-space={s.slug}>{s.name}</button>
         ))}
       </div>
     )}
@@ -76,7 +87,7 @@ function highlights(d: Design): string[] {
                     <ul class="dz-card-points">
                       {highlights(d).map((h) => <li>{h}</li>)}
                     </ul>
-                    <div class="dz-card-price">{formatLKRM(d.starting_price_lkr)}</div>
+                    <div class="dz-card-price">{d.starting_price_lkr > 0 ? formatLKRM(d.starting_price_lkr) : 'Starting price to be confirmed'}</div>
                   </div>
                 </a>
               ))}
@@ -110,11 +121,9 @@ function highlights(d: Design): string[] {
       history.replaceState(null, '', url);
     });
   });
-  var initial = new URL(location.href).searchParams.get('space');
-  if (initial) {
-    var tab = document.querySelector('.dz-tab[data-space="' + initial + '"]');
-    if (tab) tab.click();
-  }
+  var initial = new URL(location.href).searchParams.get('space') || 'bathrooms';
+  var tab = document.querySelector('.dz-tab[data-space="' + initial + '"]') || document.querySelector('.dz-tab');
+  if (tab) tab.click();
 })();
 </script>
 

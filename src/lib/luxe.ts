@@ -36,6 +36,7 @@ export interface Design {
   cover_image_url: string | null;
   video_3d_url: string | null; video_work_url: string | null;
   workflow_text: string | null;
+  highlights: string[];
   featured: boolean; sort_order: number;
   space?: Space;
 }
@@ -59,10 +60,12 @@ export interface DesignFull extends Design {
 
 export interface LuxeProject {
   id: string; slug: string; title: string; location: string | null;
+  project_ref: string | null; area_label: string | null;
   design_id: string | null; duration_label: string | null;
   completed_label: string | null; story: string | null;
   before_image_url: string | null; after_image_url: string | null;
   video_url: string | null;
+  episode_1_url: string | null; episode_2_url: string | null;
   rating: number | null; review_text: string | null; review_by: string | null;
   featured: boolean;
   design?: Pick<Design, 'slug' | 'name' | 'collection'> | null;
@@ -88,6 +91,17 @@ export interface TeamMember {
   name: string; role: string | null; bio: string | null;
   photo_url: string | null; permanent: boolean;
   tilershub_verified: boolean; sort_order: number;
+}
+
+export interface LuxeProduct {
+  id: string; slug: string; name: string; category: string | null;
+  short_description: string | null; description: string | null;
+  price_lkr: number; compare_at_price_lkr: number | null;
+  cover_image_url: string | null; gallery_image_urls: string[];
+  features: string[]; preorder: boolean;
+  stock_status: 'in_stock' | 'made_to_order' | 'out_of_stock';
+  featured: boolean; sort_order: number;
+  meta_title: string | null; meta_description: string | null;
 }
 
 /* ── Queries ───────────────────────────────────────────────── */
@@ -185,6 +199,22 @@ export async function getTeam(opts: { permanentOnly?: boolean } = {}): Promise<T
   if (opts.permanentOnly) q = q.eq('permanent', true);
   const { data } = await q;
   return data ?? [];
+}
+
+export async function getProducts(opts: { featured?: boolean } = {}): Promise<LuxeProduct[]> {
+  const c = sb();
+  if (!c) return [];
+  let q = c.from('lx_products').select('*').order('sort_order');
+  if (opts.featured) q = q.eq('featured', true);
+  const { data } = await q;
+  return (data ?? []) as LuxeProduct[];
+}
+
+export async function getProductBySlug(slug: string): Promise<LuxeProduct | null> {
+  const c = sb();
+  if (!c) return null;
+  const { data } = await c.from('lx_products').select('*').eq('slug', slug).maybeSingle();
+  return data as LuxeProduct | null;
 }
 
 /** youtube-nocookie embed URL from any YouTube URL/ID, or null. */
