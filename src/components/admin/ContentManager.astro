@@ -22,7 +22,7 @@ const { module }=Astro.props as {module:CmsModule};
     rows=data||[];
     if(new URLSearchParams(location.search).get('new')==='1'){history.replaceState(null,'',location.pathname);edit(null)}else list();
   }
-  function cards(items){return items.length?items.map(r=>`<article class="item" data-id="${esc(r.id)}"><div><strong>${esc(r[cfg.titleKey]||'Untitled')}</strong><small>${cfg.statusKey?esc(r[cfg.statusKey]??''):''}</small></div><button>Edit</button></article>`).join(''):'<div class="panel empty">No records yet.</div>'}
+  function cards(items){return items.length?items.map(r=>{const status=cfg.statusKey?r[cfg.statusKey]:null;const label=typeof status==='boolean'?(status?'Published':'Draft'):status;return `<article class="item" data-id="${esc(r.id)}"><div><strong>${esc(r[cfg.titleKey]||'Untitled')}</strong>${label!==null&&label!==undefined&&label!==''?`<small class="status-pill ${status===true||status==='published'?'live':''}">${esc(label)}</small>`:''}</div><button type="button">Edit</button></article>`}).join(''):'<div class="panel empty">No records yet.</div>'}
   function list(){root.innerHTML=`<div class="toolbar"><input id="search" placeholder="Search ${esc(cfg.label.toLowerCase())}"><button id="new-record">+ New</button></div><div id="rows">${cards(rows)}</div>`;const search=document.getElementById('search');search.oninput=()=>document.getElementById('rows').innerHTML=cards(rows.filter(r=>String(r[cfg.titleKey]||'').toLowerCase().includes(search.value.toLowerCase())));document.getElementById('new-record').onclick=()=>edit(null);bindCards()}
   function bindCards(){root.querySelectorAll('.item').forEach(el=>el.onclick=()=>edit(rows.find(r=>String(r.id)===el.dataset.id)))}
   function field(f,v,prefix=''){
@@ -62,6 +62,63 @@ const { module }=Astro.props as {module:CmsModule};
   }
   load();
 </script>
-<style>
-  .toolbar{display:flex;gap:10px;margin-bottom:16px}.toolbar input{flex:1}.toolbar button,.panel button,.child button{background:#5c6b56;color:#fff;border:0;border-radius:6px;padding:10px 15px;font:inherit}.toolbar input,.panel input,.panel textarea,.panel select,.modal-card input,.modal-card textarea,.modal-card select{border:1px solid #2b322a25;background:#fff;border-radius:6px;padding:11px;font:inherit}.item,.panel{background:#fff;border:1px solid #2b322a16;border-radius:9px;padding:15px;margin-bottom:12px}.item{display:flex;align-items:center;justify-content:space-between;cursor:pointer}.item strong,.item small{display:block}.item small{color:#667064}.item button{background:#efe8db;color:#2b322a}.formhead,.actions,.child-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.formhead h2,.child h3{font:500 30px 'Cormorant Garamond';margin:0}.formhead>button{background:#efe8db;color:#2b322a}.eyebrow{text-transform:uppercase;letter-spacing:.14em;color:#5c6b56;font-size:10px;margin:0}.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0}.fields.one{grid-template-columns:1fr}.fields label{font-size:12px}.fields input,.fields textarea,.fields select{display:block;width:100%;margin-top:5px}.fields textarea{min-height:110px}.fields .check{display:flex;align-items:center;gap:8px}.fields .check input{width:auto;margin:0}.actions{justify-content:flex-start}.actions .save{min-width:160px}.actions .delete{background:#a33}.child{margin-top:16px}.child article{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #2b322a12;cursor:pointer}.child article button{background:#efe8db;color:#2b322a;padding:6px 10px}.media-upload{display:inline-flex;background:#dfe5db;padding:10px 14px;border-radius:6px;margin-top:15px}.media-upload input{display:none}.modal-backdrop{position:fixed;inset:0;z-index:999;background:#2b322a99;display:grid;place-items:center;padding:16px}.modal-card{width:min(620px,100%);max-height:92vh;overflow:auto;background:#f7f3eb;border-radius:12px;padding:22px}#toast{position:fixed;z-index:1200;bottom:25px;left:50%;transform:translate(-50%,80px);background:#2b322a;color:#fff;padding:10px 18px;border-radius:8px;transition:.2s}#toast.show{transform:translate(-50%,0)}@media(max-width:650px){.fields{grid-template-columns:1fr}.formhead{align-items:flex-start}}
+<style is:global>
+  #manager{width:100%;max-width:1180px}
+  #manager .toolbar{display:flex;gap:10px;margin-bottom:16px}
+  #manager .toolbar input{flex:1;min-width:0}
+  #manager .toolbar button,#manager .panel button,#manager .child button,#cms-modal button{min-height:42px;background:#5c6b56;color:#fff;border:0;border-radius:7px;padding:10px 16px;font:600 13px/1 Jost,system-ui,sans-serif;cursor:pointer}
+  #manager .toolbar input,#manager .panel input,#manager .panel textarea,#manager .panel select,#cms-modal input,#cms-modal textarea,#cms-modal select{min-width:0;border:1px solid #2b322a25;background:#fff;border-radius:7px;padding:11px 12px;color:#2b322a;font:400 15px/1.4 Jost,system-ui,sans-serif}
+  #manager .item,#manager .panel{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:16px;margin-bottom:12px;box-shadow:0 4px 18px #2b322a08}
+  #manager .item{display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer}
+  #manager .item>div{min-width:0;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  #manager .item strong{display:block;overflow-wrap:anywhere;font-size:16px}
+  #manager .status-pill{display:inline-flex;width:max-content;border-radius:999px;background:#efe8db;color:#667064;padding:3px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+  #manager .status-pill.live{background:#dfe5db;color:#43513f}
+  #manager .item button{flex:0 0 auto;background:#efe8db;color:#2b322a}
+  #manager .formhead,#manager .actions,#manager .child-head,#cms-modal .formhead,#cms-modal .actions{display:flex;justify-content:space-between;gap:12px;align-items:center}
+  #manager .formhead h2,#manager .child h3,#cms-modal .formhead h2{font:500 clamp(27px,4vw,34px)/1.1 'Cormorant Garamond',serif;margin:3px 0 0;overflow-wrap:anywhere}
+  #manager .formhead>button,#cms-modal .formhead>button{background:#efe8db;color:#2b322a}
+  #manager .eyebrow,#cms-modal .eyebrow{text-transform:uppercase;letter-spacing:.14em;color:#5c6b56;font-size:10px;margin:0}
+  #manager .fields,#cms-modal .fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:15px;margin:22px 0}
+  #manager .fields.one,#cms-modal .fields.one{grid-template-columns:minmax(0,1fr)}
+  #manager .fields label,#cms-modal .fields label{display:block;min-width:0;color:#43513f;font-size:12px;font-weight:500}
+  #manager .fields input,#manager .fields textarea,#manager .fields select,#cms-modal .fields input,#cms-modal .fields textarea,#cms-modal .fields select{display:block;width:100%;margin-top:6px}
+  #manager .fields textarea,#cms-modal .fields textarea{min-height:120px;resize:vertical}
+  #manager .fields .check,#cms-modal .fields .check{display:flex;align-items:center;gap:9px;min-height:44px}
+  #manager .fields .check input,#cms-modal .fields .check input{width:20px;height:20px;margin:0;flex:0 0 auto}
+  #manager .actions,#cms-modal .actions{justify-content:flex-start;flex-wrap:wrap}
+  #manager .actions .save,#cms-modal .actions .save{min-width:160px}
+  #manager .actions .delete,#cms-modal .actions .delete{background:#9b3e35}
+  #manager .child{margin-top:16px}
+  #manager .child article{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #2b322a12;cursor:pointer}
+  #manager .child article span{min-width:0;overflow-wrap:anywhere}
+  #manager .child article button{flex:0 0 auto;min-height:36px;background:#efe8db;color:#2b322a;padding:7px 11px}
+  #manager .empty{color:#667064;text-align:center;padding:30px 18px}
+  #manager .media-upload{display:inline-flex;background:#dfe5db;padding:11px 14px;border-radius:7px;margin-top:15px;cursor:pointer}
+  #manager .media-upload input{display:none}
+  #cms-modal .modal-backdrop{position:fixed;inset:0;z-index:999;background:#2b322ab3;display:grid;place-items:center;padding:16px}
+  #cms-modal .modal-card{width:min(620px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:#f7f3eb;border-radius:13px;padding:22px;box-shadow:0 24px 80px #0005}
+  #toast{position:fixed;z-index:1200;bottom:max(25px,env(safe-area-inset-bottom));left:50%;width:max-content;max-width:calc(100vw - 32px);transform:translate(-50%,100px);background:#2b322a;color:#fff;padding:11px 18px;border-radius:8px;transition:.2s;text-align:center}
+  #toast.show{transform:translate(-50%,0)}
+  @media(max-width:650px){
+    #manager .toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+    #manager .toolbar input{width:100%;font-size:16px}
+    #manager .item,#manager .panel{padding:14px}
+    #manager .item{min-height:64px}
+    #manager .item>div{display:grid;gap:5px}
+    #manager .fields,#cms-modal .fields{grid-template-columns:minmax(0,1fr);gap:13px;margin:18px 0}
+    #manager .fields input,#manager .fields textarea,#manager .fields select,#cms-modal .fields input,#cms-modal .fields textarea,#cms-modal .fields select{font-size:16px}
+    #manager .formhead,#manager .child-head,#cms-modal .formhead{align-items:flex-start}
+    #manager .child-head{flex-wrap:wrap}
+    #manager .actions,#cms-modal .actions{display:grid;grid-template-columns:1fr}
+    #manager .actions button,#cms-modal .actions button{width:100%;min-width:0}
+    #cms-modal .modal-backdrop{align-items:end;padding:0}
+    #cms-modal .modal-card{width:100%;max-height:92dvh;border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
+  }
+  @media(max-width:390px){
+    #manager .toolbar{grid-template-columns:1fr}
+    #manager .toolbar button{width:100%}
+    #manager .formhead,#cms-modal .formhead{display:grid;grid-template-columns:1fr}
+    #manager .formhead>button,#cms-modal .formhead>button{width:100%}
+  }
 </style>
