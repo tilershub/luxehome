@@ -46,12 +46,12 @@ Never configure a Supabase secret/service-role key as a `PUBLIC_` variable.
 - `/admin/catalogue/projects` — transparent project stories
 - `/admin/catalogue/projects/new` — add a project story
 - `/admin/catalogue/team` — permanent and project team
-- `/admin/blog` — blog publishing
-- `/admin/shop` — product publishing
+- `/admin/cms/blog` — blog publishing
+- `/admin/cms/products` — product publishing
 - `/admin/crm` — leads and follow-up
 - `/admin/cms/pages` — website and legal pages
 - `/admin/cms/categories` — blog/product/media categories
-- `/admin/cms/inquiries` — site-inspection queue
+- `/admin/cms/inspections` — site-inspection queue
 - `/admin/cms/media` — Supabase Storage media library
 - `/admin/cms/settings` — WhatsApp, warranty, inspection fee and SEO defaults
 

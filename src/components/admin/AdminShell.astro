@@ -2,11 +2,25 @@
 import AdminAuthGate from './AdminAuthGate.astro';
 interface Props { title:string; active?:string; }
 const {title,active='dashboard'}=Astro.props;
-const nav=[['dashboard','Dashboard','/admin'],['designs','Designs','/admin/luxehome?tab=designs'],['projects','Projects','/admin/luxehome?tab=projects'],['blog','Blog Articles','/admin/blog'],['pages','Website Pages','/admin/cms/pages'],['products','Products','/admin/shop'],['categories','Categories','/admin/cms/categories'],['inquiries','Site Inspections','/admin/cms/inquiries'],['team','Team','/admin/luxehome?tab=team'],['media','Media Library','/admin/cms/media'],['settings','Global Settings','/admin/cms/settings']];
+const nav=[['dashboard','Dashboard','/admin'],['designs','Designs','/admin/cms/designs'],['projects','Projects','/admin/cms/projects'],['blog','Blog Articles','/admin/cms/blog'],['pages','Website Pages','/admin/cms/pages'],['products','Products','/admin/cms/products'],['categories','Categories','/admin/cms/categories'],['inspections','Site Inspections','/admin/cms/inspections'],['team','Team','/admin/cms/team'],['media','Media Library','/admin/cms/media'],['settings','Global Settings','/admin/cms/settings']];
 ---
-<AdminAuthGate />
-<div class="cms"><aside><a class="brand" href="/admin"><strong>LUXE</strong><em>home</em><small>CMS</small></a><button id="cms-menu">Menu</button><nav id="cms-nav">{nav.map(([key,label,href])=><a class:list={{active:key===active}} href={href}>{label}</a>)}</nav><a class="public" href="/">← Public website</a><button class="signout" id="admin-signout">Sign out</button></aside><main><header><div><span>LUXEhome CMS</span><h1>{title}</h1></div><slot name="action" /></header><slot /></main></div>
-<script is:inline>document.getElementById('cms-menu')?.addEventListener('click',()=>document.getElementById('cms-nav')?.classList.toggle('open'));document.getElementById('admin-signout')?.addEventListener('click',()=>window.dispatchEvent(new Event('admin-sign-out')));</script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} | LUXEhome CMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Jost:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <AdminAuthGate />
+    <div class="cms"><aside><a class="brand" href="/admin"><strong>LUXE</strong><em>home</em><small>CMS</small></a><button id="cms-menu">Menu</button><nav id="cms-nav">{nav.map(([key,label,href])=><a class:list={{active:key===active}} href={href}>{label}</a>)}</nav><a class="public" href="/">← Public website</a><button class="signout" id="admin-signout">Sign out</button></aside><main><header><div><span>LUXEhome CMS</span><h1>{title}</h1></div><slot name="action" /></header><slot /></main></div>
+    <script is:inline>document.getElementById('cms-menu')?.addEventListener('click',()=>document.getElementById('cms-nav')?.classList.toggle('open'));document.getElementById('admin-signout')?.addEventListener('click',()=>window.dispatchEvent(new Event('admin-sign-out')));</script>
+  </body>
+</html>
 <style>
   :global(*){box-sizing:border-box}:global(body){margin:0;background:#f7f3eb;color:#2b322a;font:14px/1.5 Jost,system-ui,sans-serif}.cms{min-height:100vh;display:grid;grid-template-columns:240px 1fr}aside{position:sticky;top:0;height:100vh;background:#253029;color:#f7f3eb;padding:24px 16px;display:flex;flex-direction:column}.brand{color:#fff;text-decoration:none;font:24px 'Cormorant Garamond',serif;margin:0 8px 24px}.brand em{color:#e4ce9c}.brand small{display:block;font:10px Jost,sans-serif;letter-spacing:.2em}.brand strong{letter-spacing:.08em}.cms nav{display:grid;gap:3px}.cms nav a,.public{color:#f7f3ebaa;text-decoration:none;padding:9px 10px;border-radius:6px}.cms nav a.active,.cms nav a:hover{background:#ffffff12;color:#fff}.public{margin-top:auto}.signout{background:none;border:0;color:#e4ce9c;text-align:left;padding:9px 10px;cursor:pointer}#cms-menu{display:none}main{min-width:0;padding:28px clamp(18px,4vw,48px)}header{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:28px}header span{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#5c6b56}header h1{font:500 clamp(34px,5vw,50px)/1 'Cormorant Garamond';margin:5px 0 0}@media(max-width:760px){.cms{display:block}aside{position:sticky;height:auto;z-index:20;padding:12px 16px;display:grid;grid-template-columns:1fr auto;align-items:center}.brand{margin:0}.cms nav{display:none;grid-column:1/-1;padding-top:12px}.cms nav.open{display:grid}.public,.signout{display:none}#cms-menu{display:block;background:#c9a24b;border:0;padding:8px 12px;border-radius:6px}main{padding:22px 16px}}
 </style>

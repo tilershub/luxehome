@@ -2,10 +2,14 @@
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { PUBLIC_INFO_PAGES, type PublicInfoPage } from '../lib/luxe-pages';
 import { waLink } from '../lib/luxe-config';
-export function getStaticPaths() { return PUBLIC_INFO_PAGES.map((page) => ({ params: { page: page.slug }, props: { page } })); }
-const { page } = Astro.props as { page: PublicInfoPage };
+import { createServerSupabase } from '../lib/supabase';
+export function getStaticPaths() { return PUBLIC_INFO_PAGES.filter((page)=>page.slug!=='team').map((page) => ({ params: { page: page.slug }, props: { page } })); }
+const { page: fallbackPage } = Astro.props as { page: PublicInfoPage };
+const sb=createServerSupabase(import.meta.env as unknown as Record<string,string>);
+const {data:storedPage}=sb?await sb.from('lx_pages').select('title,eyebrow,lead,seo_title,meta_description').eq('slug',fallbackPage.slug).eq('published',true).maybeSingle():{data:null};
+const page={...fallbackPage,...Object.fromEntries(Object.entries(storedPage||{}).filter(([,value])=>value))};
 ---
-<LuxeLayout title={`${page.title} — LUXEhome`} description={page.lead}>
+<LuxeLayout title={storedPage?.seo_title||`${page.title} — LUXEhome`} description={storedPage?.meta_description||page.lead}>
   <section class="info-hero"><p class="lx-eyebrow">{page.eyebrow}</p><h1>{page.title}</h1><p>{page.lead}</p><div class="actions"><a class="lx-btn-wa" href="/book-site-inspection">Book site inspection</a><a class="lx-btn-ghost" href="/designs">Browse designs</a></div></section>
   <section class="info-section"><div class="info-grid">{page.cards.map((card) => <article><h2>{card.title}</h2><p>{card.copy}</p></article>)}</div></section>
   <section class="info-cta"><div><p class="lx-eyebrow">Start with clarity</p><h2>Ready to discuss your home?</h2></div><a href={waLink(`Hi LUXEhome! I am interested in ${page.title}`)} target="_blank" rel="noopener noreferrer">Talk on WhatsApp</a></section>
