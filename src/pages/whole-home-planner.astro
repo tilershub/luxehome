@@ -2,7 +2,7 @@
 import LuxeLayout from '../layouts/LuxeLayout.astro'; import { PLANNER } from '../lib/luxe-config';
 ---
 <LuxeLayout title="Whole-Home Planner — LUXEhome" description="Build an early investment picture across multiple bathrooms and spaces before booking your LUXEhome inspection.">
-  <section class="planner-hero"><p class="lx-eyebrow">Plan the whole home</p><h1>See the bigger picture early.</h1><p>Use the planner for an initial bathroom investment range, then add kitchens, staircases and floors during the site inspection.</p></section>
+  <section class="planner-hero"><p class="lx-eyebrow">Plan the whole home</p><h1>Whole-home renovation planner.</h1><p>Use the planner for an initial bathroom investment range, then add kitchens, staircases and floors during the site inspection.</p></section>
   <section class="planner"><div class="row"><label>Bathrooms</label><div class="counter"><button id="minus">−</button><strong id="count">2</strong><button id="plus">+</button></div></div><div class="row"><label>Collection</label><div id="collections" class="options">{Object.entries(PLANNER.collections).map(([key,value],i)=><button class:list={{on:i===0}} data-price={value.basePrice}>{value.label}</button>)}</div></div><div class="row"><label>Typical size</label><div id="sizes" class="options">{Object.entries(PLANNER.sizeMultipliers).map(([key,value],i)=><button class:list={{on:i===1}} data-factor={value.factor}>{value.label}</button>)}</div></div><div class="total"><span>Estimated from</span><strong id="total"></strong></div><a href="/book-site-inspection">Book site inspection</a><small>Planning estimate only. The fixed quotation follows inspection and design customisation.</small></section>
 </LuxeLayout>
 <script is:inline>

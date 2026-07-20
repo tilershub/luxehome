@@ -212,15 +212,13 @@
       main.innerHTML = `
         <div class="login-box">
           <h2>Sign in to LUXEhome admin</h2>
-          <div class="fld"><label>Email</label><input id="li-email" type="email" autocomplete="email" /></div>
-          <div class="fld"><label>Password</label><input id="li-pass" type="password" autocomplete="current-password" /></div>
-          <button class="btn-save" id="li-btn" style="width:100%">Sign In</button>
+          <div class="fld"><label>Email</label><input id="li-email" type="email" value="wildplus4@gmail.com" readonly /></div>
+          <button class="btn-save" id="li-btn" style="width:100%">Email me a sign-in link</button>
+          <p id="li-status"></p>
         </div>`;
       document.getElementById('li-btn').addEventListener('click', async () => {
-        const { error } = await sb.auth.signInWithPassword({ email: gv('li-email'), password: gv('li-pass') });
-        if (error) { toast(error.message); return; }
-        toast('Signed in');
-        boot();
+        const { error } = await sb.auth.signInWithOtp({ email: 'wildplus4@gmail.com', options: { emailRedirectTo: location.origin + '/admin/luxehome', shouldCreateUser: true } });
+        document.getElementById('li-status').textContent = error ? error.message : 'Check your email and open the secure sign-in link.';
       });
       return false;
     }

@@ -164,6 +164,12 @@
         return;
       }
       sb = createClient(SB_URL, SB_KEY);
+      const {data:{session}}=await sb.auth.getSession();
+      if(!session){
+        mainEl.innerHTML=`<div class="empty-state"><div class="ei">✉️</div><h3>Sign in by email link</h3><p>wildplus4@gmail.com</p><button id="magic-link" class="btn-primary">Email me a sign-in link</button><p id="magic-status"></p></div>`;
+        g('magic-link').addEventListener('click',async()=>{const {error}=await sb.auth.signInWithOtp({email:'wildplus4@gmail.com',options:{emailRedirectTo:location.origin+'/admin/blog',shouldCreateUser:true}});g('magic-status').textContent=error?error.message:'Check your email and open the secure sign-in link.'});
+        return;
+      }
       newBtn.addEventListener('click', ()=>goEditor(null));
       g('back-lnk').addEventListener('click', e=>{ if(view==='editor'){e.preventDefault();loadList();} });
       await loadList();

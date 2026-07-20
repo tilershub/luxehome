@@ -1,8 +1,13 @@
 ---
-export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getProjects, getProjectBySlug, youtubeEmbed, type ProjectFull } from '../../lib/luxe';
 import { cloudinary, waLink } from '../../lib/luxe-config';
+
+export async function getStaticPaths() {
+  const stored = await getProjects();
+  const slugs = new Set(['kotte-family-bathroom', 'avissawella-ensuite', 'matara-bathroom-makeover', ...stored.map((project) => project.slug)]);
+  return [...slugs].map((slug) => ({ params: { slug } }));
+}
 
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);

@@ -1,9 +1,14 @@
 ---
-export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
-import { getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
+import { getDesigns, getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
 import { formatLKRM, cloudinary, waLink } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
+
+export async function getStaticPaths() {
+  const stored = await getDesigns();
+  const slugs = new Set([...CATALOGUE_DESIGNS.map((design) => design.slug), ...stored.map((design) => design.slug)]);
+  return [...slugs].map((slug) => ({ params: { slug } }));
+}
 
 const { slug } = Astro.params;
 const storedDesign = await getDesignBySlug(slug!);
