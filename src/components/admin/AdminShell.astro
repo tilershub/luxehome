@@ -2,7 +2,7 @@
 import AdminAuthGate from './AdminAuthGate.astro';
 interface Props { title:string; active?:string; }
 const {title,active='dashboard'}=Astro.props;
-const nav=[['dashboard','Dashboard','/admin'],['designs','Designs','/admin/luxehome?tab=designs'],['projects','Projects','/admin/luxehome?tab=projects'],['blog','Blog Articles','/admin/blog'],['pages','Website Pages','/admin/cms/pages'],['products','Products','/admin/shop'],['categories','Categories','/admin/cms/categories'],['inquiries','Site Inspections','/admin/cms/inquiries'],['team','Team','/admin/luxehome?tab=team'],['media','Media Library','/admin/cms/media'],['settings','Global Settings','/admin/cms/settings']];
+const nav=[['dashboard','Dashboard','/admin'],['designs','Designs','/admin/cms/designs'],['projects','Projects','/admin/cms/projects'],['blog','Blog Articles','/admin/cms/blog'],['pages','Website Pages','/admin/cms/pages'],['products','Products','/admin/cms/products'],['categories','Categories','/admin/cms/categories'],['inspections','Site Inspections','/admin/cms/inspections'],['team','Team','/admin/cms/team'],['media','Media Library','/admin/cms/media'],['settings','Global Settings','/admin/cms/settings']];
 ---
 <AdminAuthGate />
 <div class="cms"><aside><a class="brand" href="/admin"><strong>LUXE</strong><em>home</em><small>CMS</small></a><button id="cms-menu">Menu</button><nav id="cms-nav">{nav.map(([key,label,href])=><a class:list={{active:key===active}} href={href}>{label}</a>)}</nav><a class="public" href="/">← Public website</a><button class="signout" id="admin-signout">Sign out</button></aside><main><header><div><span>LUXEhome CMS</span><h1>{title}</h1></div><slot name="action" /></header><slot /></main></div>
