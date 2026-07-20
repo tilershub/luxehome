@@ -12,7 +12,7 @@
 </div>
 <script>
   import { createClient } from '@supabase/supabase-js';
-  const url=import.meta.env.PUBLIC_SUPABASE_URL,key=import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  import { LUXE_SUPABASE_KEY as key, LUXE_SUPABASE_URL as url } from '../../lib/luxe-supabase';
   const gate=document.getElementById('admin-auth-gate'),form=document.getElementById('admin-magic-form'),status=document.getElementById('admin-magic-status');
   if(!url||!key){status.textContent='Supabase is not configured.'}
   else{
@@ -21,7 +21,7 @@
     if(session) gate.remove();
     else form.addEventListener('submit',async(event)=>{
       event.preventDefault();const button=form.querySelector('button');button.disabled=true;status.textContent='Sending secure link…';
-      const {error}=await sb.auth.signInWithOtp({email:'wildplus4@gmail.com',options:{emailRedirectTo:location.origin+'/admin',shouldCreateUser:true}});
+      const {error}=await sb.auth.signInWithOtp({email:'wildplus4@gmail.com',options:{emailRedirectTo:location.origin+'/admin/',shouldCreateUser:false}});
       status.textContent=error?error.message:'Check wildplus4@gmail.com and open the sign-in link on this device.';
       button.disabled=false;
     });
