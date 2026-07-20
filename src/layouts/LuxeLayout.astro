@@ -210,7 +210,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   }
 
   html.luxe { scroll-behavior: smooth; }
-  html.luxe * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Zero-specificity reset (:where) so the layout's own class rules always win */
+  :where(html.luxe) *,
+  :where(html.luxe) *::before,
+  :where(html.luxe) *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   .luxe-body {
     background: var(--cream);
@@ -278,6 +281,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   .lx-nav-burger span { display: block; width: 24px; height: 2px; background: var(--ink); margin: 5px 0; transition: transform .25s; }
   .lx-nav-burger.is-open span:first-child { transform: translateY(3.5px) rotate(45deg); }
   .lx-nav-burger.is-open span:last-child  { transform: translateY(-3.5px) rotate(-45deg); }
+
+  .lx-mobile-menu[hidden] { display: none; }
 
   .lx-mobile-menu {
     position: sticky;
