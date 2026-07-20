@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 560" role="img" aria-labelledby="title desc">
+  <title id="title">LUXEhome kitchen collection</title><desc id="desc">Warm contemporary kitchen cabinetry inspired by Sri Lankan spices.</desc>
+  <defs><linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e7d8bd"/><stop offset="1" stop-color="#b77c4d"/></linearGradient><linearGradient id="cab" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6d3f2d"/><stop offset="1" stop-color="#37251f"/></linearGradient></defs>
+  <rect width="760" height="560" fill="url(#wall)"/><rect y="405" width="760" height="155" fill="#746d61"/><path d="M0 420L760 360V560H0z" fill="#8d877d" opacity=".7"/>
+  <g fill="url(#cab)"><rect x="70" y="100" width="180" height="290" rx="4"/><rect x="260" y="100" width="205" height="290" rx="4"/><rect x="475" y="100" width="215" height="290" rx="4"/></g><g fill="#eadcc6"><rect x="82" y="118" width="156" height="105"/><rect x="272" y="118" width="181" height="105"/><rect x="487" y="118" width="191" height="105"/></g><rect x="54" y="382" width="652" height="28" rx="6" fill="#eee8de"/>
+  <rect x="265" y="245" width="194" height="137" fill="#26302a"/><circle cx="362" cy="314" r="54" fill="#111814"/><path d="M362 265v98M313 314h98" stroke="#c9a24b" stroke-width="5" opacity=".65"/>
+  <g fill="#c9a24b"><circle cx="135" cy="315" r="24"/><circle cx="182" cy="325" r="18"/><circle cx="620" cy="320" r="28"/></g><g fill="#5c6b56"><path d="M118 292q18-55 36 0q-18 25-36 0M164 306q14-43 28 0q-14 20-28 0M598 290q22-65 44 0q-22 30-44 0"/></g>
+</svg>

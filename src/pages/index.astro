@@ -2,8 +2,10 @@
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { waLink } from '../lib/luxe-config';
 const spaces = [
-  { name: 'Bathrooms', href: '/bathroom-designs' }, { name: 'Kitchens', href: '/kitchen-designs' },
-  { name: 'Staircases', href: '/staircase-designs' }, { name: 'Floors', href: '/floor-designs' },
+  { name: 'Bathrooms', href: '/designs?space=bathrooms', image: '/hero-bathroom-card.webp', eyebrow: 'The floral collection', copy: 'Complete bathroom designs, documented fixture by fixture.' },
+  { name: 'Kitchens', href: '/designs?space=kitchens', image: '/hero-kitchen-card.svg', eyebrow: 'The spice collection', copy: 'Sri Lankan character shaped into beautifully practical kitchens.' },
+  { name: 'Staircases', href: '/designs?space=staircases', image: '/hero-staircase-card.webp', eyebrow: 'The highland collection', copy: 'Architectural staircases designed as part of the home.' },
+  { name: 'Floors', href: '/designs?space=floors', image: '/floor-tiling-hero.svg', eyebrow: 'The landscape collection', copy: 'Material-led floors with every transition carefully resolved.' },
 ];
 ---
 <LuxeLayout title="Your home, fully resolved. — LUXEhome" description="Choose a complete, documented design with an honest starting price, specified materials and a trusted Sri Lankan design-and-build team.">
@@ -13,13 +15,26 @@ const spaces = [
     <p class="lead lxr">Choose a complete, documented design—with an honest starting price, specified materials and a team you can trust.</p>
     <div class="actions lxr"><a class="lx-btn-wa" href="/book-site-inspection">Book site inspection</a><a class="lx-btn-ghost" href="/designs">Browse designs</a></div>
   </section>
-  <section class="artifact-section"><div class="artifact-grid">
-    <article class="artifact-card lxr"><h2>Choose your space</h2><div class="chips">{spaces.map((space) => <a href={space.href}>{space.name}</a>)}</div></article>
+  <section class="space-section">
+    <div class="space-heading lxr"><div><p class="lx-eyebrow">Browse by space</p><h2>Choose where to begin.</h2></div><a href="/designs">View all designs →</a></div>
+    <div class="space-card-grid">
+      {spaces.map((space) => (
+        <a class="space-card lxr" href={space.href} aria-label={`Browse ${space.name} designs`}>
+          <img src={space.image} alt={`${space.name} design collection`} loading="lazy" width="760" height="560" />
+          <span class="space-shade" aria-hidden="true"></span>
+          <span class="space-copy"><small>{space.eyebrow}</small><strong>{space.name}</strong><em>{space.copy}</em><b>Explore designs <span>→</span></b></span>
+        </a>
+      ))}
+    </div>
+  </section>
+  <section class="artifact-section"><div class="artifact-grid artifact-grid--trust">
     <article class="artifact-card lxr"><h2>Why LUXEhome</h2><div class="chips"><span>Fixed quotation</span><span>Verified teams</span><span>WhatsApp progress updates</span><span>1-year warranty</span></div></article>
     <article class="artifact-card lxr"><h2>Start with clarity</h2><p>Browse named designs, see real project stories, or book a professional site inspection.</p></article>
   </div></section>
   <section class="artifact-cta lxr"><div><div class="lx-eyebrow">Start with clarity</div><h2>Ready to discuss your home?</h2></div><a class="cta-gold" href={waLink("Hi LUXEhome! I am interested in 'Your home, fully resolved.'")} target="_blank" rel="noopener noreferrer">Talk on WhatsApp</a></section>
 </LuxeLayout>
 <style>
-  .artifact-hero{width:min(1100px,calc(100% - 34px));margin:auto;padding:clamp(3.5rem,9vw,7rem) 0 3rem}.artifact-hero h1{font-size:clamp(3.5rem,8vw,5.6rem);max-width:900px;margin:.8rem 0 1.35rem}.lead{font:500 clamp(1.25rem,3vw,1.5rem)/1.4 var(--lx-serif);max-width:700px}.actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.7rem}.artifact-section{padding:2.2rem 0 4.4rem}.artifact-grid{width:min(1100px,calc(100% - 34px));margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.artifact-card{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:24px}.artifact-card h2{font-size:1.7rem;margin-bottom:.8rem}.artifact-card p{color:#586057}.chips{display:flex;gap:8px;flex-wrap:wrap}.chips span,.chips a{background:var(--sage-mist);border-radius:99px;padding:7px 11px;font-size:12px;color:var(--ink);text-decoration:none}.artifact-cta{width:min(1100px,calc(100% - 34px));margin:0 auto 4rem;background:var(--sage-deep);color:#fff;border-radius:14px;padding:42px;display:flex;justify-content:space-between;align-items:center;gap:25px}.artifact-cta .lx-eyebrow{color:var(--gold-soft)}.artifact-cta h2{font-size:clamp(2.2rem,5vw,3.4rem);margin:.4rem 0 0}.cta-gold{display:inline-flex;padding:11px 18px;border-radius:99px;background:var(--gold);color:#fff;text-decoration:none;white-space:nowrap}@media(max-width:800px){.artifact-grid{grid-template-columns:1fr}.artifact-cta{display:block;padding:30px 24px}.cta-gold{margin-top:18px}.actions a{width:100%}}
+  .artifact-hero{width:min(1100px,calc(100% - 34px));margin:auto;padding:clamp(3.5rem,9vw,7rem) 0 3rem}.artifact-hero h1{font-size:clamp(3.5rem,8vw,5.6rem);max-width:900px;margin:.8rem 0 1.35rem}.lead{font:500 clamp(1.25rem,3vw,1.5rem)/1.4 var(--lx-serif);max-width:700px}.actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.7rem}
+  .space-section{width:min(1100px,calc(100% - 34px));margin:0 auto;padding:1.6rem 0 2.5rem}.space-heading{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}.space-heading h2{font-size:clamp(2.2rem,5vw,3.4rem);margin:.25rem 0 0}.space-heading>a{color:var(--sage-deep);font-size:.82rem;font-weight:600;text-decoration:none;white-space:nowrap}.space-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.space-card{position:relative;display:block;min-height:360px;border-radius:12px;overflow:hidden;color:#fff;text-decoration:none;background:var(--sage-deep);box-shadow:0 12px 35px #2b322a14}.space-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s ease}.space-shade{position:absolute;inset:0;background:linear-gradient(180deg,#17201912 20%,#172019e8 100%)}.space-copy{position:absolute;inset:auto 0 0;padding:clamp(20px,4vw,30px);display:block}.space-copy small{display:block;color:var(--gold-soft);font-size:.65rem;font-style:normal;text-transform:uppercase;letter-spacing:.15em}.space-copy strong{display:block;margin:.2rem 0;font:600 clamp(2rem,4vw,3rem)/1 var(--lx-serif)}.space-copy em{display:block;max-width:42ch;color:#f7f3ebd9;font:normal .82rem/1.5 var(--lx-sans)}.space-copy b{display:block;margin-top:.9rem;font-size:.72rem;letter-spacing:.05em}.space-copy b span{display:inline-block;transition:transform .25s}.space-card:hover img{transform:scale(1.035)}.space-card:hover b span{transform:translateX(5px)}
+  .artifact-section{padding:1rem 0 4.4rem}.artifact-grid{width:min(1100px,calc(100% - 34px));margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.artifact-grid--trust{grid-template-columns:repeat(2,1fr)}.artifact-card{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:24px}.artifact-card h2{font-size:1.7rem;margin-bottom:.8rem}.artifact-card p{color:#586057}.chips{display:flex;gap:8px;flex-wrap:wrap}.chips span,.chips a{background:var(--sage-mist);border-radius:99px;padding:7px 11px;font-size:12px;color:var(--ink);text-decoration:none}.artifact-cta{width:min(1100px,calc(100% - 34px));margin:0 auto 4rem;background:var(--sage-deep);color:#fff;border-radius:14px;padding:42px;display:flex;justify-content:space-between;align-items:center;gap:25px}.artifact-cta .lx-eyebrow{color:var(--gold-soft)}.artifact-cta h2{font-size:clamp(2.2rem,5vw,3.4rem);margin:.4rem 0 0}.cta-gold{display:inline-flex;padding:11px 18px;border-radius:99px;background:var(--gold);color:#fff;text-decoration:none;white-space:nowrap}@media(max-width:800px){.space-card-grid{grid-template-columns:1fr}.space-card{min-height:330px}.artifact-grid{grid-template-columns:1fr}.artifact-cta{display:block;padding:30px 24px}.cta-gold{margin-top:18px}.actions a{width:100%}}@media(max-width:480px){.space-heading{display:block}.space-heading>a{display:inline-block;margin-top:.7rem}.space-card{min-height:310px}.space-copy em{font-size:.78rem}}
 </style>

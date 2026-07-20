@@ -12,7 +12,9 @@ export function waLink(message: string): string {
 /** "From LKR X M" — store rupees in DB, format in UI. */
 export function formatLKRM(rupees: number): string {
   const millions = rupees / 1_000_000;
-  const label = millions >= 10 ? millions.toFixed(0) : (Math.round(millions * 100) / 100).toString();
+  // Preserve exact catalogue prices down to LKR 1,000 (for example 2.175M)
+  // without adding trailing zeroes to round figures such as 1M or 1.6M.
+  const label = millions >= 10 ? millions.toFixed(0) : (Math.round(millions * 1000) / 1000).toString();
   return `From LKR ${label}M`;
 }
 
@@ -73,7 +75,7 @@ export const PLANNER = {
   collections: {
     standard:  { label: 'Standard',  basePrice: 1_000_000 },
     premium:   { label: 'Premium',   basePrice: 1_600_000 },
-    signature: { label: 'Signature', basePrice: 2_500_000 },
+    signature: { label: 'Signature', basePrice: 2_175_000 },
   },
   /** Size multipliers applied to a collection's base price. */
   sizeMultipliers: {

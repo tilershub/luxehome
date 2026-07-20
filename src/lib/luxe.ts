@@ -33,7 +33,10 @@ export interface Design {
   space_id: string; collection: Collection;
   tagline: string | null; description: string | null;
   starting_price_lkr: number; min_sqm: number | null;
+  new_starting_price_lkr: number | null;
+  renovation_starting_price_lkr: number | null;
   cover_image_url: string | null;
+  inspiration_image_url: string | null;
   video_3d_url: string | null; video_work_url: string | null;
   workflow_text: string | null;
   highlights: string[];

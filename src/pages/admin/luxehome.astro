@@ -1,0 +1,933 @@
+---
+// LUXEhome catalogue admin — Designs / Projects / Team
+// Client-side SPA following the admin/projects.astro conventions.
+// Writes require a Supabase-authenticated session (lx_ RLS).
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LUXEhome — Admin</title>
+  <link rel="icon" href="/favicon.svg" />
+</head>
+<body>
+  <div id="app">
+    <header id="hdr">
+      <a href="/admin" class="back-lnk">← Admin</a>
+      <span id="hdr-title">LUXEhome</span>
+      <nav id="hdr-tabs">
+        <button data-tab="designs" class="tab-btn active">Designs</button>
+        <button data-tab="projects" class="tab-btn">Projects</button>
+        <button data-tab="team" class="tab-btn">Team</button>
+      </nav>
+      <button id="new-btn" class="hdr-action">＋ New</button>
+    </header>
+    <main id="main"></main>
+    <div id="toast" aria-live="polite"></div>
+  </div>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #161c1a; --surface: #1e2422; --surface2: #252c29;
+      --border: rgba(255,255,255,.08); --cream: #f0ece0;
+      --muted: rgba(240,236,224,.6); --clay: #b8945a;
+      --green: #22c55e; --red: #ef4444; --gold: #C9A24B; --sage: #8A9A84;
+    }
+    html, body { min-height: 100%; background: var(--bg); color: var(--cream); font-family: 'DM Sans', system-ui, sans-serif; font-size: 15px; }
+    #app { display: flex; flex-direction: column; min-height: 100vh; }
+    #hdr {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px; background: var(--surface);
+      border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .back-lnk { color: var(--muted); text-decoration: none; font-size: .85rem; }
+    #hdr-title { font-weight: 700; }
+    #hdr-tabs { display: flex; gap: 6px; }
+    .tab-btn {
+      background: transparent; color: var(--muted); border: 1px solid var(--border);
+      border-radius: 999px; padding: 5px 14px; font-size: .8rem; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--clay); border-color: var(--clay); color: #16120c; font-weight: 700; }
+    .hdr-action {
+      margin-left: auto; background: var(--clay); color: #16120c; border: none;
+      border-radius: 6px; padding: 7px 14px; font-weight: 700; cursor: pointer; font-size: .85rem;
+    }
+    #main { flex: 1; padding: 16px; max-width: 960px; width: 100%; margin: 0 auto; }
+    #toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--cream); color: #16120c; font-weight: 600; font-size: .85rem;
+      padding: 10px 20px; border-radius: 8px; transition: transform .25s; z-index: 100;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    .empty-state { text-align: center; padding: 60px 16px; color: var(--muted); }
+    .empty-state .ei { font-size: 2rem; margin-bottom: 8px; }
+
+    .row-card {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer;
+    }
+    .row-card:hover { border-color: rgba(255,255,255,.2); }
+    .row-title { font-weight: 700; }
+    .row-sub { font-size: .75rem; color: var(--muted); }
+    .row-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .pill { font-size: .68rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+    .pill-pub   { background: rgba(34,197,94,.15); color: var(--green); }
+    .pill-draft { background: rgba(240,236,224,.1); color: var(--muted); }
+    .pill-file  { background: rgba(201,162,75,.15); color: var(--gold); }
+    .star-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: rgba(240,236,224,.3); }
+    .star-btn.on { color: var(--gold); }
+
+    .ed-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .ed-tab { background: var(--surface); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: .78rem; cursor: pointer; }
+    .ed-tab.active { color: var(--cream); border-color: var(--clay); }
+
+    .fld { margin-bottom: 12px; }
+    .fld label { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+    .fld input, .fld select, .fld textarea {
+      width: 100%; background: var(--surface2); color: var(--cream);
+      border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; font-size: .9rem;
+      font-family: inherit;
+    }
+    .fld textarea { min-height: 90px; resize: vertical; }
+    .media-field { display: grid; grid-template-columns: 1fr auto; gap: 7px; }
+    .media-field input[type="url"], .media-field input[type="text"] { min-width: 0; }
+    .upload-label {
+      display: inline-flex !important; align-items: center; justify-content: center;
+      margin: 0 !important; padding: 9px 12px; border: 1px solid var(--clay);
+      border-radius: 6px; color: var(--clay) !important; cursor: pointer;
+      text-transform: none !important; letter-spacing: 0 !important; white-space: nowrap;
+    }
+    .upload-label.busy { opacity: .55; pointer-events: none; }
+    .upload-label input { display: none; }
+    .fld-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .chk { display: flex; align-items: center; gap: 8px; font-size: .85rem; margin-bottom: 10px; }
+    .chk input { width: auto; }
+
+    .sub-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .sub-row {
+      display: grid; gap: 6px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px;
+    }
+    .sub-row input, .sub-row textarea, .sub-row select {
+      background: var(--surface2); color: var(--cream); border: 1px solid var(--border);
+      border-radius: 5px; padding: 7px 9px; font-size: .82rem; font-family: inherit; width: 100%;
+    }
+    .sub-del { background: none; border: none; color: var(--red); cursor: pointer; font-size: .78rem; justify-self: end; }
+    .add-row-btn {
+      background: var(--surface); color: var(--clay); border: 1px dashed var(--clay);
+      border-radius: 6px; padding: 8px; width: 100%; cursor: pointer; font-size: .82rem; margin-bottom: 14px;
+    }
+    .save-bar { display: flex; gap: 10px; margin-top: 18px; }
+    .btn-save { flex: 1; background: var(--green); color: #06220f; border: none; border-radius: 8px; padding: 12px; font-weight: 800; cursor: pointer; }
+    .btn-cancel { background: var(--surface); color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; cursor: pointer; }
+    .btn-del { background: rgba(239,68,68,.12); color: var(--red); border: 1px solid rgba(239,68,68,.3); border-radius: 8px; padding: 12px 18px; cursor: pointer; }
+
+    .stars-pick { display: flex; gap: 4px; font-size: 1.5rem; }
+    .stars-pick button { background: none; border: none; cursor: pointer; color: rgba(240,236,224,.25); }
+    .stars-pick button.on { color: var(--gold); }
+
+    .login-box { max-width: 380px; margin: 60px auto; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+    .login-box h2 { margin-bottom: 14px; font-size: 1.1rem; }
+    @media (max-width: 640px) { .fld-row { grid-template-columns: 1fr; } }
+  </style>
+
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+    import { FIXTURE_CATEGORIES, DEFAULT_MATERIALS, DEFAULT_JOURNEY_STAGES, COMPLETENESS_CHECKS } from '../../lib/luxe-config';
+
+    const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+    const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const MEDIA_BUCKET = 'luxehome-media';
+
+    let sb = null;
+    let main, newBtn;
+    const routeParams = new URLSearchParams(location.search);
+    let tab = ['designs', 'projects', 'team'].includes(routeParams.get('tab')) ? routeParams.get('tab') : 'designs';
+    let spaces = [], designs = [], projects = [], team = [];
+    let childCounts = {}; // design_id -> {drawings, fixtures, materials, timeline, faq}
+
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const gv = (id) => document.getElementById(id)?.value?.trim() ?? '';
+    const gc = (id) => !!document.getElementById(id)?.checked;
+    const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const ytId = (u) => { const m = String(u || '').match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/) || String(u || '').match(/^([a-zA-Z0-9_-]{11})$/); return m ? m[1] : null; };
+
+    function mediaField(id, label, value, folder = 'misc', multiple = false) {
+      return `<div class="fld"><label>${esc(label)}</label><div class="media-field">
+        ${multiple
+          ? `<textarea id="${id}">${esc(value)}</textarea>`
+          : `<input id="${id}" type="url" value="${esc(value)}" placeholder="Paste a URL or upload an image" />`}
+        <label class="upload-label">Upload<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" ${multiple ? 'multiple' : ''} data-media-target="${id}" data-media-folder="${folder}" /></label>
+      </div></div>`;
+    }
+
+    async function uploadMedia(file, folder) {
+      if (!file.type.startsWith('image/')) throw new Error('Please choose an image file.');
+      if (file.size > 10 * 1024 * 1024) throw new Error('Images must be 10 MB or smaller.');
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const stem = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'image';
+      const path = `${folder}/${Date.now()}-${crypto.randomUUID()}-${stem}.${ext}`;
+      const { error } = await sb.storage.from(MEDIA_BUCKET).upload(path, file, { cacheControl: '31536000', upsert: false });
+      if (error) throw error;
+      return sb.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+    }
+
+    function bindMediaUploads(root = main) {
+      root.querySelectorAll('[data-media-target]').forEach((input) => input.addEventListener('change', async () => {
+        const files = [...(input.files || [])];
+        if (!files.length) return;
+        const target = document.getElementById(input.dataset.mediaTarget);
+        const label = input.closest('.upload-label');
+        label.classList.add('busy'); label.firstChild.textContent = 'Uploading…';
+        try {
+          const urls = [];
+          for (const file of files) urls.push(await uploadMedia(file, input.dataset.mediaFolder || 'misc'));
+          if (input.multiple) target.value = [target.value.trim(), ...urls].filter(Boolean).join('\n');
+          else target.value = urls[0];
+          toast(`${urls.length} image${urls.length === 1 ? '' : 's'} uploaded`);
+        } catch (error) {
+          toast(error.message || 'Upload failed');
+        } finally {
+          label.classList.remove('busy'); label.firstChild.textContent = 'Upload'; input.value = '';
+        }
+      }));
+    }
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    /* ── Auth gate ── */
+    async function ensureAuth() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) return true;
+      main.innerHTML = `
+        <div class="login-box">
+          <h2>Sign in to LUXEhome admin</h2>
+          <div class="fld"><label>Email</label><input id="li-email" type="email" value="wildplus4@gmail.com" readonly /></div>
+          <button class="btn-save" id="li-btn" style="width:100%">Email me a sign-in link</button>
+          <p id="li-status"></p>
+        </div>`;
+      document.getElementById('li-btn').addEventListener('click', async () => {
+        const { error } = await sb.auth.signInWithOtp({ email: 'wildplus4@gmail.com', options: { emailRedirectTo: location.origin + '/admin/luxehome', shouldCreateUser: true } });
+        document.getElementById('li-status').textContent = error ? error.message : 'Check your email and open the secure sign-in link.';
+      });
+      return false;
+    }
+
+    /* ── Data ── */
+    async function loadAll() {
+      const [sp, dz, pj, tm] = await Promise.all([
+        sb.from('lx_spaces').select('*').order('sort_order'),
+        sb.from('lx_designs').select('*').order('sort_order'),
+        sb.from('lx_projects').select('*').order('created_at', { ascending: false }),
+        sb.from('lx_team_members').select('*').order('sort_order'),
+      ]);
+      spaces = sp.data ?? []; designs = dz.data ?? []; projects = pj.data ?? []; team = tm.data ?? [];
+
+      const ids = designs.map((d) => d.id);
+      childCounts = {};
+      if (ids.length) {
+        const [dr, fx, mt, tl, fq] = await Promise.all([
+          sb.from('lx_design_drawings').select('design_id').in('design_id', ids),
+          sb.from('lx_design_fixtures').select('design_id').in('design_id', ids),
+          sb.from('lx_design_materials').select('design_id').in('design_id', ids),
+          sb.from('lx_design_timeline').select('design_id').in('design_id', ids),
+          sb.from('lx_design_faq').select('design_id').in('design_id', ids),
+        ]);
+        const tally = (rows, key) => (rows ?? []).forEach((r) => {
+          childCounts[r.design_id] = childCounts[r.design_id] || {};
+          childCounts[r.design_id][key] = (childCounts[r.design_id][key] || 0) + 1;
+        });
+        tally(dr.data, 'drawings'); tally(fx.data, 'fixtures'); tally(mt.data, 'materials');
+        tally(tl.data, 'timeline'); tally(fq.data, 'faq');
+      }
+    }
+
+    function completeness(d) {
+      const c = childCounts[d.id] || {};
+      let score = 0;
+      if ((c.drawings || 0) >= 6) score++;
+      if (ytId(d.video_3d_url)) score++;
+      if ((c.fixtures || 0) >= 5) score++;
+      if ((c.materials || 0) >= 4) score++;
+      if (d.workflow_text && (c.timeline || 0) > 0) score++;
+      if ((c.faq || 0) >= 1) score++;
+      return score;
+    }
+
+    /* ── Lists ── */
+    function renderList() {
+      newBtn.style.display = '';
+      if (tab === 'designs') return renderDesignList();
+      if (tab === 'projects') return renderProjectList();
+      return renderTeamList();
+    }
+
+    function renderDesignList() {
+      if (!designs.length) {
+        main.innerHTML = `<div class="empty-state"><div class="ei">🎨</div><h3>No designs yet</h3><p>Create your first design file.</p></div>`;
+        return;
+      }
+      main.innerHTML = designs.map((d) => {
+        const space = spaces.find((s) => s.id === d.space_id);
+        const score = completeness(d);
+        return `
+        <div class="row-card" data-id="${d.id}">
+          <button class="star-btn ${d.featured ? 'on' : ''}" data-star="${d.id}" title="Featured">★</button>
+          <div>
+            <div class="row-title">${esc(d.name)}</div>
+            <div class="row-sub">${esc(d.collection)} · ${esc(space?.name ?? '')} · LKR ${(d.starting_price_lkr / 1e6).toFixed(2)}M</div>
+          </div>
+          <div class="row-right">
+            <span class="pill pill-file">file ${score}/6</span>
+            <span class="pill ${d.published ? 'pill-pub' : 'pill-draft'}">${d.published ? 'Published' : 'Draft'}</span>
+          </div>
+        </div>`;
+      }).join('');
+
+      main.querySelectorAll('[data-star]').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const d = designs.find((x) => x.id === btn.dataset.star);
+          const { error } = await sb.from('lx_designs').update({ featured: !d.featured }).eq('id', d.id);
+          if (error) return toast(error.message);
+          d.featured = !d.featured;
+          btn.classList.toggle('on', d.featured);
+          toast(d.featured ? 'Featured' : 'Unfeatured');
+        });
+      });
+      main.querySelectorAll('.row-card').forEach((card) => {
+        card.addEventListener('click', () => designEditor(designs.find((x) => x.id === card.dataset.id)));
+      });
+    }
+
+    function renderProjectList() {
+      if (!projects.length) {
+        main.innerHTML = `<div class="empty-state"><div class="ei">🏠</div><h3>No project stories yet</h3></div>`;
+        return;
+      }
+      main.innerHTML = projects.map((p) => `
+        <div class="row-card" data-id="${p.id}">
+          <button class="star-btn ${p.featured ? 'on' : ''}" data-star="${p.id}">★</button>
+          <div>
+            <div class="row-title">${esc(p.title)}</div>
+            <div class="row-sub">${esc(p.location ?? '')}${p.rating ? ` · ${'★'.repeat(p.rating)}` : ''}</div>
+          </div>
+          <div class="row-right">
+            <span class="pill ${p.published ? 'pill-pub' : 'pill-draft'}">${p.published ? 'Published' : 'Draft'}</span>
+          </div>
+        </div>`).join('');
+      main.querySelectorAll('[data-star]').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const p = projects.find((x) => x.id === btn.dataset.star);
+          const { error } = await sb.from('lx_projects').update({ featured: !p.featured }).eq('id', p.id);
+          if (error) return toast(error.message);
+          p.featured = !p.featured;
+          btn.classList.toggle('on', p.featured);
+        });
+      });
+      main.querySelectorAll('.row-card').forEach((card) => {
+        card.addEventListener('click', () => projectEditor(projects.find((x) => x.id === card.dataset.id)));
+      });
+    }
+
+    function renderTeamList() {
+      if (!team.length) {
+        main.innerHTML = `<div class="empty-state"><div class="ei">👥</div><h3>No team members yet</h3></div>`;
+        return;
+      }
+      main.innerHTML = team.map((m) => `
+        <div class="row-card" data-id="${m.id}">
+          <div>
+            <div class="row-title">${esc(m.name)}</div>
+            <div class="row-sub">${esc(m.role ?? '')}${m.permanent ? ' · Permanent' : ''}${m.tilershub_verified ? ' · ✓ Verified' : ''}</div>
+          </div>
+          <div class="row-right">
+            <span class="pill ${m.published ? 'pill-pub' : 'pill-draft'}">${m.published ? 'Published' : 'Hidden'}</span>
+          </div>
+        </div>`).join('');
+      main.querySelectorAll('.row-card').forEach((card) => {
+        card.addEventListener('click', () => teamEditor(team.find((x) => x.id === card.dataset.id)));
+      });
+    }
+
+    /* ── Design editor ── */
+    const DRAWING_SLOTS = [
+      ['render_1', '3D Render 1'], ['render_2', '3D Render 2'],
+      ['render_3', '3D Render 3'], ['render_4', '3D Render 4'],
+      ['civil', 'Civil Drawing'], ['supply_water', 'Supply Water'],
+      ['waste_drainage', 'Waste & Drainage'], ['electrical', 'Electrical'],
+    ];
+
+    async function designEditor(d) {
+      newBtn.style.display = 'none';
+      const isNew = !d;
+      d = d || {
+        name: '', slug: '', space_id: spaces[0]?.id ?? '', collection: 'standard',
+        tagline: '', description: '', starting_price_lkr: 0, min_sqm: null,
+        new_starting_price_lkr: null, renovation_starting_price_lkr: null,
+        highlights: [],
+        cover_image_url: '', video_3d_url: '', video_work_url: '', workflow_text: '',
+        inspiration_image_url: '',
+        featured: false, published: false, sort_order: designs.length + 1,
+      };
+
+      let children = { drawings: [], fixtures: [], materials: [], timeline: [], faq: [], additionalCostPerSqm: null };
+      if (!isNew) {
+        const [dr, fx, mt, tl, fq, ip] = await Promise.all([
+          sb.from('lx_design_drawings').select('*').eq('design_id', d.id),
+          sb.from('lx_design_fixtures').select('*').eq('design_id', d.id).order('sort_order'),
+          sb.from('lx_design_materials').select('*').eq('design_id', d.id).order('sort_order'),
+          sb.from('lx_design_timeline').select('*').eq('design_id', d.id).order('sort_order'),
+          sb.from('lx_design_faq').select('*').eq('design_id', d.id).order('sort_order'),
+          sb.from('lx_design_internal_pricing').select('additional_cost_per_sqm_lkr').eq('design_id', d.id).maybeSingle(),
+        ]);
+        children = { drawings: dr.data ?? [], fixtures: fx.data ?? [], materials: mt.data ?? [], timeline: tl.data ?? [], faq: fq.data ?? [], additionalCostPerSqm: ip.data?.additional_cost_per_sqm_lkr ?? null };
+      } else {
+        children.materials = DEFAULT_MATERIALS.map((m, i) => ({ ...m, sort_order: i }));
+      }
+
+      let subTab = 'basics';
+      const spaceSlug = () => spaces.find((s) => s.id === (gv('f-space') || d.space_id))?.slug ?? 'bathrooms';
+
+      function subTabHtml() {
+        if (subTab === 'basics') return `
+          <div class="fld-row">
+            <div class="fld"><label>Name *</label><input id="f-name" value="${esc(d.name)}" /></div>
+            <div class="fld"><label>Slug</label><input id="f-slug" value="${esc(d.slug)}" placeholder="auto from name" /></div>
+          </div>
+          <div class="fld"><label>Additional cost per m² (LKR) — admin only, hidden from website</label><input id="f-additional-sqm" type="number" min="0" step="1000" value="${children.additionalCostPerSqm ?? ''}" /></div>
+          <div class="fld-row">
+            <div class="fld"><label>Space</label><select id="f-space">${spaces.map((s) => `<option value="${s.id}" ${s.id === d.space_id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>
+            <div class="fld"><label>Collection</label><select id="f-collection">${['standard','premium','signature'].map((c) => `<option ${c === d.collection ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+          </div>
+          <div class="fld"><label>Tagline</label><input id="f-tagline" value="${esc(d.tagline)}" /></div>
+          <div class="fld"><label>Description</label><textarea id="f-desc">${esc(d.description)}</textarea></div>
+          <div class="fld-row">
+            <div class="fld"><label>Card price / lowest starting price (LKR) *</label><input id="f-price" type="number" value="${d.starting_price_lkr || ''}" /></div>
+            <div class="fld"><label>Min size (m², blank = any)</label><input id="f-minsqm" type="number" step="0.5" value="${d.min_sqm ?? ''}" /></div>
+          </div>
+          <div class="fld-row">
+            <div class="fld"><label>New bathroom starting price (LKR)</label><input id="f-new-price" type="number" value="${d.new_starting_price_lkr ?? ''}" /></div>
+            <div class="fld"><label>Renovation starting price (LKR)</label><input id="f-renovation-price" type="number" value="${d.renovation_starting_price_lkr ?? ''}" /></div>
+          </div>
+          <div class="fld"><label>Highlights (one per line, first 3 appear on cards)</label><textarea id="f-highlights">${esc((d.highlights ?? []).join('\n'))}</textarea></div>
+          ${mediaField('f-cover', 'Cover image', d.cover_image_url, 'designs/covers')}
+          ${mediaField('f-inspiration', 'Name inspiration image', d.inspiration_image_url, 'designs/inspiration')}
+          <label class="chk"><input type="checkbox" id="f-featured" ${d.featured ? 'checked' : ''} /> ★ Featured</label>
+          <label class="chk"><input type="checkbox" id="f-published" ${d.published ? 'checked' : ''} /> Published</label>`;
+
+        if (subTab === 'media') return `
+          ${DRAWING_SLOTS.map(([kind, label]) => {
+            const row = children.drawings.find((x) => x.kind === kind);
+            return mediaField(`drawing-${kind}`, label, row?.image_url ?? '', `designs/drawings/${kind}`).replace(`id="drawing-${kind}"`, `id="drawing-${kind}" data-drawing="${kind}"`);
+          }).join('')}
+          <div class="fld"><label>3D walkthrough — YouTube URL</label><input id="f-video3d" value="${esc(d.video_3d_url)}" /></div>
+          <div class="fld"><label>"This design, built" — YouTube URL</label><input id="f-videowork" value="${esc(d.video_work_url)}" /></div>
+          <p class="row-sub">Full YouTube URLs are fine — the video ID is extracted automatically.</p>`;
+
+        if (subTab === 'fixtures') {
+          const cats = FIXTURE_CATEGORIES[spaceSlug()] ?? FIXTURE_CATEGORIES.bathrooms;
+          return `
+          <datalist id="cat-list">${cats.map((c) => `<option value="${esc(c)}">`).join('')}</datalist>
+          <div class="sub-rows" id="fixture-rows">
+            ${children.fixtures.map((f, i) => fixtureRowHtml(f, i)).join('')}
+          </div>
+          <button class="add-row-btn" id="add-fixture">+ Add fixture</button>`;
+        }
+
+        if (subTab === 'materials') return `
+          <div class="sub-rows" id="material-rows">
+            ${children.materials.map((m, i) => `
+              <div class="sub-row" style="grid-template-columns:1fr 1fr 1fr auto" data-i="${i}">
+                <input data-f="category" placeholder="Category" value="${esc(m.category)}" />
+                <input data-f="brand" placeholder="Brand" value="${esc(m.brand)}" />
+                <input data-f="item" placeholder="Item" value="${esc(m.item ?? '')}" />
+                <button class="sub-del" data-del="${i}">✕</button>
+              </div>`).join('')}
+          </div>
+          <button class="add-row-btn" id="add-material">+ Add material</button>`;
+
+        if (subTab === 'workflow') return `
+          <div class="fld"><label>Workflow paragraph</label><textarea id="f-workflow">${esc(d.workflow_text)}</textarea></div>
+          <div class="sub-rows" id="timeline-rows">
+            ${children.timeline.map((t, i) => `
+              <div class="sub-row" style="grid-template-columns:110px 1fr auto" data-i="${i}">
+                <input data-f="week_label" placeholder="Week 1" value="${esc(t.week_label)}" />
+                <input data-f="title" placeholder="Stage title" value="${esc(t.title)}" />
+                <button class="sub-del" data-del="${i}">✕</button>
+                <textarea data-f="description" placeholder="Description" style="grid-column:1/-1">${esc(t.description ?? '')}</textarea>
+              </div>`).join('')}
+          </div>
+          <button class="add-row-btn" id="add-timeline">+ Add timeline step</button>`;
+
+        return `
+          <div class="sub-rows" id="faq-rows">
+            ${children.faq.map((f, i) => `
+              <div class="sub-row" data-i="${i}">
+                <input data-f="question" placeholder="Question" value="${esc(f.question)}" />
+                <textarea data-f="answer" placeholder="Answer">${esc(f.answer)}</textarea>
+                <button class="sub-del" data-del="${i}">✕</button>
+              </div>`).join('')}
+          </div>
+          <button class="add-row-btn" id="add-faq">+ Add question</button>`;
+      }
+
+      function fixtureRowHtml(f, i) {
+        return `
+          <div class="sub-row" style="grid-template-columns:1fr 1fr;gap:6px" data-i="${i}">
+            <input data-f="category" list="cat-list" placeholder="Category" value="${esc(f.category)}" />
+            <input data-f="name" placeholder="Name" value="${esc(f.name)}" />
+            <input data-f="brand" placeholder="Brand" value="${esc(f.brand ?? '')}" />
+            <input data-f="spec" placeholder="Spec" value="${esc(f.spec ?? '')}" />
+            <input data-f="image_url" placeholder="Image URL" value="${esc(f.image_url ?? '')}" style="grid-column:1/-1" />
+            <button class="sub-del" data-del="${i}" style="grid-column:1/-1">✕ Remove</button>
+          </div>`;
+      }
+
+      function collectSubTab() {
+        // Persist current sub-tab's DOM values into d / children before switching or saving
+        if (subTab === 'basics') {
+          d.name = gv('f-name'); d.slug = gv('f-slug') || slugify(gv('f-name'));
+          d.space_id = gv('f-space'); d.collection = gv('f-collection');
+          d.tagline = gv('f-tagline'); d.description = gv('f-desc');
+          d.starting_price_lkr = parseFloat(gv('f-price')) || 0;
+          d.new_starting_price_lkr = gv('f-new-price') ? parseFloat(gv('f-new-price')) : null;
+          d.renovation_starting_price_lkr = gv('f-renovation-price') ? parseFloat(gv('f-renovation-price')) : null;
+          d.min_sqm = gv('f-minsqm') ? parseFloat(gv('f-minsqm')) : null;
+          children.additionalCostPerSqm = gv('f-additional-sqm') ? parseFloat(gv('f-additional-sqm')) : null;
+          d.highlights = gv('f-highlights').split('\n').map((s) => s.trim()).filter(Boolean);
+          d.cover_image_url = gv('f-cover');
+          d.inspiration_image_url = gv('f-inspiration');
+          d.featured = gc('f-featured'); d.published = gc('f-published');
+        } else if (subTab === 'media') {
+          children.drawings = [];
+          document.querySelectorAll('[data-drawing]').forEach((inp) => {
+            if (inp.value.trim()) children.drawings.push({ kind: inp.dataset.drawing, image_url: inp.value.trim() });
+          });
+          d.video_3d_url = gv('f-video3d'); d.video_work_url = gv('f-videowork');
+        } else if (subTab === 'workflow') {
+          d.workflow_text = gv('f-workflow');
+          children.timeline = collectRows('timeline-rows', ['week_label', 'title', 'description']);
+        } else if (subTab === 'fixtures') {
+          children.fixtures = collectRows('fixture-rows', ['category', 'name', 'brand', 'spec', 'image_url']).filter((r) => r.name || r.category);
+        } else if (subTab === 'materials') {
+          children.materials = collectRows('material-rows', ['category', 'brand', 'item']).filter((r) => r.brand);
+        } else if (subTab === 'faq') {
+          children.faq = collectRows('faq-rows', ['question', 'answer']).filter((r) => r.question);
+        }
+      }
+
+      function collectRows(containerId, fields) {
+        const out = [];
+        document.querySelectorAll(`#${containerId} .sub-row`).forEach((row, i) => {
+          const obj = { sort_order: i };
+          fields.forEach((f) => { obj[f] = row.querySelector(`[data-f="${f}"]`)?.value?.trim() || null; });
+          out.push(obj);
+        });
+        return out;
+      }
+
+      function render() {
+        main.innerHTML = `
+          <div class="ed-tabs">
+            ${[['basics','Basics'],['media','Drawings & Media'],['fixtures','Fixtures'],['materials','Materials'],['workflow','Workflow & Timeline'],['faq','Q&A']]
+              .map(([k, l]) => `<button class="ed-tab ${subTab === k ? 'active' : ''}" data-sub="${k}">${l}</button>`).join('')}
+          </div>
+          <div id="sub-body">${subTabHtml()}</div>
+          <div class="save-bar">
+            <button class="btn-save" id="d-save">💾 Save Design</button>
+            ${!isNew ? '<button class="btn-del" id="d-del">Delete</button>' : ''}
+            <button class="btn-cancel" id="d-cancel">Back</button>
+          </div>`;
+
+        main.querySelectorAll('[data-sub]').forEach((b) => b.addEventListener('click', () => { collectSubTab(); subTab = b.dataset.sub; render(); }));
+        bindRowButtons();
+        bindMediaUploads();
+        document.getElementById('d-save').addEventListener('click', save);
+        document.getElementById('d-cancel').addEventListener('click', () => { boot(); });
+        document.getElementById('d-del')?.addEventListener('click', async () => {
+          if (!confirm(`Delete design "${d.name}"? This removes its file contents too.`)) return;
+          const { error } = await sb.from('lx_designs').delete().eq('id', d.id);
+          if (error) return toast(error.message);
+          toast('Design deleted'); boot();
+        });
+      }
+
+      function bindRowButtons() {
+        const adders = {
+          'add-fixture':  () => { collectSubTab(); children.fixtures.push({ category: '', name: '', brand: '', spec: '', image_url: '' }); render(); },
+          'add-material': () => { collectSubTab(); children.materials.push({ category: '', brand: '', item: '' }); render(); },
+          'add-timeline': () => { collectSubTab(); children.timeline.push({ week_label: `Week ${children.timeline.length + 1}`, title: '', description: '' }); render(); },
+          'add-faq':      () => { collectSubTab(); children.faq.push({ question: '', answer: '' }); render(); },
+        };
+        Object.entries(adders).forEach(([id, fn]) => document.getElementById(id)?.addEventListener('click', fn));
+        const listKey = { 'fixture-rows': 'fixtures', 'material-rows': 'materials', 'timeline-rows': 'timeline', 'faq-rows': 'faq' };
+        main.querySelectorAll('.sub-del').forEach((btn) => btn.addEventListener('click', () => {
+          collectSubTab();
+          const container = btn.closest('.sub-rows');
+          const key = listKey[container?.id];
+          if (key) children[key].splice(parseInt(btn.dataset.del), 1);
+          render();
+        }));
+      }
+
+      async function save() {
+        collectSubTab();
+        if (!d.name) { toast('Name is required'); return; }
+        if (!d.slug) d.slug = slugify(d.name);
+        if (!d.starting_price_lkr) { toast('Starting price is required'); return; }
+
+        const row = {
+          slug: d.slug, name: d.name, space_id: d.space_id, collection: d.collection,
+          tagline: d.tagline || null, description: d.description || null,
+          starting_price_lkr: d.starting_price_lkr, min_sqm: d.min_sqm,
+          new_starting_price_lkr: d.new_starting_price_lkr,
+          renovation_starting_price_lkr: d.renovation_starting_price_lkr,
+          cover_image_url: d.cover_image_url || null,
+          inspiration_image_url: d.inspiration_image_url || null,
+          video_3d_url: d.video_3d_url || null, video_work_url: d.video_work_url || null,
+          workflow_text: d.workflow_text || null,
+          highlights: d.highlights ?? [],
+          featured: d.featured, published: d.published, sort_order: d.sort_order ?? 0,
+        };
+
+        let designId = d.id;
+        if (isNew || !designId) {
+          const { data, error } = await sb.from('lx_designs').insert(row).select('id').single();
+          if (error) return toast(error.message);
+          designId = data.id;
+        } else {
+          const { error } = await sb.from('lx_designs').update(row).eq('id', designId);
+          if (error) return toast(error.message);
+        }
+
+        // Children: replace-all per table (admin-scale simplicity)
+        const tables = [
+          ['lx_design_drawings', children.drawings.map((c) => ({ design_id: designId, kind: c.kind, image_url: c.image_url }))],
+          ['lx_design_fixtures', children.fixtures.map((c, i) => ({ design_id: designId, category: c.category || 'Other', name: c.name || '-', brand: c.brand, spec: c.spec, image_url: c.image_url, sort_order: i }))],
+          ['lx_design_materials', children.materials.map((c, i) => ({ design_id: designId, category: c.category || 'Other', brand: c.brand, item: c.item, sort_order: i }))],
+          ['lx_design_timeline', children.timeline.filter((c) => c.title).map((c, i) => ({ design_id: designId, week_label: c.week_label || `Week ${i + 1}`, title: c.title, description: c.description, sort_order: i }))],
+          ['lx_design_faq', children.faq.filter((c) => c.question && c.answer).map((c, i) => ({ design_id: designId, question: c.question, answer: c.answer, sort_order: i }))],
+        ];
+        for (const [table, rows] of tables) {
+          const del = await sb.from(table).delete().eq('design_id', designId);
+          if (del.error) return toast(`${table}: ${del.error.message}`);
+          if (rows.length) {
+            const ins = await sb.from(table).insert(rows);
+            if (ins.error) return toast(`${table}: ${ins.error.message}`);
+          }
+        }
+        const pricingDelete = await sb.from('lx_design_internal_pricing').delete().eq('design_id', designId);
+        if (pricingDelete.error) return toast(`Internal pricing: ${pricingDelete.error.message}`);
+        if (children.additionalCostPerSqm !== null) {
+          const pricingInsert = await sb.from('lx_design_internal_pricing').insert({
+            design_id: designId,
+            additional_cost_per_sqm_lkr: children.additionalCostPerSqm,
+          });
+          if (pricingInsert.error) return toast(`Internal pricing: ${pricingInsert.error.message}`);
+        }
+        toast('Design saved');
+        boot();
+      }
+
+      render();
+    }
+
+    /* ── Project editor ── */
+    async function projectEditor(p) {
+      newBtn.style.display = 'none';
+      const isNew = !p;
+      p = p || {
+        title: '', slug: '', location: '', design_id: null, duration_label: '',
+        project_ref: '', area_label: '', episode_1_url: '', episode_2_url: '',
+        completed_label: '', story: '', before_image_url: '', after_image_url: '',
+        video_url: '', rating: null, review_text: '', review_by: '',
+        featured: false, published: false,
+      };
+      let gallery = [], journey = [], crew = [];
+      if (!isNew) {
+        const [g, j, c] = await Promise.all([
+          sb.from('lx_project_gallery').select('*').eq('project_id', p.id).order('sort_order'),
+          sb.from('lx_project_journey').select('*').eq('project_id', p.id).order('sort_order'),
+          sb.from('lx_project_crew').select('*').eq('project_id', p.id).order('sort_order'),
+        ]);
+        gallery = g.data ?? []; journey = j.data ?? []; crew = c.data ?? [];
+      } else {
+        journey = DEFAULT_JOURNEY_STAGES.map((s, i) => ({ stage: s, date_label: '', note: '', issue: '', fix: '', sort_order: i }));
+      }
+      let rating = p.rating || 0;
+
+      function render() {
+        main.innerHTML = `
+          <div class="fld-row">
+            <div class="fld"><label>Title *</label><input id="p-title" value="${esc(p.title)}" /></div>
+            <div class="fld"><label>Location</label><input id="p-location" value="${esc(p.location)}" /></div>
+          </div>
+          <div class="fld-row">
+            <div class="fld"><label>Design used</label><select id="p-design">
+              <option value="">— none —</option>
+              ${designs.map((d) => `<option value="${d.id}" ${d.id === p.design_id ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}
+            </select></div>
+            <div class="fld"><label>Duration label</label><input id="p-duration" value="${esc(p.duration_label)}" placeholder="4 weeks" /></div>
+          </div>
+          <div class="fld"><label>Completed label</label><input id="p-completed" value="${esc(p.completed_label)}" placeholder="March 2026" /></div>
+          <div class="fld-row">
+            <div class="fld"><label>Project reference</label><input id="p-ref" value="${esc(p.project_ref)}" placeholder="LX-2026-001" /></div>
+            <div class="fld"><label>Area label</label><input id="p-area" value="${esc(p.area_label)}" placeholder="Main family bathroom" /></div>
+          </div>
+          <div class="fld-row">
+            ${mediaField('p-before', 'Before image', p.before_image_url, 'projects/before')}
+            ${mediaField('p-after', 'After image', p.after_image_url, 'projects/after')}
+          </div>
+          <div class="fld"><label>Video URL (YouTube)</label><input id="p-video" value="${esc(p.video_url)}" /></div>
+          <div class="fld-row">
+            <div class="fld"><label>Episode 01 — old space to 3D design</label><input id="p-episode1" value="${esc(p.episode_1_url)}" /></div>
+            <div class="fld"><label>Episode 02 — completed tour</label><input id="p-episode2" value="${esc(p.episode_2_url)}" /></div>
+          </div>
+          ${mediaField('p-gallery', 'Gallery images (one URL per line)', gallery.map((g) => g.image_url).join('\n'), 'projects/gallery', true)}
+          <div class="fld"><label>Story — written about the family</label><textarea id="p-story" style="min-height:130px">${esc(p.story)}</textarea></div>
+
+          <div class="fld"><label>The journey</label></div>
+          <div class="sub-rows" id="journey-rows">
+            ${journey.map((j, i) => `
+              <div class="sub-row" data-i="${i}">
+                <div style="display:grid;grid-template-columns:1fr 130px auto;gap:6px">
+                  <input data-f="stage" placeholder="Stage" value="${esc(j.stage)}" />
+                  <input data-f="date_label" placeholder="When" value="${esc(j.date_label ?? '')}" />
+                  <button class="sub-del" data-del="${i}">✕</button>
+                </div>
+                <textarea data-f="note" placeholder="Note">${esc(j.note ?? '')}</textarea>
+                <input data-f="issue" placeholder="Optional — the issue we found" value="${esc(j.issue ?? '')}" style="border-color:rgba(201,162,75,.4)" />
+                <input data-f="fix" placeholder="Optional — how we fixed it" value="${esc(j.fix ?? '')}" style="border-color:rgba(201,162,75,.4)" />
+              </div>`).join('')}
+          </div>
+          <button class="add-row-btn" id="add-journey">+ Add stage</button>
+
+          <div class="fld"><label>Crew</label></div>
+          <div class="sub-rows" id="crew-rows">
+            ${crew.map((c, i) => `
+              <div class="sub-row" style="grid-template-columns:1fr 1fr;gap:6px" data-i="${i}">
+                <input data-f="name" placeholder="Name" value="${esc(c.name)}" />
+                <input data-f="role" placeholder="Role" value="${esc(c.role ?? '')}" />
+                <input data-f="photo_url" placeholder="Photo URL" value="${esc(c.photo_url ?? '')}" />
+                <label class="chk" style="margin:0"><input type="checkbox" data-f="tilershub_verified" ${c.tilershub_verified ? 'checked' : ''} /> ✓ TILERSHUB Verified</label>
+                <button class="sub-del" data-del="${i}" style="grid-column:1/-1">✕ Remove</button>
+              </div>`).join('')}
+          </div>
+          <button class="add-row-btn" id="add-crew">+ Add crew member</button>
+
+          <div class="fld"><label>Rating</label>
+            <div class="stars-pick" id="p-stars">
+              ${[1,2,3,4,5].map((n) => `<button data-n="${n}" class="${rating >= n ? 'on' : ''}">★</button>`).join('')}
+            </div>
+          </div>
+          <div class="fld-row">
+            <div class="fld"><label>Review text</label><textarea id="p-review">${esc(p.review_text)}</textarea></div>
+            <div class="fld"><label>Review by</label><input id="p-reviewby" value="${esc(p.review_by)}" /></div>
+          </div>
+          <label class="chk"><input type="checkbox" id="p-featured" ${p.featured ? 'checked' : ''} /> ★ Featured</label>
+          <label class="chk"><input type="checkbox" id="p-published" ${p.published ? 'checked' : ''} /> Published</label>
+
+          <div class="save-bar">
+            <button class="btn-save" id="p-save">💾 Save Project</button>
+            ${!isNew ? '<button class="btn-del" id="p-del">Delete</button>' : ''}
+            <button class="btn-cancel" id="p-cancel">Back</button>
+          </div>`;
+
+        document.getElementById('p-stars').querySelectorAll('button').forEach((b) => {
+          b.addEventListener('click', () => {
+            rating = rating === parseInt(b.dataset.n) ? 0 : parseInt(b.dataset.n);
+            document.getElementById('p-stars').querySelectorAll('button').forEach((x) =>
+              x.classList.toggle('on', rating >= parseInt(x.dataset.n)));
+          });
+        });
+        bindMediaUploads();
+        document.getElementById('add-journey').addEventListener('click', () => { collect(); journey.push({ stage: '', date_label: '', note: '', issue: '', fix: '' }); render(); });
+        document.getElementById('add-crew').addEventListener('click', () => { collect(); crew.push({ name: '', role: '', photo_url: '', tilershub_verified: false }); render(); });
+        main.querySelectorAll('.sub-del').forEach((btn) => btn.addEventListener('click', () => {
+          collect();
+          const container = btn.closest('.sub-rows');
+          if (container?.id === 'journey-rows') journey.splice(parseInt(btn.dataset.del), 1);
+          if (container?.id === 'crew-rows') crew.splice(parseInt(btn.dataset.del), 1);
+          render();
+        }));
+        document.getElementById('p-save').addEventListener('click', save);
+        document.getElementById('p-cancel').addEventListener('click', () => boot());
+        document.getElementById('p-del')?.addEventListener('click', async () => {
+          if (!confirm(`Delete project "${p.title}"?`)) return;
+          const { error } = await sb.from('lx_projects').delete().eq('id', p.id);
+          if (error) return toast(error.message);
+          toast('Project deleted'); boot();
+        });
+      }
+
+      function collect() {
+        p.title = gv('p-title'); p.location = gv('p-location');
+        p.design_id = gv('p-design') || null;
+        p.duration_label = gv('p-duration'); p.completed_label = gv('p-completed');
+        p.project_ref = gv('p-ref'); p.area_label = gv('p-area');
+        p.before_image_url = gv('p-before'); p.after_image_url = gv('p-after');
+        p.video_url = gv('p-video'); p.story = gv('p-story');
+        p.episode_1_url = gv('p-episode1'); p.episode_2_url = gv('p-episode2');
+        p.review_text = gv('p-review'); p.review_by = gv('p-reviewby');
+        p.featured = gc('p-featured'); p.published = gc('p-published');
+        gallery = gv('p-gallery').split('\n').map((s) => s.trim()).filter(Boolean).map((u, i) => ({ image_url: u, sort_order: i }));
+        journey = [...document.querySelectorAll('#journey-rows .sub-row')].map((row, i) => ({
+          stage: row.querySelector('[data-f="stage"]').value.trim(),
+          date_label: row.querySelector('[data-f="date_label"]').value.trim() || null,
+          note: row.querySelector('[data-f="note"]').value.trim() || null,
+          issue: row.querySelector('[data-f="issue"]').value.trim() || null,
+          fix: row.querySelector('[data-f="fix"]').value.trim() || null,
+          sort_order: i,
+        }));
+        crew = [...document.querySelectorAll('#crew-rows .sub-row')].map((row, i) => ({
+          name: row.querySelector('[data-f="name"]').value.trim(),
+          role: row.querySelector('[data-f="role"]').value.trim() || null,
+          photo_url: row.querySelector('[data-f="photo_url"]').value.trim() || null,
+          tilershub_verified: row.querySelector('[data-f="tilershub_verified"]').checked,
+          sort_order: i,
+        }));
+      }
+
+      async function save() {
+        collect();
+        if (!p.title) { toast('Title is required'); return; }
+        const row = {
+          slug: p.slug || slugify(p.title), title: p.title, location: p.location || null,
+          design_id: p.design_id, duration_label: p.duration_label || null,
+          project_ref: p.project_ref || null, area_label: p.area_label || null,
+          completed_label: p.completed_label || null, story: p.story || null,
+          before_image_url: p.before_image_url || null, after_image_url: p.after_image_url || null,
+          video_url: p.video_url || null, rating: rating || null,
+          episode_1_url: p.episode_1_url || null, episode_2_url: p.episode_2_url || null,
+          review_text: p.review_text || null, review_by: p.review_by || null,
+          featured: p.featured, published: p.published,
+        };
+        let projectId = p.id;
+        if (isNew || !projectId) {
+          const { data, error } = await sb.from('lx_projects').insert(row).select('id').single();
+          if (error) return toast(error.message);
+          projectId = data.id;
+        } else {
+          const { error } = await sb.from('lx_projects').update(row).eq('id', projectId);
+          if (error) return toast(error.message);
+        }
+        const tables = [
+          ['lx_project_gallery', gallery.map((g) => ({ ...g, project_id: projectId }))],
+          ['lx_project_journey', journey.filter((j) => j.stage).map((j) => ({ ...j, project_id: projectId }))],
+          ['lx_project_crew', crew.filter((c) => c.name).map((c) => ({ ...c, project_id: projectId }))],
+        ];
+        for (const [table, rows] of tables) {
+          const del = await sb.from(table).delete().eq('project_id', projectId);
+          if (del.error) return toast(`${table}: ${del.error.message}`);
+          if (rows.length) {
+            const ins = await sb.from(table).insert(rows);
+            if (ins.error) return toast(`${table}: ${ins.error.message}`);
+          }
+        }
+        toast('Project saved');
+        boot();
+      }
+
+      render();
+    }
+
+    /* ── Team editor ── */
+    function teamEditor(m) {
+      newBtn.style.display = 'none';
+      const isNew = !m;
+      m = m || { name: '', role: '', bio: '', photo_url: '', permanent: false, tilershub_verified: false, published: true, sort_order: team.length + 1 };
+      main.innerHTML = `
+        <div class="fld-row">
+          <div class="fld"><label>Name *</label><input id="t-name" value="${esc(m.name)}" /></div>
+          <div class="fld"><label>Role</label><input id="t-role" value="${esc(m.role)}" /></div>
+        </div>
+        <div class="fld"><label>Bio</label><textarea id="t-bio">${esc(m.bio)}</textarea></div>
+        ${mediaField('t-photo', 'Photo', m.photo_url, 'team')}
+        <label class="chk"><input type="checkbox" id="t-permanent" ${m.permanent ? 'checked' : ''} /> Permanent team (shown on home)</label>
+        <label class="chk"><input type="checkbox" id="t-verified" ${m.tilershub_verified ? 'checked' : ''} /> ✓ TILERSHUB Verified</label>
+        <label class="chk"><input type="checkbox" id="t-published" ${m.published ? 'checked' : ''} /> Published</label>
+        <div class="save-bar">
+          <button class="btn-save" id="t-save">💾 Save</button>
+          ${!isNew ? '<button class="btn-del" id="t-del">Delete</button>' : ''}
+          <button class="btn-cancel" id="t-cancel">Back</button>
+        </div>`;
+      document.getElementById('t-save').addEventListener('click', async () => {
+        const row = {
+          name: gv('t-name'), role: gv('t-role') || null, bio: gv('t-bio') || null,
+          photo_url: gv('t-photo') || null, permanent: gc('t-permanent'),
+          tilershub_verified: gc('t-verified'), published: gc('t-published'),
+          sort_order: m.sort_order ?? 0,
+        };
+        if (!row.name) { toast('Name is required'); return; }
+        const res = isNew
+          ? await sb.from('lx_team_members').insert(row)
+          : await sb.from('lx_team_members').update(row).eq('id', m.id);
+        if (res.error) return toast(res.error.message);
+        toast('Saved'); boot();
+      });
+      bindMediaUploads();
+      document.getElementById('t-cancel').addEventListener('click', () => boot());
+      document.getElementById('t-del')?.addEventListener('click', async () => {
+        if (!confirm(`Remove ${m.name}?`)) return;
+        const { error } = await sb.from('lx_team_members').delete().eq('id', m.id);
+        if (error) return toast(error.message);
+        toast('Removed'); boot();
+      });
+    }
+
+    /* ── Boot ── */
+    async function boot() {
+      if (!(await ensureAuth())) return;
+      main.innerHTML = `<div class="empty-state"><div class="ei">⏳</div><h3>Loading…</h3></div>`;
+      await loadAll();
+      document.querySelectorAll('.tab-btn').forEach((button) => button.classList.toggle('active', button.dataset.tab === tab));
+      if (routeParams.get('action') === 'new') {
+        routeParams.delete('action');
+        history.replaceState({}, '', `${location.pathname}?${new URLSearchParams({ tab })}`);
+        if (tab === 'designs') return designEditor(null);
+        if (tab === 'projects') return projectEditor(null);
+        return teamEditor(null);
+      }
+      renderList();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      main = document.getElementById('main');
+      newBtn = document.getElementById('new-btn');
+
+      if (!SB_URL || !SB_KEY) {
+        document.getElementById('main').innerHTML =
+          `<div class="empty-state"><div class="ei">⚠️</div><h3>Supabase not configured</h3><p>Set PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_ANON_KEY.</p></div>`;
+        return;
+      }
+      sb = createClient(SB_URL, SB_KEY);
+
+      document.querySelectorAll('.tab-btn').forEach((b) => b.addEventListener('click', () => {
+        tab = b.dataset.tab;
+        history.replaceState({}, '', `${location.pathname}?${new URLSearchParams({ tab })}`);
+        document.querySelectorAll('.tab-btn').forEach((x) => x.classList.toggle('active', x === b));
+        renderList();
+      }));
+      newBtn.addEventListener('click', () => {
+        if (tab === 'designs') designEditor(null);
+        else if (tab === 'projects') projectEditor(null);
+        else teamEditor(null);
+      });
+
+      boot();
+    });
+  </script>
+</body>
+</html>
