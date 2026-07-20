@@ -1,12 +1,8 @@
 ---
+export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getProjects, getProjectBySlug, youtubeEmbed } from '../../lib/luxe';
 import { cloudinary, waLink } from '../../lib/luxe-config';
-
-export async function getStaticPaths() {
-  const projects = await getProjects();
-  return projects.map((p) => ({ params: { slug: p.slug } }));
-}
 
 const { slug } = Astro.params;
 const project = await getProjectBySlug(slug!);
