@@ -49,11 +49,10 @@ if (design.slug === 'manel') {
     render_1: '/images/designs/manel/render-1.jpeg',
     render_2: '/images/designs/manel/render-2.jpeg',
     render_3: '/images/designs/manel/render-3.jpeg',
-    render_4: '/images/designs/manel/render-4.jpeg',
-    civil: '/images/designs/manel/sample-civil.svg',
-    supply_water: '/images/designs/manel/sample-supply-water.svg',
-    waste_drainage: '/images/designs/manel/sample-waste-drainage.svg',
-    electrical: '/images/designs/manel/sample-electrical.svg',
+    civil: '/images/designs/manel/sample-civil.webp',
+    supply_water: '/images/designs/manel/sample-supply-water.webp',
+    waste_drainage: '/images/designs/manel/sample-waste-drainage.webp',
+    electrical: '/images/designs/manel/sample-electrical.webp',
   } as const;
   for (const [kind, image_url] of Object.entries(samples)) {
     if (!design.drawings.some((drawing) => drawing.kind === kind)) {
@@ -154,7 +153,7 @@ const productSchema = JSON.stringify({
   <!-- 3D renders -->
   <section class="df-section">
     <h2 class="lxr">The design, rendered</h2>
-    <div class="df-render-grid">
+    <div class="df-render-grid" aria-label="3D render gallery">
       {renders.map((r, i) => (
         <div class="df-render lxr">
           {r
@@ -168,7 +167,7 @@ const productSchema = JSON.stringify({
   <!-- Videos -->
   <section class="df-section">
     <h2 class="lxr">See it move</h2>
-    <div class="df-video-grid">
+    <div class="df-video-grid" aria-label="Design videos">
       <div class="df-video lxr">
         <p class="lx-eyebrow">3D Walkthrough</p>
         {video3d
@@ -188,7 +187,7 @@ const productSchema = JSON.stringify({
   <section class="df-section">
     <h2 class="lxr">Technical drawings</h2>
     <p class="df-note lxr">Samples for a 2.5 m × 2 m (5 m²) bathroom — customised for your bathroom in your design file. Illustrative only; not for construction.</p>
-    <div class="df-tech-grid">
+    <div class="df-tech-grid" aria-label="Technical drawing samples">
       {TECH.map((t) => {
         const dr = design.drawings.find((d) => d.kind === t.kind);
         return (
@@ -359,8 +358,8 @@ const productSchema = JSON.stringify({
 
   .df-section { max-width: 1100px; margin: 0 auto; padding: 2.2rem clamp(1.2rem, 5vw, 4rem); }
   .df-section h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); margin-bottom: 1.2rem; }
-  .df-inspiration { display:grid; grid-template-columns:minmax(180px,320px) 1fr; gap:clamp(1.2rem,4vw,3rem); align-items:center; }
-  .df-inspiration img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:50%; }
+  .df-inspiration { display:grid; grid-template-columns:minmax(150px,240px) 1fr; gap:clamp(1.2rem,4vw,3rem); align-items:center; }
+  .df-inspiration img { width:100%; height:auto; aspect-ratio:1; object-fit:cover; border-radius:50%; }
   .df-inspiration h2 { margin:.25rem 0 .55rem; }
   .df-inspiration p:last-child { max-width:58ch; color:color-mix(in srgb,var(--ink) 72%,transparent); }
   .df-note { font-size: .85rem; font-style: italic; color: color-mix(in srgb, var(--ink) 60%, transparent); margin: -0.6rem 0 1.2rem; }
@@ -517,9 +516,40 @@ const productSchema = JSON.stringify({
     .df-fix-grid { grid-template-columns: repeat(2, 1fr); }
     .df-related { grid-template-columns: 1fr; }
   }
+  @media (max-width: 640px) {
+    .df-hero { gap: 1.15rem; padding-top: 1rem; }
+    .df-section { padding-top: 1.35rem; padding-bottom: 1.35rem; }
+    .df-section h2 { margin-bottom: .8rem; }
+    .df-render-grid,
+    .df-video-grid,
+    .df-tech-grid {
+      display: flex;
+      gap: .8rem;
+      margin-inline: calc(clamp(1.2rem, 5vw, 4rem) * -1);
+      padding-inline: clamp(1.2rem, 5vw, 4rem);
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      scroll-snap-type: inline mandatory;
+      scrollbar-width: none;
+    }
+    .df-render-grid::-webkit-scrollbar,
+    .df-video-grid::-webkit-scrollbar,
+    .df-tech-grid::-webkit-scrollbar { display: none; }
+    .df-render,
+    .df-video,
+    .df-tech {
+      flex: 0 0 min(82vw, 420px);
+      scroll-snap-align: center;
+    }
+    .df-placeholder { min-height: 150px; }
+    .df-note { margin-bottom: .85rem; }
+    .df-tech figcaption { margin-top: .35rem; }
+  }
   @media (max-width: 480px) {
-    .df-inspiration { grid-template-columns:1fr; text-align:center; }
-    .df-inspiration img { width:min(72vw,280px); margin:0 auto; }
+    .df-inspiration { grid-template-columns:112px 1fr; gap:1rem; text-align:left; }
+    .df-inspiration img { width:112px; height:112px; margin:0; }
+    .df-inspiration h2 { font-size:1.35rem; }
+    .df-inspiration p:last-child { font-size:.82rem; line-height:1.5; }
     .df-price-options { grid-template-columns: 1fr; width: 100%; }
     .df-fixture-intro { display: grid; gap: 1rem; }
     .df-fixture-count { display: flex; align-items: center; gap: .65rem; min-width: 0; width: max-content; text-align: left; padding: .75rem 1rem; }
