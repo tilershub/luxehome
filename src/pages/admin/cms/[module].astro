@@ -1,0 +1,15 @@
+---
+import AdminShell from '../../../components/admin/AdminShell.astro';
+import ContentManager from '../../../components/admin/ContentManager.astro';
+import { CMS_MODULES, type CmsModule } from '../../../lib/admin-cms';
+
+export function getStaticPaths() {
+  return CMS_MODULES.map((module) => ({ params: { module: module.slug }, props: { module } }));
+}
+
+const { module } = Astro.props as { module: CmsModule };
+---
+
+<AdminShell title={module.label} active={module.slug}>
+  <ContentManager module={module} />
+</AdminShell>

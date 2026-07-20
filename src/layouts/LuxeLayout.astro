@@ -107,10 +107,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       <header class="lx-nav">
         <a href="/" class="lx-wordmark" aria-label="LUXEhome — Home"><strong>LUXE</strong><em>home</em></a>
         <nav class="lx-nav-links" aria-label="Main">
+          <a href="/">Home</a>
           <a href="/designs">Designs</a>
           <a href="/projects">Projects</a>
+          <a href="/blog">Blog</a>
+          <a href="/shop">Shop</a>
           <a href="/about">About</a>
-          <a href="/contact">Contact</a>
+          <a href="/book-site-inspection">Book inspection</a>
         </nav>
         <a
           href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a project.')}`}
@@ -121,10 +124,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         </button>
       </header>
       <div class="lx-mobile-menu" id="lx-mobile-menu" hidden>
+        <a href="/">Home</a>
         <a href="/designs">Designs</a>
         <a href="/projects">Projects</a>
+        <a href="/blog">Blog</a>
+        <a href="/shop">Shop</a>
         <a href="/about">About</a>
-        <a href="/contact">Contact</a>
+        <a href="/book-site-inspection">Book inspection</a>
         <a
           href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a project.')}`}
           class="lx-mobile-wa" target="_blank" rel="noopener noreferrer"
@@ -144,13 +150,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           <div class="lx-footer-links">
             <a href="/designs">Designs</a>
             <a href="/projects">Projects</a>
+            <a href="/blog">Blog</a>
+            <a href="/shop">Shop</a>
             <a href="/about">About</a>
-            <a href="/contact">Contact</a>
+            <a href="/book-site-inspection">Book inspection</a>
           </div>
           <div class="lx-footer-contact">
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">077 450 3744</a>
             <span>·</span>
             <span>luxehome.lk</span>
+          </div>
+          <div class="lx-footer-legal">
+            <a href="/terms">Terms</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/warranty-terms">Warranty</a>
+            <a href="/payment-cancellation">Payments</a>
           </div>
         </div>
       </footer>
@@ -304,7 +318,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   }
   .lx-mobile-wa { color: var(--sage-deep) !important; font-weight: 500; border-bottom: none !important; }
 
-  @media (max-width: 820px) {
+  @media (max-width: 1120px) {
     .lx-nav-links, .lx-nav-wa { display: none; }
     .lx-nav-burger { display: block; margin-left: auto; }
   }
@@ -328,6 +342,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   .lx-footer-links a:hover { color: var(--gold-soft); }
   .lx-footer-contact { font-size: .85rem; display: flex; gap: .6rem; color: color-mix(in srgb, var(--cream) 70%, transparent); }
   .lx-footer-contact a { color: var(--gold-soft); text-decoration: none; }
+  .lx-footer-legal { display: flex; gap: 1rem; flex-wrap: wrap; padding-top: .7rem; border-top: 1px solid color-mix(in srgb, var(--cream) 15%, transparent); }
+  .lx-footer-legal a { color: color-mix(in srgb, var(--cream) 62%, transparent); font-size: .72rem; text-decoration: none; }
 
   /* ── Shared primitives ── */
   .lx-eyebrow {

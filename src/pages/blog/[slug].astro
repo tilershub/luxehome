@@ -49,7 +49,24 @@ if (!postData) {
   } catch {}
 }
 
-if (!postData) return Astro.redirect('/blog');
+if (!postData) {
+  const fallbackTitles: Record<string, string> = {
+    'what-a-fixed-bathroom-quotation-should-include': 'What a fixed bathroom quotation should actually include',
+    'before-the-first-tile': 'What happens before the first tile is fixed?',
+    'bathroom-under-4sqm': 'How to choose a design for a bathroom under 4m²',
+    'kitchen-storage-first': 'Storage first: planning a kitchen around real habits',
+    'large-format-tile-wall-ready': 'Large-format tile: beautiful, but is your wall ready?',
+    'when-to-book-site-inspection': 'When should you book a site inspection?',
+  };
+  const title = fallbackTitles[slug ?? ''];
+  if (!title) return Astro.redirect('/blog');
+  postData = {
+    slug, title, description: 'Practical guidance from the LUXEhome design and construction team.',
+    excerpt: 'Practical guidance from the LUXEhome design and construction team.', author: 'LUXEhome Team',
+    category: 'Ideas & Advice', reading_time: '5 min read', pub_date: new Date().toISOString(),
+    source: 'db', bodyHtml: `<h2>Start with clarity</h2><p>A successful project begins with documented decisions, a realistic understanding of the existing site, and a complete scope before construction starts.</p><h2>What to ask for</h2><p>Ask for named materials, clear assumptions, drawings where required, a programme, payment stages, exclusions, and a written process for changes.</p><h2>The LUXEhome approach</h2><p>We use the design file and site inspection to resolve these details before the team begins work.</p>`,
+  };
+}
 
 const pubDate = new Date(postData.pub_date ?? postData.pubDate);
 const pubDateISO = pubDate.toISOString();

@@ -1,15 +1,35 @@
 ---
 export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
-import { getDesigns, getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture } from '../../lib/luxe';
+import { getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
 import { formatLKRM, cloudinary, waLink } from '../../lib/luxe-config';
+import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
 const { slug } = Astro.params;
-const design = await getDesignBySlug(slug!);
+const storedDesign = await getDesignBySlug(slug!);
+const catalogueDesign = CATALOGUE_DESIGNS.find((item) => item.slug === slug);
+const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
+  id: '', slug: catalogueDesign.slug, name: catalogueDesign.name, space_id: catalogueDesign.space,
+  collection: catalogueDesign.collection, tagline: catalogueDesign.tagline,
+  description: 'A complete LUXEhome design file, customised for your room and documented before construction begins.',
+  starting_price_lkr: catalogueDesign.startingPrice ?? 0, min_sqm: catalogueDesign.minSqm,
+  cover_image_url: null, video_3d_url: null, video_work_url: null,
+  workflow_text: 'We inspect, customise and approve the complete design file before procurement and construction begin.',
+  highlights: [], featured: false, sort_order: 0,
+  space: { id: catalogueDesign.space, slug: catalogueDesign.space, name: SPACE_PRESENTATION[catalogueDesign.space].name, sinhala_name: null, sort_order: 0 },
+  drawings: [], fixtures: [],
+  materials: [
+    { category: 'Adhesive', brand: 'Swisstek', item: 'Tile Adhesive', sort_order: 0 },
+    { category: 'Grout', brand: 'Swisstek', item: 'Grout', sort_order: 1 },
+    { category: 'Waterproofing', brand: 'Tokyo Super 2K', item: 'Waterproofing', sort_order: 2 },
+    { category: 'Electrical', brand: 'ACL', item: 'Wiring & Cables', sort_order: 3 },
+  ],
+  timeline: [], faq: [],
+} : null);
 if (!design) return Astro.redirect('/designs');
 
 const collectionLabel = design.collection.charAt(0).toUpperCase() + design.collection.slice(1);
-const priceLabel = formatLKRM(design.starting_price_lkr);
+const priceLabel = design.starting_price_lkr > 0 ? formatLKRM(design.starting_price_lkr) : 'Starting price to be confirmed';
 
 const waMessage = `Hi LUXEhome! I'm interested in the "${design.name}" design (${collectionLabel}, ${priceLabel.replace('From ', 'from ')}). Can you send me the full design file?`;
 
@@ -33,7 +53,7 @@ for (const f of design.fixtures) {
   else fixtureGroups.push({ category: f.category, items: [f] });
 }
 
-const related = design.id ? (await getProjects({ designId: design.id })).slice(0, 3) : [];
+const related = storedDesign?.id ? (await getProjects({ designId: storedDesign.id })).slice(0, 3) : [];
 
 const productSchema = JSON.stringify({
   '@context': 'https://schema.org',
@@ -42,13 +62,13 @@ const productSchema = JSON.stringify({
   description: design.tagline ?? design.description ?? '',
   ...(design.cover_image_url ? { image: cloudinary(design.cover_image_url, 1200) } : {}),
   brand: { '@type': 'Brand', name: 'LUXEhome' },
-  offers: {
+  ...(design.starting_price_lkr > 0 ? { offers: {
     '@type': 'Offer',
     price: design.starting_price_lkr,
     priceCurrency: 'LKR',
     availability: 'https://schema.org/InStock',
     url: new URL(`/designs/${design.slug}`, Astro.site ?? 'https://luxehome.lk').href,
-  },
+  }} : {}),
 });
 ---
 

@@ -1,0 +1,11 @@
+---
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+import ContactForm from '../components/ContactForm.astro';
+---
+<LuxeLayout title="Book a Site Inspection — LUXEhome Sri Lanka" description="Book a professional LUXEhome site inspection for a bathroom, kitchen, staircase or floor project in Sri Lanka.">
+  <section class="inspection-hero"><p class="lx-eyebrow">The right first step</p><h1>Book a professional site inspection.</h1><p>We measure, assess existing conditions, understand your priorities and identify the correct design and quotation path.</p></section>
+  <section class="inspection-body"><div class="steps"><article><strong>01</strong><h2>Choose the space</h2><p>Bathroom, kitchen, staircase or floor.</p></article><article><strong>02</strong><h2>Share the property</h2><p>Location, dimensions, photos and preferred timing.</p></article><article><strong>03</strong><h2>Receive confirmation</h2><p>Our team confirms availability and the inspection details on WhatsApp.</p></article></div><div class="form"><ContactForm /></div></section>
+</LuxeLayout>
+<style>
+  .inspection-hero,.inspection-body{width:min(1100px,calc(100% - 34px));margin:auto}.inspection-hero{padding:clamp(3.5rem,8vw,6rem) 0 3rem}.inspection-hero h1{font-size:clamp(3.4rem,8vw,5.6rem);max-width:900px;margin:.7rem 0 1.2rem}.inspection-hero>p:last-child{font:500 1.3rem/1.45 var(--lx-serif);max-width:700px}.inspection-body{display:grid;grid-template-columns:.8fr 1.2fr;gap:2rem;padding-bottom:5rem}.steps{display:grid;gap:12px}.steps article{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:22px}.steps strong{color:var(--gold)}.steps h2{font-size:1.55rem;margin:.3rem 0}.steps p{color:#586057}.form :global(.form-wrap){border-color:#2b322a16!important;border-radius:10px!important}.form :global(label),.form :global(input),.form :global(select),.form :global(textarea),.form :global(button){font-family:var(--lx-sans)!important}@media(max-width:800px){.inspection-body{grid-template-columns:1fr}}
+</style>

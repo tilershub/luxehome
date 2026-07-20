@@ -584,6 +584,20 @@ const { service: defaultService = '' } = Astro.props;
       supabase.from('leads').insert(lead).then(({ error }) => {
         if (error) console.warn('[LUXEHOME] Lead save failed:', error.message);
       });
+      // Keep the existing lead pipeline and also populate the LUXEhome CMS inspection queue.
+      const spaceMap: Record<string, string> = {
+        'Bathroom Construction/Renovation': 'bathrooms', 'Bathroom Tiling': 'bathrooms',
+        'Kitchen Pantry': 'kitchens', 'Pantry Cupboard': 'kitchens',
+        'Staircase Tiling': 'staircases', 'Hand Railing': 'staircases',
+        'Floor Tiling': 'floors',
+      };
+      supabase.from('lx_site_inspections').insert({
+        name: lead.name, phone: lead.phone, location: lead.location,
+        space_slug: spaceMap[svc] ?? null, notes: lead.notes,
+        source_url: lead.source_url, status: 'new',
+      }).then(({ error }) => {
+        if (error) console.warn('[LUXEHOME] Inspection queue save failed:', error.message);
+      });
     }
 
     // ── Meta Pixel + CAPI (hybrid, deduplicated) ──
