@@ -7,6 +7,7 @@ const { module }=Astro.props as {module:CmsModule};
 <script>
   import {createClient} from '@supabase/supabase-js';
   import {LUXE_SUPABASE_KEY as key,LUXE_SUPABASE_URL as url} from '../../lib/luxe-supabase';
+  import {FIXTURE_CATEGORIES} from '../../lib/luxe-config';
   const root=document.getElementById('manager'),modal=document.getElementById('cms-modal'),cfg=JSON.parse(root.dataset.module);
   let sb,rows=[],lookups={spaces:[],designs:[]};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -16,7 +17,7 @@ const { module }=Astro.props as {module:CmsModule};
   async function load(){
     if(!(await auth()))return;
     const relationNames=[...new Set(cfg.fields.filter(f=>f.type==='relation').map(f=>f.relation))];
-    await Promise.all(relationNames.map(async name=>{const table=name==='spaces'?'lx_spaces':'lx_designs',label=name==='spaces'?'name':'name';const {data}=await sb.from(table).select('id,'+label).order(label);lookups[name]=data||[]}));
+    await Promise.all(relationNames.map(async name=>{const table=name==='spaces'?'lx_spaces':'lx_designs',label='name',columns=name==='spaces'?'id,name,slug':'id,name';const {data}=await sb.from(table).select(columns).order(label);lookups[name]=data||[]}));
     const {data,error}=await sb.from(cfg.table).select('*').order(cfg.titleKey);
     if(error)return root.innerHTML=`<div class="panel"><h2>Module unavailable</h2><p>${esc(error.message)}</p></div>`;
     rows=data||[];
@@ -31,6 +32,8 @@ const { module }=Astro.props as {module:CmsModule};
     if(f.type==='textarea')return `<label>${esc(f.label)}<textarea name="${name}" ${f.required?'required':''}>${esc(v)}</textarea></label>`;
     if(f.type==='lines')return `<label>${esc(f.label)}<textarea name="${name}" placeholder="One item per line">${esc(Array.isArray(v)?v.join('\n'):v)}</textarea></label>`;
     if(f.type==='select')return `<label>${esc(f.label)}<select name="${name}">${(f.options||[]).map(o=>`<option value="${esc(o)}" ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
+    if(f.type==='datalist'){const id=`options-${name}`;return `<label>${esc(f.label)}<input name="${name}" list="${id}" value="${esc(v)}" ${f.required?'required':''}><datalist id="${id}">${(f.options||[]).map(o=>`<option value="${esc(o)}"></option>`).join('')}</datalist><small class="field-help">Choose a suggestion or type your own category.</small></label>`}
+    if(f.type==='image')return `<div class="image-field"><label>${esc(f.label)}<input name="${name}" type="url" value="${esc(v)}" placeholder="https://…"></label><span class="image-tools"><label class="upload-button">Upload image<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" data-image-upload="${name}"></label>${v?`<img data-image-preview="${name}" src="${esc(v)}" alt="Fixture preview">`:`<span data-image-preview="${name}" class="image-preview-empty">No image selected</span>`}</span><small class="field-help">Upload to Supabase Storage or paste an image URL.</small></div>`;
     if(f.type==='relation'){const options=lookups[f.relation]||[];return `<label>${esc(f.label)}<select name="${name}" ${f.required?'required':''}><option value="">Not selected</option>${options.map(o=>`<option value="${o.id}" ${o.id===v?'selected':''}>${esc(o.name)}</option>`).join('')}</select></label>`}
     return `<label>${esc(f.label)}<input name="${name}" type="${f.type||'text'}" value="${esc(v)}" ${f.required?'required':''}></label>`;
   }
@@ -49,15 +52,21 @@ const { module }=Astro.props as {module:CmsModule};
   async function renderChildren(parent){
     const holder=document.getElementById('children');
     const groups=await Promise.all(cfg.children.map(async def=>{const {data,error}=await sb.from(def.table).select('*').eq(def.foreignKey,parent.id).order('sort_order',{ascending:true});return {def,items:data||[],error}}));
-    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Design file section</p><h3>${esc(group.def.label)}</h3></div><button data-child-new="${index}">+ Add row</button></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
+    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Design file section</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${group.def.table==='lx_design_fixtures'&&!group.items.length?`<button class="seed" data-fixture-seed="${index}">Create full checklist</button>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
     holder.querySelectorAll('[data-child-new]').forEach(button=>button.onclick=()=>childEditor(groups[Number(button.dataset.childNew)],null,parent));
+    holder.querySelectorAll('[data-fixture-seed]').forEach(button=>button.onclick=()=>seedFixtureSchedule(parent));
     holder.querySelectorAll('[data-child-id]').forEach(el=>{const group=groups[Number(el.dataset.childGroup)];el.onclick=()=>childEditor(group,group.items.find(item=>String(item.id)===el.dataset.childId),parent)});
   }
+  async function seedFixtureSchedule(parent){const space=lookups.spaces.find(s=>s.id===parent.space_id),categories=(FIXTURE_CATEGORIES[space?.slug]||[]).filter(name=>name!=='Other');if(!categories.length)return toast('Select a design space first');if(!confirm(`Create ${categories.length} fixture checklist rows for this ${space.name} design?`))return;const rows=categories.map((category,index)=>({design_id:parent.id,category,name:category,quantity:1,included:true,sort_order:index}));const {error}=await sb.from('lx_design_fixtures').insert(rows);if(error)return toast(error.message);toast('Fixture checklist created');renderChildren(parent)}
+  function bindImageUploads(form){form.querySelectorAll('[data-image-upload]').forEach(input=>input.addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>10485760){e.target.value='';return toast('Image must be 10 MB or smaller')}const target=form.elements[e.target.dataset.imageUpload],ext=(file.name.split('.').pop()||'jpg').replace(/[^a-z0-9]/gi,''),path=`fixtures/${Date.now()}-${crypto.randomUUID()}.${ext}`;e.target.disabled=true;toast('Uploading image…');const {error}=await sb.storage.from('luxehome-media').upload(path,file,{cacheControl:'31536000'});e.target.disabled=false;if(error)return toast(error.message);target.value=sb.storage.from('luxehome-media').getPublicUrl(path).data.publicUrl;const old=form.querySelector(`[data-image-preview="${e.target.dataset.imageUpload}"]`),img=document.createElement('img');img.dataset.imagePreview=e.target.dataset.imageUpload;img.src=target.value;img.alt='Fixture preview';old?.replaceWith(img);toast('Image uploaded') }))}
   function childEditor(group,source,parent){
-    const fresh=!source,row=source||{},def=group.def;
-    modal.innerHTML=`<div class="modal-backdrop"><form id="child-editor" class="modal-card"><div class="formhead"><h2>${fresh?'Add':'Edit'} ${esc(def.label)}</h2><button type="button" id="child-close">Close</button></div><div class="fields one">${def.fields.map(f=>field(f,row[f.key],'child_')).join('')}</div><div class="actions"><button class="save">Save row</button>${fresh?'':`<button type="button" id="child-delete" class="delete">Delete</button>`}</div></form></div>`;
+    const fresh=!source,def=group.def,row=source||{};
+    if(fresh&&def.table==='lx_design_fixtures'){row.quantity=1;row.included=true}
+    const fields=def.table==='lx_design_fixtures'?def.fields.map(f=>f.key==='category'?{...f,options:FIXTURE_CATEGORIES[(lookups.spaces.find(s=>s.id===parent.space_id)||{}).slug]||[]}:f):def.fields;
+    modal.innerHTML=`<div class="modal-backdrop"><form id="child-editor" class="modal-card"><div class="formhead"><h2>${fresh?'Add':'Edit'} ${esc(def.label)}</h2><button type="button" id="child-close">Close</button></div><div class="fields one">${fields.map(f=>field(f,row[f.key],'child_')).join('')}</div><div class="actions"><button class="save">Save row</button>${fresh?'':`<button type="button" id="child-delete" class="delete">Delete</button>`}</div></form></div>`;
     const form=document.getElementById('child-editor');document.getElementById('child-close').onclick=()=>modal.innerHTML='';
-    form.onsubmit=async e=>{e.preventDefault();const payload={...values(form,def.fields,'child_'),[def.foreignKey]:parent.id};const query=fresh?sb.from(def.table).insert(payload):sb.from(def.table).update(payload).eq('id',row.id);const {error}=await query;if(error)return toast(error.message);modal.innerHTML='';toast('Row saved');renderChildren(parent)};
+    bindImageUploads(form);
+    form.onsubmit=async e=>{e.preventDefault();const payload={...values(form,fields,'child_'),[def.foreignKey]:parent.id};const query=fresh?sb.from(def.table).insert(payload):sb.from(def.table).update(payload).eq('id',row.id);const {error}=await query;if(error)return toast(error.message);modal.innerHTML='';toast('Row saved');renderChildren(parent)};
     document.getElementById('child-delete')?.addEventListener('click',async()=>{if(!confirm('Delete this row?'))return;const {error}=await sb.from(def.table).delete().eq('id',row.id);if(error)return toast(error.message);modal.innerHTML='';renderChildren(parent)});
   }
   load();
@@ -84,6 +93,12 @@ const { module }=Astro.props as {module:CmsModule};
   #manager .fields label,#cms-modal .fields label{display:block;min-width:0;color:#43513f;font-size:12px;font-weight:500}
   #manager .fields input,#manager .fields textarea,#manager .fields select,#cms-modal .fields input,#cms-modal .fields textarea,#cms-modal .fields select{display:block;width:100%;margin-top:6px}
   #manager .fields textarea,#cms-modal .fields textarea{min-height:120px;resize:vertical}
+  #manager .field-help,#cms-modal .field-help{display:block;margin-top:6px;color:#788175;font-size:11px;font-weight:400}
+  #manager .image-tools,#cms-modal .image-tools{display:flex;align-items:center;gap:12px;margin-top:10px;padding:10px;background:#efe8db;border-radius:8px}
+  #manager .upload-button,#cms-modal .upload-button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:40px;margin:0;background:#5c6b56;color:#fff;border-radius:7px;padding:9px 13px;font-size:12px;cursor:pointer}
+  #manager .upload-button input,#cms-modal .upload-button input{display:none}
+  #manager .image-tools img,#cms-modal .image-tools img{width:88px;height:66px;object-fit:cover;border-radius:6px;background:#dfe5db}
+  #manager .image-preview-empty,#cms-modal .image-preview-empty{color:#788175;font-size:11px}
   #manager .fields .check,#cms-modal .fields .check{display:flex;align-items:center;gap:9px;min-height:44px}
   #manager .fields .check input,#cms-modal .fields .check input{width:20px;height:20px;margin:0;flex:0 0 auto}
   #manager .actions,#cms-modal .actions{justify-content:flex-start;flex-wrap:wrap}
@@ -91,6 +106,8 @@ const { module }=Astro.props as {module:CmsModule};
   #manager .actions .delete,#cms-modal .actions .delete{background:#9b3e35}
   #manager .child{margin-top:16px}
   #manager .child article{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #2b322a12;cursor:pointer}
+  #manager .child-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+  #manager .child-actions .seed{background:#c9a24b;color:#2b322a}
   #manager .child article span{min-width:0;overflow-wrap:anywhere}
   #manager .child article button{flex:0 0 auto;min-height:36px;background:#efe8db;color:#2b322a;padding:7px 11px}
   #manager .empty{color:#667064;text-align:center;padding:30px 18px}
@@ -108,8 +125,13 @@ const { module }=Astro.props as {module:CmsModule};
     #manager .item>div{display:grid;gap:5px}
     #manager .fields,#cms-modal .fields{grid-template-columns:minmax(0,1fr);gap:13px;margin:18px 0}
     #manager .fields input,#manager .fields textarea,#manager .fields select,#cms-modal .fields input,#cms-modal .fields textarea,#cms-modal .fields select{font-size:16px}
+    #manager .image-tools,#cms-modal .image-tools{align-items:flex-start;flex-direction:column}
+    #manager .image-tools img,#cms-modal .image-tools img{width:100%;height:auto;aspect-ratio:4/3}
+    #manager .upload-button,#cms-modal .upload-button{width:100%}
     #manager .formhead,#manager .child-head,#cms-modal .formhead{align-items:flex-start}
     #manager .child-head{flex-wrap:wrap}
+    #manager .child-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+    #manager .child-actions button{width:100%}
     #manager .actions,#cms-modal .actions{display:grid;grid-template-columns:1fr}
     #manager .actions button,#cms-modal .actions button{width:100%;min-width:0}
     #cms-modal .modal-backdrop{align-items:end;padding:0}

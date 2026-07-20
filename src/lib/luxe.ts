@@ -44,7 +44,9 @@ export interface Design {
 export interface DesignDrawing { kind: DrawingKind; image_url: string; }
 export interface DesignFixture {
   category: string; name: string; brand: string | null;
-  spec: string | null; image_url: string | null; sort_order: number;
+  model_code: string | null; finish: string | null; quantity: number;
+  included: boolean; spec: string | null; notes: string | null;
+  image_url: string | null; image_alt: string | null; sort_order: number;
 }
 export interface DesignMaterial { category: string; brand: string; item: string | null; sort_order: number; }
 export interface DesignTimelineStep { week_label: string; title: string; description: string | null; sort_order: number; }
@@ -139,7 +141,7 @@ export async function getDesignBySlug(slug: string): Promise<DesignFull | null> 
 
   const [drawings, fixtures, materials, timeline, faq] = await Promise.all([
     c.from('lx_design_drawings').select('kind,image_url').eq('design_id', design.id),
-    c.from('lx_design_fixtures').select('category,name,brand,spec,image_url,sort_order').eq('design_id', design.id).order('sort_order'),
+    c.from('lx_design_fixtures').select('category,name,brand,model_code,finish,quantity,included,spec,notes,image_url,image_alt,sort_order').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_materials').select('category,brand,item,sort_order').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_timeline').select('week_label,title,description,sort_order').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_faq').select('question,answer,sort_order').eq('design_id', design.id).order('sort_order'),

@@ -164,32 +164,53 @@ const productSchema = JSON.stringify({
   </section>
 
   <!-- Fixtures -->
-  {fixtureGroups.length > 0 && (
-    <section class="df-section">
-      <h2 class="lxr">Every fixture, named</h2>
+  <section class="df-section df-fixtures">
+      <div class="df-fixture-intro lxr">
+        <div>
+          <p class="lx-eyebrow">Complete fixture schedule</p>
+          <h2>Every fixture, finish and fitting</h2>
+          <p>See exactly what is specified for the {design.name}—from tiles and bathware to taps, shower fittings, lighting and accessories.</p>
+        </div>
+        <div class="df-fixture-count"><strong>{design.fixtures.length}</strong><span>specified items</span></div>
+      </div>
+      {fixtureGroups.length > 0 ? (
+      <>
+      <nav class="df-fixture-nav lxr" aria-label="Fixture categories">
+        {fixtureGroups.map((g) => <a href={`#fixture-${g.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{g.category}<span>{g.items.length}</span></a>)}
+      </nav>
       {fixtureGroups.map((g) => (
-        <div class="df-fix-group">
-          <h3 class="df-fix-cat lxr">{g.category}</h3>
+        <div class="df-fix-group" id={`fixture-${g.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
+          <div class="df-fix-heading lxr"><h3 class="df-fix-cat">{g.category}</h3><span>{g.items.length} {g.items.length === 1 ? 'item' : 'items'}</span></div>
           <div class="df-fix-grid">
             {g.items.map((f) => (
               <div class="df-fix-card lxr">
                 <div class="df-fix-img">
                   {f.image_url
-                    ? <img src={cloudinary(f.image_url, 400)} alt={f.name} loading="lazy" width="400" height="300" />
-                    : <div class="df-placeholder df-placeholder--sm"><span>{f.category}</span></div>}
+                    ? <img src={cloudinary(f.image_url, 600)} alt={f.image_alt || `${f.brand ? `${f.brand} ` : ''}${f.name}`} loading="lazy" width="600" height="450" />
+                    : <div class="df-placeholder df-placeholder--sm"><strong>LUXE</strong><em>home</em><span>{f.category}</span><small>Image being prepared</small></div>}
+                  <span class:list={['df-included', { optional: f.included === false }]}>{f.included === false ? 'Optional upgrade' : 'Included'}</span>
                 </div>
                 <div class="df-fix-body">
                   {f.brand && <p class="lx-eyebrow">{f.brand}</p>}
                   <div class="df-fix-name">{f.name}</div>
+                  <dl class="df-fix-meta">
+                    {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
+                    {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
+                    {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
+                  </dl>
                   {f.spec && <div class="df-fix-spec">{f.spec}</div>}
+                  {f.notes && <div class="df-fix-note">{f.notes}</div>}
                 </div>
               </div>
             ))}
           </div>
         </div>
       ))}
+      </>
+      ) : (
+        <div class="df-fixture-empty lxr"><strong>The full schedule is being prepared.</strong><p>Ask for the design file to receive the confirmed tiles, bathware, tapware, shower, lighting and accessory specification for this design.</p><a href={waLink(waMessage)} target="_blank" rel="noopener noreferrer">Request the fixture schedule →</a></div>
+      )}
     </section>
-  )}
 
   <!-- Materials -->
   {design.materials.length > 0 && (
@@ -350,14 +371,37 @@ const productSchema = JSON.stringify({
   }
 
   /* Fixtures */
-  .df-fix-cat { font-size: 1.15rem; color: var(--sage-deep); margin: 1.6rem 0 .8rem; }
-  .df-fix-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-  .df-fix-card { background: #fff; border: 1px solid var(--cream-deep); border-radius: 6px; overflow: hidden; }
-  .df-fix-img { aspect-ratio: 4 / 3; background: var(--sage-mist); }
+  .df-fixtures { scroll-margin-top: 6rem; }
+  .df-fixture-intro { display: flex; align-items: end; justify-content: space-between; gap: 2rem; padding-bottom: 1.4rem; border-bottom: 1px solid var(--cream-deep); }
+  .df-fixture-intro h2 { margin: .25rem 0 .45rem; }
+  .df-fixture-intro>div:first-child>p:last-child { max-width: 65ch; color: color-mix(in srgb, var(--ink) 72%, transparent); }
+  .df-fixture-count { flex: 0 0 auto; min-width: 120px; text-align: center; background: var(--sage-mist); border-radius: 8px; padding: 1rem; }
+  .df-fixture-count strong,.df-fixture-count span { display: block; }
+  .df-fixture-count strong { font: 600 2.2rem/1 var(--lx-serif); color: var(--sage-deep); }
+  .df-fixture-count span { margin-top: .25rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; }
+  .df-fixture-nav { display: flex; gap: .5rem; overflow-x: auto; padding: 1rem 0 .4rem; scrollbar-width: thin; }
+  .df-fixture-nav a { flex: 0 0 auto; display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--cream-deep); border-radius: 999px; padding: .48rem .8rem; background: #fff; color: var(--ink); text-decoration: none; font-size: .75rem; }
+  .df-fixture-nav a span { display: grid; place-items: center; min-width: 20px; height: 20px; border-radius: 50%; background: var(--sage-mist); color: var(--sage-deep); font-size: .65rem; }
+  .df-fix-group { padding-top: 1.4rem; scroll-margin-top: 6rem; }
+  .df-fix-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
+  .df-fix-heading>span { color: color-mix(in srgb, var(--ink) 55%, transparent); font-size: .72rem; }
+  .df-fix-cat { font-size: 1.35rem; color: var(--sage-deep); margin: 0; }
+  .df-fix-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .df-fix-card { background: #fff; border: 1px solid var(--cream-deep); border-radius: 8px; overflow: hidden; box-shadow: 0 5px 18px rgba(43,50,42,.05); }
+  .df-fix-img { position: relative; aspect-ratio: 4 / 3; background: var(--sage-mist); }
   .df-fix-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .df-fix-body { padding: .8rem .9rem 1rem; }
-  .df-fix-name { font-weight: 500; font-size: .95rem; margin-top: .15rem; }
-  .df-fix-spec { font-size: .78rem; color: color-mix(in srgb, var(--ink) 62%, transparent); margin-top: .2rem; }
+  .df-included { position: absolute; top: .65rem; left: .65rem; border-radius: 999px; padding: .32rem .6rem; background: var(--sage-deep); color: #fff; font-size: .62rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+  .df-included.optional { background: var(--gold); color: var(--ink); }
+  .df-fix-body { padding: .9rem 1rem 1.05rem; }
+  .df-fix-name { font-family: var(--lx-serif); font-weight: 600; font-size: 1.15rem; line-height: 1.15; margin-top: .2rem; }
+  .df-fix-meta { display: grid; grid-template-columns: auto 1fr; gap: .15rem .65rem; margin: .65rem 0 0; font-size: .72rem; }
+  .df-fix-meta dt { color: color-mix(in srgb, var(--ink) 52%, transparent); }
+  .df-fix-meta dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+  .df-fix-spec { font-size: .78rem; color: color-mix(in srgb, var(--ink) 68%, transparent); margin-top: .65rem; white-space: pre-line; }
+  .df-fix-note { border-top: 1px solid var(--cream-deep); margin-top: .7rem; padding-top: .6rem; color: var(--sage-deep); font-size: .72rem; font-style: italic; }
+  .df-fixture-empty { margin-top: 1.2rem; padding: 1.4rem; background: #fff; border: 1px dashed var(--sage); border-radius: 8px; }
+  .df-fixture-empty p { max-width: 65ch; margin: .35rem 0 .7rem; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+  .df-fixture-empty a { color: var(--sage-deep); font-weight: 600; }
 
   /* Materials chips */
   .df-chips { display: flex; flex-wrap: wrap; gap: .6rem; }
@@ -422,6 +466,9 @@ const productSchema = JSON.stringify({
     .df-related { grid-template-columns: 1fr; }
   }
   @media (max-width: 480px) {
+    .df-fixture-intro { display: grid; gap: 1rem; }
+    .df-fixture-count { display: flex; align-items: center; gap: .65rem; min-width: 0; width: max-content; text-align: left; padding: .75rem 1rem; }
+    .df-fixture-count span { margin: 0; }
     .df-fix-grid { grid-template-columns: 1fr; }
     .df-cta .lx-btn-wa { width: 100%; }
   }
