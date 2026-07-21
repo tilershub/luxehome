@@ -30,7 +30,7 @@ export const CATALOGUE_DESIGNS: CatalogueDesign[] = [
   design('bathrooms', 'premium', 'Sandun', 'Natural warmth with a tailored finish.', 1_850_000, 4.5),
   design('bathrooms', 'premium', 'Orchid', 'Refined contrast with hotel-like comfort.', 2_100_000, 5),
   design('bathrooms', 'signature', 'Manel', 'Sculptural, serene and unmistakably special.', 2_060_000, 5, 2_175_000, '/images/designs/manel/cover.jpeg'),
-  design('bathrooms', 'signature', 'Binara', 'A generous retreat built around ritual.', 3_000_000, 7),
+  design('bathrooms', 'signature', 'Binara', 'A generous retreat built around ritual.', 3_000_000, 7, null, '/images/designs/binara/cover.jpeg'),
   design('bathrooms', 'signature', 'Idda', 'Our most complete expression of private luxury.', 3_600_000, 8),
 
   design('kitchens', 'standard', 'Rampe', 'Fresh, light and beautifully organised for everyday cooking.'),

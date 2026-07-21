@@ -62,6 +62,21 @@ if (design.slug === 'manel') {
   }
 }
 
+// Repository-backed Binara photos keep the canonical page complete even before
+// the same assets are uploaded through the CMS. CMS values always win.
+if (design.slug === 'binara') {
+  design.cover_image_url ||= '/images/designs/binara/cover.jpeg';
+  const samples = {
+    render_1: '/images/designs/binara/render-1.jpeg',
+    render_2: '/images/designs/binara/render-2.jpeg',
+  } as const;
+  for (const [kind, image_url] of Object.entries(samples)) {
+    if (!design.drawings.some((drawing) => drawing.kind === kind)) {
+      design.drawings.push({ kind: kind as keyof typeof samples, image_url });
+    }
+  }
+}
+
 const collectionLabel = design.collection.charAt(0).toUpperCase() + design.collection.slice(1);
 const priceLabel = design.starting_price_lkr > 0 ? formatLKRM(design.starting_price_lkr) : 'Starting price to be confirmed';
 const newPriceLabel = design.new_starting_price_lkr ? formatLKRM(design.new_starting_price_lkr) : null;
