@@ -2,10 +2,10 @@
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { waLink } from '../lib/luxe-config';
 const spaces = [
-  { name: 'Bathrooms', href: '/designs?space=bathrooms', image: '/hero-bathroom-card.webp', eyebrow: 'The floral collection', copy: 'Complete bathroom designs, documented fixture by fixture.' },
-  { name: 'Kitchens', href: '/designs?space=kitchens', image: '/hero-kitchen-card.svg', eyebrow: 'The spice collection', copy: 'Sri Lankan character shaped into beautifully practical kitchens.' },
-  { name: 'Staircases', href: '/designs?space=staircases', image: '/hero-staircase-card.webp', eyebrow: 'The highland collection', copy: 'Architectural staircases designed as part of the home.' },
-  { name: 'Floors', href: '/designs?space=floors', image: '/floor-tiling-hero.svg', eyebrow: 'The landscape collection', copy: 'Material-led floors with every transition carefully resolved.' },
+  { name: 'Bathrooms', href: '/bathroom-designs', image: '/spaces/bathroom.webp', eyebrow: 'The floral collection', copy: 'Complete bathroom designs, documented fixture by fixture.' },
+  { name: 'Kitchens', href: '/kitchen-designs', image: '/spaces/kitchen.webp', eyebrow: 'The spice collection', copy: 'Sri Lankan character shaped into beautifully practical kitchens.' },
+  { name: 'Staircases', href: '/staircase-designs', image: '/spaces/staircase.webp', eyebrow: 'The highland collection', copy: 'Architectural staircases designed as part of the home.' },
+  { name: 'Floors', href: '/floor-designs', image: '/spaces/floor.webp', eyebrow: 'The landscape collection', copy: 'Material-led floors with every transition carefully resolved.' },
 ];
 ---
 <LuxeLayout title="Your home, fully resolved. — LUXEhome" description="Choose a complete, documented design with an honest starting price, specified materials and a trusted Sri Lankan design-and-build team.">
@@ -20,7 +20,7 @@ const spaces = [
     <div class="space-card-grid">
       {spaces.map((space) => (
         <a class="space-card lxr" href={space.href} aria-label={`Browse ${space.name} designs`}>
-          <img src={space.image} alt={`${space.name} design collection`} loading="lazy" width="760" height="560" />
+          <img src={space.image} alt={`${space.name} design collection`} loading="lazy" width="900" height="506" />
           <span class="space-shade" aria-hidden="true"></span>
           <span class="space-copy"><small>{space.eyebrow}</small><strong>{space.name}</strong><em>{space.copy}</em><b>Explore designs <span>→</span></b></span>
         </a>
