@@ -75,10 +75,12 @@ export interface LuxeProject {
   project_ref: string | null; area_label: string | null;
   design_id: string | null; duration_label: string | null;
   completed_label: string | null; story: string | null;
+  client_requirements?: string | null; estimate_label?: string | null;
   before_image_url: string | null; after_image_url: string | null;
   video_url: string | null;
   episode_1_url: string | null; episode_2_url: string | null;
   rating: number | null; review_text: string | null; review_by: string | null;
+  review_screenshot_url?: string | null;
   featured: boolean;
   design?: Pick<Design, 'slug' | 'name' | 'collection'> | null;
 }
@@ -87,6 +89,7 @@ export interface ProjectGalleryImage { image_url: string; sort_order: number; }
 export interface ProjectJourneyStage {
   stage: string; date_label: string | null; note: string | null;
   issue: string | null; fix: string | null; sort_order: number;
+  image_urls?: string[] | null;
 }
 export interface ProjectCrewMember {
   name: string; role: string | null; photo_url: string | null;
@@ -194,7 +197,9 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
 
   const [gallery, journey, crew] = await Promise.all([
     c.from('lx_project_gallery').select('image_url,sort_order').eq('project_id', project.id).order('sort_order'),
-    c.from('lx_project_journey').select('stage,date_label,note,issue,fix,sort_order').eq('project_id', project.id).order('sort_order'),
+    // Select all fields so deployments remain compatible while the additive
+    // diary-photo column migration is being rolled out.
+    c.from('lx_project_journey').select('*').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_crew').select('name,role,photo_url,tilershub_verified,sort_order').eq('project_id', project.id).order('sort_order'),
   ]);
 

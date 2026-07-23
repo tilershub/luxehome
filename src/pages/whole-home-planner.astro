@@ -1,13 +1,194 @@
 ---
-import LuxeLayout from '../layouts/LuxeLayout.astro'; import { PLANNER } from '../lib/luxe-config';
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+import { PLANNER } from '../lib/luxe-config';
+
+const collections = Object.entries(PLANNER.collections).map(([key, value]) => ({ key, ...value }));
+const sizes = Object.entries(PLANNER.sizeMultipliers).map(([key, value]) => ({ key, ...value }));
 ---
-<LuxeLayout title="Whole-Home Planner — LUXEhome" description="Build an early investment picture across multiple bathrooms and spaces before booking your LUXEhome inspection.">
-  <section class="planner-hero"><p class="lx-eyebrow">Plan the whole home</p><h1>Whole-home renovation planner.</h1><p>Use the planner for an initial bathroom investment range, then add kitchens, staircases and floors during the site inspection.</p></section>
-  <section class="planner"><div class="row"><label>Bathrooms</label><div class="counter"><button id="minus">−</button><strong id="count">2</strong><button id="plus">+</button></div></div><div class="row"><label>Collection</label><div id="collections" class="options">{Object.entries(PLANNER.collections).map(([key,value],i)=><button class:list={{on:i===0}} data-price={value.basePrice}>{value.label}</button>)}</div></div><div class="row"><label>Typical size</label><div id="sizes" class="options">{Object.entries(PLANNER.sizeMultipliers).map(([key,value],i)=><button class:list={{on:i===1}} data-factor={value.factor}>{value.label}</button>)}</div></div><div class="total"><span>Estimated from</span><strong id="total"></strong></div><a href="/book-site-inspection">Book site inspection</a><small>Planning estimate only. The fixed quotation follows inspection and design customisation.</small></section>
+<LuxeLayout
+  title="Whole-Home Bathroom Planner — LUXEhome"
+  description="Plan every bathroom in the house — mix Standard, Premium and Signature designs per room and see the combined investment before booking your LUXEhome inspection."
+>
+  <section class="planner-hero">
+    <p class="lx-eyebrow">Plan the whole home</p>
+    <h1>Every bathroom, one plan.</h1>
+    <p>Most homes mix collections — a Signature master bathroom, Standard for the rest. Set each bathroom separately and see the combined investment.</p>
+  </section>
+
+  <section class="planner" aria-label="Whole-home bathroom planner">
+    <noscript><p class="planner-noscript">The planner needs JavaScript. You can also simply <a href="/book-site-inspection">book a site inspection</a> and plan every bathroom with us on site.</p></noscript>
+    <div id="planner-rooms"></div>
+    <button type="button" id="planner-add" class="planner-add">+ Add another bathroom</button>
+    <div class="planner-total">
+      <div><span>Whole-home estimate</span><small id="planner-summary"></small></div>
+      <strong id="planner-grand"></strong>
+    </div>
+    <a href="/book-site-inspection" class="planner-cta">Book site inspection · LKR 10,000</a>
+    <small class="planner-note">Planning estimate from each collection’s starting specification. The fixed quotation follows the site inspection and design customisation of every room.</small>
+  </section>
 </LuxeLayout>
-<script is:inline>
-  (()=>{let count=2,price=1000000,factor=1;const c=document.getElementById('count'),t=document.getElementById('total');const draw=()=>{c.textContent=count;t.textContent='LKR '+(count*price*factor/1000000).toFixed(2).replace(/\.00$/,'')+' M'};document.getElementById('minus').onclick=()=>{count=Math.max(1,count-1);draw()};document.getElementById('plus').onclick=()=>{count=Math.min(10,count+1);draw()};document.querySelectorAll('#collections button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#collections button').forEach(x=>x.classList.remove('on'));b.classList.add('on');price=Number(b.dataset.price);draw()});document.querySelectorAll('#sizes button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#sizes button').forEach(x=>x.classList.remove('on'));b.classList.add('on');factor=Number(b.dataset.factor);draw()});draw()})();
+
+<script is:inline define:vars={{ collections, sizes }}>
+  (() => {
+    const roomsEl = document.getElementById('planner-rooms');
+    const addBtn = document.getElementById('planner-add');
+    const grandEl = document.getElementById('planner-grand');
+    const summaryEl = document.getElementById('planner-summary');
+    if (!roomsEl || !addBtn || !grandEl || !summaryEl) return;
+
+    const MAX_ROOMS = 8;
+    let rooms = [
+      { collection: 'signature', size: 'standard' },
+      { collection: 'standard', size: 'compact' },
+    ];
+
+    const byKey = (list, key) => list.find((item) => item.key === key);
+    const priceOf = (room) => byKey(collections, room.collection).basePrice * byKey(sizes, room.size).factor;
+    const fmt = (rupees) => {
+      const m = rupees / 1_000_000;
+      return `LKR ${m >= 10 ? m.toFixed(1).replace(/\.0$/, '') : (Math.round(m * 100) / 100)}M`;
+    };
+
+    function chipGroup(list, current, label) {
+      return `<div class="pr-field"><span>${label}</span><div class="pr-chips">${list.map((item) =>
+        `<button type="button" data-key="${item.key}" class="${item.key === current ? 'on' : ''}">${item.label}</button>`
+      ).join('')}</div></div>`;
+    }
+
+    function render() {
+      roomsEl.innerHTML = rooms.map((room, i) => `
+        <article class="pr-room" data-index="${i}">
+          <header>
+            <h2>Bathroom ${String(i + 1).padStart(2, '0')}</h2>
+            <div class="pr-head-end">
+              <strong>From ${fmt(priceOf(room))}</strong>
+              ${rooms.length > 1 ? '<button type="button" class="pr-remove" aria-label="Remove this bathroom">Remove</button>' : ''}
+            </div>
+          </header>
+          <div class="pr-collection">${chipGroup(collections, room.collection, 'Collection')}</div>
+          <div class="pr-size">${chipGroup(sizes, room.size, 'Typical size')}</div>
+        </article>`).join('');
+
+      const total = rooms.reduce((sum, room) => sum + priceOf(room), 0);
+      grandEl.textContent = `From ${fmt(total)}`;
+      const counts = collections
+        .map((c) => ({ label: c.label, n: rooms.filter((room) => room.collection === c.key).length }))
+        .filter((c) => c.n > 0)
+        .map((c) => `${c.n} × ${c.label}`)
+        .join(' · ');
+      summaryEl.textContent = `${rooms.length} bathroom${rooms.length > 1 ? 's' : ''} — ${counts}`;
+      addBtn.hidden = rooms.length >= MAX_ROOMS;
+    }
+
+    roomsEl.addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      const roomEl = event.target.closest('.pr-room');
+      if (!button || !roomEl) return;
+      const index = Number(roomEl.dataset.index);
+      if (button.classList.contains('pr-remove')) {
+        rooms.splice(index, 1);
+      } else if (button.dataset.key) {
+        const field = button.closest('.pr-collection') ? 'collection' : 'size';
+        rooms[index][field] = button.dataset.key;
+      } else {
+        return;
+      }
+      render();
+    });
+
+    addBtn.addEventListener('click', () => {
+      if (rooms.length < MAX_ROOMS) rooms.push({ collection: 'standard', size: 'standard' });
+      render();
+    });
+
+    render();
+  })();
 </script>
+
 <style>
-  .planner-hero,.planner{width:min(800px,calc(100% - 34px));margin:auto}.planner-hero{padding:clamp(3.5rem,8vw,6rem) 0 3rem}.planner-hero h1{font-size:clamp(3.4rem,8vw,5.3rem);margin:.7rem 0 1rem}.planner-hero>p:last-child{font:500 1.3rem/1.45 var(--lx-serif)}.planner{background:#fff;border:1px solid #2b322a16;border-radius:12px;padding:30px;margin-bottom:5rem}.row{padding:18px 0;border-bottom:1px solid #2b322a16}.row>label{display:block;font-weight:500;margin-bottom:10px}.counter,.options{display:flex;gap:8px;flex-wrap:wrap}.counter button,.options button{border:1px solid var(--sage);background:transparent;padding:9px 14px;border-radius:99px}.counter strong{padding:8px 16px}.options button.on{background:var(--sage-deep);color:#fff}.total{padding:28px 0;display:flex;justify-content:space-between;align-items:center}.total strong{font:600 2rem var(--lx-serif)}.planner>a{display:block;text-align:center;background:var(--sage-deep);color:#fff;padding:14px;text-decoration:none}.planner small{display:block;margin-top:12px;color:#667064}
+  .planner-hero, .planner { width: min(880px, calc(100% - 34px)); margin-inline: auto; }
+  .planner-hero { padding: clamp(3.2rem, 8vw, 5.5rem) 0 2.4rem; }
+  .planner-hero h1 { margin: .7rem 0 1rem; font-size: clamp(3.2rem, 8vw, 5.2rem); }
+  .planner-hero > p:last-child { max-width: 640px; font: 500 1.25rem/1.5 var(--lx-serif); }
+
+  .planner { margin-bottom: 5rem; }
+  .planner-noscript { padding: 1rem 1.2rem; border: 1px solid var(--gold); border-radius: 8px; background: #fff; }
+  .planner-noscript a { color: var(--sage-deep); font-weight: 600; }
+
+  .pr-room {
+    margin-bottom: .8rem;
+    padding: 1.2rem 1.3rem 1.35rem;
+    border: 1px solid var(--cream-deep);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .pr-room header { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: .9rem; }
+  .pr-room h2 { font-size: 1.45rem; }
+  .pr-head-end { display: flex; align-items: baseline; gap: .9rem; }
+  .pr-head-end > strong { font: 600 1.1rem var(--lx-serif); color: var(--sage-deep); white-space: nowrap; }
+  .pr-remove { border: 0; background: none; color: color-mix(in srgb, var(--ink) 48%, transparent); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .pr-remove:hover { color: #9b493d; }
+
+  .pr-field { margin-bottom: .75rem; }
+  .pr-field:last-child { margin-bottom: 0; }
+  .pr-field > span { display: block; margin-bottom: .4rem; font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--sage-deep); }
+  .pr-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .pr-chips button {
+    padding: .5rem .95rem;
+    border: 1px solid var(--sage);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    font-size: .78rem;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .pr-chips button.on { background: var(--sage-deep); border-color: var(--sage-deep); color: #fff; }
+
+  .planner-add {
+    width: 100%;
+    margin: .2rem 0 1rem;
+    padding: .85rem;
+    border: 1px dashed var(--sage);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--sage-deep);
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .planner-add:hover { background: var(--sage-mist); }
+
+  .planner-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.4rem 1.3rem;
+    border-radius: 10px;
+    background: var(--sage-deep);
+    color: var(--cream);
+  }
+  .planner-total span { display: block; color: var(--gold-soft); font-size: .68rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+  .planner-total small { display: block; margin-top: .25rem; color: rgba(247,243,235,.72); font-size: .74rem; }
+  .planner-total strong { font: 600 clamp(1.6rem, 4vw, 2.2rem) var(--lx-serif); color: var(--gold-soft); white-space: nowrap; }
+
+  .planner-cta {
+    display: block;
+    margin-top: .8rem;
+    padding: .95rem;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 500;
+  }
+  .planner-note { display: block; margin-top: .8rem; color: color-mix(in srgb, var(--ink) 55%, transparent); font-size: .72rem; }
+
+  @media (max-width: 560px) {
+    .pr-room header { flex-wrap: wrap; }
+    .planner-total { flex-direction: column; align-items: flex-start; gap: .5rem; }
+  }
 </style>
