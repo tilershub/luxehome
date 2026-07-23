@@ -1,29 +1,26 @@
 ---
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
+import VideoCard from '../../components/luxe/VideoCard.astro';
 import { getProjects, getProjectBySlug, youtubeEmbed, type ProjectFull } from '../../lib/luxe';
 import { cloudinary, waLink } from '../../lib/luxe-config';
 
 export async function getStaticPaths() {
   const stored = await getProjects();
-  const slugs = new Set(['kotte-family-bathroom', 'avissawella-ensuite', 'matara-bathroom-makeover', ...stored.map((project) => project.slug)]);
-  return [...slugs].map((slug) => ({ params: { slug } }));
+  return stored
+    .filter((project) => project.after_image_url)
+    .map((project) => ({ params: { slug: project.slug } }));
 }
 
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);
-const fallbackNames: Record<string, [string,string,string]> = {
-  'kotte-family-bathroom':['Kotte Family Bathroom','Kotte','Nelum'],
-  'avissawella-ensuite':['Avissawella Ensuite','Avissawella','Araliya'],
-  'matara-bathroom-makeover':['Matara Bathroom Makeover','Matara','Manel'],
-};
-const sample=fallbackNames[slug!];
-const project:ProjectFull|null=storedProject??(sample?{id:'',slug:slug!,title:sample[0],location:sample[1],project_ref:'Project story',area_label:'Family bathroom',design_id:null,duration_label:'Programme documented',completed_label:'Published story',story:'This project began with the family’s practical needs and a clear ambition for a calmer, better-resolved room. The design file aligned the layout, fixtures and construction work before the team began.\n\nDuring opening-up work, the team documented the existing condition, agreed the correct repair and kept the family informed before proceeding.',before_image_url:null,after_image_url:null,video_url:null,episode_1_url:null,episode_2_url:null,rating:5,review_text:'The process was clear and we always knew what was happening next.',review_by:'LUXEhome client',featured:true,design:{slug:sample[2].toLowerCase(),name:sample[2],collection:'premium'},gallery:[],journey:[{stage:'First inquiry',date_label:'Week 0',note:'The family shared the room, priorities and location.',issue:null,fix:null,sort_order:0},{stage:'Site visit',date_label:'Week 0',note:'Measurements and existing conditions were documented.',issue:'Hidden deterioration was found behind an existing finish.',fix:'The affected area was opened, repaired and checked before the new system continued.',sort_order:1},{stage:'Design & approval',date_label:'Week 1',note:'The complete design file and quotation were approved.',issue:null,fix:null,sort_order:2},{stage:'Clean & handover',date_label:'Final week',note:'Testing, snagging, cleaning and warranty handover.',issue:null,fix:null,sort_order:3}],crew:[]}:null);
+const project: ProjectFull | null = storedProject;
 if (!project) return Astro.redirect('/projects');
 
 const video = youtubeEmbed(project.video_url);
 const episode1 = youtubeEmbed(project.episode_1_url);
 const episode2 = youtubeEmbed(project.episode_2_url);
 const hasSlider = !!(project.before_image_url && project.after_image_url);
+const projectVideoCover = project.after_image_url || project.before_image_url;
 
 const waMessage = project.design
   ? `Hi LUXEhome! I saw the "${project.title}" project and I'd like something like it for my home (the ${project.design.name} design).`
@@ -87,12 +84,28 @@ const reviewSchema = project.rating ? JSON.stringify({
   )}
 
   <!-- Story -->
-  {(episode1 || episode2) && (
+  {(episode1 || episode2) && projectVideoCover && (
     <section class="ps-section">
       <h2 class="lxr">Old Space → 3D Design → Construction → Final Reveal</h2>
-      <div class="ps-episodes">
-        {episode1 && <div><p class="lx-eyebrow">Episode 01 · Old space to 3D design</p><iframe src={episode1} title={`${project.title} episode 1`} loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe></div>}
-        {episode2 && <div><p class="lx-eyebrow">Episode 02 · Completed tour</p><iframe src={episode2} title={`${project.title} episode 2`} loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe></div>}
+      <div class="ps-video-cards">
+        {episode1 && (
+          <VideoCard
+            title={`${project.title} — Episode 01`}
+            embedUrl={episode1}
+            coverImage={cloudinary(project.before_image_url || projectVideoCover, 700)}
+            eyebrow="Old space to 3D design"
+            description="Tap to watch episode one in its original vertical format."
+          />
+        )}
+        {episode2 && (
+          <VideoCard
+            title={`${project.title} — Episode 02`}
+            embedUrl={episode2}
+            coverImage={cloudinary(project.after_image_url || projectVideoCover, 700)}
+            eyebrow="Completed bathroom tour"
+            description="Tap to watch the final reveal in its original vertical format."
+          />
+        )}
       </div>
     </section>
   )}
@@ -106,12 +119,18 @@ const reviewSchema = project.rating ? JSON.stringify({
   )}
 
   <!-- Video + gallery -->
-  {(video || project.gallery.length > 0) && (
+  {((video && projectVideoCover) || project.gallery.length > 0) && (
     <section class="ps-section">
       <h2 class="lxr">Inside the build</h2>
-      {video && (
-        <div class="ps-video lxr">
-          <iframe src={video} title={`${project.title} video`} loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+      {video && projectVideoCover && (
+        <div class="ps-video-cards ps-video-cards--single">
+          <VideoCard
+            title={`${project.title} — Project Walkthrough`}
+            embedUrl={video}
+            coverImage={cloudinary(projectVideoCover, 700)}
+            eyebrow="Project walkthrough"
+            description="Tap to watch the vertical project walkthrough."
+          />
         </div>
       )}
       {project.gallery.length > 0 && (
@@ -285,10 +304,9 @@ const reviewSchema = project.rating ? JSON.stringify({
 
   .ps-story p { margin-bottom: 1rem; max-width: 65ch; color: color-mix(in srgb, var(--ink) 82%, transparent); }
 
-  .ps-video iframe { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 8px; margin-bottom: 1.2rem; }
-  .ps-episodes { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-  .ps-episodes iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 8px; margin-top: .6rem; }
-  @media (max-width: 700px) { .ps-episodes { grid-template-columns: 1fr; } }
+  .ps-video-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 330px)); gap: 1.2rem; }
+  .ps-video-cards--single { grid-template-columns: minmax(0, 330px); margin-bottom: 1.4rem; }
+  @media (max-width: 700px) { .ps-video-cards { grid-template-columns: minmax(0, 300px); } }
   .ps-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
   .ps-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; display: block; }
 

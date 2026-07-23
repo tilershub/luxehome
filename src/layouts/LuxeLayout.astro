@@ -13,8 +13,8 @@ interface Props {
 }
 
 const {
-  title = 'LUXEhome — Custom Design & Build, Sri Lanka',
-  description = 'Choose a fully documented design — bathrooms, kitchens, staircases and floors — with a fixed quotation, verified teams, and WhatsApp progress updates. Sri Lanka & diaspora.',
+  title = 'LUXEhome — Complete Bathroom Design & Construction, Sri Lanka',
+  description = 'Choose a fully documented bathroom design with clear starting prices, specified materials, verified teams and WhatsApp progress updates.',
   ogImage = 'https://luxehome.lk/og-bathroom.jpg',
   bare = false,
 } = Astro.props;
@@ -109,11 +109,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         <nav class="lx-nav-links" aria-label="Main">
           <a href="/">Home</a>
           <a href="/designs">Designs</a>
-          <a href="/bathroom-designs">Bathrooms</a>
-          <a href="/kitchen-designs">Kitchens</a>
           <a href="/projects">Projects</a>
+          <a href="/how-it-works">How it works</a>
+          <a href="/pricing-guide">Pricing</a>
           <a href="/blog">Blog</a>
-          <a href="/shop">Shop</a>
           <a href="/about">About</a>
           <a href="/book-site-inspection">Book inspection</a>
         </nav>
@@ -127,14 +126,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       </header>
       <div class="lx-mobile-menu" id="lx-mobile-menu" hidden>
         <a href="/">Home</a>
-        <a href="/designs">Designs</a>
-        <a href="/bathroom-designs">Bathroom designs</a>
-        <a href="/kitchen-designs">Kitchen designs</a>
-        <a href="/staircase-designs">Staircase designs</a>
-        <a href="/floor-designs">Floor designs</a>
+        <a href="/designs">Bathroom designs</a>
         <a href="/projects">Projects</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/pricing-guide">Pricing</a>
         <a href="/blog">Blog</a>
-        <a href="/shop">Shop</a>
         <a href="/about">About</a>
         <a href="/book-site-inspection">Book inspection</a>
         <a
@@ -152,16 +148,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       <footer class="lx-footer">
         <div class="lx-footer-inner">
           <a href="/" class="lx-wordmark lx-wordmark--footer"><strong>LUXE</strong><em>home</em></a>
-          <p class="lx-footer-tag">Custom design &amp; build · Sri Lanka<br />A sister brand of TILERSHUB</p>
+          <p class="lx-footer-tag">Complete bathroom design &amp; construction · Sri Lanka<br />A sister brand of TILERSHUB</p>
           <div class="lx-footer-links">
-            <a href="/designs">Designs</a>
-            <a href="/bathroom-designs">Bathrooms</a>
-            <a href="/kitchen-designs">Kitchens</a>
-            <a href="/staircase-designs">Staircases</a>
-            <a href="/floor-designs">Floors</a>
+            <a href="/designs">Bathroom designs</a>
             <a href="/projects">Projects</a>
             <a href="/blog">Blog</a>
-            <a href="/shop">Shop</a>
             <a href="/how-it-works">How it works</a>
             <a href="/materials-brands">Materials</a>
             <a href="/pricing-guide">Pricing</a>

@@ -1,115 +1,49 @@
 ---
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
-import { getProjects, type LuxeProject } from '../../lib/luxe';
-import { cloudinary, waLink } from '../../lib/luxe-config';
+import ProjectCard from '../../components/luxe/ProjectCard.astro';
+import { getProjects } from '../../lib/luxe';
+import { waLink } from '../../lib/luxe-config';
 
-const storedProjects = await getProjects();
-const fallbackProjects = [
-  ['kotte-family-bathroom','Kotte Family Bathroom','Kotte','Nelum','6 weeks'],
-  ['avissawella-ensuite','Avissawella Ensuite','Avissawella','Araliya','5 weeks'],
-  ['matara-bathroom-makeover','Matara Bathroom Makeover','Matara','Manel','7 weeks'],
-].map(([slug,title,location,name,duration],index) => ({ id:'',slug,title,location,project_ref:`LX-STORY-00${index+1}`,area_label:'Family bathroom',design_id:null,duration_label:duration,completed_label:'Project story',story:'A family project documented from the old space through design, construction and final reveal.',before_image_url:null,after_image_url:null,video_url:null,episode_1_url:null,episode_2_url:null,rating:null,review_text:null,review_by:null,featured:index===0,design:{slug:name.toLowerCase(),name,collection:'premium'} })) as LuxeProject[];
-const projects = storedProjects.length ? storedProjects : fallbackProjects;
+const projects = (await getProjects())
+  .filter((project) => project.after_image_url)
+  .sort((a, b) => Number(b.featured) - Number(a.featured));
 ---
 
 <LuxeLayout
-  title="Project Stories — Real LUXEhome Builds, Fully Documented | LUXEhome"
-  description="Every LUXEhome project published in full — before and after, the week-by-week journey, the problems we found and how we fixed them, and the team that built it."
+  title="Completed Bathroom Project Stories — LUXEhome"
+  description="Real LUXEhome bathroom projects documented from inquiry and design through construction, problem-solving, the team and final handover."
 >
   <section class="pj-hero">
-    <p class="lx-eyebrow lxr">Real homes · Honest stories</p>
-    <h1 class="lxr">What we built—and<br /><em>what we learned.</em></h1>
+    <p class="lx-eyebrow lxr">Real bathrooms · Complete stories</p>
+    <h1 class="lxr">From first inquiry<br /><em>to final handover.</em></h1>
     <p class="pj-intro lxr">
-      Every completed project is published in full — including the problems we found on site
-      and exactly how we fixed them. That is the LUXEhome difference.
+      Every published project shows the design, the existing conditions, what we discovered,
+      how we solved it, the construction journey and the team responsible.
     </p>
   </section>
 
   <section class="pj-body">
     {projects.length === 0 ? (
       <div class="pj-empty lxr">
-        <p>Our first fully documented project stories are being written. Ask us on WhatsApp and we will share recent work directly.</p>
-        <a href={waLink('Hi LUXEhome! Can you share photos of your recent projects?')} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">WhatsApp Us</a>
+        <p>Complete project stories are being prepared. We publish them one by one when the full inquiry-to-handover record and real completed photographs are ready.</p>
+        <a href={waLink('Hi LUXEhome! Can you share photos of your recent completed bathroom projects?')} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">Ask for recent work</a>
       </div>
     ) : (
       <div class="pj-grid">
-        {projects.map((p) => (
-          <a href={`/projects/${p.slug}`} class="pj-card lxr">
-            <div class="pj-card-img">
-              {p.before_image_url && p.after_image_url ? (
-                <div class="pj-split">
-                  <div class="pj-split-half"><img src={cloudinary(p.before_image_url, 500)} alt={`${p.title} — before`} loading="lazy" width="500" height="400" /><span>Before</span></div>
-                  <div class="pj-split-half"><img src={cloudinary(p.after_image_url, 500)} alt={`${p.title} — after`} loading="lazy" width="500" height="400" /><span>After</span></div>
-                </div>
-              ) : p.after_image_url ? (
-                <img src={cloudinary(p.after_image_url, 800)} alt={p.title} loading="lazy" width="800" height="560" />
-              ) : (
-                <div class="pj-placeholder"><strong>LUXE</strong><em>home</em></div>
-              )}
-            </div>
-            <div class="pj-card-body">
-              <h2 class="pj-card-title">{p.title}</h2>
-              <p class="pj-card-meta">
-                {p.location}{p.design ? ` · ${p.design.name} design` : ''}{p.duration_label ? ` · ${p.duration_label}` : ''}
-              </p>
-              {p.rating && (
-                <div class="pj-stars" aria-label={`${p.rating} out of 5 stars`}>
-                  {'★'.repeat(p.rating)}{'☆'.repeat(5 - p.rating)}
-                </div>
-              )}
-            </div>
-          </a>
-        ))}
+        {projects.map((project) => <ProjectCard project={project} />)}
       </div>
     )}
   </section>
 </LuxeLayout>
 
 <style>
-  .pj-hero { padding: clamp(3rem, 8vw, 6rem) clamp(1.2rem, 5vw, 4rem) 1rem; max-width: 1100px; margin: 0 auto; }
-  .pj-hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); margin: .6rem 0 1rem; }
+  .pj-hero { max-width: 1100px; margin: 0 auto; padding: clamp(3.2rem, 8vw, 6.5rem) clamp(1.2rem, 5vw, 4rem) 1.4rem; }
+  .pj-hero h1 { margin: .6rem 0 1rem; font-size: clamp(3.1rem, 7vw, 5.2rem); }
   .pj-hero h1 em { color: var(--sage-deep); }
-  .pj-intro { max-width: 54ch; font-size: 1.02rem; color: color-mix(in srgb, var(--ink) 78%, transparent); }
-
-  .pj-body { max-width: 1100px; margin: 0 auto; padding: 1.5rem clamp(1.2rem, 5vw, 4rem) 3rem; }
-  .pj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.6rem; }
-
-  .pj-card {
-    display: block;
-    background: #fff;
-    border: 1px solid var(--cream-deep);
-    border-radius: 6px;
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--ink);
-    transition: transform .25s, box-shadow .25s;
-  }
-  .pj-card:hover { transform: translateY(-4px); box-shadow: 0 14px 34px rgba(43,50,42,.1); }
-
-  .pj-card-img { aspect-ratio: 10 / 6; background: var(--sage-mist); }
-  .pj-card-img > img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  .pj-split { display: grid; grid-template-columns: 1fr 1fr; height: 100%; }
-  .pj-split-half { position: relative; overflow: hidden; }
-  .pj-split-half img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .pj-split-half span {
-    position: absolute; bottom: .6rem; left: .6rem;
-    font-size: .62rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
-    background: color-mix(in srgb, var(--ink) 78%, transparent); color: var(--cream);
-    padding: .22rem .6rem; border-radius: 999px;
-  }
-  .pj-split-half + .pj-split-half { border-left: 2px solid var(--cream); }
-
-  .pj-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; gap: .1rem; color: var(--sage-deep); font-size: 1.3rem; }
-  .pj-placeholder em { font-family: var(--lx-serif); }
-
-  .pj-card-body { padding: 1.1rem 1.3rem 1.3rem; }
-  .pj-card-title { font-size: 1.4rem; }
-  .pj-card-meta { font-size: .82rem; color: color-mix(in srgb, var(--ink) 62%, transparent); margin-top: .2rem; }
-  .pj-stars { color: var(--gold); letter-spacing: .15em; margin-top: .4rem; }
-
-  .pj-empty { text-align: center; padding: 4rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
-  .pj-empty p { max-width: 46ch; color: color-mix(in srgb, var(--ink) 70%, transparent); }
-
+  .pj-intro { max-width: 62ch; font: 500 clamp(1.05rem, 2.4vw, 1.25rem)/1.5 var(--lx-serif); }
+  .pj-body { max-width: 1100px; margin: 0 auto; padding: 1.5rem clamp(1.2rem, 5vw, 4rem) 4rem; }
+  .pj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .pj-empty { display: grid; place-items: center; gap: 1.2rem; padding: 4rem 1rem; text-align: center; }
+  .pj-empty p { max-width: 58ch; color: color-mix(in srgb, var(--ink) 70%, transparent); }
   @media (max-width: 720px) { .pj-grid { grid-template-columns: 1fr; } }
 </style>

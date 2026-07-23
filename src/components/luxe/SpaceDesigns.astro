@@ -5,22 +5,60 @@ import { formatLKRM, waLink } from '../../lib/luxe-config';
 interface Props { space: CatalogueDesign['space']; designs: CatalogueDesign[]; }
 const { space, designs } = Astro.props;
 const presentation = SPACE_PRESENTATION[space];
+const spaceLabel = space.slice(0, -1);
+const publishedDesigns = designs.filter((design) => design.coverImage);
+const hasPublishedDesigns = publishedDesigns.length > 0;
 const collections = [
   { key: 'standard', eyebrow: space === 'staircases' ? 'Simple & enduring' : 'Fresh & versatile' },
   { key: 'premium', eyebrow: 'Elevated & crafted' },
   { key: 'signature', eyebrow: 'Architectural & iconic' },
 ] as const;
 ---
-<section class="space-hero"><p class="lx-eyebrow">{presentation.eyebrow}</p><h1>{presentation.title}</h1><p>Choose a named, documented design and customise it for your home before construction begins.</p></section>
+<section class="space-hero">
+  <p class="lx-eyebrow">{presentation.eyebrow}</p>
+  <h1>{presentation.title}</h1>
+  <p>
+    {hasPublishedDesigns
+      ? 'Choose a named, documented design and customise it for your home before construction begins. New designs are published one by one when their complete decision file is ready.'
+      : `The ${presentation.name.toLowerCase()} collection is in development. We will publish each design only when its renders, pricing, specifications and technical details are complete.`}
+  </p>
+</section>
 <div class="space-body">
-  {collections.map((collection) => <section class="collection">
-    <p class="lx-eyebrow">{collection.eyebrow}</p><h2>{collection.key[0].toUpperCase() + collection.key.slice(1)} Collection</h2>
-    <div class="design-grid">{designs.filter((item) => item.collection === collection.key).map((item) => <a class="design-card" href={`/designs/${item.slug}`}>
-      <div class="art">{item.coverImage ? <img src={item.coverImage} alt={item.name} loading="lazy" /> : <span>{item.name}</span>}</div><div class="body"><div class="meta"><span>{collection.key}</span><span>{item.minSqm ? `Min. ${item.minSqm} m²` : space === 'bathrooms' ? 'Fits any size' : 'Custom sized'}</span></div><h3>{item.name}</h3><p>{item.tagline}</p><strong>{item.startingPrice ? formatLKRM(item.startingPrice) : 'Starting price to be confirmed'}</strong></div>
-    </a>)}</div>
-  </section>)}
+  {!hasPublishedDesigns && (
+    <section class="coming-soon">
+      <p class="lx-eyebrow">Collection in development</p>
+      <h2>Bathrooms are our focus right now.</h2>
+      <p>Explore the completed bathroom designs available today, or ask our team to keep you informed about this collection.</p>
+      <div>
+        <a class="lx-btn-wa" href="/designs">Browse bathroom designs</a>
+        <a class="lx-btn-ghost" href={waLink(`Hi LUXEhome! Please let me know when the ${presentation.name.toLowerCase()} collection is available.`)} target="_blank" rel="noopener noreferrer">Ask about this collection</a>
+      </div>
+    </section>
+  )}
+  {collections.map((collection) => {
+    const group = publishedDesigns.filter((item) => item.collection === collection.key);
+    if (group.length === 0) return null;
+    return <section class="collection">
+      <p class="lx-eyebrow">{collection.eyebrow}</p><h2>{collection.key[0].toUpperCase() + collection.key.slice(1)} Collection</h2>
+      <div class="design-grid">{group.map((item) => <a class="design-card" href={`/designs/${item.slug}`}>
+        <div class="art"><img src={item.coverImage} alt={`${item.name} ${spaceLabel} design`} loading="lazy" /></div>
+        <div class="body">
+          <div class="meta"><span>{collection.key}</span><span>{item.minSqm ? `Minimum ${item.minSqm} m²` : 'Custom fit'}</span></div>
+          <h3>{item.name}</h3><p>{item.tagline}</p>
+          <dl>
+            {item.startingPrice && <><dt>New bathroom</dt><dd>{formatLKRM(item.startingPrice)}</dd></>}
+            {item.renovationStartingPrice && <><dt>Renovation</dt><dd>{formatLKRM(item.renovationStartingPrice)}</dd></>}
+          </dl>
+          <strong>View complete design →</strong>
+        </div>
+      </a>)}</div>
+    </section>;
+  })}
 </div>
-<section class="space-cta"><div><p class="lx-eyebrow">Your {presentation.name.toLowerCase()}, fully resolved</p><h2>Which design feels like home?</h2></div><a href={waLink(`Hi LUXEhome! I would like help choosing a ${space} design.`)} target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a></section>
+{hasPublishedDesigns && (
+  <section class="space-cta"><div><p class="lx-eyebrow">Your {presentation.name.toLowerCase()}, fully resolved</p><h2>Which design feels like home?</h2></div><a href={waLink(`Hi LUXEhome! I would like help choosing a ${space} design.`)} target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a></section>
+)}
 <style>
-  .space-hero,.space-body,.space-cta{width:min(1100px,calc(100% - 34px));margin:auto}.space-hero{padding:clamp(3.5rem,8vw,6.5rem) 0 3.5rem}.space-hero h1{font-size:clamp(3.4rem,7vw,5.5rem);max-width:880px;margin:.7rem 0 1rem}.space-hero>p:last-child{font:500 1.25rem/1.45 var(--lx-serif);max-width:650px}.collection{padding:2rem 0 3.5rem;border-top:1px solid #2b322a1c}.collection h2{font-size:clamp(2.2rem,4vw,3.2rem);margin:.4rem 0 1.5rem}.design-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.design-card{background:#fff;border:1px solid #2b322a16;border-radius:10px;overflow:hidden;text-decoration:none;color:var(--ink)}.art{height:190px;background:var(--sage-mist);display:grid;place-items:center;position:relative;overflow:hidden}.art:has(img):before{content:none}.art:before{content:'';position:absolute;inset:13% 11% 0;background:#5c6b5620;clip-path:polygon(0 0,100% 8%,91% 100%,7% 90%)}.art span{font:italic 1.8rem var(--lx-serif);color:var(--sage-deep);z-index:1}.art img{width:100%;height:100%;object-fit:cover;display:block}.body{padding:18px}.meta{display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;color:#667064}.body h3{font-size:1.8rem;margin:.45rem 0}.body p{color:#586057;min-height:3.2em}.body strong{display:block;margin-top:1rem;font-family:var(--lx-serif);font-size:1.1rem}.space-cta{margin-top:1rem;margin-bottom:4rem;background:var(--sage-deep);color:#fff;border-radius:14px;padding:38px;display:flex;justify-content:space-between;align-items:center;gap:20px}.space-cta .lx-eyebrow{color:var(--gold-soft)}.space-cta h2{font-size:clamp(2rem,4vw,3.2rem);margin:.3rem 0}.space-cta a{background:var(--gold);color:#fff;padding:12px 18px;border-radius:99px;text-decoration:none;white-space:nowrap}@media(max-width:800px){.design-grid{grid-template-columns:1fr 1fr}.space-cta{display:block}.space-cta a{display:inline-flex;margin-top:15px}}@media(max-width:520px){.design-grid{grid-template-columns:1fr}}
+  .space-hero,.space-body,.space-cta{width:min(1100px,calc(100% - 34px));margin:auto}.space-hero{padding:clamp(3.5rem,8vw,6.5rem) 0 3.5rem}.space-hero h1{font-size:clamp(3.4rem,7vw,5.5rem);max-width:880px;margin:.7rem 0 1rem}.space-hero>p:last-child{font:500 1.25rem/1.45 var(--lx-serif);max-width:700px}.collection{padding:2rem 0 3.5rem;border-top:1px solid #2b322a1c}.collection h2{font-size:clamp(2.2rem,4vw,3.2rem);margin:.4rem 0 1.5rem}.design-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:15px}.design-card{background:#fff;border:1px solid #2b322a16;border-radius:10px;overflow:hidden;text-decoration:none;color:var(--ink)}.art{aspect-ratio:4/3;background:var(--sage-mist);position:relative;overflow:hidden}.art img{width:100%;height:100%;object-fit:cover;display:block}.body{padding:18px}.meta{display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;color:#667064}.body h3{font-size:1.8rem;margin:.45rem 0}.body p{color:#586057;min-height:3.2em}.body dl{display:grid;grid-template-columns:1fr auto;gap:.2rem .8rem;margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--cream-deep)}.body dt{font-size:.72rem;color:#667064}.body dd{margin:0;font:600 .9rem var(--lx-serif)}.body>strong{display:block;margin-top:1rem;font-size:.76rem}.space-cta{margin-top:1rem;margin-bottom:4rem;background:var(--sage-deep);color:#fff;border-radius:14px;padding:38px;display:flex;justify-content:space-between;align-items:center;gap:20px}.space-cta .lx-eyebrow{color:var(--gold-soft)}.space-cta h2{font-size:clamp(2rem,4vw,3.2rem);margin:.3rem 0}.space-cta a{background:var(--gold);color:#fff;padding:12px 18px;border-radius:99px;text-decoration:none;white-space:nowrap}@media(max-width:800px){.space-cta{display:block}.space-cta a{display:inline-flex;margin-top:15px}}
+  .coming-soon{margin-bottom:4rem;padding:clamp(2rem,6vw,4rem);border:1px solid var(--cream-deep);border-radius:14px;background:#fff}.coming-soon h2{max-width:650px;margin:.5rem 0 .8rem;font-size:clamp(2.2rem,5vw,3.5rem)}.coming-soon>p:not(.lx-eyebrow){max-width:630px;color:#586057}.coming-soon>div{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.4rem}@media(max-width:600px){.coming-soon>div a{width:100%}}
 </style>
