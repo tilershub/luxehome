@@ -1,5 +1,4 @@
 ---
-import { getCollection, render } from 'astro:content';
 import { createServerSupabase } from '../../lib/supabase';
 import { marked } from 'marked';
 import Layout from '../../layouts/Layout.astro';
@@ -7,7 +6,6 @@ import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
 
 export async function getStaticPaths() {
-  const mdPosts = await getCollection('blog');
   const sb = createServerSupabase(import.meta.env as unknown as Record<string, string>);
   const { data: dbPosts } = sb
     ? await sb.from('blog_posts').select('slug').eq('status', 'published')
@@ -16,7 +14,6 @@ export async function getStaticPaths() {
     'what-a-fixed-bathroom-quotation-should-include', 'before-the-first-tile',
     'bathroom-under-4sqm', 'kitchen-storage-first', 'large-format-tile-wall-ready',
     'what-we-found-avissawella', 'when-to-book-site-inspection',
-    ...mdPosts.map((post) => post.id.replace(/\.mdx?$/, '')),
     ...(dbPosts ?? []).map((post: { slug: string }) => post.slug),
   ]);
   return [...slugs].map((slug) => ({ params: { slug } }));
@@ -27,7 +24,6 @@ const { slug } = Astro.params;
 // Try Supabase first
 const sb = createServerSupabase(import.meta.env as unknown as Record<string, string>);
 let postData: any = null;
-let Content: any = null;
 
 if (sb) {
   const { data } = await sb
@@ -37,31 +33,6 @@ if (sb) {
     .eq('status', 'published')
     .single();
   if (data) postData = { ...data, source: 'db', bodyHtml: marked(data.content || '') };
-}
-
-// Fallback to Markdown
-if (!postData) {
-  try {
-    const mdPosts = await getCollection('blog');
-    const entry = mdPosts.find((p) => p.id.replace(/\.mdx?$/, '') === slug);
-    if (entry) {
-      const { Content: C } = await render(entry);
-      Content = C;
-      postData = {
-        slug,
-        title: entry.data.title,
-        description: entry.data.description,
-        excerpt: entry.data.description,
-        author: entry.data.author,
-        category: entry.data.category,
-        reading_time: entry.data.readingTime,
-        pub_date: entry.data.pubDate.toISOString(),
-        meta_title: entry.data.title,
-        meta_description: entry.data.description,
-        source: 'md',
-      };
-    }
-  } catch {}
 }
 
 if (!postData) {
@@ -91,12 +62,16 @@ const pubDateDisplay = pubDate.toLocaleDateString('en-LK', {
   day: 'numeric',
 });
 
-// Related posts (same source as original code — markdown only for simplicity)
-const allMdPosts = await getCollection('blog');
-const relatedPosts = allMdPosts
-  .filter((p) => p.id.replace(/\.mdx?$/, '') !== slug)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 3);
+// Related posts — drawn from the canonical journal articles
+const JOURNAL_ARTICLES = [
+  { slug: 'what-a-fixed-bathroom-quotation-should-include', title: 'What a fixed bathroom quotation should actually include', category: 'Planning' },
+  { slug: 'before-the-first-tile', title: 'What happens before the first tile is fixed?', category: 'Construction' },
+  { slug: 'bathroom-under-4sqm', title: 'How to choose a design for a bathroom under 4m²', category: 'Design' },
+  { slug: 'kitchen-storage-first', title: 'Storage first: planning a kitchen around real habits', category: 'Kitchen' },
+  { slug: 'large-format-tile-wall-ready', title: 'Large-format tile: beautiful, but is your wall ready?', category: 'Materials' },
+  { slug: 'when-to-book-site-inspection', title: 'When should you book a site inspection?', category: 'Planning' },
+];
+const relatedPosts = JOURNAL_ARTICLES.filter((p) => p.slug !== slug).slice(0, 3);
 
 const canonical = new URL(`/blog/${slug}`, Astro.site);
 
@@ -146,10 +121,7 @@ const jsonLd = JSON.stringify({
     <div class="post-layout">
 
       <article class="post-body prose">
-        {postData.source === 'db'
-          ? <div set:html={postData.bodyHtml} />
-          : Content && <Content />
-        }
+        <div set:html={postData.bodyHtml} />
 
         {postData.source === 'db' && postData.images?.length > 0 && (
           <div class="post-gallery">
@@ -204,9 +176,9 @@ const jsonLd = JSON.stringify({
             <ul class="related-list">
               {relatedPosts.map((p) => (
                 <li>
-                  <a href={`/blog/${p.id.replace(/\.mdx?$/, '')}`} class="related-link">
-                    <span class="related-cat">{p.data.category}</span>
-                    <span class="related-title">{p.data.title}</span>
+                  <a href={`/blog/${p.slug}`} class="related-link">
+                    <span class="related-cat">{p.category}</span>
+                    <span class="related-title">{p.title}</span>
                   </a>
                 </li>
               ))}
