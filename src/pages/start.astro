@@ -1,7 +1,7 @@
 ---
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
-import { formatLKRM, cloudinary, waLink, BRAND_STRIP, PLANNER, WHATSAPP_NUMBER } from '../lib/luxe-config';
+import { formatLKRM, cloudinary, BRAND_STRIP, PLANNER } from '../lib/luxe-config';
 
 const featured = (await getDesigns({ featured: true })).slice(0, 3);
 const heroProject = (await getProjects({ featured: true })).find((p) => p.before_image_url && p.after_image_url) ?? null;
@@ -18,7 +18,9 @@ const DELIVERABLES = [
 ];
 
 const FAQ = [
-  ['Is the price really fixed?', 'Yes. Once we measure your space and you approve the design file, the quotation is fixed. The only changes are ones you request.'],
+  ['Do I need to know the bathroom size?', 'No. Request the LKR 10,000 site inspection and choose “please measure it.” We measure the room and assess the site before recommending the next step.'],
+  ['Is the price really fixed?', 'The design-page prices are starting guides. Once we inspect the room, adapt the design and confirm the scope, you receive the final quotation for approval.'],
+  ['When do I pay the 10% construction confirmation?', 'Only after the inspection, design adaptation, scope and final quotation are approved—not when you first request the visit.'],
   ['I live overseas — can you manage everything?', 'Most of our clients are abroad. Design approval happens on a video call, you get weekly WhatsApp photo and video updates, and you approve every milestone before payment.'],
   ['How long does a bathroom take?', 'Typically 3–5 weeks depending on the design and site condition. Your design file includes a week-by-week plan.'],
   ['What warranty do I get?', 'One year on workmanship, in writing, on every project.'],
@@ -27,23 +29,27 @@ const FAQ = [
 
 <LuxeLayout
   bare={true}
-  title="Start Your Project — LUXEhome | Fixed-Price Designs, Built Without Stress"
-  description="Choose a named LUXEhome design with a complete file and fixed price. Message us on WhatsApp to start — Sri Lanka and overseas clients welcome."
+  title="Start Your Bathroom Project — LUXEhome Site Inspection"
+  description="Choose a named LUXEhome bathroom design, then request a LKR 10,000 site inspection. No measurements are needed before booking."
 >
   <!-- Minimal header -->
   <header class="st-hdr">
     <span class="lx-wordmark"><strong>LUXE</strong><em>home</em></span>
-    <a href={waLink("Hi LUXEhome! I'd like to start a project.")} class="st-hdr-wa" target="_blank" rel="noopener noreferrer">WhatsApp Us</a>
+    <a href="/book-site-inspection" class="st-hdr-wa">Book inspection · LKR 10,000</a>
   </header>
 
   <!-- Hero -->
   <section class="st-hero">
-    <p class="lx-eyebrow lxr">Fixed price · Verified teams · 1-year warranty</p>
+    <p class="lx-eyebrow lxr">Measured first · Verified teams · 1-year warranty</p>
     <h1 class="lxr">Your dream bathroom,<br /><em>built without the stress.</em></h1>
     <p class="st-sub lxr">
-      Choose a named design with a complete file — renders, drawings, every fixture, and one
-      fixed price. Then watch it built with weekly WhatsApp updates.
+      Choose a named design, then let us inspect and measure the actual room. We confirm the fit,
+      adapt the design and prepare the final quotation before any construction deposit.
     </p>
+    <div class="st-hero-actions lxr">
+      <a class="lx-btn-wa" href="/book-site-inspection">Book Inspection · LKR 10,000</a>
+      <a class="lx-btn-ghost" href="/designs">Browse bathroom designs</a>
+    </div>
 
     {heroProject ? (
       <div class="st-slider lxr" id="st-slider" style="--pos: 50%">
@@ -140,24 +146,11 @@ const FAQ = [
 
   <!-- Lead form -->
   <section class="st-sec st-lead">
-    <h2 class="lxr">Start on WhatsApp</h2>
-    <p class="st-lead-sub lxr">Tell us a little and we will reply with designs that fit — usually within the hour.</p>
-    <form id="lead-form" class="st-form lxr">
-      <input type="text" id="lf-name" placeholder="Your name" required />
-      <input type="text" id="lf-location" placeholder="Property location (e.g. Kandy)" required />
-      <select id="lf-project">
-        <option value="a bathroom">Bathroom</option>
-        <option value="a kitchen">Kitchen</option>
-        <option value="a staircase">Staircase</option>
-        <option value="floors">Floors</option>
-        <option value="a whole house">Whole house</option>
-      </select>
-      <select id="lf-where">
-        <option value="in Sri Lanka">I live in Sri Lanka</option>
-        <option value="overseas">I live overseas</option>
-      </select>
-      <button type="submit" class="lx-btn-wa">Continue on WhatsApp →</button>
-    </form>
+    <p class="lx-eyebrow lxr">The practical first step</p>
+    <h2 class="lxr">You do not need bathroom measurements.</h2>
+    <p class="st-lead-sub lxr">Share your contact and property location. We confirm the visit, then collect the LKR 10,000 inspection fee.</p>
+    <a href="/book-site-inspection" class="lx-btn-wa lxr">Request My Site Inspection</a>
+    <small class="lxr">No construction deposit is collected at this stage.</small>
   </section>
 
   <!-- FAQ -->
@@ -173,13 +166,13 @@ const FAQ = [
     <p>Custom design &amp; build · Sri Lanka · 077 450 3744</p>
   </footer>
 
-  <!-- Sticky mobile WhatsApp bar -->
+  <!-- Sticky mobile inspection bar -->
   <div class="st-sticky">
-    <a href={waLink("Hi LUXEhome! I'd like to start a project.")} target="_blank" rel="noopener noreferrer">WhatsApp Us — replies within the hour</a>
+    <a href="/book-site-inspection">Book inspection · LKR 10,000</a>
   </div>
 </LuxeLayout>
 
-<script is:inline define:vars={{ WHATSAPP_NUMBER }}>
+<script is:inline>
 (function () {
   // Before/after slider
   var slider = document.getElementById('st-slider');
@@ -222,18 +215,6 @@ const FAQ = [
   });
   planTotal();
 
-  // Lead form → WhatsApp with prefilled details
-  document.getElementById('lead-form')?.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var name = document.getElementById('lf-name').value.trim();
-    var loc = document.getElementById('lf-location').value.trim();
-    var proj = document.getElementById('lf-project').value;
-    var where = document.getElementById('lf-where').value;
-    var msg = 'Hi LUXEhome! I\'m ' + name + ', living ' + where +
-      '. I\'m planning ' + proj + ' for my property in ' + loc +
-      '. Can you send me designs that would fit?';
-    window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
-  });
 })();
 </script>
 
@@ -253,6 +234,7 @@ const FAQ = [
   .st-hero h1 { font-size: clamp(2.4rem, 7vw, 4rem); margin: .6rem 0 1rem; }
   .st-hero h1 em { color: var(--sage-deep); }
   .st-sub { max-width: 52ch; margin: 0 auto 1.8rem; color: color-mix(in srgb, var(--ink) 78%, transparent); }
+  .st-hero-actions { display: flex; justify-content: center; gap: .7rem; flex-wrap: wrap; margin: -.45rem 0 1.5rem; }
 
   .st-slider {
     position: relative; aspect-ratio: 3 / 2; border-radius: 8px; overflow: hidden;
@@ -309,11 +291,8 @@ const FAQ = [
 
   .st-lead { text-align: center; }
   .st-lead-sub { max-width: 46ch; margin: -0.6rem auto 1.4rem; color: color-mix(in srgb, var(--ink) 72%, transparent); }
-  .st-form { display: grid; gap: .7rem; max-width: 460px; margin: 0 auto; }
-  .st-form input, .st-form select {
-    font-family: var(--lx-sans); font-size: .95rem; padding: .85rem 1rem;
-    border: 1px solid var(--cream-deep); border-radius: 6px; background: #fff; color: var(--ink);
-  }
+  .st-lead > .lx-btn-wa { display: inline-flex; }
+  .st-lead > small { display: block; margin-top: .65rem; color: color-mix(in srgb, var(--ink) 52%, transparent); font-size: .68rem; }
 
   .st-faq { border-bottom: 1px solid var(--cream-deep); }
   .st-faq summary { font-family: var(--lx-serif); font-size: 1.1rem; font-weight: 600; padding: .9rem 0; cursor: pointer; list-style: none; }
@@ -339,5 +318,6 @@ const FAQ = [
   @media (max-width: 720px) {
     .st-designs { grid-template-columns: 1fr; }
     .st-deliv { grid-template-columns: 1fr; }
+    .st-hero-actions a { width: 100%; }
   }
 </style>

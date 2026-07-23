@@ -1,11 +1,173 @@
 ---
 import LuxeLayout from '../layouts/LuxeLayout.astro';
-import ContactForm from '../components/ContactForm.astro';
+import InspectionBookingForm from '../components/luxe/InspectionBookingForm.astro';
 ---
-<LuxeLayout title="Book a Site Inspection — LUXEhome Sri Lanka" description="Book a professional LUXEhome site inspection for a bathroom, kitchen, staircase or floor project in Sri Lanka.">
-  <section class="inspection-hero"><p class="lx-eyebrow">The right first step</p><h1>Measure first. Decide with confidence.</h1><p>We measure, assess existing conditions, understand your priorities and identify the correct design and quotation path.</p></section>
-  <section class="inspection-body"><div class="steps"><article><strong>01</strong><h2>Choose the space</h2><p>Bathroom, kitchen, staircase or floor.</p></article><article><strong>02</strong><h2>Share the property</h2><p>Location, dimensions, photos and preferred timing.</p></article><article><strong>03</strong><h2>Receive confirmation</h2><p>Our team confirms availability and the inspection details on WhatsApp.</p></article></div><div class="form"><ContactForm /></div></section>
+
+<LuxeLayout
+  title="Bathroom Site Inspection — LKR 10,000 | LUXEhome Sri Lanka"
+  description="Request a professional LUXEhome bathroom site inspection for LKR 10,000. No measurements needed: we inspect, measure and recommend the right design and next step."
+>
+  <section class="inspection-hero">
+    <div class="inspection-hero-copy lxr">
+      <p class="lx-eyebrow">The practical first step</p>
+      <h1>You have the bathroom.<br /><em>We will measure the rest.</em></h1>
+      <p>
+        Request a professional site inspection before committing to construction.
+        We assess the room, measure it properly and check which LUXEhome design can work.
+      </p>
+      <div class="inspection-price">
+        <span>Bathroom site inspection</span>
+        <strong>LKR 10,000</strong>
+        <small>Pay only after we confirm the location and appointment.</small>
+      </div>
+    </div>
+    <div class="inspection-promise lxr">
+      <strong>No bathroom dimensions required</strong>
+      <p>If you know the approximate size, share it. If not, simply choose “please measure it” in the form.</p>
+    </div>
+  </section>
+
+  <section class="inspection-process" aria-labelledby="inspection-process-title">
+    <div class="inspection-section-heading lxr">
+      <p class="lx-eyebrow">How booking works</p>
+      <h2 id="inspection-process-title">Clear before you pay.</h2>
+    </div>
+    <div class="inspection-steps">
+      <article class="lxr">
+        <span>01</span>
+        <h3>Send the request</h3>
+        <p>Name, WhatsApp number, location and whether it is a renovation or new bathroom. Measurements are optional.</p>
+      </article>
+      <article class="lxr">
+        <span>02</span>
+        <h3>We confirm the visit</h3>
+        <p>Our team checks the service area and agrees the date and time with you on WhatsApp.</p>
+      </article>
+      <article class="lxr">
+        <span>03</span>
+        <h3>Pay LKR 10,000</h3>
+        <p>Payment details are sent only after the appointment is confirmed—not before.</p>
+      </article>
+      <article class="lxr">
+        <span>04</span>
+        <h3>We inspect and advise</h3>
+        <p>We measure, review site conditions and explain the suitable design, budget and next decision.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="inspection-booking">
+    <div class="inspection-includes lxr">
+      <p class="lx-eyebrow">What the inspection covers</p>
+      <h2>A decision visit, not just a measurement.</h2>
+      <ul>
+        <li>Bathroom dimensions, proportions and access</li>
+        <li>Existing plumbing, drainage and electrical conditions</li>
+        <li>Visible repair, waterproofing and service-relocation needs</li>
+        <li>Which published design can fit—or what needs adapting</li>
+        <li>Preliminary budget direction and the correct next step</li>
+      </ul>
+      <div class="inspection-note">
+        <strong>Important</strong>
+        <p>The LKR 10,000 inspection is not a construction deposit and does not confirm a final project price.</p>
+      </div>
+    </div>
+    <InspectionBookingForm />
+  </section>
+
+  <section class="inspection-next" aria-labelledby="inspection-next-title">
+    <div class="inspection-section-heading lxr">
+      <p class="lx-eyebrow">After the inspection</p>
+      <h2 id="inspection-next-title">Choose the path that makes sense.</h2>
+    </div>
+    <div class="inspection-next-grid">
+      <article class="lxr">
+        <span>Construction path</span>
+        <h3>Proceed with LUXEhome</h3>
+        <p>We adapt the selected design, confirm the scope and prepare the final quotation. The 10% construction confirmation is requested only after you approve those documents.</p>
+      </article>
+      <article class="lxr">
+        <span>Design-only path</span>
+        <h3>LKR 50,000 design adaptation</h3>
+        <p>The inspection fee is credited, leaving LKR 40,000. This includes an adapted layout, 3D concept, one revision, finish direction and preliminary price guidance.</p>
+        <small>Full construction drawings and an unrestricted technical pack require a construction agreement or a separate quotation.</small>
+      </article>
+    </div>
+  </section>
 </LuxeLayout>
+
 <style>
-  .inspection-hero,.inspection-body{width:min(1100px,calc(100% - 34px));margin:auto}.inspection-hero{padding:clamp(3.5rem,8vw,6rem) 0 3rem}.inspection-hero h1{font-size:clamp(3.4rem,8vw,5.6rem);max-width:900px;margin:.7rem 0 1.2rem}.inspection-hero>p:last-child{font:500 1.3rem/1.45 var(--lx-serif);max-width:700px}.inspection-body{display:grid;grid-template-columns:.8fr 1.2fr;gap:2rem;padding-bottom:5rem}.steps{display:grid;gap:12px}.steps article{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:22px}.steps strong{color:var(--gold)}.steps h2{font-size:1.55rem;margin:.3rem 0}.steps p{color:#586057}.form :global(.form-wrap){border-color:#2b322a16!important;border-radius:10px!important}.form :global(label),.form :global(input),.form :global(select),.form :global(textarea),.form :global(button){font-family:var(--lx-sans)!important}@media(max-width:800px){.inspection-body{grid-template-columns:1fr}}
+  .inspection-hero,
+  .inspection-process,
+  .inspection-booking,
+  .inspection-next { width: min(1120px, calc(100% - 34px)); margin-inline: auto; }
+
+  .inspection-hero {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: end;
+    padding: clamp(3.5rem, 8vw, 6.5rem) 0 clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .inspection-hero h1 { max-width: 850px; margin: .65rem 0 1rem; font-size: clamp(3.3rem, 7.5vw, 5.7rem); }
+  .inspection-hero h1 em { color: var(--sage-deep); }
+  .inspection-hero-copy > p:not(.lx-eyebrow) { max-width: 62ch; font: 500 clamp(1.08rem, 2.3vw, 1.28rem)/1.5 var(--lx-serif); }
+  .inspection-price { width: min(100%, 470px); margin-top: 1.5rem; padding: 1.1rem 1.2rem; border-left: 3px solid var(--gold); background: #fff; }
+  .inspection-price span,
+  .inspection-price strong,
+  .inspection-price small { display: block; }
+  .inspection-price span { color: var(--sage-deep); font-size: .65rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+  .inspection-price strong { margin: .18rem 0; font: 600 2rem var(--lx-serif); }
+  .inspection-price small { color: color-mix(in srgb, var(--ink) 58%, transparent); font-size: .7rem; }
+  .inspection-promise { padding: clamp(1.4rem, 4vw, 2.2rem); border-radius: 14px; background: var(--sage-deep); color: var(--cream); }
+  .inspection-promise strong { display: block; color: var(--gold-soft); font: 600 clamp(1.7rem, 4vw, 2.3rem)/1.05 var(--lx-serif); }
+  .inspection-promise p { margin-top: .7rem; color: rgba(247,243,235,.74); font-size: .85rem; }
+
+  .inspection-process,
+  .inspection-next { padding: clamp(2.8rem, 6vw, 4.7rem) 0; border-top: 1px solid rgba(43,50,42,.12); }
+  .inspection-section-heading { margin-bottom: 1.4rem; }
+  .inspection-section-heading h2 { margin-top: .3rem; font-size: clamp(2.2rem, 5vw, 3.5rem); }
+  .inspection-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
+  .inspection-steps article { padding: 1.2rem; border-top: 2px solid var(--sage); background: rgba(255,255,255,.65); }
+  .inspection-steps span { color: var(--gold); font: 600 1rem var(--lx-serif); }
+  .inspection-steps h3 { margin: .55rem 0 .4rem; font-size: 1.25rem; }
+  .inspection-steps p { color: color-mix(in srgb, var(--ink) 65%, transparent); font-size: .78rem; }
+
+  .inspection-booking {
+    display: grid;
+    grid-template-columns: .78fr 1.22fr;
+    gap: clamp(2rem, 6vw, 4.5rem);
+    align-items: start;
+    padding: clamp(2.8rem, 7vw, 5rem) 0;
+  }
+  .inspection-includes { position: sticky; top: 7rem; }
+  .inspection-includes h2 { margin: .35rem 0 1rem; font-size: clamp(2.2rem, 5vw, 3.4rem); }
+  .inspection-includes ul { display: grid; gap: .65rem; margin: 0; padding: 0; list-style: none; }
+  .inspection-includes li { position: relative; padding-left: 1.35rem; color: color-mix(in srgb, var(--ink) 73%, transparent); font-size: .86rem; }
+  .inspection-includes li::before { content: '✓'; position: absolute; left: 0; color: var(--gold); font-weight: 600; }
+  .inspection-note { margin-top: 1.4rem; padding: 1rem; border: 1px solid var(--cream-deep); border-radius: 8px; background: #fff; }
+  .inspection-note strong { color: var(--sage-deep); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; }
+  .inspection-note p { margin-top: .25rem; color: color-mix(in srgb, var(--ink) 62%, transparent); font-size: .76rem; }
+
+  .inspection-next { padding-bottom: 5rem; }
+  .inspection-next-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .inspection-next-grid article { padding: clamp(1.4rem, 4vw, 2rem); border-radius: 12px; background: #fff; border: 1px solid var(--cream-deep); }
+  .inspection-next-grid article:last-child { background: var(--sage-mist); }
+  .inspection-next-grid span { color: var(--gold); font-size: .65rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+  .inspection-next-grid h3 { margin: .45rem 0 .6rem; font-size: 1.8rem; }
+  .inspection-next-grid p { color: color-mix(in srgb, var(--ink) 69%, transparent); font-size: .86rem; }
+  .inspection-next-grid small { display: block; margin-top: .8rem; color: color-mix(in srgb, var(--ink) 52%, transparent); font-size: .68rem; }
+
+  @media (max-width: 880px) {
+    .inspection-hero,
+    .inspection-booking { grid-template-columns: 1fr; }
+    .inspection-promise { width: min(100%, 620px); }
+    .inspection-steps { grid-template-columns: repeat(2, 1fr); }
+    .inspection-includes { position: static; }
+  }
+  @media (max-width: 600px) {
+    .inspection-hero { padding-top: 2.8rem; }
+    .inspection-steps,
+    .inspection-next-grid { grid-template-columns: 1fr; }
+  }
 </style>

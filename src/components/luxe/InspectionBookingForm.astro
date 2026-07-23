@@ -1,0 +1,436 @@
+---
+import { CATALOGUE_DESIGNS } from '../../lib/luxe-catalogue';
+import { getDesigns } from '../../lib/luxe';
+
+const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
+const bathroomDesignNames = [...new Set([
+  ...CATALOGUE_DESIGNS
+    .filter((design) => design.space === 'bathrooms' && design.coverImage)
+    .map((design) => design.name),
+  ...storedDesigns
+    .filter((design) => design.cover_image_url)
+    .map((design) => design.name),
+])];
+---
+
+<div class="ibf-wrap">
+  <div class="ibf-success" id="inspection-success" aria-live="polite" hidden>
+    <span aria-hidden="true">✓</span>
+    <h2>Request received.</h2>
+    <p>
+      We will confirm the service area and appointment on WhatsApp, then send the
+      LKR 10,000 payment details. Please do not pay until the booking is confirmed.
+    </p>
+    <a id="inspection-whatsapp-backup" href="#" target="_blank" rel="noopener noreferrer">
+      Continue to WhatsApp
+    </a>
+  </div>
+
+  <form id="inspection-request-form">
+    <div class="ibf-heading">
+      <p class="lx-eyebrow">Bathroom site inspection</p>
+      <h2>Request your visit.</h2>
+      <p>You do not need drawings or measurements. Tell us what you know; we will measure the rest.</p>
+    </div>
+
+    <input class="ibf-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+    <div class="ibf-grid">
+      <label>
+        <span>Full name <b aria-hidden="true">*</b></span>
+        <input type="text" name="name" placeholder="e.g. Nuwan Perera" autocomplete="name" required />
+      </label>
+      <label>
+        <span>Phone / WhatsApp <b aria-hidden="true">*</b></span>
+        <input type="tel" name="phone" placeholder="e.g. 077 450 3744" autocomplete="tel" required />
+      </label>
+    </div>
+
+    <label>
+      <span>Property location <b aria-hidden="true">*</b></span>
+      <input type="text" name="location" placeholder="e.g. Nugegoda, Kandy, Galle" autocomplete="address-level2" required />
+    </label>
+
+    <fieldset>
+      <legend>What are you planning? <b aria-hidden="true">*</b></legend>
+      <div class="ibf-choice-grid">
+        <label><input type="radio" name="project_type" value="Bathroom renovation" required /><span>Renovate an existing bathroom</span></label>
+        <label><input type="radio" name="project_type" value="New bathroom" /><span>Build a new bathroom</span></label>
+        <label><input type="radio" name="project_type" value="Not sure yet" /><span>Not sure yet</span></label>
+      </div>
+    </fieldset>
+
+    <label>
+      <span>Preferred LUXEhome design <small>(optional)</small></span>
+      <input id="inspection-design" type="text" name="preferred_design" list="inspection-designs" placeholder="Choose a design or leave this blank" />
+      <datalist id="inspection-designs">
+        {bathroomDesignNames.map((name) => <option value={name}></option>)}
+      </datalist>
+    </label>
+    <div class="ibf-selected-design" id="inspection-selected-design" hidden>
+      <span>Selected from the design page</span>
+      <strong id="inspection-selected-design-name"></strong>
+    </div>
+
+    <fieldset>
+      <legend>Do you know the bathroom size?</legend>
+      <div class="ibf-choice-grid ibf-choice-grid--two">
+        <label><input type="radio" name="size_status" value="Please measure during inspection" checked /><span>No — please measure it</span></label>
+        <label><input type="radio" name="size_status" value="Approximate size provided" /><span>Yes — approximately</span></label>
+      </div>
+    </fieldset>
+
+    <label id="inspection-size-field" hidden>
+      <span>Approximate size <small>(optional)</small></span>
+      <input type="text" name="approximate_size" placeholder="e.g. 2.5 m × 2 m, or about 5 m²" />
+    </label>
+
+    <div class="ibf-grid">
+      <label>
+        <span>Preferred visit date <small>(optional)</small></span>
+        <input id="inspection-date" type="date" name="preferred_date" />
+      </label>
+      <label>
+        <span>Preferred time <small>(optional)</small></span>
+        <select name="preferred_time">
+          <option value="">Any suitable time</option>
+          <option value="Morning">Morning</option>
+          <option value="Afternoon">Afternoon</option>
+          <option value="Saturday">Saturday</option>
+        </select>
+      </label>
+    </div>
+
+    <label>
+      <span>Anything we should know? <small>(optional)</small></span>
+      <textarea name="notes" rows="4" placeholder="Current problems, access, timeline, style preferences or other details"></textarea>
+      <small class="ibf-help">You can attach bathroom photos after WhatsApp opens.</small>
+    </label>
+
+    <div class="ibf-fee">
+      <div>
+        <span>Professional site inspection</span>
+        <strong>LKR 10,000</strong>
+      </div>
+      <ul>
+        <li>Room measurements and site-condition review</li>
+        <li>Design-fit and preliminary budget guidance</li>
+        <li>Clear recommendation for the next step</li>
+      </ul>
+    </div>
+
+    <label class="ibf-consent">
+      <input type="checkbox" name="fee_acknowledgement" required />
+      <span>I understand the inspection fee is LKR 10,000. LUXEhome will confirm the location and appointment before asking me to pay.</span>
+    </label>
+
+    <button class="ibf-submit" id="inspection-submit" type="submit">
+      <span>Request My Site Inspection</span>
+      <span hidden>Preparing your request…</span>
+    </button>
+    <p class="ibf-footnote">No construction deposit is collected at this stage.</p>
+  </form>
+</div>
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+  import type { LeadInsert } from '../../lib/supabase';
+  import { LUXE_SUPABASE_KEY, LUXE_SUPABASE_URL } from '../../lib/luxe-supabase';
+
+  const supabase = createClient(LUXE_SUPABASE_URL, LUXE_SUPABASE_KEY);
+
+  const form = document.getElementById('inspection-request-form') as HTMLFormElement | null;
+  const success = document.getElementById('inspection-success') as HTMLElement | null;
+  const submit = document.getElementById('inspection-submit') as HTMLButtonElement | null;
+  const designInput = document.getElementById('inspection-design') as HTMLInputElement | null;
+  const selectedDesign = document.getElementById('inspection-selected-design') as HTMLElement | null;
+  const selectedDesignName = document.getElementById('inspection-selected-design-name') as HTMLElement | null;
+  const sizeField = document.getElementById('inspection-size-field') as HTMLElement | null;
+  const dateInput = document.getElementById('inspection-date') as HTMLInputElement | null;
+  const backupLink = document.getElementById('inspection-whatsapp-backup') as HTMLAnchorElement | null;
+
+  function titleFromSlug(value: string) {
+    return value
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  function formValue(data: FormData, key: string) {
+    return data.get(key)?.toString().trim() ?? '';
+  }
+
+  function updateSizeField() {
+    if (!form || !sizeField) return;
+    const status = form.querySelector<HTMLInputElement>('input[name="size_status"]:checked')?.value;
+    sizeField.hidden = status !== 'Approximate size provided';
+  }
+
+  if (form) {
+    const params = new URLSearchParams(window.location.search);
+    const design = params.get('design');
+    const project = params.get('project');
+
+    if (design && designInput && selectedDesign && selectedDesignName) {
+      const designName = titleFromSlug(design);
+      designInput.value = designName;
+      selectedDesignName.textContent = designName;
+      selectedDesign.hidden = false;
+    }
+
+    const projectValues: Record<string, string> = {
+      renovation: 'Bathroom renovation',
+      new: 'New bathroom',
+      unsure: 'Not sure yet',
+    };
+    const projectValue = project ? projectValues[project.toLowerCase()] : '';
+    if (projectValue) {
+      const option = form.querySelector<HTMLInputElement>(`input[name="project_type"][value="${projectValue}"]`);
+      if (option) option.checked = true;
+    }
+
+    form.querySelectorAll<HTMLInputElement>('input[name="size_status"]').forEach((radio) => {
+      radio.addEventListener('change', updateSizeField);
+    });
+    updateSizeField();
+
+    if (dateInput) {
+      const dateParts = Object.fromEntries(new Intl.DateTimeFormat('en', {
+        timeZone: 'Asia/Colombo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).formatToParts(new Date()).map((part) => [part.type, part.value]));
+      dateInput.min = `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      if (formValue(data, 'website')) return;
+      if (!form.reportValidity() || !submit || !success) return;
+
+      const name = formValue(data, 'name');
+      const phone = formValue(data, 'phone');
+      const location = formValue(data, 'location');
+      const projectType = formValue(data, 'project_type');
+      const preferredDesign = formValue(data, 'preferred_design');
+      const sizeStatus = formValue(data, 'size_status') || 'Please measure during inspection';
+      const approximateSize = formValue(data, 'approximate_size');
+      const preferredDate = formValue(data, 'preferred_date');
+      const preferredTime = formValue(data, 'preferred_time');
+      const notes = formValue(data, 'notes');
+
+      submit.disabled = true;
+      submit.children[0]?.setAttribute('hidden', '');
+      submit.children[1]?.removeAttribute('hidden');
+
+      const details: Record<string, string> = {
+        project_type: projectType,
+        size_status: sizeStatus,
+        inspection_fee_lkr: '10000',
+        payment_status: 'Awaiting appointment confirmation',
+      };
+      if (preferredDesign) details.preferred_design = preferredDesign;
+      if (approximateSize) details.approximate_size = approximateSize;
+      if (preferredDate) details.preferred_date = preferredDate;
+      if (preferredTime) details.preferred_time = preferredTime;
+
+      const queueNotes = [
+        `Project: ${projectType}`,
+        preferredDesign ? `Preferred design: ${preferredDesign}` : 'Preferred design: Please recommend',
+        `Measurements: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
+        'Inspection fee: LKR 10,000 — payment after booking confirmation',
+        notes ? `Notes: ${notes}` : '',
+      ].filter(Boolean).join('\n');
+
+      if (supabase) {
+        const lead: LeadInsert = {
+          name,
+          phone,
+          service: 'Bathroom Site Inspection',
+          location,
+          service_details: details,
+          notes: notes || null,
+          source_url: window.location.href,
+        };
+
+        supabase.from('leads').insert(lead).then(({ error }) => {
+          if (error) console.warn('[LUXEHOME] Lead save failed:', error.message);
+        });
+        supabase.from('lx_site_inspections').insert({
+          name,
+          phone,
+          location,
+          space_slug: 'bathrooms',
+          preferred_date: preferredDate || null,
+          preferred_time: preferredTime || null,
+          notes: queueNotes,
+          source_url: window.location.href,
+          status: 'new',
+        }).then(({ error }) => {
+          if (error) console.warn('[LUXEHOME] Inspection queue save failed:', error.message);
+        });
+      }
+
+      const metaEventId = crypto.randomUUID();
+      if (typeof (window as any).fbq === 'function') {
+        (window as any).fbq('track', 'Lead', {
+          content_name: 'Bathroom Site Inspection',
+          content_category: projectType,
+          value: 10000,
+          currency: 'LKR',
+        }, { eventID: metaEventId });
+      }
+      fetch('/api/meta-capi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_id: metaEventId,
+          event_source_url: window.location.href,
+          phone,
+          name,
+          service: 'Bathroom Site Inspection',
+        }),
+      }).catch(() => {});
+
+      const message = [
+        'Bathroom Site Inspection Request — LUXEHOME',
+        '',
+        `Name: ${name}`,
+        `Phone: ${phone}`,
+        `Location: ${location}`,
+        `Project: ${projectType}`,
+        `Preferred design: ${preferredDesign || 'Please recommend one'}`,
+        `Bathroom size: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
+        preferredDate ? `Preferred date: ${preferredDate}` : '',
+        preferredTime ? `Preferred time: ${preferredTime}` : '',
+        'Inspection fee: LKR 10,000 — payment after location and appointment confirmation',
+        notes ? `Notes: ${notes}` : '',
+      ].filter(Boolean).join('\n');
+      const whatsappUrl = `https://wa.me/94774503744?text=${encodeURIComponent(message)}`;
+
+      if (backupLink) backupLink.href = whatsappUrl;
+      window.open(whatsappUrl, '_blank', 'noopener');
+
+      form.hidden = true;
+      success.hidden = false;
+      if (typeof (window as any).gtag === 'function') {
+        (window as any).gtag('event', 'lead_form_submit', {
+          event_category: 'Lead',
+          event_label: 'Bathroom Site Inspection',
+          value: 10000,
+        });
+      }
+    });
+  }
+</script>
+
+<style>
+  .ibf-wrap {
+    overflow: hidden;
+    border: 1px solid rgba(43,50,42,.12);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 18px 50px rgba(43,50,42,.08);
+  }
+  .ibf-wrap form,
+  .ibf-success { padding: clamp(1.35rem, 4vw, 2.4rem); }
+  .ibf-heading { padding-bottom: 1.25rem; border-bottom: 1px solid var(--cream-deep); }
+  .ibf-heading h2 { margin: .25rem 0 .4rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .ibf-heading > p:last-child { max-width: 58ch; color: color-mix(in srgb, var(--ink) 67%, transparent); }
+  .ibf-wrap form { display: grid; gap: 1rem; }
+  .ibf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
+  .ibf-wrap label > span,
+  .ibf-wrap legend { display: block; margin-bottom: .4rem; font-size: .76rem; font-weight: 600; color: var(--ink); }
+  .ibf-wrap label > span b,
+  .ibf-wrap legend b { color: #9b493d; }
+  .ibf-wrap label > span small { color: color-mix(in srgb, var(--ink) 48%, transparent); font-weight: 400; }
+  .ibf-wrap input[type="text"],
+  .ibf-wrap input[type="tel"],
+  .ibf-wrap input[type="date"],
+  .ibf-wrap select,
+  .ibf-wrap textarea {
+    width: 100%;
+    border: 1px solid rgba(43,50,42,.2);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--ink);
+    padding: .78rem .85rem;
+    font: 400 .9rem/1.35 var(--lx-sans);
+  }
+  .ibf-wrap textarea { resize: vertical; }
+  .ibf-wrap input:focus,
+  .ibf-wrap select:focus,
+  .ibf-wrap textarea:focus { outline: 2px solid color-mix(in srgb, var(--gold) 55%, transparent); outline-offset: 1px; border-color: var(--gold); }
+  .ibf-wrap fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+  .ibf-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
+  .ibf-choice-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ibf-choice-grid label {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    min-height: 100%;
+    padding: .72rem;
+    border: 1px solid rgba(43,50,42,.16);
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--cream) 70%, #fff);
+    cursor: pointer;
+  }
+  .ibf-choice-grid input { flex: 0 0 auto; margin-top: .12rem; accent-color: var(--sage-deep); }
+  .ibf-choice-grid label > span { margin: 0; font-size: .76rem; font-weight: 400; line-height: 1.35; }
+  .ibf-selected-design {
+    margin-top: -.35rem;
+    padding: .65rem .8rem;
+    border-left: 3px solid var(--gold);
+    background: var(--sage-mist);
+  }
+  .ibf-selected-design span,
+  .ibf-selected-design strong { display: block; }
+  .ibf-selected-design span { color: var(--sage-deep); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; }
+  .ibf-selected-design strong { margin-top: .15rem; font: 600 1.05rem var(--lx-serif); }
+  .ibf-help { display: block; margin-top: .3rem; color: color-mix(in srgb, var(--ink) 52%, transparent); font-size: .68rem; }
+  .ibf-fee {
+    display: grid;
+    grid-template-columns: .8fr 1.2fr;
+    gap: 1rem;
+    padding: 1.05rem;
+    border-radius: 9px;
+    background: var(--sage-deep);
+    color: var(--cream);
+  }
+  .ibf-fee > div span,
+  .ibf-fee > div strong { display: block; }
+  .ibf-fee > div span { color: var(--gold-soft); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; }
+  .ibf-fee > div strong { margin-top: .25rem; font: 600 1.7rem var(--lx-serif); }
+  .ibf-fee ul { margin: 0; padding-left: 1.1rem; color: rgba(247,243,235,.8); font-size: .72rem; line-height: 1.55; }
+  .ibf-consent { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer; }
+  .ibf-consent input { flex: 0 0 auto; margin-top: .18rem; accent-color: var(--sage-deep); }
+  .ibf-consent > span { margin: 0 !important; color: color-mix(in srgb, var(--ink) 67%, transparent) !important; font-size: .72rem !important; font-weight: 400 !important; line-height: 1.45; }
+  .ibf-submit {
+    width: 100%;
+    border: 0;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #fff;
+    padding: .9rem 1.2rem;
+    font: 600 .84rem var(--lx-sans);
+    cursor: pointer;
+  }
+  .ibf-submit:disabled { cursor: wait; opacity: .72; }
+  .ibf-footnote { text-align: center; color: color-mix(in srgb, var(--ink) 52%, transparent); font-size: .68rem; }
+  .ibf-honeypot { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; }
+  .ibf-success { min-height: 420px; display: grid; place-content: center; justify-items: center; text-align: center; }
+  .ibf-success[hidden] { display: none; }
+  .ibf-success > span { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--sage-deep); color: #fff; font-size: 1.3rem; }
+  .ibf-success h2 { margin: .8rem 0 .4rem; font-size: 2.3rem; }
+  .ibf-success p { max-width: 52ch; color: color-mix(in srgb, var(--ink) 68%, transparent); }
+  .ibf-success a { display: inline-flex; margin-top: 1rem; border-radius: 999px; padding: .75rem 1rem; background: var(--gold); color: #fff; text-decoration: none; font-size: .78rem; font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .ibf-grid,
+    .ibf-choice-grid,
+    .ibf-choice-grid--two,
+    .ibf-fee { grid-template-columns: 1fr; }
+    .ibf-fee { gap: .6rem; }
+  }
+</style>

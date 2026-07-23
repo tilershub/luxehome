@@ -1,7 +1,7 @@
 ---
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getDesigns, type Design } from '../../lib/luxe';
-import { formatLKRM, cloudinary, waLink } from '../../lib/luxe-config';
+import { formatLKRM, cloudinary } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS } from '../../lib/luxe-catalogue';
 
 const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
@@ -74,8 +74,8 @@ const collections = [
 
     {designs.length === 0 ? (
       <div class="dz-empty lxr">
-        <p>The first complete bathroom design is being prepared. Message us and we will share the current options directly.</p>
-        <a href={waLink('Hi LUXEhome! Can you share your current bathroom designs?')} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a>
+        <p>The first complete bathroom design is being prepared. You can still request a site inspection so we can measure the room and advise the correct path.</p>
+        <a href="/book-site-inspection" class="lx-btn-wa">Book Site Inspection · LKR 10,000</a>
       </div>
     ) : (
       collections.map((collection) => {
@@ -115,8 +115,8 @@ const collections = [
   </section>
 
   <section class="dz-cta lxr">
-    <div><p class="lx-eyebrow">Need help choosing?</p><h2>Tell us about your bathroom.</h2></div>
-    <a href={waLink('Hi LUXEhome! I would like help choosing a bathroom design. My approximate bathroom size is ...')} target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a>
+    <div><p class="lx-eyebrow">Need help choosing?</p><h2>We will measure your bathroom.</h2><p>No dimensions are required to request the visit.</p></div>
+    <a href="/book-site-inspection">Book Inspection · LKR 10,000</a>
   </section>
 </LuxeLayout>
 
@@ -183,6 +183,7 @@ const collections = [
   }
   .dz-cta .lx-eyebrow { color: var(--gold-soft); }
   .dz-cta h2 { margin-top: .3rem; font-size: clamp(2rem, 4.5vw, 3rem); }
+  .dz-cta div > p:last-child:not(.lx-eyebrow) { margin-top: .35rem; color: rgba(247,243,235,.72); font-size: .78rem; }
   .dz-cta > a { flex: 0 0 auto; padding: .75rem 1.15rem; border-radius: 999px; background: var(--gold); color: #fff; text-decoration: none; }
   @media (max-width: 640px) {
     .dz-publishing-note { grid-template-columns: 1fr; gap: .35rem; }
