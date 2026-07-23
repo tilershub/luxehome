@@ -56,9 +56,18 @@ const collections = [
   })}
 </div>
 {hasPublishedDesigns && (
-  <section class="space-cta"><div><p class="lx-eyebrow">Your {presentation.name.toLowerCase()}, fully resolved</p><h2>Which design feels like home?</h2></div><a href={waLink(`Hi LUXEhome! I would like help choosing a ${space} design.`)} target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a></section>
+  <section class="space-cta">
+    <div>
+      <p class="lx-eyebrow">Your {presentation.name.toLowerCase()}, fully resolved</p>
+      <h2>{space === 'bathrooms' ? 'We will measure the room.' : 'Which design feels like home?'}</h2>
+      {space === 'bathrooms' && <p>No dimensions are required to request the visit.</p>}
+    </div>
+    {space === 'bathrooms'
+      ? <a href="/book-site-inspection">Book inspection · LKR 10,000</a>
+      : <a href={waLink(`Hi LUXEhome! I would like help choosing a ${space} design.`)} target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a>}
+  </section>
 )}
 <style>
   .space-hero,.space-body,.space-cta{width:min(1100px,calc(100% - 34px));margin:auto}.space-hero{padding:clamp(3.5rem,8vw,6.5rem) 0 3.5rem}.space-hero h1{font-size:clamp(3.4rem,7vw,5.5rem);max-width:880px;margin:.7rem 0 1rem}.space-hero>p:last-child{font:500 1.25rem/1.45 var(--lx-serif);max-width:700px}.collection{padding:2rem 0 3.5rem;border-top:1px solid #2b322a1c}.collection h2{font-size:clamp(2.2rem,4vw,3.2rem);margin:.4rem 0 1.5rem}.design-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:15px}.design-card{background:#fff;border:1px solid #2b322a16;border-radius:10px;overflow:hidden;text-decoration:none;color:var(--ink)}.art{aspect-ratio:4/3;background:var(--sage-mist);position:relative;overflow:hidden}.art img{width:100%;height:100%;object-fit:cover;display:block}.body{padding:18px}.meta{display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;color:#667064}.body h3{font-size:1.8rem;margin:.45rem 0}.body p{color:#586057;min-height:3.2em}.body dl{display:grid;grid-template-columns:1fr auto;gap:.2rem .8rem;margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--cream-deep)}.body dt{font-size:.72rem;color:#667064}.body dd{margin:0;font:600 .9rem var(--lx-serif)}.body>strong{display:block;margin-top:1rem;font-size:.76rem}.space-cta{margin-top:1rem;margin-bottom:4rem;background:var(--sage-deep);color:#fff;border-radius:14px;padding:38px;display:flex;justify-content:space-between;align-items:center;gap:20px}.space-cta .lx-eyebrow{color:var(--gold-soft)}.space-cta h2{font-size:clamp(2rem,4vw,3.2rem);margin:.3rem 0}.space-cta a{background:var(--gold);color:#fff;padding:12px 18px;border-radius:99px;text-decoration:none;white-space:nowrap}@media(max-width:800px){.space-cta{display:block}.space-cta a{display:inline-flex;margin-top:15px}}
-  .coming-soon{margin-bottom:4rem;padding:clamp(2rem,6vw,4rem);border:1px solid var(--cream-deep);border-radius:14px;background:#fff}.coming-soon h2{max-width:650px;margin:.5rem 0 .8rem;font-size:clamp(2.2rem,5vw,3.5rem)}.coming-soon>p:not(.lx-eyebrow){max-width:630px;color:#586057}.coming-soon>div{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.4rem}@media(max-width:600px){.coming-soon>div a{width:100%}}
+  .space-cta div>p:last-child:not(.lx-eyebrow){margin-top:.35rem;color:rgba(255,255,255,.72);font-size:.78rem}.coming-soon{margin-bottom:4rem;padding:clamp(2rem,6vw,4rem);border:1px solid var(--cream-deep);border-radius:14px;background:#fff}.coming-soon h2{max-width:650px;margin:.5rem 0 .8rem;font-size:clamp(2.2rem,5vw,3.5rem)}.coming-soon>p:not(.lx-eyebrow){max-width:630px;color:#586057}.coming-soon>div{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.4rem}@media(max-width:600px){.coming-soon>div a{width:100%}}
 </style>

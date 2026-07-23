@@ -2,7 +2,7 @@
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import { getProjects, getProjectBySlug, youtubeEmbed, type ProjectFull } from '../../lib/luxe';
-import { cloudinary, waLink } from '../../lib/luxe-config';
+import { cloudinary } from '../../lib/luxe-config';
 
 export async function getStaticPaths() {
   const stored = await getProjects();
@@ -22,9 +22,9 @@ const episode2 = youtubeEmbed(project.episode_2_url);
 const hasSlider = !!(project.before_image_url && project.after_image_url);
 const projectVideoCover = project.after_image_url || project.before_image_url;
 
-const waMessage = project.design
-  ? `Hi LUXEhome! I saw the "${project.title}" project and I'd like something like it for my home (the ${project.design.name} design).`
-  : `Hi LUXEhome! I saw the "${project.title}" project and I'd like something like it for my home.`;
+const inspectionHref = project.design
+  ? `/book-site-inspection?design=${encodeURIComponent(project.design.slug)}&source_project=${encodeURIComponent(project.slug)}`
+  : `/book-site-inspection?source_project=${encodeURIComponent(project.slug)}`;
 
 const reviewSchema = project.rating ? JSON.stringify({
   '@context': 'https://schema.org',
@@ -206,12 +206,13 @@ const reviewSchema = project.rating ? JSON.stringify({
 
   <!-- Closing CTA -->
   <section class="ps-closing lxr">
-    <h2>Want this for your home?</h2>
-    <p>Message us on WhatsApp — we will send the design file and a fixed quotation for your space.</p>
+    <h2>Want a result like this?</h2>
+    <p>Start with a site inspection. We will measure your bathroom, assess its condition and confirm the right design and quotation path.</p>
     <div class="ps-closing-btns">
-      <a href={waLink(waMessage)} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">WhatsApp Us</a>
+      <a href={inspectionHref} class="lx-btn-wa">Book Inspection · LKR 10,000</a>
       {project.design && <a href={`/designs/${project.design.slug}`} class="lx-btn-ghost">See the {project.design.name} design</a>}
     </div>
+    <small>No measurements or construction deposit are required to request the visit.</small>
   </section>
 </LuxeLayout>
 
@@ -371,6 +372,7 @@ const reviewSchema = project.rating ? JSON.stringify({
   .ps-closing h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); margin-bottom: .5rem; }
   .ps-closing p { max-width: 46ch; margin: 0 auto 1.5rem; color: color-mix(in srgb, var(--ink) 75%, transparent); }
   .ps-closing-btns { display: flex; gap: .9rem; justify-content: center; flex-wrap: wrap; }
+  .ps-closing small { display: block; margin-top: .8rem; color: color-mix(in srgb, var(--ink) 52%, transparent); font-size: .68rem; }
 
   @media (max-width: 720px) {
     .ps-gallery { grid-template-columns: repeat(2, 1fr); }

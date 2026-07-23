@@ -3,7 +3,7 @@ import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import { getDesigns, getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, cloudinary, waLink } from '../../lib/luxe-config';
+import { formatLKRM, cloudinary } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
 export async function getStaticPaths() {
@@ -88,7 +88,7 @@ const priceLabel = design.starting_price_lkr > 0 ? formatLKRM(design.starting_pr
 const newPriceLabel = design.new_starting_price_lkr ? formatLKRM(design.new_starting_price_lkr) : null;
 const renovationPriceLabel = design.renovation_starting_price_lkr ? formatLKRM(design.renovation_starting_price_lkr) : null;
 
-const waMessage = `Hi LUXEhome! I'm interested in the "${design.name}" design (${collectionLabel}, ${priceLabel.replace('From ', 'from ')}). Can you send me the full design file?`;
+const inspectionHref = `/book-site-inspection?design=${encodeURIComponent(design.slug)}`;
 
 const renders = (['render_1', 'render_2', 'render_3', 'render_4'] as const)
   .map((k) => design.drawings.find((dr) => dr.kind === k) ?? null)
@@ -143,7 +143,7 @@ const productSchema = JSON.stringify({
 
 <LuxeLayout
   title={`${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design | ${priceLabel} | LUXEhome`}
-  description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Complete fixture list, technical drawings, timeline and FAQ — the full design file on request.`}
+  description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Review the renders, technical drawings, fixtures and warranties, then book a site inspection to check the fit.`}
   ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
 >
   <Fragment slot="head">
@@ -167,7 +167,8 @@ const productSchema = JSON.stringify({
       </div>
       {design.description && <p class="df-desc lxr">{design.description}</p>}
       <div class="df-cta lxr">
-        <a href={waLink(waMessage)} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">Get This Design's Full File</a>
+        <a href={inspectionHref} class="lx-btn-wa">Inspect My Bathroom for This Design</a>
+        <small>LKR 10,000 · No measurements needed</small>
       </div>
     </div>
     <div class="df-hero-img lxr">
@@ -216,7 +217,7 @@ const productSchema = JSON.stringify({
         </div>
       </div>
       <p class="df-price-disclaimer lxr">Starting-price guide for the listed design specification and standard room conditions. Room proportions, ceiling height, access, service relocation and structural changes are assessed separately.</p>
-      <a class="df-price-cta lxr" href={waLink(`Hi LUXEhome! I would like an exact ${design.name} price for my bathroom. The approximate floor size is ... m² and it is a new bathroom / renovation.`)} target="_blank" rel="noopener noreferrer">Get a price for my bathroom →</a>
+      <a class="df-price-cta lxr" href={inspectionHref}>Check this design against my bathroom →</a>
     </section>
   )}
 
@@ -331,7 +332,7 @@ const productSchema = JSON.stringify({
       ))}
       </>
       ) : (
-        <div class="df-fixture-empty lxr"><strong>The full schedule is being prepared.</strong><p>Ask for the design file to receive the confirmed tiles, bathware, tapware, shower, lighting and accessory specification for this design.</p><a href={waLink(waMessage)} target="_blank" rel="noopener noreferrer">Request the fixture schedule →</a></div>
+        <div class="df-fixture-empty lxr"><strong>The full schedule is being prepared.</strong><p>The confirmed tiles, bathware, tapware, shower, lighting and accessory specification will be published here. A site inspection can still confirm whether this layout is suitable for your room.</p><a href={inspectionHref}>Check this design against my bathroom →</a></div>
       )}
     </section>
 
@@ -398,10 +399,19 @@ const productSchema = JSON.stringify({
 
   <!-- Closing CTA -->
   <section class="df-closing lxr">
-    <h2>The {design.name}, in your home.</h2>
-    <p>Get the complete design file — renders, drawings, fixture list, and a fixed quotation for your exact space.</p>
-    <a href={waLink(waMessage)} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">Get This Design's Full File</a>
+    <p class="lx-eyebrow">The practical next step</p>
+    <h2>Will the {design.name} work in your bathroom?</h2>
+    <p>We will measure the room, review the site conditions and confirm the right fit before you commit to construction.</p>
+    <a href={inspectionHref} class="lx-btn-wa">Book Site Inspection · LKR 10,000</a>
+    <small>No construction deposit is collected at this stage.</small>
   </section>
+
+  <div class="df-mobile-cta">
+    <a href={inspectionHref}>
+      <span>Book {design.name} inspection</span>
+      <strong>LKR 10,000</strong>
+    </a>
+  </div>
 </LuxeLayout>
 
 <style>
@@ -429,6 +439,8 @@ const productSchema = JSON.stringify({
     padding: .35rem .8rem; border-radius: 999px;
   }
   .df-desc { max-width: 52ch; color: color-mix(in srgb, var(--ink) 78%, transparent); margin-bottom: 1.4rem; }
+  .df-cta { display: grid; justify-items: start; gap: .45rem; }
+  .df-cta small { color: color-mix(in srgb, var(--ink) 55%, transparent); font-size: .68rem; }
 
   .df-hero-img { border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--sage-mist); }
   .df-hero-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -636,6 +648,9 @@ const productSchema = JSON.stringify({
   }
   .df-closing h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); margin-bottom: .6rem; }
   .df-closing p { max-width: 48ch; margin: 0 auto 1.5rem; color: color-mix(in srgb, var(--ink) 75%, transparent); }
+  .df-closing .lx-eyebrow { margin-bottom: .35rem; color: var(--sage-deep); }
+  .df-closing small { display: block; margin-top: .65rem; color: color-mix(in srgb, var(--ink) 52%, transparent); font-size: .68rem; }
+  .df-mobile-cta { display: none; }
 
   @media (max-width: 860px) {
     .df-hero { grid-template-columns: 1fr; }
@@ -673,6 +688,30 @@ const productSchema = JSON.stringify({
     .df-placeholder { min-height: 150px; }
     .df-note { margin-bottom: .85rem; }
     .df-tech figcaption { margin-top: .35rem; }
+    .df-closing { margin-bottom: 4.5rem; }
+    .df-mobile-cta {
+      position: fixed;
+      z-index: 90;
+      left: .75rem;
+      right: .75rem;
+      bottom: calc(.75rem + env(safe-area-inset-bottom));
+      display: block;
+    }
+    .df-mobile-cta a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .8rem;
+      padding: .8rem 1rem;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      background: var(--sage-deep);
+      color: var(--cream);
+      text-decoration: none;
+      box-shadow: 0 12px 34px rgba(23,30,23,.28);
+      font-size: .76rem;
+    }
+    .df-mobile-cta strong { flex: 0 0 auto; color: var(--gold-soft); font: 600 .78rem var(--lx-serif); }
   }
   @media (max-width: 480px) {
     .df-inspiration { grid-template-columns:112px 1fr; gap:1rem; text-align:left; }

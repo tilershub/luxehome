@@ -3,7 +3,7 @@ import LuxeLayout from '../layouts/LuxeLayout.astro';
 import ProjectCard from '../components/luxe/ProjectCard.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
 import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
-import { cloudinary, formatLKRM, waLink } from '../lib/luxe-config';
+import { cloudinary, formatLKRM } from '../lib/luxe-config';
 
 interface HomeDesign {
   slug: string;
@@ -64,7 +64,7 @@ const projects = (await getProjects())
 
 <LuxeLayout
   title="Complete Bathroom Design & Construction in Sri Lanka — LUXEhome"
-  description="Choose a fully documented LUXEhome bathroom design and adapt it to your space. New bathrooms and renovations, managed from design to handover."
+  description="Choose a fully documented LUXEhome bathroom design, then book a LKR 10,000 site inspection. We measure, confirm the fit and manage new bathrooms or renovations through handover."
 >
   <section class="home-hero">
     <div class="home-hero-copy">
@@ -75,10 +75,11 @@ const projects = (await getProjects())
         manages the design, specified materials, construction and final handover.
       </p>
       <div class="home-actions lxr">
-        <a class="lx-btn-wa" href="/designs">Explore bathroom designs</a>
-        <a class="lx-btn-ghost" href="/how-it-works">See how it works</a>
+        <a class="lx-btn-wa" href="/book-site-inspection">Book Site Inspection · LKR 10,000</a>
+        <a class="lx-btn-ghost" href="/designs">Explore bathroom designs</a>
       </div>
       <div class="home-proof lxr" aria-label="LUXEhome service commitments">
+        <span>No measurements needed</span>
         <span>Fixed quotation</span>
         <span>WhatsApp updates</span>
         <span>1-year warranty</span>
@@ -92,10 +93,24 @@ const projects = (await getProjects())
         <span class="home-visual-copy">
           <small>{heroDesign.collection} collection · Design preview</small>
           <strong>{heroDesign.name}</strong>
-          <em>View the complete design file →</em>
+          <em>View this bathroom design →</em>
         </span>
       </a>
     )}
+  </section>
+
+  <section class="home-first-step" aria-labelledby="first-step-title">
+    <div class="home-first-price lxr">
+      <p class="lx-eyebrow">Your first commitment</p>
+      <h2 id="first-step-title">Site inspection</h2>
+      <strong>LKR 10,000</strong>
+      <small>Pay after the location and appointment are confirmed.</small>
+    </div>
+    <div class="home-first-flow">
+      <article class="lxr"><span>01</span><h3>Request</h3><p>Share your contact and location. Bathroom dimensions are optional.</p></article>
+      <article class="lxr"><span>02</span><h3>Measure</h3><p>We inspect the room, services, site condition and access.</p></article>
+      <article class="lxr"><span>03</span><h3>Decide</h3><p>We recommend the right design, budget path and next action.</p></article>
+    </div>
   </section>
 
   <section class="home-paths" aria-labelledby="project-type-title">
@@ -104,10 +119,10 @@ const projects = (await getProjects())
         <p class="lx-eyebrow">Start with your project</p>
         <h2 id="project-type-title">New bathroom or renovation?</h2>
       </div>
-      <p>Choose the correct starting point. The complete design is then customised for your room.</p>
+      <p>Choose the closest path. If you are unsure, the site inspection will settle it.</p>
     </div>
     <div class="home-path-grid">
-      <a class="home-path-card lxr" href="/designs">
+      <a class="home-path-card lxr" href="/book-site-inspection?project=new">
         <span>01</span>
         <div>
           <p class="lx-eyebrow">New construction</p>
@@ -117,7 +132,7 @@ const projects = (await getProjects())
         </div>
         <b aria-hidden="true">→</b>
       </a>
-      <a class="home-path-card lxr" href="/designs">
+      <a class="home-path-card lxr" href="/book-site-inspection?project=renovation">
         <span>02</span>
         <div>
           <p class="lx-eyebrow">Existing bathroom</p>
@@ -192,19 +207,20 @@ const projects = (await getProjects())
 
   <section class="home-cta lxr">
     <div>
-      <p class="lx-eyebrow">Start with your bathroom</p>
-      <h2>Ready to find the right design?</h2>
-      <p>Share the location, approximate size and whether it is new or being renovated.</p>
+      <p class="lx-eyebrow">Do not know the bathroom size?</p>
+      <h2>That is exactly where we start.</h2>
+      <p>We will inspect it, measure it and check which design can work before you commit to construction.</p>
     </div>
     <div class="home-cta-actions">
-      <a class="cta-gold" href={waLink('Hi LUXEhome! I would like help choosing a bathroom design. My bathroom is new / a renovation, and the approximate size is ...')} target="_blank" rel="noopener noreferrer">Start on WhatsApp</a>
-      <a href="/book-site-inspection">Book site inspection</a>
+      <a class="cta-gold" href="/book-site-inspection">Book Inspection · LKR 10,000</a>
+      <a href="/designs">Browse designs first</a>
     </div>
   </section>
 </LuxeLayout>
 
 <style>
   .home-hero,
+  .home-first-step,
   .home-paths,
   .home-designs,
   .home-projects,
@@ -245,6 +261,30 @@ const projects = (await getProjects())
   .home-visual-copy strong { margin-top: .25rem; font: 600 clamp(2rem, 4vw, 3rem)/1 var(--lx-serif); }
   .home-visual-copy em { margin-top: .65rem; font: normal .78rem var(--lx-sans); }
   .home-hero-visual:hover img { transform: scale(1.025); }
+
+  .home-first-step {
+    display: grid;
+    grid-template-columns: .75fr 1.25fr;
+    gap: 1rem;
+    padding: 0 0 clamp(3rem, 7vw, 5rem);
+  }
+  .home-first-price {
+    padding: clamp(1.35rem, 4vw, 2rem);
+    border-radius: 12px;
+    background: var(--sage-deep);
+    color: var(--cream);
+  }
+  .home-first-price .lx-eyebrow { color: var(--gold-soft); }
+  .home-first-price h2 { margin: .25rem 0 .1rem; font-size: 2rem; }
+  .home-first-price strong,
+  .home-first-price small { display: block; }
+  .home-first-price strong { color: var(--gold-soft); font: 600 clamp(2rem, 5vw, 3rem) var(--lx-serif); }
+  .home-first-price small { margin-top: .35rem; color: rgba(247,243,235,.7); font-size: .68rem; }
+  .home-first-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; }
+  .home-first-flow article { padding: 1.2rem; border-top: 2px solid var(--sage); background: rgba(255,255,255,.65); }
+  .home-first-flow span { color: var(--gold); font: 600 .9rem var(--lx-serif); }
+  .home-first-flow h3 { margin: .55rem 0 .35rem; font-size: 1.2rem; }
+  .home-first-flow p { color: color-mix(in srgb, var(--ink) 63%, transparent); font-size: .75rem; }
 
   .home-paths,
   .home-designs,
@@ -335,6 +375,7 @@ const projects = (await getProjects())
   @media (max-width: 900px) {
     .home-hero { grid-template-columns: 1fr; }
     .home-hero-visual { width: min(100%, 620px); aspect-ratio: 5 / 4; }
+    .home-first-step { grid-template-columns: 1fr; }
     .home-path-grid,
     .home-project-grid { grid-template-columns: 1fr; }
     .home-trust-grid { grid-template-columns: repeat(2, 1fr); }
@@ -345,6 +386,7 @@ const projects = (await getProjects())
     .home-hero h1 { font-size: clamp(3.35rem, 15vw, 4.6rem); }
     .home-actions a { width: 100%; }
     .home-hero-visual { aspect-ratio: 4 / 5; }
+    .home-first-flow { grid-template-columns: 1fr; }
     .home-section-heading { grid-template-columns: 1fr; gap: .8rem; }
     .home-section-heading > a { justify-self: start; }
     .home-path-card { grid-template-columns: auto 1fr; }

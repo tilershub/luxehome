@@ -1,23 +1,23 @@
 ---
 import LuxeLayout from '../layouts/LuxeLayout.astro';
-import ContactForm from '../components/ContactForm.astro';
+import InspectionBookingForm from '../components/luxe/InspectionBookingForm.astro';
 import { waLink } from '../lib/luxe-config';
 ---
-<LuxeLayout title="Tell us what you want to transform. — LUXEhome" description="Contact LUXEhome about a bathroom, kitchen, staircase, floor or whole-home project in Sri Lanka.">
+<LuxeLayout title="Contact LUXEhome — Bathroom Design & Construction" description="Contact LUXEhome about a bathroom renovation or new bathroom in Sri Lanka, or request a professional LKR 10,000 site inspection.">
   <section class="contact-hero">
     <p class="lx-eyebrow">Contact LUXEhome</p>
     <h1>Tell us what you want to transform.</h1>
-    <p>Share the space, location and result you have in mind. We’ll guide you to the right design, inspection or planning step.</p>
+    <p>Talk to us about a new bathroom or complete renovation, or request the site inspection when you are ready for us to measure the room.</p>
   </section>
   <section class="contact-body">
     <div class="contact-cards">
-      <article><h2>WhatsApp</h2><p>The fastest way to share photographs, dimensions and location.</p><a href={waLink('Hi LUXEhome! I would like to discuss a project.')} target="_blank" rel="noopener noreferrer">Start a conversation →</a></article>
+      <article><h2>WhatsApp</h2><p>The fastest way to ask a question or share bathroom photographs. Dimensions are not required.</p><a href={waLink('Hi LUXEhome! I would like to discuss a bathroom project.')} target="_blank" rel="noopener noreferrer">Start a conversation →</a></article>
       <article><h2>Service area</h2><p>Projects across Sri Lanka, subject to scope, location and site assessment.</p></article>
       <article><h2>Business hours</h2><p>Monday to Saturday · 8:00 am–6:00 pm</p><a href="tel:+94774503744">077 450 3744</a></article>
     </div>
-    <div class="contact-form"><p class="lx-eyebrow">Project inquiry</p><h2>Tell us about your project</h2><ContactForm /></div>
+    <div class="contact-form"><InspectionBookingForm /></div>
   </section>
 </LuxeLayout>
 <style>
-  .contact-hero,.contact-body{width:min(1100px,calc(100% - 34px));margin:auto}.contact-hero{padding:clamp(3.5rem,8vw,6rem) 0 3rem}.contact-hero h1{font-size:clamp(3.4rem,8vw,5.6rem);max-width:900px;margin:.7rem 0 1.2rem}.contact-hero>p:last-child{font:500 1.3rem/1.45 var(--lx-serif);max-width:720px}.contact-body{display:grid;grid-template-columns:.8fr 1.2fr;gap:2rem;padding-bottom:5rem}.contact-cards{display:grid;gap:12px}.contact-cards article,.contact-form{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:24px}.contact-cards h2,.contact-form>h2{font-size:1.7rem;margin-bottom:.5rem}.contact-cards p{color:#586057}.contact-cards a{display:inline-block;color:var(--sage-deep);margin-top:.6rem}.contact-form :global(.form-wrap){border:0!important;padding:0!important}.contact-form :global(label),.contact-form :global(input),.contact-form :global(select),.contact-form :global(textarea),.contact-form :global(button){font-family:var(--lx-sans)!important}@media(max-width:800px){.contact-body{grid-template-columns:1fr}}
+  .contact-hero,.contact-body{width:min(1100px,calc(100% - 34px));margin:auto}.contact-hero{padding:clamp(3.5rem,8vw,6rem) 0 3rem}.contact-hero h1{font-size:clamp(3.4rem,8vw,5.6rem);max-width:900px;margin:.7rem 0 1.2rem}.contact-hero>p:last-child{font:500 1.3rem/1.45 var(--lx-serif);max-width:720px}.contact-body{display:grid;grid-template-columns:.7fr 1.3fr;gap:2rem;padding-bottom:5rem}.contact-cards{display:grid;align-content:start;gap:12px}.contact-cards article{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:24px}.contact-cards h2{font-size:1.7rem;margin-bottom:.5rem}.contact-cards p{color:#586057}.contact-cards a{display:inline-block;color:var(--sage-deep);margin-top:.6rem}@media(max-width:800px){.contact-body{grid-template-columns:1fr}}
 </style>
