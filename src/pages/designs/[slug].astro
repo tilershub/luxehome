@@ -1,18 +1,23 @@
 ---
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
+import VideoCard from '../../components/luxe/VideoCard.astro';
+import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import { getDesigns, getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
 import { formatLKRM, cloudinary, waLink } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
 export async function getStaticPaths() {
-  const stored = await getDesigns();
-  const slugs = new Set([...CATALOGUE_DESIGNS.map((design) => design.slug), ...stored.map((design) => design.slug)]);
+  const stored = await getDesigns({ spaceSlug: 'bathrooms' });
+  const slugs = new Set([
+    ...CATALOGUE_DESIGNS.filter((design) => design.space === 'bathrooms' && design.coverImage).map((design) => design.slug),
+    ...stored.filter((design) => design.cover_image_url).map((design) => design.slug),
+  ]);
   return [...slugs].map((slug) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;
 const storedDesign = await getDesignBySlug(slug!);
-const catalogueDesign = CATALOGUE_DESIGNS.find((item) => item.slug === slug);
+const catalogueDesign = CATALOGUE_DESIGNS.find((item) => item.space === 'bathrooms' && item.slug === slug);
 const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
   id: '', slug: catalogueDesign.slug, name: catalogueDesign.name, space_id: catalogueDesign.space,
   collection: catalogueDesign.collection, tagline: catalogueDesign.tagline,
@@ -20,12 +25,19 @@ const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
   starting_price_lkr: catalogueDesign.startingPrice ?? 0, min_sqm: catalogueDesign.minSqm,
   new_starting_price_lkr: catalogueDesign.startingPrice ?? null,
   renovation_starting_price_lkr: catalogueDesign.renovationStartingPrice ?? null,
-  cover_image_url: null, video_3d_url: null, video_work_url: null,
+  cover_image_url: catalogueDesign.coverImage ?? null, video_3d_url: null, video_work_url: null,
   inspiration_image_url: null,
   workflow_text: 'We inspect, customise and approve the complete design file before procurement and construction begin.',
   highlights: [], featured: false, sort_order: 0,
   space: { id: catalogueDesign.space, slug: catalogueDesign.space, name: SPACE_PRESENTATION[catalogueDesign.space].name, sinhala_name: null, sort_order: 0 },
   drawings: [], fixtures: [],
+  price_tiers: (catalogueDesign.pricingTiers ?? []).map((tier, sort_order) => ({
+    label: tier.label,
+    sqm: tier.sqm,
+    new_price_lkr: tier.newPrice,
+    renovation_price_lkr: tier.renovationPrice,
+    sort_order,
+  })),
   materials: [
     { category: 'Adhesive', brand: 'Swisstek', item: 'Tile Adhesive', sort_order: 0 },
     { category: 'Grout', brand: 'Swisstek', item: 'Grout', sort_order: 1 },
@@ -46,6 +58,15 @@ if (design.slug === 'manel') {
   design.cover_image_url ||= '/images/designs/manel/cover.jpeg';
   design.inspiration_image_url ||= '/images/designs/manel/manel-flower.jpeg';
   design.video_3d_url ||= 'https://youtube.com/shorts/LHkPOUT4ku8';
+  design.workflow_text ||= 'We inspect, customise and approve the complete design file before procurement and construction begin.';
+  if (design.materials.length === 0) {
+    design.materials.push(
+      { category: 'Adhesive', brand: 'Swisstek', item: 'Tile Adhesive', sort_order: 0 },
+      { category: 'Grout', brand: 'Swisstek', item: 'Grout', sort_order: 1 },
+      { category: 'Waterproofing', brand: 'Tokyo Super 2K', item: 'Waterproofing', sort_order: 2 },
+      { category: 'Electrical', brand: 'ACL', item: 'Wiring & Cables', sort_order: 3 },
+    );
+  }
   const samples = {
     render_1: '/images/designs/manel/render-1.jpeg',
     render_2: '/images/designs/manel/render-2.jpeg',
@@ -70,7 +91,8 @@ const renovationPriceLabel = design.renovation_starting_price_lkr ? formatLKRM(d
 const waMessage = `Hi LUXEhome! I'm interested in the "${design.name}" design (${collectionLabel}, ${priceLabel.replace('From ', 'from ')}). Can you send me the full design file?`;
 
 const renders = (['render_1', 'render_2', 'render_3', 'render_4'] as const)
-  .map((k) => design.drawings.find((dr) => dr.kind === k) ?? null);
+  .map((k) => design.drawings.find((dr) => dr.kind === k) ?? null)
+  .filter((render): render is NonNullable<typeof render> => Boolean(render));
 
 const TECH = [
   { kind: 'civil',          label: 'Civil Drawing' },
@@ -79,8 +101,16 @@ const TECH = [
   { kind: 'electrical',     label: 'Electrical' },
 ] as const;
 
-const video3d   = youtubeEmbed(design.video_3d_url);
-const videoWork = youtubeEmbed(design.video_work_url);
+const video3d = youtubeEmbed(design.video_3d_url);
+const priceTiers = design.price_tiers.length > 0
+  ? design.price_tiers
+  : (catalogueDesign?.pricingTiers ?? []).map((tier, sort_order) => ({
+      label: tier.label,
+      sqm: tier.sqm,
+      new_price_lkr: tier.newPrice,
+      renovation_price_lkr: tier.renovationPrice,
+      sort_order,
+    }));
 
 const fixtureGroups: Array<{ category: string; items: DesignFixture[] }> = [];
 for (const f of design.fixtures) {
@@ -89,7 +119,10 @@ for (const f of design.fixtures) {
   else fixtureGroups.push({ category: f.category, items: [f] });
 }
 
-const related = storedDesign?.id ? (await getProjects({ designId: storedDesign.id })).slice(0, 3) : [];
+const allRelated = storedDesign?.id
+  ? await getProjects({ designId: storedDesign.id })
+  : (await getProjects()).filter((project) => project.design?.slug === design.slug);
+const related = allRelated.filter((project) => project.after_image_url).slice(0, 3);
 
 const productSchema = JSON.stringify({
   '@context': 'https://schema.org',
@@ -151,38 +184,84 @@ const productSchema = JSON.stringify({
     </section>
   )}
 
+  {priceTiers.length > 0 && (
+    <section class="df-section df-pricing" aria-labelledby="pricing-title">
+      <div class="df-pricing-intro lxr">
+        <div>
+          <p class="lx-eyebrow">Size-based pricing guide</p>
+          <h2 id="pricing-title">Choose the right fit for your room.</h2>
+        </div>
+        <p>Each reference price keeps the {design.name} specification while allowing for the additional floor, wall and construction area.</p>
+      </div>
+      <div class="df-price-table lxr" role="table" aria-label={`${design.name} size and price guide`}>
+        <div class="df-price-row df-price-head" role="row">
+          <span role="columnheader">Design fit</span>
+          <span role="columnheader">Floor area</span>
+          <span role="columnheader">New bathroom</span>
+          <span role="columnheader">Renovation</span>
+        </div>
+        {priceTiers.map((tier) => (
+          <div class="df-price-row" role="row">
+            <strong role="cell">{tier.label}</strong>
+            <span role="cell">{tier.sqm} m²</span>
+            <span role="cell">{formatLKRM(tier.new_price_lkr)}</span>
+            <span role="cell">{formatLKRM(tier.renovation_price_lkr)}</span>
+          </div>
+        ))}
+        <div class="df-price-row df-price-custom" role="row">
+          <strong role="cell">Larger or complex room</strong>
+          <span role="cell">Above {priceTiers.at(-1)?.sqm} m²</span>
+          <span role="cell">Custom price</span>
+          <span role="cell">Custom price</span>
+        </div>
+      </div>
+      <p class="df-price-disclaimer lxr">Starting-price guide for the listed design specification and standard room conditions. Room proportions, ceiling height, access, service relocation and structural changes are assessed separately.</p>
+      <a class="df-price-cta lxr" href={waLink(`Hi LUXEhome! I would like an exact ${design.name} price for my bathroom. The approximate floor size is ... m² and it is a new bathroom / renovation.`)} target="_blank" rel="noopener noreferrer">Get a price for my bathroom →</a>
+    </section>
+  )}
+
   <!-- 3D renders -->
   <section class="df-section">
     <h2 class="lxr">The design, rendered</h2>
     <div class="df-render-grid" aria-label="3D render gallery">
-      {renders.map((r, i) => (
+      {renders.map((render, i) => (
         <div class="df-render lxr">
-          {r
-            ? <img src={cloudinary(r.image_url, 800)} alt={`${design.name} — 3D render ${i + 1}`} loading="lazy" width="800" height="600" />
-            : <div class="df-placeholder"><span>Render {i + 1}</span><small>Coming soon</small></div>}
+          <img src={cloudinary(render.image_url, 800)} alt={`${design.name} — 3D render ${i + 1}`} loading="lazy" width="800" height="600" />
         </div>
       ))}
     </div>
   </section>
 
-  <!-- Videos -->
-  <section class="df-section">
-    <h2 class="lxr">See it move</h2>
-    <div class="df-video-grid" aria-label="Design videos">
-      <div class="df-video lxr">
-        <p class="lx-eyebrow">3D Walkthrough</p>
-        {video3d
-          ? <iframe src={video3d} title={`${design.name} 3D walkthrough`} loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
-          : <div class="df-placeholder df-placeholder--video"><span>3D Walkthrough</span><small>Coming soon</small></div>}
+  {video3d && design.cover_image_url && (
+    <section class="df-section">
+      <div class="df-video-layout">
+        <div class="df-video-copy lxr">
+          <p class="lx-eyebrow">Vertical 3D walkthrough</p>
+          <h2>Walk through the {design.name}.</h2>
+          <p>See the vanity, water closet, shower and complete room in one short walkthrough. The video opens in a portrait player and keeps you on this design page.</p>
+        </div>
+        <VideoCard
+          title={`${design.name} 3D Walkthrough`}
+          embedUrl={video3d}
+          coverImage={cloudinary(design.cover_image_url, 700)}
+          eyebrow="3D walkthrough"
+          description="Tap to watch the complete vertical walkthrough."
+        />
       </div>
-      <div class="df-video lxr">
-        <p class="lx-eyebrow">This Design, Built</p>
-        {videoWork
-          ? <iframe src={videoWork} title={`${design.name} recent work`} loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
-          : <div class="df-placeholder df-placeholder--video"><span>Recent Work</span><small>Coming soon</small></div>}
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="df-section">
+      <div class="df-related-heading lxr">
+        <div><p class="lx-eyebrow">From design to reality</p><h2>See the {design.name} built.</h2></div>
+        <p>Real completed bathrooms based on this design, including their customisations and complete project stories.</p>
       </div>
-    </div>
-  </section>
+      <div class="df-related">
+        {related.map((project) => <ProjectCard project={project} compact />)}
+      </div>
+    </section>
+  )}
 
   <!-- Technical drawings -->
   <section class="df-section">
@@ -240,6 +319,7 @@ const productSchema = JSON.stringify({
                     {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
                     {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
                     {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
+                    {f.warranty_period && <><dt>Warranty</dt><dd>{f.warranty_period}</dd></>}
                   </dl>
                   {f.spec && <div class="df-fix-spec">{f.spec}</div>}
                   {f.notes && <div class="df-fix-note">{f.notes}</div>}
@@ -302,23 +382,19 @@ const productSchema = JSON.stringify({
     </section>
   )}
 
-  <!-- Related projects -->
-  {related.length > 0 && (
-    <section class="df-section">
-      <h2 class="lxr">This design, built</h2>
-      <div class="df-related lxr">
-        {related.map((p) => (
-          <a href={`/projects/${p.slug}`} class="df-rel-card">
-            {p.after_image_url && <img src={cloudinary(p.after_image_url, 600)} alt={p.title} loading="lazy" width="600" height="420" />}
-            <div class="df-rel-body">
-              <div class="df-rel-title">{p.title}</div>
-              {p.location && <div class="df-rel-loc">{p.location}</div>}
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
-  )}
+  <section class="df-section df-warranty lxr">
+    <div class="df-warranty-intro">
+      <p class="lx-eyebrow">Warranty &amp; aftercare</p>
+      <h2>Protected after handover.</h2>
+      <p>The completed project includes LUXEhome’s documented one-year service warranty. Manufacturer or supplier cover is listed against each confirmed fixture where applicable.</p>
+      <a href="/warranty-aftercare">Read how warranty support works →</a>
+    </div>
+    <div class="df-warranty-grid">
+      <article><strong>01</strong><h3>Tested handover</h3><p>Final checks, care guidance and the agreed warranty record.</p></article>
+      <article><strong>02</strong><h3>Product clarity</h3><p>Fixture warranty periods stay attached to the exact approved products.</p></article>
+      <article><strong>03</strong><h3>One contact</h3><p>Report an issue with the project reference, photos and a clear description.</p></article>
+    </div>
+  </section>
 
   <!-- Closing CTA -->
   <section class="df-closing lxr">
@@ -365,6 +441,43 @@ const productSchema = JSON.stringify({
   .df-inspiration p:last-child { max-width:58ch; color:color-mix(in srgb,var(--ink) 72%,transparent); }
   .df-note { font-size: .85rem; font-style: italic; color: color-mix(in srgb, var(--ink) 60%, transparent); margin: -0.6rem 0 1.2rem; }
 
+  /* Size-based price guidance */
+  .df-pricing { padding-top: 2.8rem; padding-bottom: 2.8rem; }
+  .df-pricing-intro {
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 2rem;
+    align-items: end;
+    margin-bottom: 1.2rem;
+  }
+  .df-pricing-intro h2 { margin: .3rem 0 0; }
+  .df-pricing-intro > p { color: color-mix(in srgb, var(--ink) 67%, transparent); font-size: .86rem; }
+  .df-price-table { overflow: hidden; border: 1px solid var(--cream-deep); border-radius: 9px; background: #fff; }
+  .df-price-row {
+    display: grid;
+    grid-template-columns: 1.2fr .65fr 1fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: .9rem 1rem;
+    border-bottom: 1px solid var(--cream-deep);
+  }
+  .df-price-row:last-child { border-bottom: 0; }
+  .df-price-row > strong { font: 600 1.03rem var(--lx-serif); }
+  .df-price-row > span { font-size: .82rem; }
+  .df-price-row > span:nth-child(n+3) { font-family: var(--lx-serif); font-weight: 600; }
+  .df-price-head {
+    background: var(--sage-deep);
+    color: var(--cream);
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .df-price-head > span { font: inherit; }
+  .df-price-custom { background: color-mix(in srgb, var(--sage-mist) 52%, #fff); }
+  .df-price-disclaimer { max-width: 82ch; margin-top: .75rem; color: color-mix(in srgb, var(--ink) 55%, transparent); font-size: .72rem; }
+  .df-price-cta { display: inline-flex; margin-top: .7rem; color: var(--sage-deep); font-size: .78rem; font-weight: 600; text-decoration: none; }
+
   /* Placeholders — branded, never broken */
   .df-placeholder {
     width: 100%; height: 100%;
@@ -384,9 +497,14 @@ const productSchema = JSON.stringify({
   .df-render { border-radius: 6px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--sage-mist); }
   .df-render img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  .df-video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
-  .df-video iframe, .df-placeholder--video { width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 6px; }
-  .df-video .lx-eyebrow { margin-bottom: .5rem; }
+  .df-video-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: center;
+  }
+  .df-video-copy h2 { margin: .35rem 0 .7rem; }
+  .df-video-copy p:last-child { max-width: 54ch; color: color-mix(in srgb, var(--ink) 68%, transparent); }
 
   /* Technical drawings + SAMPLE watermark */
   .df-tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
@@ -492,13 +610,22 @@ const productSchema = JSON.stringify({
   .df-faq-item[open] summary::after { transform: rotate(45deg); }
   .df-faq-item p { padding: 0 0 1.1rem; max-width: 62ch; color: color-mix(in srgb, var(--ink) 78%, transparent); font-size: .92rem; }
 
-  /* Related */
+  /* Warranty */
+  .df-warranty { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(2rem, 6vw, 5rem); align-items: start; }
+  .df-warranty-intro h2 { margin: .3rem 0 .65rem; }
+  .df-warranty-intro > p:not(.lx-eyebrow) { max-width: 52ch; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+  .df-warranty-intro > a { display: inline-flex; margin-top: .85rem; color: var(--sage-deep); font-size: .78rem; font-weight: 600; text-decoration: none; }
+  .df-warranty-grid { display: grid; gap: .65rem; }
+  .df-warranty-grid article { padding: 1rem 1.1rem; border-left: 2px solid var(--gold); background: #fff; }
+  .df-warranty-grid strong { color: var(--gold); font: 600 .82rem var(--lx-serif); }
+  .df-warranty-grid h3 { display: inline; margin-left: .55rem; font-size: 1.08rem; }
+  .df-warranty-grid p { margin-top: .35rem; color: color-mix(in srgb, var(--ink) 65%, transparent); font-size: .78rem; }
+
+  /* Related projects */
+  .df-related-heading { display: grid; grid-template-columns: 1.1fr .9fr; align-items: end; gap: 2rem; margin-bottom: 1.2rem; }
+  .df-related-heading h2 { margin: .3rem 0 0; }
+  .df-related-heading > p { color: color-mix(in srgb, var(--ink) 66%, transparent); font-size: .84rem; }
   .df-related { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
-  .df-rel-card { display: block; border-radius: 6px; overflow: hidden; background: #fff; border: 1px solid var(--cream-deep); text-decoration: none; color: var(--ink); }
-  .df-rel-card img { width: 100%; aspect-ratio: 10 / 7; object-fit: cover; display: block; }
-  .df-rel-body { padding: .8rem 1rem 1rem; }
-  .df-rel-title { font-family: var(--lx-serif); font-size: 1.1rem; font-weight: 600; }
-  .df-rel-loc { font-size: .78rem; color: color-mix(in srgb, var(--ink) 60%, transparent); }
 
   /* Closing */
   .df-closing {
@@ -513,7 +640,11 @@ const productSchema = JSON.stringify({
   @media (max-width: 860px) {
     .df-hero { grid-template-columns: 1fr; }
     .df-hero-img { order: -1; }
-    .df-render-grid, .df-video-grid, .df-tech-grid { grid-template-columns: 1fr; }
+    .df-render-grid, .df-tech-grid { grid-template-columns: 1fr; }
+    .df-video-layout { grid-template-columns: 1fr; }
+    .df-pricing-intro,
+    .df-related-heading,
+    .df-warranty { grid-template-columns: 1fr; gap: .7rem; }
     .df-fix-grid { grid-template-columns: repeat(2, 1fr); }
     .df-related { grid-template-columns: 1fr; }
   }
@@ -522,7 +653,6 @@ const productSchema = JSON.stringify({
     .df-section { padding-top: 1.35rem; padding-bottom: 1.35rem; }
     .df-section h2 { margin-bottom: .8rem; }
     .df-render-grid,
-    .df-video-grid,
     .df-tech-grid {
       display: flex;
       gap: .8rem;
@@ -534,10 +664,8 @@ const productSchema = JSON.stringify({
       scrollbar-width: none;
     }
     .df-render-grid::-webkit-scrollbar,
-    .df-video-grid::-webkit-scrollbar,
     .df-tech-grid::-webkit-scrollbar { display: none; }
     .df-render,
-    .df-video,
     .df-tech {
       flex: 0 0 min(82vw, 420px);
       scroll-snap-align: center;
@@ -552,6 +680,22 @@ const productSchema = JSON.stringify({
     .df-inspiration h2 { font-size:1.35rem; }
     .df-inspiration p:last-child { font-size:.82rem; line-height:1.5; }
     .df-price-options { grid-template-columns: 1fr; width: 100%; }
+    .df-price-table { overflow: visible; border: 0; background: transparent; }
+    .df-price-head { display: none; }
+    .df-price-row {
+      grid-template-columns: 1fr 1fr;
+      gap: .35rem .8rem;
+      margin-bottom: .65rem;
+      padding: .9rem;
+      border: 1px solid var(--cream-deep);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .df-price-row > strong { grid-column: 1 / -1; }
+    .df-price-row > span:nth-child(2)::before { content: 'Floor area · '; color: color-mix(in srgb, var(--ink) 55%, transparent); font-family: var(--lx-sans); font-weight: 400; }
+    .df-price-row > span:nth-child(3)::before { content: 'New · '; display: block; color: var(--sage-deep); font: 600 .6rem var(--lx-sans); letter-spacing: .08em; text-transform: uppercase; }
+    .df-price-row > span:nth-child(4)::before { content: 'Renovation · '; display: block; color: var(--sage-deep); font: 600 .6rem var(--lx-sans); letter-spacing: .08em; text-transform: uppercase; }
+    .df-price-custom { background: color-mix(in srgb, var(--sage-mist) 52%, #fff); }
     .df-fixture-intro { display: grid; gap: 1rem; }
     .df-fixture-count { display: flex; align-items: center; gap: .65rem; min-width: 0; width: max-content; text-align: left; padding: .75rem 1rem; }
     .df-fixture-count span { margin: 0; }
