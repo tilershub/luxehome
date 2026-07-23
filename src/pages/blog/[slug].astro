@@ -1,0 +1,205 @@
+---
+/* LUXEhome Journal article — server-rendered so CMS edits and new
+   articles go live immediately. Unknown or unpublished slugs
+   return to the journal index. */
+export const prerender = false;
+
+import { marked } from 'marked';
+import LuxeLayout from '../../layouts/LuxeLayout.astro';
+import { getPublishedPost, getPublishedPosts, readingTime, excerptOf, formatPostDate } from '../../lib/luxe-blog';
+import { cloudinary } from '../../lib/luxe-config';
+
+const { slug } = Astro.params;
+const post = slug ? await getPublishedPost(slug) : null;
+if (!post) return Astro.redirect('/blog', 302);
+
+const bodyHtml = await marked(post.content ?? '');
+const description = post.meta_description || excerptOf(post);
+const ogImage = post.og_image || post.cover_image || undefined;
+
+const related = (await getPublishedPosts())
+  .filter((candidate) => candidate.slug !== post.slug)
+  .sort((a, b) => Number(b.category === post.category) - Number(a.category === post.category))
+  .slice(0, 3);
+
+const canonical = new URL(`/blog/${post.slug}`, Astro.site);
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.title,
+  description,
+  author: { '@type': 'Organization', name: post.author },
+  datePublished: post.pub_date,
+  dateModified: post.updated_at,
+  ...(post.cover_image ? { image: post.cover_image } : {}),
+  publisher: { '@type': 'Organization', name: 'LUXEhome', url: 'https://luxehome.lk' },
+  mainEntityOfPage: canonical.href,
+});
+---
+
+<LuxeLayout
+  title={post.meta_title || `${post.title} — LUXEhome Journal`}
+  description={description}
+  ogImage={ogImage}
+>
+  <script type="application/ld+json" set:html={jsonLd} slot="head" />
+
+  <article class="post">
+    <header class="post-hero">
+      <nav class="post-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true">›</span>
+        <a href="/blog">Journal</a><span aria-hidden="true">›</span>
+        <span>{post.category ?? 'Article'}</span>
+      </nav>
+      <p class="lx-eyebrow">{post.category ?? 'Ideas & advice'} · {readingTime(post)}</p>
+      <h1>{post.title}</h1>
+      <p class="post-byline">
+        {post.author} · <time datetime={post.pub_date}>{formatPostDate(post.pub_date)}</time>
+      </p>
+    </header>
+
+    {post.cover_image && (
+      <figure class="post-cover">
+        <img src={cloudinary(post.cover_image, 1400)} alt="" width="1400" height="800" fetchpriority="high" />
+      </figure>
+    )}
+
+    <div class="post-body prose" set:html={bodyHtml} />
+
+    <aside class="post-cta lxr">
+      <div>
+        <p class="lx-eyebrow">Apply this to your own home</p>
+        <h2>Start with a measured plan.</h2>
+        <p>A LKR 10,000 site inspection turns this advice into a documented recommendation for your room.</p>
+      </div>
+      <a href="/book-site-inspection">Book Site Inspection</a>
+    </aside>
+  </article>
+
+  {related.length > 0 && (
+    <section class="post-related" aria-labelledby="related-title">
+      <div class="post-related-heading lxr">
+        <div>
+          <p class="lx-eyebrow">Keep reading</p>
+          <h2 id="related-title">More from the journal.</h2>
+        </div>
+        <a href="/blog">All articles →</a>
+      </div>
+      <div class="post-related-grid">
+        {related.map((item) => (
+          <a class="post-related-card lxr" href={`/blog/${item.slug}`}>
+            <div class="post-related-art">
+              {item.cover_image
+                ? <img src={cloudinary(item.cover_image, 600)} alt="" loading="lazy" width="600" height="400" />
+                : <span aria-hidden="true">{item.category ?? 'Journal'}</span>}
+            </div>
+            <div class="post-related-body">
+              <p class="lx-eyebrow">{item.category ?? 'Advice'} · {readingTime(item)}</p>
+              <h3>{item.title}</h3>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</LuxeLayout>
+
+<style>
+  .post,
+  .post-related { width: min(1160px, calc(100% - 34px)); margin-inline: auto; }
+
+  .post-hero { max-width: 780px; margin-inline: auto; padding: clamp(2.8rem, 7vw, 5rem) 0 clamp(1.6rem, 4vw, 2.4rem); }
+  .post-breadcrumb { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.2rem; font-size: .72rem; color: color-mix(in srgb, var(--ink) 52%, transparent); }
+  .post-breadcrumb a { color: inherit; text-decoration: none; }
+  .post-breadcrumb a:hover { color: var(--sage-deep); }
+  .post-hero h1 { margin: .6rem 0 .9rem; font-size: clamp(2.5rem, 5.6vw, 4.2rem); }
+  .post-byline { color: color-mix(in srgb, var(--ink) 58%, transparent); font-size: .82rem; }
+
+  .post-cover { margin: 0 auto clamp(1.8rem, 4vw, 2.8rem); }
+  .post-cover img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(43,50,42,.12);
+  }
+
+  .post-body { max-width: 720px; margin-inline: auto; }
+  .prose { font-size: .98rem; line-height: 1.85; }
+  .prose :global(h2) { margin: 2.4rem 0 .8rem; font-size: clamp(1.7rem, 3.2vw, 2.3rem); }
+  .prose :global(h3) { margin: 1.8rem 0 .6rem; font-size: 1.35rem; }
+  .prose :global(p) { margin-bottom: 1.15rem; color: color-mix(in srgb, var(--ink) 82%, transparent); }
+  .prose :global(strong) { font-weight: 600; color: var(--ink); }
+  .prose :global(ul), .prose :global(ol) { margin: 0 0 1.15rem; padding-left: 1.35rem; color: color-mix(in srgb, var(--ink) 82%, transparent); }
+  .prose :global(li) { margin-bottom: .4rem; }
+  .prose :global(a) { color: var(--sage-deep); text-decoration: underline; text-underline-offset: 3px; }
+  .prose :global(a:hover) { color: var(--gold); }
+  .prose :global(img) { max-width: 100%; height: auto; border-radius: 10px; margin: 1.4rem 0; }
+  .prose :global(blockquote) { margin: 1.5rem 0; padding: .2rem 0 .2rem 1.2rem; border-left: 3px solid var(--gold); color: color-mix(in srgb, var(--ink) 68%, transparent); font: 500 1.08rem/1.7 var(--lx-serif); }
+  .prose :global(hr) { margin: 2.4rem 0; border: 0; border-top: 1px solid var(--cream-deep); }
+  .prose :global(table) { width: 100%; margin: 1.5rem 0 1.8rem; border-collapse: collapse; font-size: .86rem; }
+  .prose :global(th) { padding: .6rem .9rem; background: var(--sage-deep); color: var(--cream); text-align: left; font-weight: 500; }
+  .prose :global(td) { padding: .55rem .9rem; border-bottom: 1px solid var(--cream-deep); }
+  .prose :global(tr:nth-child(even) td) { background: color-mix(in srgb, var(--cream) 55%, #fff); }
+  .prose :global(code) { padding: .1em .35em; border-radius: 4px; background: var(--cream-deep); font-size: .86em; }
+
+  .post-cta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.6rem;
+    max-width: 780px;
+    margin: clamp(2.4rem, 6vw, 3.6rem) auto 0;
+    padding: clamp(1.5rem, 4vw, 2.2rem);
+    border-radius: 14px;
+    background: var(--sage-deep);
+    color: var(--cream);
+  }
+  .post-cta .lx-eyebrow { color: var(--gold-soft); }
+  .post-cta h2 { margin: .3rem 0 .4rem; font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
+  .post-cta p:not(.lx-eyebrow) { max-width: 46ch; color: rgba(247,243,235,.75); font-size: .88rem; }
+  .post-cta > a {
+    flex: 0 0 auto;
+    padding: .8rem 1.2rem;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .post-related { padding: clamp(2.6rem, 6vw, 4.2rem) 0 4rem; margin-top: clamp(2.4rem, 6vw, 4rem); border-top: 1px solid rgba(43,50,42,.12); }
+  .post-related-heading { display: flex; justify-content: space-between; align-items: end; gap: 1.5rem; margin-bottom: 1.4rem; }
+  .post-related-heading h2 { margin-top: .35rem; font-size: clamp(1.9rem, 4vw, 2.8rem); }
+  .post-related-heading > a { color: var(--sage-deep); font-size: .78rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .post-related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .post-related-card {
+    overflow: hidden;
+    border: 1px solid var(--cream-deep);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .post-related-card:hover { transform: translateY(-4px); box-shadow: 0 14px 34px rgba(43,50,42,.09); }
+  .post-related-art { position: relative; aspect-ratio: 3 / 2; background: var(--sage-mist); }
+  .post-related-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .post-related-art span { position: absolute; inset: 0; display: grid; place-items: center; color: var(--sage-deep); font: 600 1.1rem var(--lx-serif); letter-spacing: .1em; text-transform: uppercase; }
+  .post-related-body { padding: .95rem 1.05rem 1.15rem; }
+  .post-related-body h3 { margin-top: .3rem; font-size: 1.25rem; }
+
+  @media (max-width: 760px) {
+    .post-cta { display: block; }
+    .post-cta > a { display: inline-flex; margin-top: 1rem; }
+    .post-related-grid { grid-template-columns: 1fr; }
+    .post-related-heading { flex-direction: column; align-items: flex-start; gap: .6rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-related-card { transition: none; }
+  }
+</style>

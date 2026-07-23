@@ -2,3 +2,4 @@ User-agent: *
 Disallow:
 
 Sitemap: https://luxehome.lk/sitemap-index.xml
+Sitemap: https://luxehome.lk/blog-sitemap.xml

@@ -43,9 +43,6 @@
 /services/waterproofing/ /designs 301
 /services/* /designs 301
 
-# Retired estimator page and blog section
+# Retired estimator page
 /estimator /pricing-guide 301
 /estimator/ /pricing-guide 301
-/blog / 301
-/blog/ / 301
-/blog/* / 301
