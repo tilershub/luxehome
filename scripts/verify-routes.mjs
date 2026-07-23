@@ -1,13 +1,10 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const designs = [
-  'araliya','olu','kumudu','nelum','sandun','orchid','manel','binara','idda',
-  'rampe','karapincha','inguru','karabu','goraka','siyambala','kurundu','sadikka','wasawasi',
-  'ritigala','dolukanda','hanthana','namunukula','kirigalpotta','thotupola','dumbara','samanala','pidurutalagala',
-  'weligama','kalpitiya','pasikuda','habarana','ella','sinharaja','sigiriya','yala','horton',
-];
-const projects = ['kotte-family-bathroom','avissawella-ensuite','matara-bathroom-makeover'];
+// Only complete, repository-backed entries are required in an offline build.
+// Additional published CMS designs and projects are added when Supabase is
+// available at build time.
+const designs = ['manel'];
 const articles = [
   'what-a-fixed-bathroom-quotation-should-include','before-the-first-tile','bathroom-under-4sqm',
   'kitchen-storage-first','large-format-tile-wall-ready','what-we-found-avissawella','when-to-book-site-inspection',
@@ -20,8 +17,7 @@ const routes = [
   '/', '/designs', '/bathroom-designs', '/kitchen-designs', '/staircase-designs', '/floor-designs',
   '/projects', '/blog', '/shop', '/about', '/contact', '/book-site-inspection', '/design-recommendation',
   '/whole-home-planner', '/start', '/thank-you', '/how-it-works', '/bathroom-renovation',
-  '/kitchen-design-build', '/staircase-design-build', '/floor-design-installation', '/materials-brands',
-  '/pricing-guide', '/warranty-aftercare', '/team', '/faq', '/terms', '/privacy', '/warranty-terms',
+  '/materials-brands', '/pricing-guide', '/warranty-aftercare', '/team', '/faq', '/terms', '/privacy', '/warranty-terms',
   '/payment-cancellation', '/admin', '/admin/cms', '/admin/cms/designs', '/admin/cms/projects',
   '/admin/cms/blog', '/admin/cms/pages', '/admin/cms/products', '/admin/cms/categories',
   '/admin/cms/inspections', '/admin/cms/team', '/admin/cms/media', '/admin/cms/settings', '/admin/luxehome', '/admin/blog',
@@ -29,7 +25,6 @@ const routes = [
   '/admin/catalogue/designs/new', '/admin/catalogue/projects', '/admin/catalogue/projects/new',
   '/admin/catalogue/team', '/admin/catalogue/team/new',
   ...designs.map((slug) => `/designs/${slug}`),
-  ...projects.map((slug) => `/projects/${slug}`),
   ...articles.map((slug) => `/blog/${slug}`),
   ...products.map((slug) => `/shop/${slug}`),
 ];
