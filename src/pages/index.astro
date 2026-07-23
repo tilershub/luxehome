@@ -1,40 +1,363 @@
 ---
 import LuxeLayout from '../layouts/LuxeLayout.astro';
-import { waLink } from '../lib/luxe-config';
-const spaces = [
-  { name: 'Bathrooms', href: '/bathroom-designs', image: '/spaces/bathroom.webp', eyebrow: 'The floral collection', copy: 'Complete bathroom designs, documented fixture by fixture.' },
-  { name: 'Kitchens', href: '/kitchen-designs', image: '/spaces/kitchen.webp', eyebrow: 'The spice collection', copy: 'Sri Lankan character shaped into beautifully practical kitchens.' },
-  { name: 'Staircases', href: '/staircase-designs', image: '/spaces/staircase.webp', eyebrow: 'The highland collection', copy: 'Architectural staircases designed as part of the home.' },
-  { name: 'Floors', href: '/floor-designs', image: '/spaces/floor.webp', eyebrow: 'The landscape collection', copy: 'Material-led floors with every transition carefully resolved.' },
-];
+import ProjectCard from '../components/luxe/ProjectCard.astro';
+import { getDesigns, getProjects } from '../lib/luxe';
+import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
+import { cloudinary, formatLKRM, waLink } from '../lib/luxe-config';
+
+interface HomeDesign {
+  slug: string;
+  name: string;
+  collection: string;
+  tagline: string;
+  minSqm: number | null;
+  newPrice: number | null;
+  renovationPrice: number | null;
+  cover: string;
+}
+
+const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
+const readyCatalogue = CATALOGUE_DESIGNS.filter((item) => item.space === 'bathrooms' && item.coverImage);
+const designMap = new Map<string, HomeDesign>();
+
+for (const item of readyCatalogue) {
+  designMap.set(item.slug, {
+    slug: item.slug,
+    name: item.name,
+    collection: item.collection,
+    tagline: item.tagline,
+    minSqm: item.minSqm,
+    newPrice: item.startingPrice,
+    renovationPrice: item.renovationStartingPrice ?? null,
+    cover: item.coverImage!,
+  });
+}
+
+for (const item of storedDesigns) {
+  const fallback = readyCatalogue.find((candidate) => candidate.slug === item.slug);
+  const cover = item.cover_image_url || fallback?.coverImage;
+  if (!cover) continue;
+  designMap.set(item.slug, {
+    slug: item.slug,
+    name: item.name,
+    collection: item.collection,
+    tagline: item.tagline || fallback?.tagline || 'A complete, documented LUXEhome bathroom.',
+    minSqm: item.min_sqm,
+    newPrice: item.new_starting_price_lkr || item.starting_price_lkr || fallback?.startingPrice || null,
+    renovationPrice: item.renovation_starting_price_lkr || fallback?.renovationStartingPrice || null,
+    cover,
+  });
+}
+
+const designs = [...designMap.values()].slice(0, 4);
+const newPrices = designs.flatMap((design) => design.newPrice ? [design.newPrice] : []);
+const renovationPrices = designs.flatMap((design) => design.renovationPrice ? [design.renovationPrice] : []);
+const newFrom = newPrices.length ? Math.min(...newPrices) : null;
+const renovationFrom = renovationPrices.length ? Math.min(...renovationPrices) : null;
+const heroDesign = designs[0] ?? null;
+
+const projects = (await getProjects())
+  .filter((project) => project.after_image_url)
+  .sort((a, b) => Number(b.featured) - Number(a.featured))
+  .slice(0, 2);
 ---
-<LuxeLayout title="Your home, fully resolved. — LUXEhome" description="Choose a complete, documented design with an honest starting price, specified materials and a trusted Sri Lankan design-and-build team.">
-  <section class="artifact-hero">
-    <div class="lx-eyebrow lxr">Design-led renovation · Sri Lanka</div>
-    <h1 class="lxr">Your home, fully resolved.</h1>
-    <p class="lead lxr">Choose a complete, documented design—with an honest starting price, specified materials and a team you can trust.</p>
-    <div class="actions lxr"><a class="lx-btn-wa" href="/book-site-inspection">Book site inspection</a><a class="lx-btn-ghost" href="/designs">Browse designs</a></div>
+
+<LuxeLayout
+  title="Complete Bathroom Design & Construction in Sri Lanka — LUXEhome"
+  description="Choose a fully documented LUXEhome bathroom design and adapt it to your space. New bathrooms and renovations, managed from design to handover."
+>
+  <section class="home-hero">
+    <div class="home-hero-copy">
+      <p class="lx-eyebrow lxr">Complete bathroom design &amp; construction · Sri Lanka</p>
+      <h1 class="lxr">Your bathroom,<br />fully resolved.</h1>
+      <p class="home-lead lxr">
+        Choose a complete LUXEhome design or adapt one to your room. One accountable team
+        manages the design, specified materials, construction and final handover.
+      </p>
+      <div class="home-actions lxr">
+        <a class="lx-btn-wa" href="/designs">Explore bathroom designs</a>
+        <a class="lx-btn-ghost" href="/how-it-works">See how it works</a>
+      </div>
+      <div class="home-proof lxr" aria-label="LUXEhome service commitments">
+        <span>Fixed quotation</span>
+        <span>WhatsApp updates</span>
+        <span>1-year warranty</span>
+      </div>
+    </div>
+
+    {heroDesign && (
+      <a class="home-hero-visual lxr" href={`/designs/${heroDesign.slug}`} aria-label={`Explore the ${heroDesign.name} bathroom design`}>
+        <img src={cloudinary(heroDesign.cover, 1000)} alt={`${heroDesign.name} bathroom design preview`} width="1000" height="750" fetchpriority="high" />
+        <span class="home-visual-shade" aria-hidden="true"></span>
+        <span class="home-visual-copy">
+          <small>{heroDesign.collection} collection · Design preview</small>
+          <strong>{heroDesign.name}</strong>
+          <em>View the complete design file →</em>
+        </span>
+      </a>
+    )}
   </section>
-  <section class="space-section">
-    <div class="space-heading lxr"><div><p class="lx-eyebrow">Browse by space</p><h2>Choose where to begin.</h2></div><a href="/designs">View all designs →</a></div>
-    <div class="space-card-grid">
-      {spaces.map((space) => (
-        <a class="space-card lxr" href={space.href} aria-label={`Browse ${space.name} designs`}>
-          <img src={space.image} alt={`${space.name} design collection`} loading="lazy" width="900" height="506" />
-          <span class="space-shade" aria-hidden="true"></span>
-          <span class="space-copy"><small>{space.eyebrow}</small><strong>{space.name}</strong><em>{space.copy}</em><b>Explore designs <span>→</span></b></span>
+
+  <section class="home-paths" aria-labelledby="project-type-title">
+    <div class="home-section-heading lxr">
+      <div>
+        <p class="lx-eyebrow">Start with your project</p>
+        <h2 id="project-type-title">New bathroom or renovation?</h2>
+      </div>
+      <p>Choose the correct starting point. The complete design is then customised for your room.</p>
+    </div>
+    <div class="home-path-grid">
+      <a class="home-path-card lxr" href="/designs">
+        <span>01</span>
+        <div>
+          <p class="lx-eyebrow">New construction</p>
+          <h3>Build a new bathroom</h3>
+          <p>Start with a resolved layout, technical drawings and a complete material and fixture specification.</p>
+          {newFrom && <strong>{formatLKRM(newFrom)}</strong>}
+        </div>
+        <b aria-hidden="true">→</b>
+      </a>
+      <a class="home-path-card lxr" href="/designs">
+        <span>02</span>
+        <div>
+          <p class="lx-eyebrow">Existing bathroom</p>
+          <h3>Renovate completely</h3>
+          <p>Rework the old room through demolition, repairs, services, waterproofing, finishes and handover.</p>
+          {renovationFrom && <strong>{formatLKRM(renovationFrom)}</strong>}
+        </div>
+        <b aria-hidden="true">→</b>
+      </a>
+    </div>
+    {(newFrom || renovationFrom) && <p class="home-price-note lxr">Current starting prices are based on the minimum room size and listed specification of the available design. Final fit and price follow room assessment.</p>}
+  </section>
+
+  <section class="home-designs" id="available-designs" aria-labelledby="available-designs-title">
+    <div class="home-section-heading lxr">
+      <div>
+        <p class="lx-eyebrow">The floral collection</p>
+        <h2 id="available-designs-title">Fully developed bathroom designs.</h2>
+      </div>
+      <p>We publish one design at a time—only after its renders, pricing, drawings, fixtures and warranties are documented.</p>
+    </div>
+
+    <div class="home-design-grid">
+      {designs.map((design) => (
+        <a class="home-design-card lxr" href={`/designs/${design.slug}`}>
+          <div class="home-design-image">
+            <img src={cloudinary(design.cover, 800)} alt={`${design.name} bathroom design`} loading="lazy" width="800" height="600" />
+            <span>{design.minSqm ? `Minimum ${design.minSqm} m²` : 'Custom fit'}</span>
+          </div>
+          <div class="home-design-body">
+            <p class="lx-eyebrow">{design.collection} collection</p>
+            <h3>{design.name}</h3>
+            <p>{design.tagline}</p>
+            <dl>
+              {design.newPrice && <><dt>New bathroom</dt><dd>{formatLKRM(design.newPrice)}</dd></>}
+              {design.renovationPrice && <><dt>Renovation</dt><dd>{formatLKRM(design.renovationPrice)}</dd></>}
+            </dl>
+            <strong>View complete design <span aria-hidden="true">→</span></strong>
+          </div>
         </a>
       ))}
     </div>
   </section>
-  <section class="artifact-section"><div class="artifact-grid artifact-grid--trust">
-    <article class="artifact-card lxr"><h2>Why LUXEhome</h2><div class="chips"><span>Fixed quotation</span><span>Verified teams</span><span>WhatsApp progress updates</span><span>1-year warranty</span></div></article>
-    <article class="artifact-card lxr"><h2>Start with clarity</h2><p>Browse named designs, see real project stories, or book a professional site inspection.</p></article>
-  </div></section>
-  <section class="artifact-cta lxr"><div><div class="lx-eyebrow">Start with clarity</div><h2>Ready to discuss your home?</h2></div><a class="cta-gold" href={waLink("Hi LUXEhome! I am interested in 'Your home, fully resolved.'")} target="_blank" rel="noopener noreferrer">Talk on WhatsApp</a></section>
+
+  {projects.length > 0 && (
+    <section class="home-projects" aria-labelledby="home-projects-title">
+      <div class="home-section-heading lxr">
+        <div>
+          <p class="lx-eyebrow">Designs brought to life</p>
+          <h2 id="home-projects-title">See what we actually built.</h2>
+        </div>
+        <a href="/projects">View all project stories →</a>
+      </div>
+      <div class="home-project-grid">
+        {projects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </section>
+  )}
+
+  <section class="home-trust" aria-labelledby="why-title">
+    <div class="home-section-heading lxr">
+      <div><p class="lx-eyebrow">Why LUXEhome</p><h2 id="why-title">Clarity before construction.</h2></div>
+      <p>Every important decision is documented before the work reaches site.</p>
+    </div>
+    <div class="home-trust-grid">
+      <article class="lxr"><span>01</span><h3>Complete design file</h3><p>Renders, layouts, technical drawings, fixtures, finishes and warranties in one place.</p></article>
+      <article class="lxr"><span>02</span><h3>Fixed quotation</h3><p>The approved scope, selections, payment stages and exclusions are written before construction.</p></article>
+      <article class="lxr"><span>03</span><h3>One responsible team</h3><p>Design, procurement, civil work and specialist trades are coordinated through LUXEhome.</p></article>
+      <article class="lxr"><span>04</span><h3>Visible progress</h3><p>Stage-by-stage WhatsApp updates keep local and overseas clients informed.</p></article>
+    </div>
+  </section>
+
+  <section class="home-cta lxr">
+    <div>
+      <p class="lx-eyebrow">Start with your bathroom</p>
+      <h2>Ready to find the right design?</h2>
+      <p>Share the location, approximate size and whether it is new or being renovated.</p>
+    </div>
+    <div class="home-cta-actions">
+      <a class="cta-gold" href={waLink('Hi LUXEhome! I would like help choosing a bathroom design. My bathroom is new / a renovation, and the approximate size is ...')} target="_blank" rel="noopener noreferrer">Start on WhatsApp</a>
+      <a href="/book-site-inspection">Book site inspection</a>
+    </div>
+  </section>
 </LuxeLayout>
+
 <style>
-  .artifact-hero{width:min(1100px,calc(100% - 34px));margin:auto;padding:clamp(3.5rem,9vw,7rem) 0 3rem}.artifact-hero h1{font-size:clamp(3.5rem,8vw,5.6rem);max-width:900px;margin:.8rem 0 1.35rem}.lead{font:500 clamp(1.25rem,3vw,1.5rem)/1.4 var(--lx-serif);max-width:700px}.actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.7rem}
-  .space-section{width:min(1100px,calc(100% - 34px));margin:0 auto;padding:1.6rem 0 2.5rem}.space-heading{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}.space-heading h2{font-size:clamp(2.2rem,5vw,3.4rem);margin:.25rem 0 0}.space-heading>a{color:var(--sage-deep);font-size:.82rem;font-weight:600;text-decoration:none;white-space:nowrap}.space-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.space-card{position:relative;display:block;min-height:360px;border-radius:12px;overflow:hidden;color:#fff;text-decoration:none;background:var(--sage-deep);box-shadow:0 12px 35px #2b322a14}.space-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s ease}.space-shade{position:absolute;inset:0;background:linear-gradient(180deg,#17201912 20%,#172019e8 100%)}.space-copy{position:absolute;inset:auto 0 0;padding:clamp(20px,4vw,30px);display:block}.space-copy small{display:block;color:var(--gold-soft);font-size:.65rem;font-style:normal;text-transform:uppercase;letter-spacing:.15em}.space-copy strong{display:block;margin:.2rem 0;font:600 clamp(2rem,4vw,3rem)/1 var(--lx-serif)}.space-copy em{display:block;max-width:42ch;color:#f7f3ebd9;font:normal .82rem/1.5 var(--lx-sans)}.space-copy b{display:block;margin-top:.9rem;font-size:.72rem;letter-spacing:.05em}.space-copy b span{display:inline-block;transition:transform .25s}.space-card:hover img{transform:scale(1.035)}.space-card:hover b span{transform:translateX(5px)}
-  .artifact-section{padding:1rem 0 4.4rem}.artifact-grid{width:min(1100px,calc(100% - 34px));margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.artifact-grid--trust{grid-template-columns:repeat(2,1fr)}.artifact-card{background:#fff;border:1px solid #2b322a16;border-radius:10px;padding:24px}.artifact-card h2{font-size:1.7rem;margin-bottom:.8rem}.artifact-card p{color:#586057}.chips{display:flex;gap:8px;flex-wrap:wrap}.chips span,.chips a{background:var(--sage-mist);border-radius:99px;padding:7px 11px;font-size:12px;color:var(--ink);text-decoration:none}.artifact-cta{width:min(1100px,calc(100% - 34px));margin:0 auto 4rem;background:var(--sage-deep);color:#fff;border-radius:14px;padding:42px;display:flex;justify-content:space-between;align-items:center;gap:25px}.artifact-cta .lx-eyebrow{color:var(--gold-soft)}.artifact-cta h2{font-size:clamp(2.2rem,5vw,3.4rem);margin:.4rem 0 0}.cta-gold{display:inline-flex;padding:11px 18px;border-radius:99px;background:var(--gold);color:#fff;text-decoration:none;white-space:nowrap}@media(max-width:800px){.space-card-grid{grid-template-columns:1fr}.space-card{min-height:330px}.artifact-grid{grid-template-columns:1fr}.artifact-cta{display:block;padding:30px 24px}.cta-gold{margin-top:18px}.actions a{width:100%}}@media(max-width:480px){.space-heading{display:block}.space-heading>a{display:inline-block;margin-top:.7rem}.space-card{min-height:310px}.space-copy em{font-size:.78rem}}
+  .home-hero,
+  .home-paths,
+  .home-designs,
+  .home-projects,
+  .home-trust,
+  .home-cta { width: min(1160px, calc(100% - 34px)); margin-inline: auto; }
+
+  .home-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, .85fr);
+    gap: clamp(2rem, 6vw, 5.5rem);
+    align-items: center;
+    padding: clamp(3.2rem, 8vw, 7rem) 0 clamp(3rem, 7vw, 5.5rem);
+  }
+  .home-hero h1 { margin: .75rem 0 1.2rem; max-width: 780px; font-size: clamp(3.5rem, 7.6vw, 6rem); }
+  .home-lead { max-width: 640px; font: 500 clamp(1.17rem, 2.5vw, 1.45rem)/1.45 var(--lx-serif); }
+  .home-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.7rem; }
+  .home-proof { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1.35rem; }
+  .home-proof span { padding: .36rem .7rem; border-radius: 999px; background: var(--sage-mist); color: var(--sage-deep); font-size: .7rem; }
+
+  .home-hero-visual {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 14px;
+    color: var(--cream);
+    text-decoration: none;
+    background: var(--sage-deep);
+    box-shadow: 0 24px 60px rgba(43,50,42,.15);
+  }
+  .home-hero-visual img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+  .home-visual-shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(25,32,25,.9) 100%); }
+  .home-visual-copy { position: absolute; inset: auto 0 0; padding: clamp(1.3rem, 4vw, 2rem); }
+  .home-visual-copy small,
+  .home-visual-copy strong,
+  .home-visual-copy em { display: block; }
+  .home-visual-copy small { color: var(--gold-soft); font-size: .65rem; font-style: normal; letter-spacing: .16em; text-transform: uppercase; }
+  .home-visual-copy strong { margin-top: .25rem; font: 600 clamp(2rem, 4vw, 3rem)/1 var(--lx-serif); }
+  .home-visual-copy em { margin-top: .65rem; font: normal .78rem var(--lx-sans); }
+  .home-hero-visual:hover img { transform: scale(1.025); }
+
+  .home-paths,
+  .home-designs,
+  .home-projects,
+  .home-trust { padding: clamp(2.8rem, 6vw, 5rem) 0; border-top: 1px solid rgba(43,50,42,.12); }
+  .home-section-heading { display: grid; grid-template-columns: 1.2fr .8fr; gap: 2rem; align-items: end; margin-bottom: 1.5rem; }
+  .home-section-heading h2 { margin-top: .35rem; font-size: clamp(2.2rem, 5vw, 3.6rem); }
+  .home-section-heading > p { max-width: 48ch; color: color-mix(in srgb, var(--ink) 68%, transparent); }
+  .home-section-heading > a { justify-self: end; color: var(--sage-deep); font-size: .78rem; font-weight: 600; text-decoration: none; }
+
+  .home-path-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .home-path-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem;
+    align-items: start;
+    padding: clamp(1.2rem, 3vw, 1.7rem);
+    border: 1px solid var(--cream-deep);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .home-path-card > span { color: var(--gold); font: 600 1.2rem var(--lx-serif); }
+  .home-path-card h3 { margin: .2rem 0 .5rem; font-size: 1.65rem; }
+  .home-path-card p:not(.lx-eyebrow) { color: color-mix(in srgb, var(--ink) 68%, transparent); font-size: .85rem; }
+  .home-path-card strong { display: block; margin-top: .8rem; font: 600 1.15rem var(--lx-serif); }
+  .home-path-card > b { align-self: center; font-size: 1.2rem; transition: transform .2s ease; }
+  .home-path-card:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(43,50,42,.08); }
+  .home-path-card:hover > b { transform: translateX(4px); }
+  .home-price-note { max-width: 78ch; margin-top: .85rem; color: color-mix(in srgb, var(--ink) 55%, transparent); font-size: .72rem; }
+
+  .home-design-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 1rem; }
+  .home-design-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--cream-deep);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .home-design-card:hover { transform: translateY(-4px); box-shadow: 0 16px 38px rgba(43,50,42,.1); }
+  .home-design-image { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--sage-mist); }
+  .home-design-image img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .45s ease; }
+  .home-design-card:hover img { transform: scale(1.025); }
+  .home-design-image span { position: absolute; left: .8rem; bottom: .8rem; padding: .3rem .7rem; border-radius: 999px; background: rgba(43,50,42,.84); color: var(--cream); font-size: .63rem; letter-spacing: .08em; text-transform: uppercase; }
+  .home-design-body { display: flex; flex-direction: column; flex: 1; padding: 1.15rem 1.2rem 1.3rem; }
+  .home-design-body h3 { margin: .2rem 0 .3rem; font-size: 1.8rem; }
+  .home-design-body > p:not(.lx-eyebrow) { color: color-mix(in srgb, var(--ink) 67%, transparent); font-size: .86rem; }
+  .home-design-body dl { display: grid; grid-template-columns: 1fr auto; gap: .2rem .8rem; margin: 1rem 0; padding-top: .8rem; border-top: 1px solid var(--cream-deep); }
+  .home-design-body dt { color: color-mix(in srgb, var(--ink) 58%, transparent); font-size: .72rem; }
+  .home-design-body dd { margin: 0; font: 600 .9rem var(--lx-serif); }
+  .home-design-body > strong { margin-top: auto; font-size: .75rem; letter-spacing: .04em; }
+  .home-design-body > strong span { display: inline-block; transition: transform .2s ease; }
+  .home-design-card:hover .home-design-body > strong span { transform: translateX(4px); }
+
+  .home-project-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+
+  .home-trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  .home-trust-grid article { padding: 1.25rem; border-top: 2px solid var(--sage); background: rgba(255,255,255,.55); }
+  .home-trust-grid span { color: var(--gold); font: 600 .9rem var(--lx-serif); }
+  .home-trust-grid h3 { margin: .6rem 0 .45rem; font-size: 1.25rem; }
+  .home-trust-grid p { color: color-mix(in srgb, var(--ink) 66%, transparent); font-size: .8rem; }
+
+  .home-cta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 4rem;
+    padding: clamp(1.8rem, 5vw, 3.2rem);
+    border-radius: 14px;
+    background: var(--sage-deep);
+    color: var(--cream);
+  }
+  .home-cta .lx-eyebrow { color: var(--gold-soft); }
+  .home-cta h2 { margin: .35rem 0; font-size: clamp(2.2rem, 5vw, 3.4rem); }
+  .home-cta p:not(.lx-eyebrow) { color: rgba(247,243,235,.74); }
+  .home-cta-actions { display: flex; flex-direction: column; align-items: center; gap: .65rem; flex: 0 0 auto; }
+  .home-cta-actions a { color: var(--cream); font-size: .78rem; }
+  .home-cta-actions .cta-gold { padding: .8rem 1.25rem; border-radius: 999px; background: var(--gold); color: #fff; font-size: .84rem; font-weight: 500; text-decoration: none; white-space: nowrap; }
+
+  @media (max-width: 900px) {
+    .home-hero { grid-template-columns: 1fr; }
+    .home-hero-visual { width: min(100%, 620px); aspect-ratio: 5 / 4; }
+    .home-path-grid,
+    .home-project-grid { grid-template-columns: 1fr; }
+    .home-trust-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .home-hero { padding-top: 2.8rem; }
+    .home-hero h1 { font-size: clamp(3.35rem, 15vw, 4.6rem); }
+    .home-actions a { width: 100%; }
+    .home-hero-visual { aspect-ratio: 4 / 5; }
+    .home-section-heading { grid-template-columns: 1fr; gap: .8rem; }
+    .home-section-heading > a { justify-self: start; }
+    .home-path-card { grid-template-columns: auto 1fr; }
+    .home-path-card > b { display: none; }
+    .home-trust-grid { grid-template-columns: 1fr; }
+    .home-cta { display: block; }
+    .home-cta-actions { align-items: stretch; margin-top: 1.2rem; text-align: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-hero-visual img,
+    .home-design-image img,
+    .home-path-card,
+    .home-design-card { transition: none; }
+  }
 </style>
