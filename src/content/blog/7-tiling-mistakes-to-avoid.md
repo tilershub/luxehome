@@ -91,4 +91,4 @@ At LUXEHOME, we use a tile leveling system on every floor installation as standa
 
 **The common thread:** every mistake above comes down to either the wrong product, the wrong technique, or not allowing enough time. A professional tiler who has done this work for years has encountered every one of these failure modes — and has systems in place to avoid them.
 
-If you are planning a tiling project and want it done right the first time, [WhatsApp us](/services/floor-tiling) for a site visit and honest quote.
+If you are planning a tiling project and want it done right the first time, [book a professional site inspection](/book-site-inspection) for a documented assessment.

@@ -79,8 +79,8 @@ A few minutes with your tiler before purchasing can save significant money and f
 - Exactly how many you need including cut wastage (typically 10–15%)
 - Whether the format or finish requires any special adhesive or method
 
-We are happy to advise on tile selection before any project begins. [WhatsApp us](/services/floor-tiling) with a photo of the space and what you are considering — we will give you an honest answer.
+We are happy to advise on tile selection before any project begins. Explore our [floor design collection](/floor-designs), or [book a professional site inspection](/book-site-inspection) for project-specific advice.
 
 ---
 
-**Ready to install?** Our [floor tiling service](/services/floor-tiling) covers all tile types up to 4×2 feet, from Rs. 350/sq.ft — including leveling system and Swisstek waterproof grout.
+**Ready to plan the complete finish?** Browse the [floor design collection](/floor-designs) to start with a documented material and layout direction.
