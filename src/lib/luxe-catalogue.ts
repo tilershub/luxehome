@@ -1,5 +1,12 @@
 import type { Collection } from './luxe';
 
+export interface CataloguePriceTier {
+  label: 'Minimum fit' | 'Recommended fit' | 'Spacious fit';
+  sqm: number;
+  newPrice: number;
+  renovationPrice: number;
+}
+
 export interface CatalogueDesign {
   slug: string;
   name: string;
@@ -10,6 +17,7 @@ export interface CatalogueDesign {
   renovationStartingPrice?: number | null;
   minSqm: number | null;
   coverImage?: string;
+  pricingTiers?: CataloguePriceTier[];
 }
 
 const design = (
@@ -17,8 +25,9 @@ const design = (
   tagline: string, startingPrice: number | null = null, minSqm: number | null = null,
   renovationStartingPrice: number | null = null,
   coverImage: string | undefined = undefined,
+  pricingTiers: CataloguePriceTier[] | undefined = undefined,
 ): CatalogueDesign => ({
-  space, collection, name, tagline, startingPrice, minSqm, renovationStartingPrice, coverImage,
+  space, collection, name, tagline, startingPrice, minSqm, renovationStartingPrice, coverImage, pricingTiers,
   slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
 });
 
@@ -29,7 +38,21 @@ export const CATALOGUE_DESIGNS: CatalogueDesign[] = [
   design('bathrooms', 'premium', 'Nelum', 'Calm, considered and quietly luxurious.', 1_600_000, 4),
   design('bathrooms', 'premium', 'Sandun', 'Natural warmth with a tailored finish.', 1_850_000, 4.5),
   design('bathrooms', 'premium', 'Orchid', 'Refined contrast with hotel-like comfort.', 2_100_000, 5),
-  design('bathrooms', 'signature', 'Manel', 'Sculptural, serene and unmistakably special.', 2_060_000, 5, 2_175_000, '/images/designs/manel/cover.jpeg'),
+  design(
+    'bathrooms',
+    'signature',
+    'Manel',
+    'Sculptural, serene and unmistakably special.',
+    2_060_000,
+    5,
+    2_175_000,
+    '/images/designs/manel/cover.jpeg',
+    [
+      { label: 'Minimum fit', sqm: 5, newPrice: 2_060_000, renovationPrice: 2_175_000 },
+      { label: 'Recommended fit', sqm: 6, newPrice: 2_255_000, renovationPrice: 2_370_000 },
+      { label: 'Spacious fit', sqm: 7, newPrice: 2_450_000, renovationPrice: 2_565_000 },
+    ],
+  ),
   design('bathrooms', 'signature', 'Binara', 'A generous retreat built around ritual.', 3_000_000, 7),
   design('bathrooms', 'signature', 'Idda', 'Our most complete expression of private luxury.', 3_600_000, 8),
 
