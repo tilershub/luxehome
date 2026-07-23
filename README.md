@@ -25,7 +25,6 @@ src/
 ├── components/
 │   ├── Nav.astro        — Fixed navigation bar
 │   ├── Hero.astro       — Hero with animated tile mosaic
-│   ├── Services.astro   — 4-service pricing grid
 │   ├── Materials.astro  — Materials showcase
 │   ├── Bathroom.astro   — Full bathroom scope breakdown
 │   ├── CTA.astro        — Call-to-action strip

@@ -94,4 +94,4 @@ This preparation is often the difference between a tile job that lasts 20 years 
 
 If you are hiring a tiler, ask which adhesive they are specifying for your job. If they cannot name the product or the EN class, that is a sign of someone buying the cheapest bag at the hardware store — which is C1 standard and not appropriate for bathrooms or large-format tiles.
 
-We are happy to advise on adhesive specification before any project begins. [WhatsApp us](/services/floor-tiling) with details of your project and tile size.
+We are happy to advise on adhesive specification before any project begins. [Book a professional site inspection](/book-site-inspection) with details of your project and tile size.

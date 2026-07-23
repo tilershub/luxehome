@@ -108,4 +108,4 @@ A quote that covers all of the above gives you an apples-to-apples comparison. A
 
 ---
 
-We provide free site visits and detailed quotes for all bathroom renovation projects across Sri Lanka. [WhatsApp us](/services/bathroom-renovation) with your bathroom dimensions and what you are looking to achieve — we will give you a clear, itemised figure.
+For an accurate, project-specific quotation, [book a professional site inspection](/book-site-inspection). The inspection fee is credited against your project when you proceed with LUXEhome.

@@ -118,4 +118,4 @@ A legitimate contractor will answer all of these without hesitation.
 
 ---
 
-Our [bathroom renovation service](/services/bathroom-renovation) covers full strip-out, Sika waterproofing, precision tiling with leveling system, and Swisstek waterproof grout — from Rs. 3,500/sq.ft. [WhatsApp us](/services/bathroom-renovation) for a site visit and quote.
+Explore the [LUXEhome bathroom design collection](/bathroom-designs), then [book a professional site inspection](/book-site-inspection) for a project-specific scope and quotation.

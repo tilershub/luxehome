@@ -39,4 +39,10 @@ if (missing.length) {
   console.error(`Missing ${missing.length} built route(s):\n${missing.join('\n')}`);
   process.exit(1);
 }
+
+if (existsSync(join('dist', 'services'))) {
+  console.error('Legacy /services routes were generated unexpectedly.');
+  process.exit(1);
+}
+
 console.log(`Verified ${routes.length} built public and admin routes.`);
