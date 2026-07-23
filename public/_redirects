@@ -43,18 +43,9 @@
 /services/waterproofing/ /designs 301
 /services/* /designs 301
 
-# Retired estimator page and legacy blog articles
+# Retired estimator page and blog section
 /estimator /pricing-guide 301
 /estimator/ /pricing-guide 301
-/blog/how-to-choose-floor-tiles /blog 301
-/blog/how-to-choose-floor-tiles/ /blog 301
-/blog/bathroom-renovation-guide-sri-lanka /blog 301
-/blog/bathroom-renovation-guide-sri-lanka/ /blog 301
-/blog/tile-adhesive-vs-mortar /blog 301
-/blog/tile-adhesive-vs-mortar/ /blog 301
-/blog/bathroom-renovation-cost-sri-lanka /blog 301
-/blog/bathroom-renovation-cost-sri-lanka/ /blog 301
-/blog/7-tiling-mistakes-to-avoid /blog 301
-/blog/7-tiling-mistakes-to-avoid/ /blog 301
-/blog/how-to-choose-a-good-tiler /blog 301
-/blog/how-to-choose-a-good-tiler/ /blog 301
+/blog / 301
+/blog/ / 301
+/blog/* / 301

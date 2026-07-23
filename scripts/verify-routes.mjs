@@ -5,17 +5,13 @@ import { join } from 'node:path';
 // Additional published CMS designs and projects are added when Supabase is
 // available at build time.
 const designs = ['manel'];
-const articles = [
-  'what-a-fixed-bathroom-quotation-should-include','before-the-first-tile','bathroom-under-4sqm',
-  'kitchen-storage-first','large-format-tile-wall-ready','what-we-found-avissawella','when-to-book-site-inspection',
-];
 const products = [
   'wall-hung-wc','backlit-5mm-mirror','10mm-shower-screen','eco-board-vanity',
   'concealed-rain-shower','tile-in-linear-drain','undermount-sink-set','quartz-worktop','soft-close-drawer-system',
 ];
 const routes = [
   '/', '/designs', '/bathroom-designs', '/kitchen-designs', '/staircase-designs', '/floor-designs',
-  '/projects', '/blog', '/shop', '/about', '/contact', '/book-site-inspection', '/design-recommendation',
+  '/projects', '/shop', '/about', '/contact', '/book-site-inspection', '/design-recommendation',
   '/whole-home-planner', '/start', '/thank-you', '/how-it-works', '/bathroom-renovation',
   '/materials-brands', '/pricing-guide', '/warranty-aftercare', '/team', '/faq', '/terms', '/privacy', '/warranty-terms',
   '/payment-cancellation', '/admin', '/admin/cms', '/admin/cms/designs', '/admin/cms/projects',
@@ -25,7 +21,6 @@ const routes = [
   '/admin/catalogue/designs/new', '/admin/catalogue/projects', '/admin/catalogue/projects/new',
   '/admin/catalogue/team', '/admin/catalogue/team/new',
   ...designs.map((slug) => `/designs/${slug}`),
-  ...articles.map((slug) => `/blog/${slug}`),
   ...products.map((slug) => `/shop/${slug}`),
 ];
 
