@@ -85,10 +85,11 @@ export const PLANNER = {
   },
 } as const;
 
-/** File completeness checks for the admin designs list (6 checks). */
+/** File completeness checks for the admin designs list (7 checks). */
 export const COMPLETENESS_CHECKS = [
   { key: 'drawings',  label: '≥6 drawings' },
   { key: 'video',     label: '3D video' },
+  { key: 'pricing',   label: '3 size prices' },
   { key: 'fixtures',  label: '≥5 fixtures' },
   { key: 'materials', label: '≥4 materials' },
   { key: 'workflow',  label: 'workflow + timeline' },
