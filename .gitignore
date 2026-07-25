@@ -1,6 +1,9 @@
 # Build output
 dist/
 
+# Wrangler local dev cache and build artifacts
+.wrangler/
+
 # Astro generated types
 .astro/
 
