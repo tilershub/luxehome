@@ -1,15 +1,9 @@
 ---
+export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
-import { getProjects, getProjectBySlug, youtubeEmbed, type ProjectFull } from '../../lib/luxe';
+import { getProjectBySlug, youtubeEmbed, type ProjectFull } from '../../lib/luxe';
 import { cloudinary } from '../../lib/luxe-config';
-
-export async function getStaticPaths() {
-  const stored = await getProjects();
-  return stored
-    .filter((project) => project.after_image_url)
-    .map((project) => ({ params: { slug: project.slug } }));
-}
 
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);

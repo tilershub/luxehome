@@ -20,6 +20,15 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+/* CMS-driven pages render on demand so published content is live immediately.
+   Cloudflare caches each response at the edge for a minute and serves the
+   stale copy while revalidating, so ad traffic never queues behind Supabase.
+   Prerendered pages ignore these headers at build time. */
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=60, stale-while-revalidate=300'
+);
 ---
 
 <!DOCTYPE html>

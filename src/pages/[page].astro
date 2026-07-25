@@ -1,10 +1,11 @@
 ---
+export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { PUBLIC_INFO_PAGES, type PublicInfoPage } from '../lib/luxe-pages';
 import { waLink } from '../lib/luxe-config';
 import { createServerSupabase } from '../lib/supabase';
-export function getStaticPaths() { return PUBLIC_INFO_PAGES.filter((page)=>page.slug!=='team').map((page) => ({ params: { page: page.slug }, props: { page } })); }
-const { page: fallbackPage } = Astro.props as { page: PublicInfoPage };
+const fallbackPage = PUBLIC_INFO_PAGES.find((entry) => entry.slug === Astro.params.page && entry.slug !== 'team') as PublicInfoPage | undefined;
+if (!fallbackPage) return Astro.redirect('/');
 const sb=createServerSupabase(import.meta.env as unknown as Record<string,string>);
 const {data:storedPage}=sb?await sb.from('lx_pages').select('title,eyebrow,lead,seo_title,meta_description').eq('slug',fallbackPage.slug).eq('published',true).maybeSingle():{data:null};
 const page={...fallbackPage,...Object.fromEntries(Object.entries(storedPage||{}).filter(([,value])=>value))};

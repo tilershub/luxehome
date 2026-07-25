@@ -75,21 +75,17 @@ export const DEFAULT_JOURNEY_STAGES = [
   'Work begins', 'Construction', 'Clean & handover',
 ];
 
-/** The documented warranty on every completed bathroom — the headline cover
-    plus the period carried by each component. The one place these live. */
-export const WARRANTY_HEADLINE = {
-  period: '5 years',
-  label: 'Complete bathroom',
-  note: 'Workmanship across the finished room, running from the tested handover.',
-};
-
+/** Warranty is given per task, not as one blanket cover. Each part of the
+    work carries its own documented period. The one place these live. */
 export const WARRANTY_SCHEDULE: Array<{ item: string; period: string }> = [
   { item: 'Bathware',          period: '15 years' },
   { item: 'Waterproofing',     period: '10 years' },
   { item: 'Plumbing',          period: '10 years' },
+  { item: 'Wiring',            period: '10 years' },
   { item: 'Taps & showers',    period: '5 years' },
+  { item: 'Ceiling',           period: '5 years' },
   { item: 'Light fixtures',    period: '1 year' },
-  { item: 'Ceiling',           period: '1 year' },
+  { item: 'Tempered glass',    period: '1 year' },
 ];
 
 /** Brands strip for home / landing pages. */

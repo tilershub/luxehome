@@ -1,4 +1,5 @@
 ---
+export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro'; import SpaceDesigns from '../components/luxe/SpaceDesigns.astro'; import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
 ---
 <LuxeLayout title="Sri Lankan Landscape Floor Designs — LUXEhome"><SpaceDesigns space="floors" designs={CATALOGUE_DESIGNS.filter((d) => d.space === 'floors')} /></LuxeLayout>
