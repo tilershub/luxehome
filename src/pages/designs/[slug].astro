@@ -1,19 +1,11 @@
 ---
+export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
-import { getDesigns, getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
+import { getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
 import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_HEADLINE, WARRANTY_SCHEDULE } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
-
-export async function getStaticPaths() {
-  const stored = await getDesigns({ spaceSlug: 'bathrooms' });
-  const slugs = new Set([
-    ...CATALOGUE_DESIGNS.filter((design) => design.space === 'bathrooms' && design.coverImage).map((design) => design.slug),
-    ...stored.filter((design) => design.cover_image_url).map((design) => design.slug),
-  ]);
-  return [...slugs].map((slug) => ({ params: { slug } }));
-}
 
 const { slug } = Astro.params;
 const storedDesign = await getDesignBySlug(slug!);

@@ -1,6 +1,6 @@
 ---
-import LuxeLayout from '../../layouts/LuxeLayout.astro'; import { getProducts, getProductBySlug } from '../../lib/luxe'; import { waLink } from '../../lib/luxe-config';
-export async function getStaticPaths(){const stored=await getProducts();const slugs=new Set(['wall-hung-wc','backlit-5mm-mirror','10mm-shower-screen','eco-board-vanity','concealed-rain-shower','tile-in-linear-drain','undermount-sink-set','quartz-worktop','soft-close-drawer-system',...stored.map((product)=>product.slug)]);return [...slugs].map((slug)=>({params:{slug}}));}
+export const prerender = false;
+import LuxeLayout from '../../layouts/LuxeLayout.astro'; import { getProductBySlug } from '../../lib/luxe'; import { waLink } from '../../lib/luxe-config';
 const slug=Astro.params.slug||''; const stored=await getProductBySlug(slug);
 const fallback:any={slug,name:slug.split('-').map(s=>s[0]?.toUpperCase()+s.slice(1)).join(' '),short_description:'A LUXEhome-specified product selected to work with a complete room design.',description:'Specification, finish, compatibility and installation requirements are confirmed for the project before ordering.',price_lkr:0,cover_image_url:null,gallery_image_urls:[],features:['Specified for the complete design','Compatibility checked before ordering','Installation coordinated by LUXEhome'],preorder:true,stock_status:'made_to_order',meta_title:null,meta_description:null}; const product=stored||fallback; const price=Number(product.price_lkr)>0?`From LKR ${Number(product.price_lkr).toLocaleString('en-LK')}`:'Price on request'; const images=[product.cover_image_url,...(product.gallery_image_urls||[])].filter(Boolean);
 ---
