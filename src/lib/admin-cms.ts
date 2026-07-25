@@ -11,7 +11,7 @@ const designChildren:CmsChild[]=[
     {key:'sort_order',label:'Display order',type:'number'},
   ]},
   {label:'Internal pricing (admin only)',table:'lx_design_internal_pricing',foreignKey:'design_id',titleKey:'additional_cost_per_sqm_lkr',fields:[{key:'additional_cost_per_sqm_lkr',label:'Additional cost per m² (LKR) — hidden from website',type:'number',required:true},{key:'sort_order',label:'Display order',type:'number'}]},
-  {label:'Drawings & renders',table:'lx_design_drawings',foreignKey:'design_id',titleKey:'kind',fields:[{key:'kind',label:'Slot',type:'select',options:['render_1','render_2','render_3','render_4','civil','supply_water','waste_drainage','electrical']},{key:'image_url',label:'Image',type:'image',required:true},{key:'caption',label:'Walk-in caption (renders only, e.g. “The vanity wall”)'},{key:'sort_order',label:'Display order',type:'number'}]},
+  {label:'Drawings & renders',table:'lx_design_drawings',foreignKey:'design_id',titleKey:'kind',fields:[{key:'kind',label:'Image slot',type:'select',options:['vanity','water_closet','shower','ceiling','civil','supply_water','waste_drainage','electrical']},{key:'image_url',label:'Image',type:'image',required:true},{key:'caption',label:'Walk-in caption (area images only, e.g. “Stone and warm mirror light”)'},{key:'sort_order',label:'Display order',type:'number'}]},
   {label:'Fixtures & finishes',table:'lx_design_fixtures',foreignKey:'design_id',titleKey:'name',fields:[
     {key:'category',label:'Category',type:'datalist',required:true},
     {key:'name',label:'Fixture / finish name',required:true},

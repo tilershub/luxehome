@@ -25,7 +25,7 @@ function sb(): SupabaseClient | null {
 
 export type Collection = 'standard' | 'premium' | 'signature';
 export type DrawingKind =
-  | 'render_1' | 'render_2' | 'render_3' | 'render_4'
+  | 'vanity' | 'water_closet' | 'shower' | 'ceiling'
   | 'civil' | 'supply_water' | 'waste_drainage' | 'electrical';
 
 export interface Space {
