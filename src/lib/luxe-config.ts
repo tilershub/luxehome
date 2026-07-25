@@ -40,12 +40,15 @@ export const FIXTURE_CATEGORIES: Record<string, string[]> = {
   // Ordered the way clients actually look through a bathroom. This order also
   // sequences the fixture schedule on the design page when sort_order is unset.
   bathrooms: [
-    'Tile', 'Water Closet', 'Wash Basin', 'Basin Mixer / Taps', 'Shower',
-    'Accessories', 'Ceiling', 'Light Fixtures', 'Gully Covers',
-    'Shower Cubicle', 'Niche',
-    'Mirror', 'Cupboard / Vanity', 'Bidet Spray', 'Bathtub & Mixer',
+    'Water Closet', 'Bidet Spray', 'Paper Holder',
+    'Wash Basin', 'Basin Mixer / Tap',
+    'Shower', 'Angle Valve', 'Accessories',
+    'Gully Cover', 'Magic Hose', 'Flexible Hose', 'Magic Bend',
+    'Mirror', 'Vanity Cupboard', 'Shower Cubicle',
+    'Tile', 'Ceiling', 'Light Fixtures', 'Niche',
     'Door', 'Window', 'Other',
   ],
+
   kitchens: [
     'Tile', 'Pantry Cupboards', 'Countertop', 'Sink & Tap', 'Hob & Hood',
     'Backsplash', 'Ceiling', 'Light Fixtures', 'Accessories', 'Door', 'Window', 'Other',

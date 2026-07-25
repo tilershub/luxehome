@@ -60,9 +60,9 @@ if (design.slug === 'manel') {
     );
   }
   const samples = {
-    render_1: '/images/designs/manel/render-1.jpeg',
-    render_2: '/images/designs/manel/render-2.jpeg',
-    render_3: '/images/designs/manel/render-3.jpeg',
+    vanity: '/images/designs/manel/render-1.jpeg',
+    water_closet: '/images/designs/manel/render-2.jpeg',
+    shower: '/images/designs/manel/render-3.jpeg',
     civil: '/images/designs/manel/sample-civil.webp',
     supply_water: '/images/designs/manel/sample-supply-water.webp',
     waste_drainage: '/images/designs/manel/sample-waste-drainage.webp',
@@ -83,28 +83,31 @@ const renoPrice = design.renovation_starting_price_lkr ?? null;
 const inspectionHref = `/book-site-inspection?design=${encodeURIComponent(design.slug)}`;
 
 const drawingOf = (kind: string) => design.drawings.find((d) => d.kind === kind) ?? null;
-const renders = (['render_1', 'render_2', 'render_3', 'render_4'] as const)
-  .map((k) => drawingOf(k))
-  .filter((r): r is NonNullable<typeof r> => Boolean(r));
 
-// The walk-in: doorway first, then each render in sequence.
-const STEP_COPY = [
-  { n: 'I', kicker: 'Step one · At the door', title: 'The first glance across the room' },
-  { n: 'II', kicker: 'Step two · The vanity wall', title: 'Stone and warm mirror light' },
-  { n: 'III', kicker: 'Step three · Into the shower', title: 'The walk-in shower and niche' },
-  { n: 'IV', kicker: 'Step four · Turn around', title: 'The whole room, looking back' },
-];
-// Cover leads the sequence, then each render. A render's CMS caption
-// overrides the generic step title.
-const stepSources = [
-  ...(design.cover_image_url ? [{ image: design.cover_image_url, caption: null as string | null }] : []),
-  ...renders.map((r) => ({ image: r.image_url, caption: r.caption ?? null })),
-];
-const steps = stepSources.slice(0, STEP_COPY.length).map((source, i) => ({
-  ...STEP_COPY[i],
-  image: source.image,
-  title: source.caption || STEP_COPY[i].title,
-}));
+/* The walk-in: the doorway view, then each named area in the order you
+   move through the room. Only the areas that have an image are shown, and
+   a CMS caption overrides the default title. */
+const AREAS = [
+  { kind: 'cover',        n: 'I',   kicker: 'At the door',        title: 'The first glance across the room' },
+  { kind: 'vanity',       n: 'II',  kicker: 'The vanity',         title: 'Stone and warm mirror light' },
+  { kind: 'water_closet', n: 'III', kicker: 'The water closet',   title: 'Concealed, quiet and neatly set out' },
+  { kind: 'shower',       n: 'IV',  kicker: 'The shower',         title: 'The walk-in shower and niche' },
+  { kind: 'ceiling',      n: 'V',   kicker: 'Looking up',         title: 'The ceiling, lighting and ventilation' },
+] as const;
+
+const steps = AREAS.flatMap((area) => {
+  const source = area.kind === 'cover'
+    ? (design.cover_image_url ? { image_url: design.cover_image_url, caption: null } : null)
+    : drawingOf(area.kind);
+  if (!source) return [];
+  return [{
+    n: area.n,
+    kicker: `${area.kicker}`,
+    title: source.caption || area.title,
+    image: source.image_url,
+  }];
+});
+const renders = steps.slice(1);
 
 const TECH = [
   { kind: 'civil',          label: 'Civil Drawing',            tag: 'Plan & levels' },
@@ -140,9 +143,15 @@ const categoryRank = (f: DesignFixture) => {
   const i = FIXTURE_CATEGORIES.bathrooms.indexOf(f.category);
   return i === -1 ? FIXTURE_CATEGORIES.bathrooms.length : i;
 };
+/* Checklist rows carrying nothing but a category name are still being
+   filled in — showing them would publish an empty tab. A fixture appears
+   once it has something to say. */
+const hasSubstance = (f: DesignFixture) =>
+  Boolean(f.image_url || f.brand || f.spec || f.model_code || f.reference_price_label);
 const fixtures: DesignFixture[] = [...design.fixtures]
+  .filter(hasSubstance)
   .sort((a, b) => (a.sort_order - b.sort_order) || (categoryRank(a) - categoryRank(b)));
-const roomImage = renders[0]?.image_url ?? design.cover_image_url;
+const roomImage = renders[0]?.image ?? design.cover_image_url;
 const romanNumeral = (n: number) => ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'][n - 1] ?? String(n);
 
 const allRelated = storedDesign?.id
