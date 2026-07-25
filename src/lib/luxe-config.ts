@@ -37,10 +37,14 @@ export function cloudinary(url: string | null | undefined, width?: number): stri
 /** Fixture category presets per space (admin dropdown suggestions;
     free text is always allowed). Keys = lx_spaces.slug. */
 export const FIXTURE_CATEGORIES: Record<string, string[]> = {
+  // Ordered the way clients actually look through a bathroom. This order also
+  // sequences the fixture schedule on the design page when sort_order is unset.
   bathrooms: [
-    'Tile', 'Water Closet', 'Wash Basin', 'Shower', 'Shower Cubicle', 'Mirror',
-    'Cupboard / Vanity', 'Ceiling', 'Bathtub & Mixer', 'Light Fixtures',
-    'Bidet Spray', 'Gully Covers', 'Accessories', 'Door', 'Window', 'Other',
+    'Tile', 'Water Closet', 'Wash Basin', 'Basin Mixer / Taps', 'Shower',
+    'Accessories', 'Ceiling', 'Light Fixtures', 'Gully Covers',
+    'Shower Cubicle', 'Niche',
+    'Mirror', 'Cupboard / Vanity', 'Bidet Spray', 'Bathtub & Mixer',
+    'Door', 'Window', 'Other',
   ],
   kitchens: [
     'Tile', 'Pantry Cupboards', 'Countertop', 'Sink & Tap', 'Hob & Hood',
@@ -69,6 +73,23 @@ export const DEFAULT_MATERIALS: Array<{ category: string; brand: string; item: s
 export const DEFAULT_JOURNEY_STAGES = [
   'First inquiry', 'Site visit', 'Design & approval',
   'Work begins', 'Construction', 'Clean & handover',
+];
+
+/** The documented warranty on every completed bathroom — the headline cover
+    plus the period carried by each component. The one place these live. */
+export const WARRANTY_HEADLINE = {
+  period: '5 years',
+  label: 'Complete bathroom',
+  note: 'Workmanship across the finished room, running from the tested handover.',
+};
+
+export const WARRANTY_SCHEDULE: Array<{ item: string; period: string }> = [
+  { item: 'Bathware',          period: '15 years' },
+  { item: 'Waterproofing',     period: '10 years' },
+  { item: 'Plumbing',          period: '10 years' },
+  { item: 'Taps & showers',    period: '5 years' },
+  { item: 'Light fixtures',    period: '1 year' },
+  { item: 'Ceiling',           period: '1 year' },
 ];
 
 /** Brands strip for home / landing pages. */

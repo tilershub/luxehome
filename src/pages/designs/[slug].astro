@@ -3,7 +3,7 @@ import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import { getDesigns, getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, lkrM, cloudinary } from '../../lib/luxe-config';
+import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_HEADLINE, WARRANTY_SCHEDULE } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
 export async function getStaticPaths() {
@@ -133,7 +133,14 @@ const perSqmRate = (() => {
   return rate > 0 ? Math.round(rate) : null;
 })();
 
-const fixtures: DesignFixture[] = design.fixtures;
+// Explicit sort_order wins; otherwise fixtures follow the order clients look
+// through a bathroom (tile → water closet → basin → …).
+const categoryRank = (f: DesignFixture) => {
+  const i = FIXTURE_CATEGORIES.bathrooms.indexOf(f.category);
+  return i === -1 ? FIXTURE_CATEGORIES.bathrooms.length : i;
+};
+const fixtures: DesignFixture[] = [...design.fixtures]
+  .sort((a, b) => (a.sort_order - b.sort_order) || (categoryRank(a) - categoryRank(b)));
 const roomImage = renders[0]?.image_url ?? design.cover_image_url;
 const romanNumeral = (n: number) => ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'][n - 1] ?? String(n);
 
@@ -547,12 +554,20 @@ const productSchema = JSON.stringify({
   <section id="warranty" class="wx-section">
     <p class="wx-kicker">Warranty &amp; aftercare</p>
     <h2>Protected after handover.</h2>
-    <p class="wx-body">Every LUXEhome bathroom is handed over with documented, written warranties — from the waterproofing beneath the tiles to each approved fixture. <a class="wx-inline-link" href="/warranty-aftercare">Read how warranty support works →</a></p>
-    <div class="wx-warranty-grid">
-      <article><em>10 yrs</em><h3>Waterproofing warranty</h3><p>The applied waterproofing system is covered for ten years — the layer that matters most in a bathroom.</p></article>
-      <article><em>1 yr</em><h3>LUXEhome service warranty</h3><p>Complete workmanship cover after the tested handover, with care guidance and the agreed warranty record.</p></article>
-      <article><em>Per item</em><h3>Manufacturer warranties</h3><p>Bathware, tapware and accessories carry their own manufacturer cover — each period is listed on the fixture above.</p></article>
+    <p class="wx-body">Every LUXEhome bathroom is handed over with written warranties — {WARRANTY_HEADLINE.period} on the complete bathroom, and a documented period against each component. <a class="wx-inline-link" href="/warranty-aftercare">Read how warranty support works →</a></p>
+    <div class="wx-warranty">
+      <div class="wx-warranty-headline">
+        <em>{WARRANTY_HEADLINE.period}</em>
+        <strong>{WARRANTY_HEADLINE.label}</strong>
+        <span>{WARRANTY_HEADLINE.note}</span>
+      </div>
+      <dl class="wx-warranty-schedule">
+        {WARRANTY_SCHEDULE.map((w) => (
+          <div><dt>{w.item}</dt><dd>{w.period}</dd></div>
+        ))}
+      </dl>
     </div>
+    <p class="wx-fineprint wx-fineprint--light">Periods run from handover and follow the agreed scope and care guidance. Where a specific product carries its own manufacturer cover, that period is listed against the item in the fixture schedule above.</p>
   </section>
 
   <!-- CLOSING CTA -->
@@ -823,11 +838,17 @@ const productSchema = JSON.stringify({
   .wx-faq-item p { max-width: 62ch; padding: 0 0 1.1rem; font-size: .92rem; color: var(--wx-muted); }
 
   /* ── Warranty ── */
-  .wx-warranty-grid { display: grid; grid-template-columns: 1fr; gap: clamp(14px, 2vw, 20px); margin-top: 44px; }
-  .wx-warranty-grid article { background: #fff; border-left: 2px solid var(--wx-gold); padding: clamp(28px, 3vw, 38px); }
-  .wx-warranty-grid em { display: block; margin-bottom: 10px; font: italic 400 18px var(--lx-serif); color: var(--wx-gold); }
-  .wx-warranty-grid h3 { margin: 0 0 12px; font: 500 clamp(22px, 2.6vw, 28px) var(--lx-serif); }
-  .wx-warranty-grid p { margin: 0; font-size: 15px; line-height: 1.6; color: #7A7A70; }
+  .wx-warranty { display: grid; grid-template-columns: 1fr; gap: clamp(14px, 2vw, 20px); margin-top: 44px; }
+  .wx-warranty-headline { background: var(--wx-forest); color: #EDE7DA; padding: clamp(28px, 3vw, 38px); }
+  .wx-warranty-headline em { display: block; font: 500 clamp(40px, 5vw, 56px)/1 var(--lx-serif); font-style: normal; color: var(--wx-gold); }
+  .wx-warranty-headline strong { display: block; margin-top: 12px; font: 500 clamp(20px, 2.4vw, 26px) var(--lx-serif); }
+  .wx-warranty-headline span { display: block; margin-top: 10px; max-width: 34ch; font-size: 14px; line-height: 1.6; color: #A9AF97; }
+  .wx-warranty-schedule { margin: 0; background: #fff; border-left: 2px solid var(--wx-gold); padding: clamp(18px, 2.4vw, 26px) clamp(24px, 3vw, 34px); }
+  .wx-warranty-schedule > div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid #EAE4D8; }
+  .wx-warranty-schedule > div:last-child { border-bottom: 0; padding-bottom: 0; }
+  .wx-warranty-schedule dt { font-size: 15px; color: var(--wx-muted); }
+  .wx-warranty-schedule dd { margin: 0; font: 500 19px var(--lx-serif); white-space: nowrap; }
+  .wx-fineprint--light { color: var(--wx-faint); }
 
   /* ── Closing ── */
   .wx-closing { background: var(--wx-mist); padding: clamp(80px, 14vh, 170px) clamp(20px, 5vw, 64px); text-align: center; }
@@ -857,7 +878,7 @@ const productSchema = JSON.stringify({
   @media (min-width: 900px) {
     .wxf-layout { grid-template-columns: 1.1fr 1fr; }
     .wx-from-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .wx-warranty-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .wx-warranty { grid-template-columns: .85fr 1.15fr; }
     .wx-plan-grid, .wx-video-grid, .wx-quote-grid { grid-template-columns: 1fr 1fr; }
     .wx-name-grid { grid-template-columns: auto 1fr; gap: 56px; }
   }
