@@ -102,8 +102,17 @@ const STEP_COPY = [
   { n: 'III', kicker: 'Step three · Into the shower', title: 'The walk-in shower and niche' },
   { n: 'IV', kicker: 'Step four · Turn around', title: 'The whole room, looking back' },
 ];
-const stepImages = [design.cover_image_url, ...renders.map((r) => r.image_url)].filter(Boolean) as string[];
-const steps = STEP_COPY.slice(0, stepImages.length).map((copy, i) => ({ ...copy, image: stepImages[i] }));
+// Cover leads the sequence, then each render. A render's CMS caption
+// overrides the generic step title.
+const stepSources = [
+  ...(design.cover_image_url ? [{ image: design.cover_image_url, caption: null as string | null }] : []),
+  ...renders.map((r) => ({ image: r.image_url, caption: r.caption ?? null })),
+];
+const steps = stepSources.slice(0, STEP_COPY.length).map((source, i) => ({
+  ...STEP_COPY[i],
+  image: source.image,
+  title: source.caption || STEP_COPY[i].title,
+}));
 
 const TECH = [
   { kind: 'civil',          label: 'Civil Drawing',            tag: 'Plan & levels' },
@@ -156,12 +165,16 @@ const testimonials = allRelated
     who: [project.review_by, project.location].filter(Boolean).join(' · ') || 'LUXEhome client',
   }));
 
-const nameHeading = design.slug === 'manel'
-  ? 'Inspired by the Manel flower.'
-  : `Inspired by the ${design.name} flower.`;
-const nameStory = design.slug === 'manel'
-  ? 'Named after Sri Lanka’s blue water lily, this design translates its deep blue character and quiet symmetry into a composed Signature bathroom.'
-  : (design.description ?? `The ${design.name} carries its namesake’s character into a fully documented ${collectionLabel} bathroom.`);
+const nameHeading = design.name_heading || `Inspired by the ${design.name} flower.`;
+const nameStory = design.name_story
+  || (design.slug === 'manel'
+    ? 'Named after Sri Lanka’s blue water lily, this design translates its deep blue character and quiet symmetry into a composed Signature bathroom.'
+    : design.description
+    || `The ${design.name} carries its namesake’s character into a fully documented ${collectionLabel} bathroom.`);
+
+const materialsWithPhotos = design.materials.filter((m) => m.image_url);
+const roomLength = design.room_length_m ?? (design.slug === 'manel' ? 2.5 : null);
+const roomWidth = design.room_width_m ?? (design.slug === 'manel' ? 2.0 : null);
 
 const productSchema = JSON.stringify({
   '@context': 'https://schema.org',
@@ -394,6 +407,21 @@ const productSchema = JSON.stringify({
     <section id="materials" class="wx-section">
       <p class="wx-kicker">Reach out and touch</p>
       <h2>Materials &amp; finishes.</h2>
+      {materialsWithPhotos.length > 0 && (
+        <div class="wx-mat-grid">
+          {materialsWithPhotos.map((m) => (
+            <figure class="wx-mat">
+              <div class="wx-mat-img">
+                <img src={cloudinary(m.image_url!, 700)} alt={`${m.brand}${m.item ? ` — ${m.item}` : ''}`} loading="lazy" width="700" height="875" />
+              </div>
+              <figcaption>
+                <span>{m.brand}</span>
+                <em>{m.usage_label || m.category}</em>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
       <div class="wx-chips">
         {design.materials.map((m) => (
           <span class="wx-chip"><strong>{m.brand}</strong>{m.item ? ` · ${m.item}` : ''}</span>
@@ -411,11 +439,17 @@ const productSchema = JSON.stringify({
           <h2>A plan drawn for {design.min_sqm} m².</h2>
           <p class="wx-body">The {design.name} layout is set out to the minimum fit — vanity, water closet and walk-in shower composed around a single clear line of movement.</p>
           <div class="wx-plan-stats">
-            {design.slug === 'manel' && <div><strong>2.5<span>m</span></strong><em>Length</em></div>}
-            {design.slug === 'manel' && <div><strong>2.0<span>m</span></strong><em>Width</em></div>}
+            {roomLength && <div><strong>{roomLength}<span>m</span></strong><em>Length</em></div>}
+            {roomWidth && <div><strong>{roomWidth}<span>m</span></strong><em>Width</em></div>}
             <div><strong>{design.min_sqm}<span>m²</span></strong><em>Min. area</em></div>
           </div>
         </div>
+        {design.plan_image_url ? (
+          <div class="wx-plan-canvas">
+            <img class="wx-plan-photo" src={cloudinary(design.plan_image_url, 900)} alt={`${design.name} floor plan at the minimum fit`} loading="lazy" width="900" height="1125" />
+            <small>Layout at the minimum fit — customised to your room in the design file.</small>
+          </div>
+        ) : (
         <div class="wx-plan-canvas" aria-label={`Illustrative ${design.name} floor plan at the minimum fit`}>
           <svg viewBox="0 0 400 500" width="100%" role="img">
             <rect x="40" y="40" width="320" height="420" fill="none" stroke="#3B3B33" stroke-width="2"></rect>
@@ -431,11 +465,12 @@ const productSchema = JSON.stringify({
             <line x1="240" y1="300" x2="360" y2="460" stroke="#B7B09E" stroke-width="1" stroke-dasharray="3 3"></line>
             <circle cx="340" cy="322" r="7" fill="none" stroke="#5B6349" stroke-width="1.4"></circle>
             <text x="300" y="392" text-anchor="middle" font-size="13" fill="#5B6349" letter-spacing="1.5">SHOWER</text>
-            {design.slug === 'manel' && <text x="200" y="26" text-anchor="middle" font-size="12" fill="#8A897C">2.5 m</text>}
-            {design.slug === 'manel' && <text x="24" y="255" text-anchor="middle" font-size="12" fill="#8A897C" transform="rotate(-90 24 255)">2.0 m</text>}
+            {roomLength && <text x="200" y="26" text-anchor="middle" font-size="12" fill="#8A897C">{roomLength} m</text>}
+            {roomWidth && <text x="24" y="255" text-anchor="middle" font-size="12" fill="#8A897C" transform="rotate(-90 24 255)">{roomWidth} m</text>}
           </svg>
           <small>Illustrative layout at the minimum fit — customised to your room in the design file.</small>
         </div>
+        )}
       </div>
     </section>
   )}
@@ -778,6 +813,15 @@ const productSchema = JSON.stringify({
   .wx-dark-cta { display: inline-flex; margin-top: 18px; color: var(--wx-gold); font-size: 13px; font-weight: 500; letter-spacing: .04em; text-decoration: none; }
 
   /* ── Materials chips ── */
+  .wx-mat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 26px); margin-top: 34px; }
+  .wx-mat { margin: 0; }
+  .wx-mat-img { aspect-ratio: 4 / 5; border-radius: 2px; overflow: hidden; background: var(--wx-mist); }
+  .wx-mat-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .wx-mat figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 14px; }
+  .wx-mat figcaption span { font: 500 21px var(--lx-serif); }
+  .wx-mat figcaption em { font: normal 11px var(--lx-sans); letter-spacing: .14em; text-transform: uppercase; color: #9A998C; text-align: right; }
+  .wx-plan-photo { width: 100%; height: auto; display: block; border-radius: 2px; }
+
   .wx-chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
   .wx-chip { padding: 12px 22px; border-radius: 100px; background: #fff; font-size: 14px; color: var(--wx-muted); }
   .wx-chip strong { color: var(--wx-sage); font-weight: 500; }
@@ -880,6 +924,7 @@ const productSchema = JSON.stringify({
     .wx-from-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .wx-warranty { grid-template-columns: .85fr 1.15fr; }
     .wx-plan-grid, .wx-video-grid, .wx-quote-grid { grid-template-columns: 1fr 1fr; }
+    .wx-mat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .wx-name-grid { grid-template-columns: auto 1fr; gap: 56px; }
   }
   @media (max-width: 860px) {

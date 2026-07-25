@@ -30,21 +30,34 @@ const { module }=Astro.props as {module:CmsModule};
     const name=prefix+f.key;
     if(f.type==='checkbox')return `<label class="check"><input name="${name}" type="checkbox" ${v?'checked':''}> ${esc(f.label)}</label>`;
     if(f.type==='textarea')return `<label>${esc(f.label)}<textarea name="${name}" ${f.required?'required':''}>${esc(v)}</textarea></label>`;
+    if(f.type==='images'){const list=Array.isArray(v)?v:(v?String(v).split('\n').filter(Boolean):[]);return `<div class="image-field"><label>${esc(f.label)}<textarea name="${name}" placeholder="One image URL per line">${esc(list.join('\n'))}</textarea></label><span class="image-tools"><label class="upload-button">Add photos<input type="file" accept="image/*" multiple data-images-upload="${name}"></label><span class="image-preview-empty" data-images-count="${name}">${list.length} image(s)</span></span><small class="field-help">Pick several photos at once from your camera roll — each is converted to WebP.</small></div>`}
     if(f.type==='lines')return `<label>${esc(f.label)}<textarea name="${name}" placeholder="One item per line">${esc(Array.isArray(v)?v.join('\n'):v)}</textarea></label>`;
     if(f.type==='select')return `<label>${esc(f.label)}<select name="${name}">${(f.options||[]).map(o=>`<option value="${esc(o)}" ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
     if(f.type==='datalist'){const id=`options-${name}`;return `<label>${esc(f.label)}<input name="${name}" list="${id}" value="${esc(v)}" ${f.required?'required':''}><datalist id="${id}">${(f.options||[]).map(o=>`<option value="${esc(o)}"></option>`).join('')}</datalist><small class="field-help">Choose a suggestion or type your own category.</small></label>`}
-    if(f.type==='image')return `<div class="image-field"><label>${esc(f.label)}<input name="${name}" type="url" value="${esc(v)}" placeholder="https://…"></label><span class="image-tools"><label class="upload-button">Upload image<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" data-image-upload="${name}"></label>${v?`<img data-image-preview="${name}" src="${esc(v)}" alt="Fixture preview">`:`<span data-image-preview="${name}" class="image-preview-empty">No image selected</span>`}</span><small class="field-help">Upload to Supabase Storage or paste an image URL.</small></div>`;
+    if(f.type==='image')return `<div class="image-field"><label>${esc(f.label)}<input name="${name}" type="url" value="${esc(v)}" placeholder="https://…"></label><span class="image-tools"><label class="upload-button">Upload photo<input type="file" accept="image/*" data-image-upload="${name}"></label>${v?`<img data-image-preview="${name}" src="${esc(v)}" alt="Preview">`:`<span data-image-preview="${name}" class="image-preview-empty">No image selected</span>`}</span><small class="field-help">Choose from your camera roll or take a photo — converted to WebP automatically.</small></div>`;
     if(f.type==='relation'){const options=lookups[f.relation]||[];return `<label>${esc(f.label)}<select name="${name}" ${f.required?'required':''}><option value="">Not selected</option>${options.map(o=>`<option value="${o.id}" ${o.id===v?'selected':''}>${esc(o.name)}</option>`).join('')}</select></label>`}
     return `<label>${esc(f.label)}<input name="${name}" type="${f.type||'text'}" value="${esc(v)}" ${f.required?'required':''}></label>`;
   }
-  function values(form,fields,prefix=''){const data={};fields.forEach(f=>{const el=form.elements[prefix+f.key];if(f.type==='checkbox')data[f.key]=el.checked;else if(f.type==='number')data[f.key]=el.value===''?null:Number(el.value);else if(f.type==='lines')data[f.key]=el.value.split('\n').map(x=>x.trim()).filter(Boolean);else data[f.key]=el.value||null});return data}
+  function values(form,fields,prefix=''){const data={};fields.forEach(f=>{const el=form.elements[prefix+f.key];if(f.type==='checkbox')data[f.key]=el.checked;else if(f.type==='number')data[f.key]=el.value===''?null:Number(el.value);else if(f.type==='lines'||f.type==='images')data[f.key]=el.value.split('\n').map(x=>x.trim()).filter(Boolean);else data[f.key]=el.value||null});return data}
   async function edit(source){
     const fresh=!source,row=source||{};
-    root.innerHTML=`<form id="editor" class="panel"><div class="formhead"><div><p class="eyebrow">${fresh?'Create':'Edit'} record</p><h2>${fresh?'New '+esc(cfg.label):esc(row[cfg.titleKey])}</h2></div><button type="button" id="back">Back to list</button></div>${cfg.slug==='media'?'<label class="media-upload">Upload image<input id="media-file" type="file" accept="image/jpeg,image/png,image/webp,image/avif"></label>':''}<div class="fields">${cfg.fields.map(f=>field(f,row[f.key])).join('')}</div><div class="actions"><button class="save">Save</button>${fresh?'':`<button type="button" class="delete" id="delete">Delete</button>`}</div></form><div id="children"></div>`;
+    root.innerHTML=`<form id="editor" class="panel"><div class="formhead"><div><p class="eyebrow">${fresh?'Create':'Edit'} record</p><h2>${fresh?'New '+esc(cfg.label):esc(row[cfg.titleKey])}</h2></div><button type="button" id="back">Back to list</button></div>${cfg.slug==='media'?'<label class="media-upload">Upload image<input id="media-file" type="file" accept="image/*"></label>':''}<div class="fields">${cfg.fields.map(f=>field(f,row[f.key])).join('')}</div><div class="actions"><button class="save">Save</button>${fresh?'':`<button type="button" class="delete" id="delete">Delete</button>`}</div></form><div id="children"></div>`;
     const editor=document.getElementById('editor');document.getElementById('back').onclick=list;
     const nameInput=editor.elements.name,titleInput=editor.elements.title,slugInput=editor.elements.slug;
     (nameInput||titleInput)?.addEventListener('blur',()=>{if(slugInput&&!slugInput.value)slugInput.value=slugify((nameInput||titleInput).value)});
-    document.getElementById('media-file')?.addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>10485760)return toast('Image must be 10 MB or smaller');const ext=(file.name.split('.').pop()||'jpg').replace(/[^a-z0-9]/gi,'');const path=`media/${Date.now()}-${crypto.randomUUID()}.${ext}`;const {error}=await sb.storage.from('luxehome-media').upload(path,file,{cacheControl:'31536000'});if(error)return toast(error.message);editor.elements.storage_path.value=path;editor.elements.public_url.value=sb.storage.from('luxehome-media').getPublicUrl(path).data.publicUrl;if(!editor.elements.name.value)editor.elements.name.value=file.name;toast('Image uploaded')});
+    bindImageUploads(editor,cfg.slug);
+    document.getElementById('media-file')?.addEventListener('change',async e=>{
+      const file=e.target.files?.[0];if(!file)return;
+      e.target.disabled=true;toast('Converting to WebP…');
+      try{
+        const {url,size,was}=await uploadImage(file,'media');
+        editor.elements.public_url.value=url;
+        editor.elements.storage_path.value=new URL(url).pathname.split('/luxehome-media/').pop()||'';
+        if(!editor.elements.name.value)editor.elements.name.value=file.name.replace(/\.[^.]+$/,'');
+        toast(`Uploaded · ${prettyKB(was)} → ${prettyKB(size)} WebP`);
+      }catch(err){toast(err.message||'Upload failed')}
+      finally{e.target.disabled=false;e.target.value=''}
+    });
     editor.onsubmit=async e=>{e.preventDefault();const payload=values(editor,cfg.fields);let query=fresh?sb.from(cfg.table).insert(payload).select().single():sb.from(cfg.table).update(payload).eq('id',row.id).select().single();const {data,error}=await query;if(error)return toast(error.message);toast('Saved');await load();const saved=rows.find(item=>String(item.id)===String(data.id));if(saved)edit(saved)};
     document.getElementById('delete')?.addEventListener('click',async()=>{if(!confirm('Delete this record?'))return;const {error}=await sb.from(cfg.table).delete().eq('id',row.id);if(error)return toast(error.message);toast('Deleted');load()});
     if(!fresh&&cfg.children?.length)await renderChildren(row);
@@ -58,7 +71,84 @@ const { module }=Astro.props as {module:CmsModule};
     holder.querySelectorAll('[data-child-id]').forEach(el=>{const group=groups[Number(el.dataset.childGroup)];el.onclick=()=>childEditor(group,group.items.find(item=>String(item.id)===el.dataset.childId),parent)});
   }
   async function seedFixtureSchedule(parent){const space=lookups.spaces.find(s=>s.id===parent.space_id),categories=(FIXTURE_CATEGORIES[space?.slug]||[]).filter(name=>name!=='Other');if(!categories.length)return toast('Select a design space first');if(!confirm(`Create ${categories.length} fixture checklist rows for this ${space.name} design?`))return;const rows=categories.map((category,index)=>({design_id:parent.id,category,name:category,quantity:1,included:true,sort_order:index}));const {error}=await sb.from('lx_design_fixtures').insert(rows);if(error)return toast(error.message);toast('Fixture checklist created');renderChildren(parent)}
-  function bindImageUploads(form){form.querySelectorAll('[data-image-upload]').forEach(input=>input.addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>10485760){e.target.value='';return toast('Image must be 10 MB or smaller')}const target=form.elements[e.target.dataset.imageUpload],ext=(file.name.split('.').pop()||'jpg').replace(/[^a-z0-9]/gi,''),path=`fixtures/${Date.now()}-${crypto.randomUUID()}.${ext}`;e.target.disabled=true;toast('Uploading image…');const {error}=await sb.storage.from('luxehome-media').upload(path,file,{cacheControl:'31536000'});e.target.disabled=false;if(error)return toast(error.message);target.value=sb.storage.from('luxehome-media').getPublicUrl(path).data.publicUrl;const old=form.querySelector(`[data-image-preview="${e.target.dataset.imageUpload}"]`),img=document.createElement('img');img.dataset.imagePreview=e.target.dataset.imageUpload;img.src=target.value;img.alt='Fixture preview';old?.replaceWith(img);toast('Image uploaded') }))}
+  /* Photos come straight off a phone camera roll — often 4000px HEIC or JPEG.
+     Convert to WebP and cap the long edge before upload so pages stay fast
+     and every browser can display the result (Chrome cannot render HEIC). */
+  const MAX_EDGE=2200,WEBP_QUALITY=0.86;
+  async function toWebp(file){
+    if(file.type==='image/webp')return file;
+    let bitmap;
+    try{bitmap=await createImageBitmap(file)}
+    catch{
+      // Safari occasionally refuses createImageBitmap on HEIC; retry via <img>.
+      bitmap=await new Promise((resolve,reject)=>{
+        const img=new Image(),src=URL.createObjectURL(file);
+        img.onload=()=>{URL.revokeObjectURL(src);resolve(img)};
+        img.onerror=()=>{URL.revokeObjectURL(src);reject(new Error('decode failed'))};
+        img.src=src;
+      });
+    }
+    const w0=bitmap.naturalWidth||bitmap.width,h0=bitmap.naturalHeight||bitmap.height;
+    if(!w0||!h0)throw new Error('Could not read that image — try a JPEG or PNG');
+    const scale=Math.min(1,MAX_EDGE/Math.max(w0,h0));
+    const w=Math.max(1,Math.round(w0*scale)),h=Math.max(1,Math.round(h0*scale));
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d');ctx.imageSmoothingQuality='high';ctx.drawImage(bitmap,0,0,w,h);
+    bitmap.close?.();
+    const blob=await new Promise(res=>canvas.toBlob(res,'image/webp',WEBP_QUALITY));
+    if(!blob)throw new Error('WebP conversion is not supported by this browser');
+    const base=(file.name.replace(/\.[^.]+$/,'')||'image').replace(/[^a-z0-9-]+/gi,'-').toLowerCase();
+    return new File([blob],`${base}.webp`,{type:'image/webp'});
+  }
+  const prettyKB=n=>n>=1048576?`${(n/1048576).toFixed(1)} MB`:`${Math.round(n/1024)} KB`;
+  /** Converts, uploads and returns the public URL. */
+  async function uploadImage(file,folder='uploads'){
+    if(file.size>26214400)throw new Error('Please choose an image under 25 MB');
+    const webp=await toWebp(file);
+    const path=`${folder}/${Date.now()}-${crypto.randomUUID()}.webp`;
+    const {error}=await sb.storage.from('luxehome-media').upload(path,webp,{cacheControl:'31536000',contentType:'image/webp'});
+    if(error)throw error;
+    return {url:sb.storage.from('luxehome-media').getPublicUrl(path).data.publicUrl,size:webp.size,was:file.size};
+  }
+  function showPreview(form,key,url){
+    const old=form.querySelector(`[data-image-preview="${key}"]`);
+    if(!old)return;
+    const img=document.createElement('img');img.dataset.imagePreview=key;img.src=url;img.alt='Preview';
+    old.replaceWith(img);
+  }
+  function bindImageUploads(form,folder='uploads'){
+    form.querySelectorAll('[data-image-upload]').forEach(input=>input.addEventListener('change',async e=>{
+      const file=e.target.files?.[0];if(!file)return;
+      const key=e.target.dataset.imageUpload,target=form.elements[key];
+      e.target.disabled=true;toast('Converting to WebP…');
+      try{
+        const {url,size,was}=await uploadImage(file,folder);
+        target.value=url;showPreview(form,key,url);
+        toast(`Uploaded · ${prettyKB(was)} → ${prettyKB(size)} WebP`);
+      }catch(err){toast(err.message||'Upload failed')}
+      finally{e.target.disabled=false;e.target.value=''}
+    }));
+    // Multi-image fields (galleries, diary photos) append one URL per line.
+    form.querySelectorAll('[data-images-upload]').forEach(input=>input.addEventListener('change',async e=>{
+      const files=[...(e.target.files||[])];if(!files.length)return;
+      const target=form.elements[e.target.dataset.imagesUpload];
+      e.target.disabled=true;
+      const urls=[];
+      for(let i=0;i<files.length;i++){
+        toast(`Uploading ${i+1} of ${files.length}…`);
+        try{const {url}=await uploadImage(files[i],folder);urls.push(url)}
+        catch(err){toast(err.message||`Image ${i+1} failed`)}
+      }
+      if(urls.length){
+        const existing=target.value.split('\n').map(s=>s.trim()).filter(Boolean);
+        target.value=[...existing,...urls].join('\n');
+        const count=form.querySelector(`[data-images-count="${e.target.dataset.imagesUpload}"]`);
+        if(count)count.textContent=`${existing.length+urls.length} image(s)`;
+        toast(`Added ${urls.length} image(s)`);
+      }
+      e.target.disabled=false;e.target.value='';
+    }));
+  }
   function childEditor(group,source,parent){
     const fresh=!source,def=group.def,row=source||{};
     if(fresh&&def.fields.some(field=>field.key==='sort_order'))row.sort_order=group.items.length;
@@ -66,7 +156,7 @@ const { module }=Astro.props as {module:CmsModule};
     const fields=def.table==='lx_design_fixtures'?def.fields.map(f=>f.key==='category'?{...f,options:FIXTURE_CATEGORIES[(lookups.spaces.find(s=>s.id===parent.space_id)||{}).slug]||[]}:f):def.fields;
     modal.innerHTML=`<div class="modal-backdrop"><form id="child-editor" class="modal-card"><div class="formhead"><h2>${fresh?'Add':'Edit'} ${esc(def.label)}</h2><button type="button" id="child-close">Close</button></div><div class="fields one">${fields.map(f=>field(f,row[f.key],'child_')).join('')}</div><div class="actions"><button class="save">Save row</button>${fresh?'':`<button type="button" id="child-delete" class="delete">Delete</button>`}</div></form></div>`;
     const form=document.getElementById('child-editor');document.getElementById('child-close').onclick=()=>modal.innerHTML='';
-    bindImageUploads(form);
+    bindImageUploads(form,cfg.slug);
     form.onsubmit=async e=>{e.preventDefault();const payload={...values(form,fields,'child_'),[def.foreignKey]:parent.id};const query=fresh?sb.from(def.table).insert(payload):sb.from(def.table).update(payload).eq('id',row.id);const {error}=await query;if(error)return toast(error.message);modal.innerHTML='';toast('Row saved');renderChildren(parent)};
     document.getElementById('child-delete')?.addEventListener('click',async()=>{if(!confirm('Delete this row?'))return;const {error}=await sb.from(def.table).delete().eq('id',row.id);if(error)return toast(error.message);modal.innerHTML='';renderChildren(parent)});
   }
