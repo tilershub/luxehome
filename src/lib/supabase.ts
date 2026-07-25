@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { LUXE_SUPABASE_KEY, LUXE_SUPABASE_URL } from './luxe-supabase';
 
 const url = import.meta.env.PUBLIC_SUPABASE_URL as string | undefined;
 const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined;
@@ -9,12 +10,14 @@ const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined;
  */
 export const supabase = url && key ? createClient(url, key) : null;
 
-/** Creates a fresh Supabase client for SSR pages (server-side context). */
-export function createServerSupabase(env: Record<string, string | undefined>) {
-  const u = env.PUBLIC_SUPABASE_URL;
-  const k = env.PUBLIC_SUPABASE_ANON_KEY;
-  if (!u || !k) return null;
-  return createClient(u, k);
+/**
+ * Creates a fresh Supabase client for SSR pages (server-side context).
+ * Always targets the project the CMS writes to — see luxe-supabase.ts — so
+ * published content reaches the public pages regardless of the stale
+ * PUBLIC_SUPABASE_* values still set in the Cloudflare Pages environment.
+ */
+export function createServerSupabase(_env?: Record<string, string | undefined>) {
+  return createClient(LUXE_SUPABASE_URL, LUXE_SUPABASE_KEY);
 }
 
 // ── Typed row shapes ──────────────────────────────────────────────────────

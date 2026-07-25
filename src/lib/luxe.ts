@@ -5,9 +5,14 @@
    ============================================================ */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { LUXE_SUPABASE_KEY, LUXE_SUPABASE_URL } from './luxe-supabase';
 
-const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
-const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+// Read from exactly the project the CMS writes to. The Cloudflare Pages
+// environment still carries PUBLIC_SUPABASE_* values from an older
+// deployment, so those are deliberately not consulted here — otherwise
+// content published in the CMS would never reach the public pages.
+const SB_URL = LUXE_SUPABASE_URL;
+const SB_KEY = LUXE_SUPABASE_KEY;
 
 let _client: SupabaseClient | null = null;
 function sb(): SupabaseClient | null {
@@ -37,6 +42,9 @@ export interface Design {
   renovation_starting_price_lkr: number | null;
   cover_image_url: string | null;
   inspiration_image_url: string | null;
+  name_heading?: string | null; name_story?: string | null;
+  plan_image_url?: string | null;
+  room_length_m?: number | null; room_width_m?: number | null;
   video_3d_url: string | null; video_work_url: string | null;
   workflow_text: string | null;
   highlights: string[];
@@ -44,7 +52,7 @@ export interface Design {
   space?: Space;
 }
 
-export interface DesignDrawing { kind: DrawingKind; image_url: string; }
+export interface DesignDrawing { kind: DrawingKind; image_url: string; caption?: string | null; sort_order?: number; }
 export interface DesignFixture {
   category: string; name: string; brand: string | null;
   model_code: string | null; finish: string | null; quantity: number;
@@ -58,7 +66,7 @@ export interface DesignPriceTier {
   new_price_lkr: number; renovation_price_lkr: number;
   sort_order: number;
 }
-export interface DesignMaterial { category: string; brand: string; item: string | null; sort_order: number; }
+export interface DesignMaterial { category: string; brand: string; item: string | null; sort_order: number; image_url?: string | null; usage_label?: string | null; }
 export interface DesignTimelineStep { week_label: string; title: string; description: string | null; sort_order: number; }
 export interface DesignFaq { question: string; answer: string; sort_order: number; }
 
@@ -154,12 +162,12 @@ export async function getDesignBySlug(slug: string): Promise<DesignFull | null> 
   if (!design) return null;
 
   const [drawings, fixtures, priceTiers, materials, timeline, faq] = await Promise.all([
-    c.from('lx_design_drawings').select('kind,image_url').eq('design_id', design.id),
+    c.from('lx_design_drawings').select('*').eq('design_id', design.id).order('sort_order'),
     // Select all fields so deployments remain compatible while the additive
     // warranty column migration is being rolled out.
     c.from('lx_design_fixtures').select('*').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_price_tiers').select('label,sqm,new_price_lkr,renovation_price_lkr,sort_order').eq('design_id', design.id).order('sort_order'),
-    c.from('lx_design_materials').select('category,brand,item,sort_order').eq('design_id', design.id).order('sort_order'),
+    c.from('lx_design_materials').select('*').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_timeline').select('week_label,title,description,sort_order').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_faq').select('question,answer,sort_order').eq('design_id', design.id).order('sort_order'),
   ]);
