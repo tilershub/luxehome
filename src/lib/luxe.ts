@@ -50,6 +50,7 @@ export interface DesignFixture {
   model_code: string | null; finish: string | null; quantity: number;
   included: boolean; spec: string | null; notes: string | null;
   warranty_period: string | null;
+  reference_price_label?: string | null;
   image_url: string | null; image_alt: string | null; sort_order: number;
 }
 export interface DesignPriceTier {

@@ -9,6 +9,13 @@ export function waLink(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
+/** "LKR 2.06M" — the bare amount, without the "From" prefix. */
+export function lkrM(rupees: number): string {
+  const millions = rupees / 1_000_000;
+  const label = millions >= 10 ? millions.toFixed(0) : (Math.round(millions * 1000) / 1000).toString();
+  return `LKR ${label}M`;
+}
+
 /** "From LKR X M" — store rupees in DB, format in UI. */
 export function formatLKRM(rupees: number): string {
   const millions = rupees / 1_000_000;

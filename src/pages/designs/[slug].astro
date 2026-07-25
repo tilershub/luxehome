@@ -3,7 +3,7 @@ import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import { getDesigns, getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, cloudinary } from '../../lib/luxe-config';
+import { formatLKRM, lkrM, cloudinary } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
 export async function getStaticPaths() {
@@ -85,20 +85,31 @@ if (design.slug === 'manel') {
 
 const collectionLabel = design.collection.charAt(0).toUpperCase() + design.collection.slice(1);
 const priceLabel = design.starting_price_lkr > 0 ? formatLKRM(design.starting_price_lkr) : 'Starting price to be confirmed';
-const newPriceLabel = design.new_starting_price_lkr ? formatLKRM(design.new_starting_price_lkr) : null;
-const renovationPriceLabel = design.renovation_starting_price_lkr ? formatLKRM(design.renovation_starting_price_lkr) : null;
+const newPrice = design.new_starting_price_lkr || design.starting_price_lkr || null;
+const renoPrice = design.renovation_starting_price_lkr ?? null;
 
 const inspectionHref = `/book-site-inspection?design=${encodeURIComponent(design.slug)}`;
 
+const drawingOf = (kind: string) => design.drawings.find((d) => d.kind === kind) ?? null;
 const renders = (['render_1', 'render_2', 'render_3', 'render_4'] as const)
-  .map((k) => design.drawings.find((dr) => dr.kind === k) ?? null)
-  .filter((render): render is NonNullable<typeof render> => Boolean(render));
+  .map((k) => drawingOf(k))
+  .filter((r): r is NonNullable<typeof r> => Boolean(r));
+
+// The walk-in: doorway first, then each render in sequence.
+const STEP_COPY = [
+  { n: 'I', kicker: 'Step one · At the door', title: 'The first glance across the room' },
+  { n: 'II', kicker: 'Step two · The vanity wall', title: 'Stone and warm mirror light' },
+  { n: 'III', kicker: 'Step three · Into the shower', title: 'The walk-in shower and niche' },
+  { n: 'IV', kicker: 'Step four · Turn around', title: 'The whole room, looking back' },
+];
+const stepImages = [design.cover_image_url, ...renders.map((r) => r.image_url)].filter(Boolean) as string[];
+const steps = STEP_COPY.slice(0, stepImages.length).map((copy, i) => ({ ...copy, image: stepImages[i] }));
 
 const TECH = [
-  { kind: 'civil',          label: 'Civil Drawing' },
-  { kind: 'supply_water',   label: 'Supply Water' },
-  { kind: 'waste_drainage', label: 'Waste & Drainage' },
-  { kind: 'electrical',     label: 'Electrical' },
+  { kind: 'civil',          label: 'Civil Drawing',            tag: 'Plan & levels' },
+  { kind: 'supply_water',   label: 'Water Supply Layout',      tag: 'Plumbing' },
+  { kind: 'waste_drainage', label: 'Waste & Drainage Layout',  tag: 'Plumbing' },
+  { kind: 'electrical',     label: 'Electrical Layout',        tag: 'Points & lighting' },
 ] as const;
 
 const video3d = youtubeEmbed(design.video_3d_url);
@@ -112,17 +123,38 @@ const priceTiers = design.price_tiers.length > 0
       sort_order,
     }));
 
-const fixtureGroups: Array<{ category: string; items: DesignFixture[] }> = [];
-for (const f of design.fixtures) {
-  const g = fixtureGroups.find((x) => x.category === f.category);
-  if (g) g.items.push(f);
-  else fixtureGroups.push({ category: f.category, items: [f] });
-}
+// Flat per-m² rate, derived from the first two published tiers.
+const perSqmRate = (() => {
+  if (priceTiers.length < 2) return null;
+  const [a, b] = priceTiers;
+  const span = b.sqm - a.sqm;
+  if (span <= 0) return null;
+  const rate = (b.new_price_lkr - a.new_price_lkr) / span;
+  return rate > 0 ? Math.round(rate) : null;
+})();
+
+const fixtures: DesignFixture[] = design.fixtures;
+const roomImage = renders[0]?.image_url ?? design.cover_image_url;
+const romanNumeral = (n: number) => ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'][n - 1] ?? String(n);
 
 const allRelated = storedDesign?.id
   ? await getProjects({ designId: storedDesign.id })
   : (await getProjects()).filter((project) => project.design?.slug === design.slug);
 const related = allRelated.filter((project) => project.after_image_url).slice(0, 3);
+const testimonials = allRelated
+  .filter((project) => project.review_text)
+  .slice(0, 2)
+  .map((project) => ({
+    text: project.review_text!,
+    who: [project.review_by, project.location].filter(Boolean).join(' · ') || 'LUXEhome client',
+  }));
+
+const nameHeading = design.slug === 'manel'
+  ? 'Inspired by the Manel flower.'
+  : `Inspired by the ${design.name} flower.`;
+const nameStory = design.slug === 'manel'
+  ? 'Named after Sri Lanka’s blue water lily, this design translates its deep blue character and quiet symmetry into a composed Signature bathroom.'
+  : (design.description ?? `The ${design.name} carries its namesake’s character into a fully documented ${collectionLabel} bathroom.`);
 
 const productSchema = JSON.stringify({
   '@context': 'https://schema.org',
@@ -143,103 +175,295 @@ const productSchema = JSON.stringify({
 
 <LuxeLayout
   title={`${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design | ${priceLabel} | LUXEhome`}
-  description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Review the renders, technical drawings, fixtures and warranties, then book a site inspection to check the fit.`}
+  description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then book a site inspection to check the fit.`}
   ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
 >
   <Fragment slot="head">
     <script is:inline type="application/ld+json" set:html={productSchema}></script>
   </Fragment>
 
-  <!-- Hero -->
-  <section class="df-hero">
-    <div class="df-hero-text">
-      <p class="lx-eyebrow lxr">{collectionLabel} Collection · {design.space?.name}</p>
-      <h1 class="lxr">{design.name}</h1>
-      {design.tagline && <p class="df-tagline lxr">{design.tagline}</p>}
-      <div class="df-meta lxr">
-        {newPriceLabel && renovationPriceLabel ? (
-          <div class="df-price-options">
-            <div><span>New bathroom</span><strong>{newPriceLabel}</strong></div>
-            <div><span>Renovation</span><strong>{renovationPriceLabel}</strong></div>
-          </div>
-        ) : <div class="df-price">{priceLabel}</div>}
-        <div class="df-size">{design.min_sqm ? `Requires min. ${design.min_sqm} m²` : 'Fits any size'}</div>
-      </div>
-      {design.description && <p class="df-desc lxr">{design.description}</p>}
-      <div class="df-cta lxr">
-        <a href={inspectionHref} class="lx-btn-wa">Inspect My Bathroom for This Design</a>
-        <small>LKR 10,000 · No measurements needed</small>
+  <!-- HERO · THE DOORWAY -->
+  <header class="wx-hero" id="wx-hero">
+    <div class="wx-hero-media" id="wx-hero-media">
+      {design.cover_image_url
+        ? <img src={cloudinary(design.cover_image_url, 1600)} alt={`${design.name} — the view from the doorway`} width="1600" height="1000" fetchpriority="high" />
+        : <div class="wx-placeholder wx-placeholder--hero"><strong>LUXE</strong><em>home</em><span>{design.name}</span></div>}
+    </div>
+    <div class="wx-hero-shade" aria-hidden="true"></div>
+    <div class="wx-hero-copy">
+      <p class="wx-kicker wx-kicker--light">{collectionLabel} Collection · Bathrooms</p>
+      <h1>{design.name}</h1>
+      {design.tagline && <p class="wx-hero-tagline">{design.tagline}</p>}
+      <div class="wx-hero-prices">
+        {newPrice && <div><span>New bathroom</span><strong>From {lkrM(newPrice)}</strong></div>}
+        {renoPrice && <div><span>Renovation</span><strong>From {lkrM(renoPrice)}</strong></div>}
       </div>
     </div>
-    <div class="df-hero-img lxr">
-      {design.cover_image_url
-        ? <img src={cloudinary(design.cover_image_url, 1000)} alt={`${design.name} design`} width="1000" height="750" fetchpriority="high" />
-        : <div class="df-placeholder df-placeholder--hero"><strong>LUXE</strong><em>home</em><span>{design.name}</span></div>}
+    <button class="wx-hero-cue" id="wx-hero-cue" aria-label="Scroll down">
+      <span>Step inside</span>
+      <span class="wx-cue-line" aria-hidden="true"></span>
+      <span aria-hidden="true">↓</span>
+    </button>
+  </header>
+
+  <!-- THRESHOLD -->
+  <section class="wx-threshold">
+    <p class="wx-kicker">You are standing at the doorway</p>
+    <p class="wx-statement">A complete bathroom, documented to the last fitting — <em>before</em> a single tile is laid.</p>
+    <div class="wx-threshold-cta">
+      <a href={inspectionHref}><span>Inspect my bathroom for this design</span><b aria-hidden="true">→</b></a>
+      <small>LKR 10,000 · No measurements needed</small>
     </div>
   </section>
 
-  {design.inspiration_image_url && (
-    <section class="df-inspiration df-section lxr">
-      <img src={cloudinary(design.inspiration_image_url, 480)} alt={`${design.name} flower — the inspiration behind this design`} loading="lazy" width="480" height="420" />
-      <div><p class="lx-eyebrow">The name behind the design</p><h2>Inspired by the Manel flower.</h2><p>Named after Sri Lanka’s blue water lily, this design translates its deep blue character and quiet symmetry into a composed Signature bathroom.</p></div>
+  <!-- THE NAME -->
+  {(design.inspiration_image_url || nameStory) && (
+    <section class="wx-name">
+      <div class="wx-name-grid">
+        <div class="wx-name-flower">
+          {design.inspiration_image_url
+            ? <img src={cloudinary(design.inspiration_image_url, 420)} alt={`The ${design.name} flower — the inspiration behind this design`} loading="lazy" width="420" height="420" />
+            : <span aria-hidden="true">{design.name.charAt(0)}</span>}
+        </div>
+        <div>
+          <p class="wx-kicker">The name behind the design</p>
+          <h2>{nameHeading}</h2>
+          <p class="wx-body">{nameStory}</p>
+        </div>
+      </div>
     </section>
   )}
 
-  {priceTiers.length > 0 && (
-    <section class="df-section df-pricing" aria-labelledby="pricing-title">
-      <div class="df-pricing-intro lxr">
-        <div>
-          <p class="lx-eyebrow">Size-based pricing guide</p>
-          <h2 id="pricing-title">Choose the right fit for your room.</h2>
-        </div>
-        <p>Each reference price keeps the {design.name} specification while allowing for the additional floor, wall and construction area.</p>
+  <!-- THE WALK-IN -->
+  {steps.length >= 2 && (
+    <section id="walkin">
+      <div class="wx-section wx-walkin-intro">
+        <p class="wx-kicker">The walk-in</p>
+        <h2>Step inside, one view at a time.</h2>
+        <p class="wx-body">Scroll down and the room unfolds exactly as it does at the door — each view settling before the next arrives.</p>
       </div>
-      <div class="df-price-table lxr" role="table" aria-label={`${design.name} size and price guide`}>
-        <div class="df-price-row df-price-head" role="row">
-          <span role="columnheader">Design fit</span>
-          <span role="columnheader">Floor area</span>
-          <span role="columnheader">New bathroom</span>
-          <span role="columnheader">Renovation</span>
-        </div>
-        {priceTiers.map((tier) => (
-          <div class="df-price-row" role="row">
-            <strong role="cell">{tier.label}</strong>
-            <span role="cell">{tier.sqm} m²</span>
-            <span role="cell">{formatLKRM(tier.new_price_lkr)}</span>
-            <span role="cell">{formatLKRM(tier.renovation_price_lkr)}</span>
+      <div class="wx-steps">
+        {steps.map((step) => (
+          <div class="wx-step">
+            <img src={cloudinary(step.image, 1600)} alt={`${design.name} — ${step.title}`} loading="lazy" width="1600" height="1000" />
+            <div class="wx-step-shade" aria-hidden="true"></div>
+            <div class="wx-step-copy">
+              <div>
+                <p class="wx-kicker wx-kicker--faded">{step.kicker}</p>
+                <strong>{step.title}</strong>
+              </div>
+              <em aria-hidden="true">{step.n}</em>
+            </div>
           </div>
         ))}
-        <div class="df-price-row df-price-custom" role="row">
-          <strong role="cell">Larger or complex room</strong>
-          <span role="cell">Above {priceTiers.at(-1)?.sqm} m²</span>
-          <span role="cell">Custom price</span>
-          <span role="cell">Custom price</span>
-        </div>
       </div>
-      <p class="df-price-disclaimer lxr">Starting-price guide for the listed design specification and standard room conditions. Room proportions, ceiling height, access, service relocation and structural changes are assessed separately.</p>
-      <a class="df-price-cta lxr" href={inspectionHref}>Check this design against my bathroom →</a>
     </section>
   )}
 
-  <!-- 3D renders -->
-  <section class="df-section">
-    <h2 class="lxr">The design, rendered</h2>
-    <div class="df-render-grid" aria-label="3D render gallery">
-      {renders.map((render, i) => (
-        <div class="df-render lxr">
-          <img src={cloudinary(render.image_url, 800)} alt={`${design.name} — 3D render ${i + 1}`} loading="lazy" width="800" height="600" />
+  <!-- FIXTURES · UP CLOSE -->
+  <section id="fixtures" class="wx-section" data-fixture-explorer>
+    <div class="wx-heading-row">
+      <div>
+        <p class="wx-kicker">Walk up to the vanity</p>
+        <h2>Every fixture, up close.</h2>
+      </div>
+      <p class="wx-aside">Choose a fitting to see the exact specification{fixtures.some((f) => f.reference_price_label) ? ' and its reference price' : ''}.</p>
+    </div>
+
+    {fixtures.length > 0 ? (
+      <div class="wxf-layout">
+        <div class="wxf-canvas">
+          {fixtures.map((f, i) => (
+            <img
+              class:list={['wxf-canvas-img', { on: i === 0 }]}
+              data-fixture-img={i}
+              src={cloudinary(f.image_url || roomImage || design.cover_image_url || '', 900)}
+              alt={f.image_alt || `${f.brand ? `${f.brand} ` : ''}${f.name}`}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              width="900" height="1125"
+            />
+          ))}
         </div>
-      ))}
+        <div class="wxf-right">
+          <div class="wxf-panels">
+            {fixtures.map((f, i) => (
+              <div class:list={['wxf-panel', { on: i === 0 }]} data-fixture-panel={i}>
+                <div>
+                  <div class="wxf-n">{romanNumeral(i + 1).toLowerCase()} · {f.category}</div>
+                  <h3>{f.brand ? `${f.brand} — ` : ''}{f.name}</h3>
+                  {f.spec && <p class="wxf-spec">{f.spec}</p>}
+                  <dl class="wxf-meta">
+                    {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
+                    {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
+                    {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
+                    {f.warranty_period && <><dt>Warranty</dt><dd>{f.warranty_period}</dd></>}
+                  </dl>
+                  <span class:list={['wxf-badge', { optional: f.included === false }]}>{f.included === false ? 'Optional upgrade' : 'Included'}</span>
+                </div>
+                {f.reference_price_label && (
+                  <div class="wxf-price"><span>Reference price</span><strong>{f.reference_price_label}</strong></div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div class="wxf-tabs" role="tablist" aria-label="Fixtures in this design">
+            {fixtures.map((f, i) => (
+              <button
+                type="button"
+                data-fixture-tab={i}
+                class:list={[{ on: i === 0 }]}
+                role="tab"
+                aria-selected={i === 0 ? 'true' : 'false'}
+              >
+                <em aria-hidden="true">{String(i + 1).padStart(2, '0')}</em>
+                <span>{f.name}</span>
+                {f.reference_price_label && <small>{f.reference_price_label}</small>}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div class="wxf-empty"><strong>The full schedule is being prepared.</strong><p>The confirmed tiles, bathware, tapware, shower, lighting and accessory specification will be published here. A site inspection can still confirm whether this layout is suitable for your room.</p><a href={inspectionHref}>Check this design against my bathroom →</a></div>
+    )}
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="wx-dark">
+    <div class="wx-section">
+      <p class="wx-kicker wx-kicker--sage">Pricing</p>
+      <h2 class="wx-dark-title">A starting price for the minimum room.</h2>
+      <p class="wx-body wx-body--dark">
+        {renoPrice
+          ? `Both prices hold the full ${design.name} specification for a ${design.min_sqm ?? priceTiers[0]?.sqm ?? '—'} m² room.${perSqmRate ? ' Every additional square metre of floor, wall and construction area is added at a flat rate.' : ''}`
+          : `The starting price holds the full ${design.name} specification for a ${design.min_sqm ?? priceTiers[0]?.sqm ?? '—'} m² room.${perSqmRate ? ' Every additional square metre of floor, wall and construction area is added at a flat rate.' : ''}`}
+      </p>
+
+      <div class="wx-from-grid">
+        {newPrice && (
+          <div class="wx-from-card">
+            <span>New bathroom</span>
+            <div><small>From</small><strong>{lkrM(newPrice)}</strong></div>
+            <em>{design.min_sqm ? `Minimum ${design.min_sqm} m²` : 'Minimum fit'} · complete build</em>
+          </div>
+        )}
+        {renoPrice && (
+          <div class="wx-from-card">
+            <span>Renovation</span>
+            <div><small>From</small><strong>{lkrM(renoPrice)}</strong></div>
+            <em>{design.min_sqm ? `Minimum ${design.min_sqm} m²` : 'Minimum fit'} · existing room</em>
+          </div>
+        )}
+      </div>
+
+      {priceTiers.length > 0 && (
+        <div class="wx-tiers">
+          <p class="wx-kicker wx-kicker--sage">Choose by room size</p>
+          <div class="wx-tier-head" role="row"><span>Fit</span><span>Area</span><span>New</span><span>Renovation</span></div>
+          {priceTiers.map((tier) => (
+            <div class="wx-tier-row" role="row">
+              <span class="wx-tier-label">{tier.label}</span>
+              <span class="wx-tier-area">{tier.sqm} m²</span>
+              <span>{lkrM(tier.new_price_lkr)}</span>
+              <span class="wx-tier-reno">{lkrM(tier.renovation_price_lkr)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {perSqmRate && (
+        <div class="wx-rate">
+          <em>Each additional square metre</em>
+          <strong>+ LKR {perSqmRate.toLocaleString('en-LK')} <span>/ m²</span></strong>
+        </div>
+      )}
+      <p class="wx-fineprint">Final area is confirmed on site inspection. Larger or complex rooms are quoted from the same rate. Room proportions, ceiling height, access, service relocation and structural changes are assessed separately.</p>
+      <a class="wx-dark-cta" href={inspectionHref}>Check this design against my bathroom →</a>
     </div>
   </section>
 
+  <!-- MATERIALS -->
+  {design.materials.length > 0 && (
+    <section id="materials" class="wx-section">
+      <p class="wx-kicker">Reach out and touch</p>
+      <h2>Materials &amp; finishes.</h2>
+      <div class="wx-chips">
+        {design.materials.map((m) => (
+          <span class="wx-chip"><strong>{m.brand}</strong>{m.item ? ` · ${m.item}` : ''}</span>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- FLOOR PLAN -->
+  {design.min_sqm && (
+    <section id="plan" class="wx-panel-band">
+      <div class="wx-section wx-plan-grid">
+        <div>
+          <p class="wx-kicker">The room, from above</p>
+          <h2>A plan drawn for {design.min_sqm} m².</h2>
+          <p class="wx-body">The {design.name} layout is set out to the minimum fit — vanity, water closet and walk-in shower composed around a single clear line of movement.</p>
+          <div class="wx-plan-stats">
+            {design.slug === 'manel' && <div><strong>2.5<span>m</span></strong><em>Length</em></div>}
+            {design.slug === 'manel' && <div><strong>2.0<span>m</span></strong><em>Width</em></div>}
+            <div><strong>{design.min_sqm}<span>m²</span></strong><em>Min. area</em></div>
+          </div>
+        </div>
+        <div class="wx-plan-canvas" aria-label={`Illustrative ${design.name} floor plan at the minimum fit`}>
+          <svg viewBox="0 0 400 500" width="100%" role="img">
+            <rect x="40" y="40" width="320" height="420" fill="none" stroke="#3B3B33" stroke-width="2"></rect>
+            <path d="M150 460 L150 400 A60 60 0 0 1 210 460 Z" fill="none" stroke="#B7B09E" stroke-width="1.2" stroke-dasharray="4 4"></path>
+            <line x1="150" y1="460" x2="210" y2="460" stroke="#F3EDE3" stroke-width="4"></line>
+            <rect x="40" y="40" width="150" height="70" fill="#DDE1D4" stroke="#5B6349" stroke-width="1.4"></rect>
+            <ellipse cx="115" cy="75" rx="34" ry="20" fill="none" stroke="#5B6349" stroke-width="1.4"></ellipse>
+            <text x="115" y="130" text-anchor="middle" font-size="13" fill="#5B6349" letter-spacing="1.5">VANITY</text>
+            <rect x="270" y="40" width="90" height="90" fill="#DDE1D4" stroke="#5B6349" stroke-width="1.4"></rect>
+            <ellipse cx="315" cy="90" rx="24" ry="30" fill="none" stroke="#5B6349" stroke-width="1.4"></ellipse>
+            <text x="315" y="152" text-anchor="middle" font-size="13" fill="#5B6349" letter-spacing="1.5">WC</text>
+            <rect x="240" y="300" width="120" height="160" fill="#DDE1D4" stroke="#5B6349" stroke-width="1.4"></rect>
+            <line x1="240" y1="300" x2="360" y2="460" stroke="#B7B09E" stroke-width="1" stroke-dasharray="3 3"></line>
+            <circle cx="340" cy="322" r="7" fill="none" stroke="#5B6349" stroke-width="1.4"></circle>
+            <text x="300" y="392" text-anchor="middle" font-size="13" fill="#5B6349" letter-spacing="1.5">SHOWER</text>
+            {design.slug === 'manel' && <text x="200" y="26" text-anchor="middle" font-size="12" fill="#8A897C">2.5 m</text>}
+            {design.slug === 'manel' && <text x="24" y="255" text-anchor="middle" font-size="12" fill="#8A897C" transform="rotate(-90 24 255)">2.0 m</text>}
+          </svg>
+          <small>Illustrative layout at the minimum fit — customised to your room in the design file.</small>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- TECHNICAL DRAWINGS -->
+  <section id="drawings" class="wx-section">
+    <p class="wx-kicker">Documented before construction</p>
+    <h2>Technical drawings.</h2>
+    <p class="wx-body">Four drawing sets — sampled here for a 2.5 m × 2 m (5 m²) room and customised to your bathroom in the design file. Illustrative only; not for construction.</p>
+    <div class="wx-draw-grid">
+      {TECH.map((t) => {
+        const dr = drawingOf(t.kind);
+        return (
+          <figure class="wx-draw">
+            <div class="wx-draw-img">
+              {dr
+                ? <img src={cloudinary(dr.image_url, 800)} alt={`${design.name} — ${t.label} sample`} loading="lazy" width="800" height="600" />
+                : <div class="wx-placeholder"><span>{t.label}</span><small>Coming soon</small></div>}
+              <div class="wx-watermark" aria-hidden="true"></div>
+            </div>
+            <figcaption><span>{t.label}</span><em>{t.tag}</em></figcaption>
+          </figure>
+        );
+      })}
+    </div>
+  </section>
+
+  <!-- WALKTHROUGH VIDEO -->
   {video3d && design.cover_image_url && (
-    <section class="df-section">
-      <div class="df-video-layout">
-        <div class="df-video-copy lxr">
-          <p class="lx-eyebrow">Vertical 3D walkthrough</p>
+    <section class="wx-panel-band">
+      <div class="wx-section wx-video-grid">
+        <div>
+          <p class="wx-kicker">Vertical 3D walkthrough</p>
           <h2>Walk through the {design.name}.</h2>
-          <p>See the vanity, water closet, shower and complete room in one short walkthrough. The video opens in a portrait player and keeps you on this design page.</p>
+          <p class="wx-body">See the vanity, water closet, shower and complete room in one short walkthrough — the same route you’d take stepping in the door.</p>
         </div>
         <VideoCard
           title={`${design.name} 3D Walkthrough`}
@@ -252,115 +476,50 @@ const productSchema = JSON.stringify({
     </section>
   )}
 
+  <!-- BUILT PROJECTS -->
   {related.length > 0 && (
-    <section class="df-section">
-      <div class="df-related-heading lxr">
-        <div><p class="lx-eyebrow">From design to reality</p><h2>See the {design.name} built.</h2></div>
-        <p>Real completed bathrooms based on this design, including their customisations and complete project stories.</p>
+    <section class="wx-section">
+      <div class="wx-heading-row">
+        <div>
+          <p class="wx-kicker">From design to reality</p>
+          <h2>See the {design.name} built.</h2>
+        </div>
+        <p class="wx-aside">Real completed bathrooms based on this design, including their customisations and complete project stories.</p>
       </div>
-      <div class="df-related">
+      <div class="wx-related">
         {related.map((project) => <ProjectCard project={project} compact />)}
       </div>
     </section>
   )}
 
-  <!-- Technical drawings -->
-  <section class="df-section">
-    <h2 class="lxr">Technical drawings</h2>
-    <p class="df-note lxr">Samples for a 2.5 m × 2 m (5 m²) bathroom — customised for your bathroom in your design file. Illustrative only; not for construction.</p>
-    <div class="df-tech-grid" aria-label="Technical drawing samples">
-      {TECH.map((t) => {
-        const dr = design.drawings.find((d) => d.kind === t.kind);
-        return (
-          <figure class="df-tech lxr">
-            <div class="df-tech-img">
-              {dr
-                ? <img src={cloudinary(dr.image_url, 700)} alt={`${design.name} — ${t.label} sample`} loading="lazy" width="700" height="500" />
-                : <div class="df-placeholder"><span>{t.label}</span><small>Coming soon</small></div>}
-              <div class="df-watermark" aria-hidden="true"></div>
-            </div>
-            <figcaption>{t.label}</figcaption>
+  <!-- TESTIMONIALS -->
+  {testimonials.length > 0 && (
+    <section class="wx-dark">
+      <div class="wx-section wx-quote-grid">
+        {testimonials.map((quote) => (
+          <figure class="wx-quote">
+            <blockquote>“{quote.text}”</blockquote>
+            <figcaption>{quote.who}</figcaption>
           </figure>
-        );
-      })}
-    </div>
-  </section>
-
-  <!-- Fixtures -->
-  <section class="df-section df-fixtures">
-      <div class="df-fixture-intro lxr">
-        <div>
-          <p class="lx-eyebrow">Complete fixture schedule</p>
-          <h2>Every fixture, finish and fitting</h2>
-          <p>See exactly what is specified for the {design.name}—from tiles and bathware to taps, shower fittings, lighting and accessories.</p>
-        </div>
-        <div class="df-fixture-count"><strong>{design.fixtures.length}</strong><span>specified items</span></div>
-      </div>
-      {fixtureGroups.length > 0 ? (
-      <>
-      <nav class="df-fixture-nav lxr" aria-label="Fixture categories">
-        {fixtureGroups.map((g) => <a href={`#fixture-${g.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{g.category}<span>{g.items.length}</span></a>)}
-      </nav>
-      {fixtureGroups.map((g) => (
-        <div class="df-fix-group" id={`fixture-${g.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
-          <div class="df-fix-heading lxr"><h3 class="df-fix-cat">{g.category}</h3><span>{g.items.length} {g.items.length === 1 ? 'item' : 'items'}</span></div>
-          <div class="df-fix-grid">
-            {g.items.map((f) => (
-              <div class="df-fix-card lxr">
-                <div class="df-fix-img">
-                  {f.image_url
-                    ? <img src={cloudinary(f.image_url, 600)} alt={f.image_alt || `${f.brand ? `${f.brand} ` : ''}${f.name}`} loading="lazy" width="600" height="450" />
-                    : <div class="df-placeholder df-placeholder--sm"><strong>LUXE</strong><em>home</em><span>{f.category}</span><small>Image being prepared</small></div>}
-                  <span class:list={['df-included', { optional: f.included === false }]}>{f.included === false ? 'Optional upgrade' : 'Included'}</span>
-                </div>
-                <div class="df-fix-body">
-                  {f.brand && <p class="lx-eyebrow">{f.brand}</p>}
-                  <div class="df-fix-name">{f.name}</div>
-                  <dl class="df-fix-meta">
-                    {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
-                    {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
-                    {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
-                    {f.warranty_period && <><dt>Warranty</dt><dd>{f.warranty_period}</dd></>}
-                  </dl>
-                  {f.spec && <div class="df-fix-spec">{f.spec}</div>}
-                  {f.notes && <div class="df-fix-note">{f.notes}</div>}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-      </>
-      ) : (
-        <div class="df-fixture-empty lxr"><strong>The full schedule is being prepared.</strong><p>The confirmed tiles, bathware, tapware, shower, lighting and accessory specification will be published here. A site inspection can still confirm whether this layout is suitable for your room.</p><a href={inspectionHref}>Check this design against my bathroom →</a></div>
-      )}
-    </section>
-
-  <!-- Materials -->
-  {design.materials.length > 0 && (
-    <section class="df-section">
-      <h2 class="lxr">Construction materials</h2>
-      <div class="df-chips lxr">
-        {design.materials.map((m) => (
-          <span class="df-chip"><strong>{m.brand}</strong>{m.item ? ` · ${m.item}` : ''}</span>
         ))}
       </div>
     </section>
   )}
 
-  <!-- Workflow + timeline -->
+  <!-- WORKFLOW + TIMELINE -->
   {(design.workflow_text || design.timeline.length > 0) && (
-    <section class="df-section">
-      <h2 class="lxr">How it gets built</h2>
-      {design.workflow_text && <p class="df-workflow lxr">{design.workflow_text}</p>}
+    <section class="wx-section">
+      <p class="wx-kicker">From approval to handover</p>
+      <h2>How it gets built.</h2>
+      {design.workflow_text && <p class="wx-body">{design.workflow_text}</p>}
       {design.timeline.length > 0 && (
-        <ol class="df-timeline">
+        <ol class="wx-timeline">
           {design.timeline.map((t) => (
-            <li class="lxr">
-              <span class="df-tl-dot" aria-hidden="true"></span>
-              <div class="df-tl-week">{t.week_label}</div>
-              <div class="df-tl-title">{t.title}</div>
-              {t.description && <p class="df-tl-desc">{t.description}</p>}
+            <li>
+              <span class="wx-tl-dot" aria-hidden="true"></span>
+              <div class="wx-tl-week">{t.week_label}</div>
+              <div class="wx-tl-title">{t.title}</div>
+              {t.description && <p>{t.description}</p>}
             </li>
           ))}
         </ol>
@@ -370,11 +529,12 @@ const productSchema = JSON.stringify({
 
   <!-- FAQ -->
   {design.faq.length > 0 && (
-    <section class="df-section">
-      <h2 class="lxr">Questions about {design.name}</h2>
-      <div class="df-faq lxr">
+    <section class="wx-section">
+      <p class="wx-kicker">Before you ask</p>
+      <h2>Questions about {design.name}.</h2>
+      <div class="wx-faq">
         {design.faq.map((f) => (
-          <details class="df-faq-item">
+          <details class="wx-faq-item">
             <summary>{f.question}</summary>
             <p>{f.answer}</p>
           </details>
@@ -383,30 +543,29 @@ const productSchema = JSON.stringify({
     </section>
   )}
 
-  <section class="df-section df-warranty lxr">
-    <div class="df-warranty-intro">
-      <p class="lx-eyebrow">Warranty &amp; aftercare</p>
-      <h2>Protected after handover.</h2>
-      <p>Every LUXEhome bathroom is handed over with documented, written warranties — from the waterproofing beneath the tiles to each approved fixture.</p>
-      <a href="/warranty-aftercare">Read how warranty support works →</a>
-    </div>
-    <div class="df-warranty-grid">
-      <article><strong>10 yrs</strong><h3>Waterproofing warranty</h3><p>The applied waterproofing system is covered for ten years — the layer that matters most in a bathroom.</p></article>
-      <article><strong>1 yr</strong><h3>LUXEhome service warranty</h3><p>Complete workmanship cover after the tested handover, with care guidance and the agreed warranty record.</p></article>
-      <article><strong>Per item</strong><h3>Manufacturer warranties</h3><p>Bathware, tapware and accessories carry their own manufacturer cover — each period is listed on the fixture above.</p></article>
+  <!-- WARRANTY -->
+  <section id="warranty" class="wx-section">
+    <p class="wx-kicker">Warranty &amp; aftercare</p>
+    <h2>Protected after handover.</h2>
+    <p class="wx-body">Every LUXEhome bathroom is handed over with documented, written warranties — from the waterproofing beneath the tiles to each approved fixture. <a class="wx-inline-link" href="/warranty-aftercare">Read how warranty support works →</a></p>
+    <div class="wx-warranty-grid">
+      <article><em>10 yrs</em><h3>Waterproofing warranty</h3><p>The applied waterproofing system is covered for ten years — the layer that matters most in a bathroom.</p></article>
+      <article><em>1 yr</em><h3>LUXEhome service warranty</h3><p>Complete workmanship cover after the tested handover, with care guidance and the agreed warranty record.</p></article>
+      <article><em>Per item</em><h3>Manufacturer warranties</h3><p>Bathware, tapware and accessories carry their own manufacturer cover — each period is listed on the fixture above.</p></article>
     </div>
   </section>
 
-  <!-- Closing CTA -->
-  <section class="df-closing lxr">
-    <p class="lx-eyebrow">The practical next step</p>
+  <!-- CLOSING CTA -->
+  <section id="book" class="wx-closing">
+    <p class="wx-kicker">The practical next step</p>
     <h2>Will the {design.name} work in your bathroom?</h2>
-    <p>We will measure the room, review the site conditions and confirm the right fit before you commit to construction.</p>
-    <a href={inspectionHref} class="lx-btn-wa">Book Site Inspection · LKR 10,000</a>
+    <p>We measure the room, review the site conditions and confirm the right fit before you commit to construction.</p>
+    <a href={inspectionHref} class="wx-book-btn">Book site inspection · LKR 10,000</a>
     <small>No construction deposit is collected at this stage.</small>
   </section>
 
-  <div class="df-mobile-cta">
+  <!-- STICKY BOOK BAR -->
+  <div class="wx-bar" id="wx-bar">
     <a href={inspectionHref}>
       <span>Book {design.name} inspection</span>
       <strong>LKR 10,000</strong>
@@ -414,331 +573,312 @@ const productSchema = JSON.stringify({
   </div>
 </LuxeLayout>
 
+<script is:inline>
+(function () {
+  // Scroll cue → glide past the hero
+  var cue = document.getElementById('wx-hero-cue');
+  var hero = document.getElementById('wx-hero');
+  if (cue && hero) {
+    cue.addEventListener('click', function () {
+      window.scrollTo({ top: hero.offsetTop + hero.offsetHeight, behavior: 'smooth' });
+    });
+  }
+
+  // Sticky book bar appears once the hero has been passed
+  var bar = document.getElementById('wx-bar');
+  if (bar && hero && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      bar.classList.toggle('show', !entries[0].isIntersecting);
+    }, { threshold: 0 }).observe(hero);
+  } else if (bar) {
+    bar.classList.add('show');
+  }
+
+  // Gentle hero parallax (skipped for reduced motion)
+  var media = document.getElementById('wx-hero-media');
+  if (media && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var ticking = false;
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        media.style.transform = 'translateY(' + (window.scrollY * 0.18) + 'px)';
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+
+  // Fixture explorer
+  var explorer = document.querySelector('[data-fixture-explorer]');
+  if (explorer) {
+    explorer.addEventListener('click', function (event) {
+      var tab = event.target.closest('[data-fixture-tab]');
+      if (!tab) return;
+      var index = tab.getAttribute('data-fixture-tab');
+      explorer.querySelectorAll('[data-fixture-tab]').forEach(function (el) {
+        var on = el === tab;
+        el.classList.toggle('on', on);
+        el.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      explorer.querySelectorAll('[data-fixture-panel]').forEach(function (el) {
+        el.classList.toggle('on', el.getAttribute('data-fixture-panel') === index);
+      });
+      explorer.querySelectorAll('[data-fixture-img]').forEach(function (el) {
+        el.classList.toggle('on', el.getAttribute('data-fixture-img') === index);
+      });
+    });
+  }
+})();
+</script>
+
 <style>
-  .df-hero {
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: clamp(1.5rem, 4vw, 4rem);
-    align-items: center;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.2rem, 5vw, 4rem) 2rem;
+  /* ── Walk-in experience palette ── */
+  .wx-hero, .wx-threshold, .wx-name, .wx-section, .wx-dark, .wx-panel-band, .wx-closing {
+    --wx-cream: #F3EDE3;
+    --wx-panel: #EBE4D8;
+    --wx-mist:  #DDE1D4;
+    --wx-sage:  #5B6349;
+    --wx-sage-2:#4A5039;
+    --wx-forest:#262B23;
+    --wx-ink:   #3B3B33;
+    --wx-muted: #57564C;
+    --wx-faint: #8A897C;
+    --wx-gold:  #C6A363;
+    --wx-light: #F7F3EA;
   }
-  .df-hero h1 { font-size: clamp(2.8rem, 7vw, 4.6rem); margin: .4rem 0 .2rem; }
-  .df-tagline { font-family: var(--lx-serif); font-style: italic; font-size: 1.25rem; color: var(--sage-deep); margin-bottom: 1.2rem; }
-  .df-meta { display: flex; gap: 1.4rem; align-items: baseline; margin-bottom: 1rem; flex-wrap: wrap; }
-  .df-price { font-family: var(--lx-serif); font-size: 1.7rem; font-weight: 700; }
-  .df-price-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .65rem; width: min(100%,480px); }
-  .df-price-options>div { padding: .75rem .9rem; border: 1px solid var(--cream-deep); border-radius: 7px; background: #fff; }
-  .df-price-options span,.df-price-options strong { display: block; }
-  .df-price-options span { margin-bottom: .18rem; color: var(--sage-deep); font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
-  .df-price-options strong { font-family: var(--lx-serif); font-size: 1.25rem; }
-  .df-size {
-    font-size: .72rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
-    background: var(--sage-mist); color: var(--sage-deep);
-    padding: .35rem .8rem; border-radius: 999px;
-  }
-  .df-desc { max-width: 52ch; color: color-mix(in srgb, var(--ink) 78%, transparent); margin-bottom: 1.4rem; }
-  .df-cta { display: grid; justify-items: start; gap: .45rem; }
-  .df-cta small { color: color-mix(in srgb, var(--ink) 55%, transparent); font-size: .68rem; }
 
-  .df-hero-img { border-radius: 8px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--sage-mist); }
-  .df-hero-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .wx-kicker { margin-bottom: 14px; font: 400 12px var(--lx-sans); letter-spacing: .22em; text-transform: uppercase; color: var(--wx-sage); }
+  .wx-kicker--light { color: #E7E1D4; }
+  .wx-kicker--faded { color: #C9C3B4; margin-bottom: 10px; }
+  .wx-kicker--sage { color: #A9AF97; }
+  .wx-body { max-width: 56ch; font-size: clamp(16px, 2vw, 19px); line-height: 1.7; color: var(--wx-muted); }
+  .wx-body--dark { color: #C9C3B4; margin-bottom: 52px; }
+  .wx-aside { max-width: 34ch; font-size: 13px; color: var(--wx-faint); }
+  .wx-inline-link { color: var(--wx-sage); font-weight: 500; text-decoration: none; }
 
-  .df-section { max-width: 1100px; margin: 0 auto; padding: 2.2rem clamp(1.2rem, 5vw, 4rem); }
-  .df-section h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); margin-bottom: 1.2rem; }
-  .df-inspiration { display:grid; grid-template-columns:minmax(150px,240px) 1fr; gap:clamp(1.2rem,4vw,3rem); align-items:center; }
-  .df-inspiration img { width:100%; height:auto; aspect-ratio:1; object-fit:cover; border-radius:50%; }
-  .df-inspiration h2 { margin:.25rem 0 .55rem; }
-  .df-inspiration p:last-child { max-width:58ch; color:color-mix(in srgb,var(--ink) 72%,transparent); }
-  .df-note { font-size: .85rem; font-style: italic; color: color-mix(in srgb, var(--ink) 60%, transparent); margin: -0.6rem 0 1.2rem; }
+  .wx-section { max-width: 1240px; margin: 0 auto; padding: clamp(70px, 11vh, 130px) clamp(20px, 5vw, 64px); }
+  .wx-section h2, .wx-threshold h2, .wx-name h2 { margin: 0 0 14px; font: 500 clamp(34px, 5.2vw, 58px)/1.02 var(--lx-serif); }
+  .wx-heading-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 38px; }
+  .wx-heading-row h2 { margin-bottom: 0; }
+  .wx-panel-band { background: var(--wx-panel); }
 
-  /* Size-based price guidance */
-  .df-pricing { padding-top: 2.8rem; padding-bottom: 2.8rem; }
-  .df-pricing-intro {
-    display: grid;
-    grid-template-columns: 1.1fr .9fr;
-    gap: 2rem;
-    align-items: end;
-    margin-bottom: 1.2rem;
-  }
-  .df-pricing-intro h2 { margin: .3rem 0 0; }
-  .df-pricing-intro > p { color: color-mix(in srgb, var(--ink) 67%, transparent); font-size: .86rem; }
-  .df-price-table { overflow: hidden; border: 1px solid var(--cream-deep); border-radius: 9px; background: #fff; }
-  .df-price-row {
-    display: grid;
-    grid-template-columns: 1.2fr .65fr 1fr 1fr;
-    gap: 1rem;
-    align-items: center;
-    padding: .9rem 1rem;
-    border-bottom: 1px solid var(--cream-deep);
-  }
-  .df-price-row:last-child { border-bottom: 0; }
-  .df-price-row > strong { font: 600 1.03rem var(--lx-serif); }
-  .df-price-row > span { font-size: .82rem; }
-  .df-price-row > span:nth-child(n+3) { font-family: var(--lx-serif); font-weight: 600; }
-  .df-price-head {
-    background: var(--sage-deep);
-    color: var(--cream);
-    font-size: .66rem;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-  }
-  .df-price-head > span { font: inherit; }
-  .df-price-custom { background: color-mix(in srgb, var(--sage-mist) 52%, #fff); }
-  .df-price-disclaimer { max-width: 82ch; margin-top: .75rem; color: color-mix(in srgb, var(--ink) 55%, transparent); font-size: .72rem; }
-  .df-price-cta { display: inline-flex; margin-top: .7rem; color: var(--sage-deep); font-size: .78rem; font-weight: 600; text-decoration: none; }
+  /* ── Hero ── */
+  .wx-hero { position: relative; height: calc(100svh - 62px); min-height: 600px; display: flex; align-items: flex-end; overflow: hidden; background: var(--wx-sage-2); }
+  .wx-hero-media { position: absolute; inset: 0; }
+  .wx-hero-media img { width: 100%; height: 100%; object-fit: cover; display: block; animation: wxSlowZoom 24s ease-in-out infinite alternate; }
+  .wx-hero-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(28,30,24,.34) 0%, rgba(28,30,24,0) 34%, rgba(28,30,24,.12) 62%, rgba(28,30,24,.72) 100%); pointer-events: none; }
+  .wx-hero-copy { position: relative; z-index: 2; width: 100%; padding: 0 clamp(20px, 5vw, 64px) clamp(56px, 9vh, 96px); pointer-events: none; }
+  .wx-hero-copy h1 { margin: 0; font: 500 clamp(64px, 15vw, 200px)/0.9 var(--lx-serif); letter-spacing: -.01em; color: var(--wx-light); }
+  .wx-hero-tagline { max-width: 640px; margin: 14px 0 0; font: italic 400 clamp(20px, 3.4vw, 34px) var(--lx-serif); color: #EDE7DA; }
+  .wx-hero-prices { display: flex; flex-wrap: wrap; gap: 12px 40px; margin-top: 30px; }
+  .wx-hero-prices span { display: block; margin-bottom: 4px; font: 400 11px var(--lx-sans); letter-spacing: .2em; text-transform: uppercase; color: #C9C3B4; }
+  .wx-hero-prices strong { font: 500 26px var(--lx-serif); color: var(--wx-light); }
+  .wx-hero-cue { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 24px; border: 0; background: none; color: #EDE7DA; cursor: pointer; }
+  .wx-hero-cue > span:first-child { font: 400 10px var(--lx-sans); letter-spacing: .28em; text-transform: uppercase; }
+  .wx-cue-line { display: block; width: 1px; height: 34px; background: linear-gradient(#EDE7DA, transparent); animation: wxCueBounce 2.4s ease-in-out infinite; }
+  @keyframes wxCueBounce { 0%,100% { transform: translateY(0); opacity: .55; } 50% { transform: translateY(9px); opacity: 1; } }
+  @keyframes wxSlowZoom { from { transform: scale(1.06); } to { transform: scale(1.14); } }
 
-  /* Placeholders — branded, never broken */
-  .df-placeholder {
-    width: 100%; height: 100%;
-    min-height: 180px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: .25rem;
-    background: repeating-linear-gradient(-45deg, var(--sage-mist), var(--sage-mist) 14px, var(--cream-deep) 14px, var(--cream-deep) 28px);
-    color: var(--sage-deep);
-  }
-  .df-placeholder span { font-family: var(--lx-serif); font-size: 1.15rem; font-style: italic; }
-  .df-placeholder small { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
-  .df-placeholder--hero span { font-size: 2rem; }
-  .df-placeholder--sm { min-height: 120px; }
-  .df-placeholder--sm span { font-size: .9rem; }
+  /* ── Threshold ── */
+  .wx-threshold { max-width: 1120px; margin: 0 auto; padding: clamp(70px, 12vh, 140px) clamp(20px, 5vw, 64px); }
+  .wx-threshold .wx-kicker { margin-bottom: 26px; }
+  .wx-statement { max-width: 20ch; margin: 0; font: 400 clamp(28px, 4.6vw, 52px)/1.24 var(--lx-serif); letter-spacing: -.005em; }
+  .wx-statement em { font-style: italic; }
+  .wx-threshold-cta { display: grid; gap: 16px; margin-top: 52px; max-width: 520px; }
+  .wx-threshold-cta > a { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 22px 26px; background: var(--wx-sage); color: var(--wx-cream); font: 400 13px var(--lx-sans); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; transition: background .35s ease; }
+  .wx-threshold-cta > a:hover { background: var(--wx-sage-2); color: var(--wx-cream); }
+  .wx-threshold-cta b { font: 400 22px var(--lx-serif); }
+  .wx-threshold-cta small { font-size: 13px; color: var(--wx-faint); }
 
-  .df-render-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
-  .df-render { border-radius: 6px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--sage-mist); }
-  .df-render img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* ── The name ── */
+  .wx-name { background: var(--wx-panel); padding: clamp(64px, 10vh, 120px) 0; }
+  .wx-name-grid { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; max-width: 1120px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 64px); }
+  .wx-name-flower { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; background: var(--wx-mist); display: grid; place-items: center; }
+  .wx-name-flower img { width: 100%; height: 100%; object-fit: cover; }
+  .wx-name-flower span { font: italic 500 64px var(--lx-serif); color: var(--wx-sage); }
 
-  .df-video-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
-    gap: clamp(2rem, 6vw, 5rem);
-    align-items: center;
-  }
-  .df-video-copy h2 { margin: .35rem 0 .7rem; }
-  .df-video-copy p:last-child { max-width: 54ch; color: color-mix(in srgb, var(--ink) 68%, transparent); }
+  /* ── Walk-in steps ── */
+  .wx-walkin-intro { padding-bottom: clamp(30px, 5vh, 50px); }
+  .wx-steps { position: relative; }
+  .wx-step { position: sticky; top: 0; height: 100svh; min-height: 560px; overflow: hidden; background: #31382C; }
+  .wx-step img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .wx-step-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(28,30,24,.18) 0%, rgba(28,30,24,0) 40%, rgba(28,30,24,.62) 100%); pointer-events: none; }
+  .wx-step-copy { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: clamp(28px, 5vh, 64px) clamp(20px, 5vw, 64px); pointer-events: none; }
+  .wx-step-copy strong { display: block; max-width: 16ch; font: 500 clamp(30px, 5vw, 54px)/1.02 var(--lx-serif); color: var(--wx-light); }
+  .wx-step-copy em { font: italic 400 clamp(38px, 6vw, 64px)/1 var(--lx-serif); color: rgba(247,243,234,.5); }
 
-  /* Technical drawings + SAMPLE watermark */
-  .df-tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
-  .df-tech { margin: 0; }
-  .df-tech-img { position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 7 / 5; background: #fff; border: 1px solid var(--cream-deep); }
-  .df-tech-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .df-tech figcaption { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--sage-deep); margin-top: .5rem; }
+  /* ── Fixture explorer ── */
+  .wxf-layout { display: grid; grid-template-columns: 1fr; gap: 28px; align-items: start; }
+  .wxf-canvas { position: relative; aspect-ratio: 4 / 5; border-radius: 2px; overflow: hidden; background: var(--wx-mist); }
+  .wxf-canvas-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .55s ease; }
+  .wxf-canvas-img.on { opacity: 1; }
+  .wxf-right { display: flex; flex-direction: column; gap: 18px; }
+  .wxf-panels { position: relative; display: grid; background: #fff; border-radius: 2px; overflow: hidden; }
+  .wxf-panel { grid-area: 1 / 1; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(26px, 3vw, 40px); opacity: 0; transform: translateY(12px); transition: opacity .55s ease, transform .55s ease; pointer-events: none; visibility: hidden; }
+  .wxf-panel.on { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
+  .wxf-n { margin-bottom: 20px; font: italic 400 20px var(--lx-serif); color: var(--wx-sage); }
+  .wxf-panel h3 { margin: 0 0 12px; font: 500 clamp(26px, 3.2vw, 38px)/1.05 var(--lx-serif); }
+  .wxf-spec { max-width: 40ch; margin: 0 0 14px; font-size: 16px; line-height: 1.6; color: #7A7A70; }
+  .wxf-meta { display: grid; grid-template-columns: auto 1fr; gap: .2rem .8rem; margin: 0 0 16px; font-size: 13px; }
+  .wxf-meta dt { color: var(--wx-faint); }
+  .wxf-meta dd { margin: 0; overflow-wrap: anywhere; }
+  .wxf-badge { display: inline-block; width: max-content; padding: 6px 12px; border-radius: 100px; background: var(--wx-sage); color: #fff; font: 600 10px var(--lx-sans); letter-spacing: .08em; text-transform: uppercase; }
+  .wxf-badge.optional { background: var(--wx-gold); color: var(--wx-ink); }
+  .wxf-price { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 18px; border-top: 1px solid #EAE4D8; }
+  .wxf-price span { font: 400 11px var(--lx-sans); letter-spacing: .18em; text-transform: uppercase; color: var(--wx-faint); }
+  .wxf-price strong { font: 500 26px var(--lx-serif); }
+  .wxf-tabs { display: flex; flex-direction: column; max-height: 340px; overflow-y: auto; scrollbar-width: thin; }
+  .wxf-tabs button { display: flex; align-items: center; gap: 16px; padding: 14px 4px; border: 0; border-top: 1px solid #E2DCCF; background: none; color: #9A998C; font-family: var(--lx-sans); text-align: left; cursor: pointer; transition: color .3s ease; }
+  .wxf-tabs button:hover, .wxf-tabs button.on { color: var(--wx-ink); }
+  .wxf-tabs em { width: 26px; font: italic 400 14px var(--lx-serif); opacity: .7; }
+  .wxf-tabs span { flex: 1; font-size: 14px; letter-spacing: .04em; }
+  .wxf-tabs small { font-size: 12px; color: #9A998C; white-space: nowrap; }
+  .wxf-empty { padding: 1.4rem; background: #fff; border: 1px dashed var(--wx-sage); border-radius: 8px; }
+  .wxf-empty p { max-width: 65ch; margin: .35rem 0 .7rem; color: var(--wx-muted); }
+  .wxf-empty a { color: var(--wx-sage); font-weight: 600; }
 
-  .df-watermark {
-    position: absolute;
-    inset: -50%;
-    pointer-events: none;
-    background-image: repeating-linear-gradient(
-      -30deg,
-      transparent 0 90px,
-      rgba(43,50,42,.001) 90px 91px
-    );
-  }
-  .df-watermark::before {
+  /* ── Pricing (dark) ── */
+  .wx-dark { background: var(--wx-forest); color: #EDE7DA; }
+  .wx-dark-title { color: #EDE7DA; max-width: 16ch; }
+  .wx-from-grid { display: grid; grid-template-columns: 1fr; gap: 1px; background: rgba(237,231,218,.14); }
+  .wx-from-card { background: var(--wx-forest); padding: clamp(30px, 3vw, 48px); }
+  .wx-from-card > span { display: block; margin-bottom: 14px; font: 400 11px var(--lx-sans); letter-spacing: .2em; text-transform: uppercase; color: #A9AF97; }
+  .wx-from-card > div { display: flex; align-items: baseline; gap: 10px; }
+  .wx-from-card small { font: 400 13px var(--lx-sans); color: #9AA089; }
+  .wx-from-card strong { font: 500 clamp(40px, 5vw, 58px)/1 var(--lx-serif); }
+  .wx-from-card em { display: block; margin-top: 12px; font: normal 13px var(--lx-sans); color: #9AA089; }
+  .wx-tiers { margin-top: 52px; }
+  .wx-tiers .wx-kicker--sage { margin-bottom: 18px; font-size: 11px; }
+  .wx-tier-head, .wx-tier-row { display: grid; grid-template-columns: 1.2fr .6fr 1fr 1fr; gap: 10px; align-items: baseline; }
+  .wx-tier-head { padding: 0 0 12px; border-bottom: 1px solid rgba(237,231,218,.2); font: 400 11px var(--lx-sans); letter-spacing: .14em; text-transform: uppercase; color: #9AA089; }
+  .wx-tier-row { padding: 16px 0; border-bottom: 1px solid rgba(237,231,218,.12); font: 500 clamp(18px, 2.4vw, 24px) var(--lx-serif); }
+  .wx-tier-label { color: #EDE7DA; }
+  .wx-tier-area { font: 400 14px var(--lx-sans); color: #9AA089; }
+  .wx-tier-reno { color: #C9C3B4; }
+  .wx-rate { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 14px; margin-top: 32px; padding-top: 28px; border-top: 1px solid rgba(237,231,218,.14); }
+  .wx-rate em { font: italic 400 clamp(20px, 2.6vw, 26px) var(--lx-serif); color: #EDE7DA; }
+  .wx-rate strong { font: 500 clamp(26px, 3.4vw, 34px) var(--lx-serif); color: var(--wx-gold); }
+  .wx-rate strong span { font: 400 14px var(--lx-sans); letter-spacing: .04em; color: #9AA089; }
+  .wx-fineprint { margin-top: 22px; max-width: 82ch; font-size: 13px; color: #9AA089; }
+  .wx-dark-cta { display: inline-flex; margin-top: 18px; color: var(--wx-gold); font-size: 13px; font-weight: 500; letter-spacing: .04em; text-decoration: none; }
+
+  /* ── Materials chips ── */
+  .wx-chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+  .wx-chip { padding: 12px 22px; border-radius: 100px; background: #fff; font-size: 14px; color: var(--wx-muted); }
+  .wx-chip strong { color: var(--wx-sage); font-weight: 500; }
+
+  /* ── Floor plan ── */
+  .wx-plan-grid { display: grid; grid-template-columns: 1fr; gap: clamp(40px, 5vw, 72px); align-items: center; }
+  .wx-plan-stats { display: flex; gap: 36px; flex-wrap: wrap; margin-top: 30px; }
+  .wx-plan-stats strong { font: 500 34px var(--lx-serif); }
+  .wx-plan-stats strong span { font-size: 20px; }
+  .wx-plan-stats em { display: block; font: normal 12px var(--lx-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--wx-faint); }
+  .wx-plan-canvas { background: var(--wx-cream); border-radius: 2px; padding: clamp(22px, 3vw, 40px); }
+  .wx-plan-canvas svg { display: block; font-family: var(--lx-sans); }
+  .wx-plan-canvas small { display: block; margin-top: 12px; font-size: 12px; color: var(--wx-faint); }
+
+  /* ── Technical drawings ── */
+  .wx-draw-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 26px); margin-top: 40px; }
+  .wx-draw { margin: 0; }
+  .wx-draw-img { position: relative; aspect-ratio: 4 / 3; border-radius: 2px; overflow: hidden; background: var(--wx-forest); }
+  .wx-draw-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .wx-draw figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 14px; }
+  .wx-draw figcaption span { font: 400 12px var(--lx-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--wx-sage); }
+  .wx-draw figcaption em { font: normal 12px var(--lx-sans); color: #9A998C; }
+  .wx-watermark { position: absolute; inset: -50%; pointer-events: none; }
+  .wx-watermark::before {
     content: 'SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome  SAMPLE · LUXEhome ';
-    position: absolute;
-    inset: 0;
-    display: block;
-    transform: rotate(-30deg);
-    font-family: var(--lx-sans);
-    font-size: 1.05rem;
-    font-weight: 500;
-    letter-spacing: .3em;
-    line-height: 3.2;
-    color: rgba(43,50,42,.13);
-    white-space: normal;
-    word-break: break-word;
-    text-align: center;
+    position: absolute; inset: 0; display: block; transform: rotate(-30deg);
+    font: 500 1.05rem/3.2 var(--lx-sans); letter-spacing: .3em; text-align: center;
+    color: rgba(247,243,234,.14); word-break: break-word;
   }
 
-  /* Fixtures */
-  .df-fixtures { scroll-margin-top: 6rem; }
-  .df-fixture-intro { display: flex; align-items: end; justify-content: space-between; gap: 2rem; padding-bottom: 1.4rem; border-bottom: 1px solid var(--cream-deep); }
-  .df-fixture-intro h2 { margin: .25rem 0 .45rem; }
-  .df-fixture-intro>div:first-child>p:last-child { max-width: 65ch; color: color-mix(in srgb, var(--ink) 72%, transparent); }
-  .df-fixture-count { flex: 0 0 auto; min-width: 120px; text-align: center; background: var(--sage-mist); border-radius: 8px; padding: 1rem; }
-  .df-fixture-count strong,.df-fixture-count span { display: block; }
-  .df-fixture-count strong { font: 600 2.2rem/1 var(--lx-serif); color: var(--sage-deep); }
-  .df-fixture-count span { margin-top: .25rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; }
-  .df-fixture-nav { display: flex; gap: .5rem; overflow-x: auto; padding: 1rem 0 .4rem; scrollbar-width: thin; }
-  .df-fixture-nav a { flex: 0 0 auto; display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--cream-deep); border-radius: 999px; padding: .48rem .8rem; background: #fff; color: var(--ink); text-decoration: none; font-size: .75rem; }
-  .df-fixture-nav a span { display: grid; place-items: center; min-width: 20px; height: 20px; border-radius: 50%; background: var(--sage-mist); color: var(--sage-deep); font-size: .65rem; }
-  .df-fix-group { padding-top: 1.4rem; scroll-margin-top: 6rem; }
-  .df-fix-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
-  .df-fix-heading>span { color: color-mix(in srgb, var(--ink) 55%, transparent); font-size: .72rem; }
-  .df-fix-cat { font-size: 1.35rem; color: var(--sage-deep); margin: 0; }
-  .df-fix-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-  .df-fix-card { background: #fff; border: 1px solid var(--cream-deep); border-radius: 8px; overflow: hidden; box-shadow: 0 5px 18px rgba(43,50,42,.05); }
-  .df-fix-img { position: relative; aspect-ratio: 4 / 3; background: var(--sage-mist); }
-  .df-fix-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .df-included { position: absolute; top: .65rem; left: .65rem; border-radius: 999px; padding: .32rem .6rem; background: var(--sage-deep); color: #fff; font-size: .62rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
-  .df-included.optional { background: var(--gold); color: var(--ink); }
-  .df-fix-body { padding: .9rem 1rem 1.05rem; }
-  .df-fix-name { font-family: var(--lx-serif); font-weight: 600; font-size: 1.15rem; line-height: 1.15; margin-top: .2rem; }
-  .df-fix-meta { display: grid; grid-template-columns: auto 1fr; gap: .15rem .65rem; margin: .65rem 0 0; font-size: .72rem; }
-  .df-fix-meta dt { color: color-mix(in srgb, var(--ink) 52%, transparent); }
-  .df-fix-meta dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
-  .df-fix-spec { font-size: .78rem; color: color-mix(in srgb, var(--ink) 68%, transparent); margin-top: .65rem; white-space: pre-line; }
-  .df-fix-note { border-top: 1px solid var(--cream-deep); margin-top: .7rem; padding-top: .6rem; color: var(--sage-deep); font-size: .72rem; font-style: italic; }
-  .df-fixture-empty { margin-top: 1.2rem; padding: 1.4rem; background: #fff; border: 1px dashed var(--sage); border-radius: 8px; }
-  .df-fixture-empty p { max-width: 65ch; margin: .35rem 0 .7rem; color: color-mix(in srgb, var(--ink) 70%, transparent); }
-  .df-fixture-empty a { color: var(--sage-deep); font-weight: 600; }
+  /* ── Video ── */
+  .wx-video-grid { display: grid; grid-template-columns: 1fr; gap: clamp(30px, 4vw, 56px); align-items: center; }
 
-  /* Materials chips */
-  .df-chips { display: flex; flex-wrap: wrap; gap: .6rem; }
-  .df-chip {
-    font-size: .82rem;
-    background: #fff;
-    border: 1px solid var(--cream-deep);
-    border-radius: 999px;
-    padding: .45rem 1rem;
+  /* ── Related projects ── */
+  .wx-related { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+
+  /* ── Testimonials ── */
+  .wx-quote-grid { display: grid; grid-template-columns: 1fr; gap: clamp(48px, 6vw, 96px); }
+  .wx-quote { margin: 0; }
+  .wx-quote blockquote { margin: 0 0 26px; font: 400 clamp(24px, 3.2vw, 34px)/1.35 var(--lx-serif); }
+  .wx-quote figcaption { font: 400 13px var(--lx-sans); letter-spacing: .06em; color: #A9AF97; }
+
+  /* ── Timeline ── */
+  .wx-timeline { list-style: none; position: relative; margin-top: 30px; padding-left: 1.6rem; }
+  .wx-timeline::before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1px; background: #E2DCCF; }
+  .wx-timeline li { position: relative; padding: 0 0 1.4rem; }
+  .wx-tl-dot { position: absolute; left: -1.6rem; top: .45rem; width: 13px; height: 13px; border-radius: 50%; background: var(--wx-gold); border: 3px solid var(--wx-cream); }
+  .wx-tl-week { font: 500 .7rem var(--lx-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--wx-gold); }
+  .wx-tl-title { font: 600 1.2rem var(--lx-serif); }
+  .wx-timeline p { max-width: 56ch; font-size: .88rem; color: var(--wx-muted); }
+
+  /* ── FAQ ── */
+  .wx-faq { margin-top: 26px; }
+  .wx-faq-item { border-bottom: 1px solid #E2DCCF; }
+  .wx-faq-item summary { position: relative; padding: 1rem 2rem 1rem 0; font: 500 1.15rem var(--lx-serif); cursor: pointer; list-style: none; }
+  .wx-faq-item summary::after { content: '+'; position: absolute; right: .2rem; top: .85rem; font-size: 1.3rem; color: var(--wx-gold); transition: transform .2s; }
+  .wx-faq-item[open] summary::after { transform: rotate(45deg); }
+  .wx-faq-item p { max-width: 62ch; padding: 0 0 1.1rem; font-size: .92rem; color: var(--wx-muted); }
+
+  /* ── Warranty ── */
+  .wx-warranty-grid { display: grid; grid-template-columns: 1fr; gap: clamp(14px, 2vw, 20px); margin-top: 44px; }
+  .wx-warranty-grid article { background: #fff; border-left: 2px solid var(--wx-gold); padding: clamp(28px, 3vw, 38px); }
+  .wx-warranty-grid em { display: block; margin-bottom: 10px; font: italic 400 18px var(--lx-serif); color: var(--wx-gold); }
+  .wx-warranty-grid h3 { margin: 0 0 12px; font: 500 clamp(22px, 2.6vw, 28px) var(--lx-serif); }
+  .wx-warranty-grid p { margin: 0; font-size: 15px; line-height: 1.6; color: #7A7A70; }
+
+  /* ── Closing ── */
+  .wx-closing { background: var(--wx-mist); padding: clamp(80px, 14vh, 170px) clamp(20px, 5vw, 64px); text-align: center; }
+  .wx-closing .wx-kicker { margin-bottom: 22px; }
+  .wx-closing h2 { margin: 0 auto 22px; font: 500 clamp(38px, 6vw, 68px)/1.02 var(--lx-serif); }
+  .wx-closing p { max-width: 52ch; margin: 0 auto 44px; font-size: clamp(16px, 2vw, 19px); line-height: 1.7; color: #54554A; }
+  .wx-book-btn { display: inline-flex; align-items: center; gap: 14px; padding: 24px 44px; background: var(--wx-sage); color: var(--wx-cream); font: 400 14px var(--lx-sans); letter-spacing: .14em; text-transform: uppercase; text-decoration: none; transition: background .35s ease; }
+  .wx-book-btn:hover { background: var(--wx-sage-2); color: var(--wx-cream); }
+  .wx-closing small { display: block; margin-top: 20px; font-size: 13px; color: #7C7D6F; }
+
+  /* ── Sticky book bar ── */
+  .wx-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 55; display: flex; justify-content: center; padding: 0 16px calc(16px + env(safe-area-inset-bottom)); transform: translateY(120px); opacity: 0; transition: transform .5s ease, opacity .5s ease; pointer-events: none; }
+  .wx-bar.show { transform: none; opacity: 1; pointer-events: auto; }
+  .wx-bar a { width: 100%; max-width: 720px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 30px; border-radius: 100px; background: #5B6349; color: #F3EDE3; box-shadow: 0 14px 40px rgba(30,36,28,.28); font-family: var(--lx-sans); text-decoration: none; }
+  .wx-bar a span { font-size: 15px; letter-spacing: .02em; }
+  .wx-bar a strong { font: 500 20px var(--lx-serif); color: #DCC79A; white-space: nowrap; }
+
+  /* ── Placeholders ── */
+  .wx-placeholder { width: 100%; height: 100%; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; background: repeating-linear-gradient(-45deg, #DDE1D4, #DDE1D4 14px, #EBE4D8 14px, #EBE4D8 28px); color: #5B6349; }
+  .wx-placeholder span { font: italic 500 1.15rem var(--lx-serif); }
+  .wx-placeholder small { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+  .wx-placeholder--hero span { font-size: 2rem; color: #F7F3EA; }
+  .wx-placeholder--hero { background: repeating-linear-gradient(-45deg, #4A5039, #4A5039 14px, #31382C 14px, #31382C 28px); color: #DDE1D4; }
+  .wx-placeholder--hero strong, .wx-placeholder--hero em { font-size: 1.4rem; color: #F7F3EA; }
+
+  /* ── Responsive ── */
+  @media (min-width: 900px) {
+    .wxf-layout { grid-template-columns: 1.1fr 1fr; }
+    .wx-from-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .wx-warranty-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .wx-plan-grid, .wx-video-grid, .wx-quote-grid { grid-template-columns: 1fr 1fr; }
+    .wx-name-grid { grid-template-columns: auto 1fr; gap: 56px; }
   }
-  .df-chip strong { font-weight: 500; color: var(--sage-deep); }
-
-  /* Timeline */
-  .df-workflow { max-width: 60ch; margin-bottom: 1.6rem; color: color-mix(in srgb, var(--ink) 80%, transparent); }
-  .df-timeline { list-style: none; position: relative; padding-left: 1.6rem; }
-  .df-timeline::before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1px; background: var(--cream-deep); }
-  .df-timeline li { position: relative; padding: 0 0 1.4rem; }
-  .df-tl-dot { position: absolute; left: -1.6rem; top: .45rem; width: 13px; height: 13px; border-radius: 50%; background: var(--gold); border: 3px solid var(--cream); }
-  .df-tl-week { font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
-  .df-tl-title { font-family: var(--lx-serif); font-size: 1.2rem; font-weight: 600; }
-  .df-tl-desc { font-size: .88rem; color: color-mix(in srgb, var(--ink) 72%, transparent); max-width: 56ch; }
-
-  /* FAQ */
-  .df-faq-item { border-bottom: 1px solid var(--cream-deep); }
-  .df-faq-item summary {
-    font-family: var(--lx-serif);
-    font-size: 1.1rem;
-    font-weight: 600;
-    padding: 1rem 0;
-    cursor: pointer;
-    list-style: none;
-    position: relative;
-    padding-right: 2rem;
-  }
-  .df-faq-item summary::after { content: '+'; position: absolute; right: .2rem; top: .85rem; font-size: 1.3rem; color: var(--gold); transition: transform .2s; }
-  .df-faq-item[open] summary::after { transform: rotate(45deg); }
-  .df-faq-item p { padding: 0 0 1.1rem; max-width: 62ch; color: color-mix(in srgb, var(--ink) 78%, transparent); font-size: .92rem; }
-
-  /* Warranty */
-  .df-warranty { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(2rem, 6vw, 5rem); align-items: start; }
-  .df-warranty-intro h2 { margin: .3rem 0 .65rem; }
-  .df-warranty-intro > p:not(.lx-eyebrow) { max-width: 52ch; color: color-mix(in srgb, var(--ink) 70%, transparent); }
-  .df-warranty-intro > a { display: inline-flex; margin-top: .85rem; color: var(--sage-deep); font-size: .78rem; font-weight: 600; text-decoration: none; }
-  .df-warranty-grid { display: grid; gap: .65rem; }
-  .df-warranty-grid article { padding: 1rem 1.1rem; border-left: 2px solid var(--gold); background: #fff; }
-  .df-warranty-grid strong { color: var(--gold); font: 600 .82rem var(--lx-serif); }
-  .df-warranty-grid h3 { display: inline; margin-left: .55rem; font-size: 1.08rem; }
-  .df-warranty-grid p { margin-top: .35rem; color: color-mix(in srgb, var(--ink) 65%, transparent); font-size: .78rem; }
-
-  /* Related projects */
-  .df-related-heading { display: grid; grid-template-columns: 1.1fr .9fr; align-items: end; gap: 2rem; margin-bottom: 1.2rem; }
-  .df-related-heading h2 { margin: .3rem 0 0; }
-  .df-related-heading > p { color: color-mix(in srgb, var(--ink) 66%, transparent); font-size: .84rem; }
-  .df-related { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
-
-  /* Closing */
-  .df-closing {
-    text-align: center;
-    background: var(--sage-mist);
-    margin: 3rem auto 0;
-    padding: 3.5rem clamp(1.2rem, 5vw, 4rem);
-  }
-  .df-closing h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); margin-bottom: .6rem; }
-  .df-closing p { max-width: 48ch; margin: 0 auto 1.5rem; color: color-mix(in srgb, var(--ink) 75%, transparent); }
-  .df-closing .lx-eyebrow { margin-bottom: .35rem; color: var(--sage-deep); }
-  .df-closing small { display: block; margin-top: .65rem; color: color-mix(in srgb, var(--ink) 52%, transparent); font-size: .68rem; }
-  .df-mobile-cta { display: none; }
-
   @media (max-width: 860px) {
-    .df-hero { grid-template-columns: 1fr; }
-    .df-hero-img { order: -1; }
-    .df-render-grid, .df-tech-grid { grid-template-columns: 1fr; }
-    .df-video-layout { grid-template-columns: 1fr; }
-    .df-pricing-intro,
-    .df-related-heading,
-    .df-warranty { grid-template-columns: 1fr; gap: .7rem; }
-    .df-fix-grid { grid-template-columns: repeat(2, 1fr); }
-    .df-related { grid-template-columns: 1fr; }
+    .wx-related { grid-template-columns: 1fr; }
+    .wx-tier-head { display: none; }
+    .wx-tier-row { grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+    .wx-tier-label { grid-column: 1 / -1; }
+    .wx-tier-row > span:nth-child(3)::before { content: 'New · '; display: block; font: 600 10px var(--lx-sans); letter-spacing: .1em; text-transform: uppercase; color: #9AA089; }
+    .wx-tier-row > span:nth-child(4)::before { content: 'Renovation · '; display: block; font: 600 10px var(--lx-sans); letter-spacing: .1em; text-transform: uppercase; color: #9AA089; }
   }
   @media (max-width: 640px) {
-    .df-hero { gap: 1.15rem; padding-top: 1rem; }
-    .df-section { padding-top: 1.35rem; padding-bottom: 1.35rem; }
-    .df-section h2 { margin-bottom: .8rem; }
-    .df-render-grid,
-    .df-tech-grid {
-      display: flex;
-      gap: .8rem;
-      margin-inline: calc(clamp(1.2rem, 5vw, 4rem) * -1);
-      padding-inline: clamp(1.2rem, 5vw, 4rem);
-      overflow-x: auto;
-      overscroll-behavior-inline: contain;
-      scroll-snap-type: inline mandatory;
-      scrollbar-width: none;
-    }
-    .df-render-grid::-webkit-scrollbar,
-    .df-tech-grid::-webkit-scrollbar { display: none; }
-    .df-render,
-    .df-tech {
-      flex: 0 0 min(82vw, 420px);
-      scroll-snap-align: center;
-    }
-    .df-placeholder { min-height: 150px; }
-    .df-note { margin-bottom: .85rem; }
-    .df-tech figcaption { margin-top: .35rem; }
-    .df-closing { margin-bottom: 4.5rem; }
-    .df-mobile-cta {
-      position: fixed;
-      z-index: 90;
-      left: .75rem;
-      right: .75rem;
-      bottom: calc(.75rem + env(safe-area-inset-bottom));
-      display: block;
-    }
-    .df-mobile-cta a {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: .8rem;
-      padding: .8rem 1rem;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 999px;
-      background: var(--sage-deep);
-      color: var(--cream);
-      text-decoration: none;
-      box-shadow: 0 12px 34px rgba(23,30,23,.28);
-      font-size: .76rem;
-    }
-    .df-mobile-cta strong { flex: 0 0 auto; color: var(--gold-soft); font: 600 .78rem var(--lx-serif); }
+    .wx-hero { min-height: 520px; }
+    .wx-draw-grid { grid-template-columns: 1fr; }
+    .wx-bar a { padding: 15px 22px; }
+    .wx-bar a span { font-size: 13px; }
   }
-  @media (max-width: 480px) {
-    .df-inspiration { grid-template-columns:112px 1fr; gap:1rem; text-align:left; }
-    .df-inspiration img { width:112px; height:112px; margin:0; }
-    .df-inspiration h2 { font-size:1.35rem; }
-    .df-inspiration p:last-child { font-size:.82rem; line-height:1.5; }
-    .df-price-options { grid-template-columns: 1fr; width: 100%; }
-    .df-price-table { overflow: visible; border: 0; background: transparent; }
-    .df-price-head { display: none; }
-    .df-price-row {
-      grid-template-columns: 1fr 1fr;
-      gap: .35rem .8rem;
-      margin-bottom: .65rem;
-      padding: .9rem;
-      border: 1px solid var(--cream-deep);
-      border-radius: 8px;
-      background: #fff;
-    }
-    .df-price-row > strong { grid-column: 1 / -1; }
-    .df-price-row > span:nth-child(2)::before { content: 'Floor area · '; color: color-mix(in srgb, var(--ink) 55%, transparent); font-family: var(--lx-sans); font-weight: 400; }
-    .df-price-row > span:nth-child(3)::before { content: 'New · '; display: block; color: var(--sage-deep); font: 600 .6rem var(--lx-sans); letter-spacing: .08em; text-transform: uppercase; }
-    .df-price-row > span:nth-child(4)::before { content: 'Renovation · '; display: block; color: var(--sage-deep); font: 600 .6rem var(--lx-sans); letter-spacing: .08em; text-transform: uppercase; }
-    .df-price-custom { background: color-mix(in srgb, var(--sage-mist) 52%, #fff); }
-    .df-fixture-intro { display: grid; gap: 1rem; }
-    .df-fixture-count { display: flex; align-items: center; gap: .65rem; min-width: 0; width: max-content; text-align: left; padding: .75rem 1rem; }
-    .df-fixture-count span { margin: 0; }
-    .df-fix-grid { grid-template-columns: 1fr; }
-    .df-cta .lx-btn-wa { width: 100%; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wx-hero-media img { animation: none; }
+    .wx-cue-line { animation: none; }
+    .wxf-canvas-img, .wxf-panel, .wx-bar { transition: none; }
   }
 </style>

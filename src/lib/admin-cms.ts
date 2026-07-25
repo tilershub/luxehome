@@ -21,6 +21,7 @@ const designChildren:CmsChild[]=[
     {key:'quantity',label:'Quantity',type:'number',required:true},
     {key:'spec',label:'Specification',type:'textarea'},
     {key:'warranty_period',label:'Product warranty'},
+    {key:'reference_price_label',label:'Reference price (e.g. "LKR 96,000" or "LKR 58,000 / m²")'},
     {key:'notes',label:'Selection notes',type:'textarea'},
     {key:'image_url',label:'Fixture image',type:'image'},
     {key:'image_alt',label:'Image description'},
