@@ -7,7 +7,7 @@
     "build": "astro build",
     "verify:routes": "node scripts/verify-routes.mjs",
     "preview": "astro preview",
-    "deploy": "astro build && wrangler pages deploy",
+    "deploy": "astro build && wrangler deploy",
     "postinstall": "astro build"
   },
   "dependencies": {

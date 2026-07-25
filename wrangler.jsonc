@@ -1,8 +1,17 @@
 {
   "name": "luxehome",
+  // "main" is what makes this a Worker rather than a bucket of files. Without
+  // it wrangler uploads ./dist as static assets and deploys no server code, so
+  // every server-rendered route and every /api endpoint returns 404.
+  "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-02-22",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    // Requests that match a file are served from ./dist; everything else
+    // falls through to the Worker, which renders the page.
+    "binding": "ASSETS",
+    "not_found_handling": "none",
+    "run_worker_first": false
   }
 }
