@@ -5,9 +5,14 @@
    ============================================================ */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { LUXE_SUPABASE_KEY, LUXE_SUPABASE_URL } from './luxe-supabase';
 
-const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
-const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+// Read from exactly the project the CMS writes to. The Cloudflare Pages
+// environment still carries PUBLIC_SUPABASE_* values from an older
+// deployment, so those are deliberately not consulted here — otherwise
+// content published in the CMS would never reach the public pages.
+const SB_URL = LUXE_SUPABASE_URL;
+const SB_KEY = LUXE_SUPABASE_KEY;
 
 let _client: SupabaseClient | null = null;
 function sb(): SupabaseClient | null {
