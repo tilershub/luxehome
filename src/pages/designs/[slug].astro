@@ -4,7 +4,7 @@ import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import { getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE } from '../../lib/luxe-config';
+import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
 const { slug } = Astro.params;
@@ -63,10 +63,6 @@ if (design.slug === 'manel') {
     vanity: '/images/designs/manel/render-1.jpeg',
     water_closet: '/images/designs/manel/render-2.jpeg',
     shower: '/images/designs/manel/render-3.jpeg',
-    civil: '/images/designs/manel/sample-civil.webp',
-    supply_water: '/images/designs/manel/sample-supply-water.webp',
-    waste_drainage: '/images/designs/manel/sample-waste-drainage.webp',
-    electrical: '/images/designs/manel/sample-electrical.webp',
   } as const;
   for (const [kind, image_url] of Object.entries(samples)) {
     if (!design.drawings.some((drawing) => drawing.kind === kind)) {
@@ -108,13 +104,6 @@ const steps = AREAS.flatMap((area) => {
   }];
 });
 const renders = steps.slice(1);
-
-const TECH = [
-  { kind: 'civil',          label: 'Civil Drawing',            tag: 'Plan & levels' },
-  { kind: 'supply_water',   label: 'Water Supply Layout',      tag: 'Plumbing' },
-  { kind: 'waste_drainage', label: 'Waste & Drainage Layout',  tag: 'Plumbing' },
-  { kind: 'electrical',     label: 'Electrical Layout',        tag: 'Points & lighting' },
-] as const;
 
 const video3d = youtubeEmbed(design.video_3d_url);
 const priceTiers = design.price_tiers.length > 0
@@ -174,8 +163,6 @@ const nameStory = design.name_story
     || `The ${design.name} carries its namesake’s character into a fully documented ${collectionLabel} bathroom.`);
 
 const materialsWithPhotos = design.materials.filter((m) => m.image_url);
-const roomLength = design.room_length_m ?? (design.slug === 'manel' ? 2.5 : null);
-const roomWidth = design.room_width_m ?? (design.slug === 'manel' ? 2.0 : null);
 
 const productSchema = JSON.stringify({
   '@context': 'https://schema.org',
@@ -431,71 +418,58 @@ const productSchema = JSON.stringify({
     </section>
   )}
 
-  <!-- FLOOR PLAN -->
-  {design.min_sqm && (
-    <section id="plan" class="wx-panel-band">
-      <div class="wx-section wx-plan-grid">
-        <div>
-          <p class="wx-kicker">The room, from above</p>
-          <h2>A plan drawn for {design.min_sqm} m².</h2>
-          <p class="wx-body">The {design.name} layout is set out to the minimum fit — vanity, water closet and walk-in shower composed around a single clear line of movement.</p>
-          <div class="wx-plan-stats">
-            {roomLength && <div><strong>{roomLength}<span>m</span></strong><em>Length</em></div>}
-            {roomWidth && <div><strong>{roomWidth}<span>m</span></strong><em>Width</em></div>}
-            <div><strong>{design.min_sqm}<span>m²</span></strong><em>Min. area</em></div>
-          </div>
-        </div>
-        {design.plan_image_url ? (
-          <div class="wx-plan-canvas">
-            <img class="wx-plan-photo" src={cloudinary(design.plan_image_url, 900)} alt={`${design.name} floor plan at the minimum fit`} loading="lazy" width="900" height="1125" />
-            <small>Layout at the minimum fit — customised to your room in the design file.</small>
-          </div>
-        ) : (
-        <div class="wx-plan-canvas" aria-label={`Illustrative ${design.name} floor plan at the minimum fit`}>
-          <svg viewBox="0 0 400 500" width="100%" role="img">
-            <rect x="40" y="40" width="320" height="420" fill="none" stroke="#3B3B33" stroke-width="2"></rect>
-            <path d="M150 460 L150 400 A60 60 0 0 1 210 460 Z" fill="none" stroke="#B7B09E" stroke-width="1.2" stroke-dasharray="4 4"></path>
-            <line x1="150" y1="460" x2="210" y2="460" stroke="#F3EDE3" stroke-width="4"></line>
-            <rect x="40" y="40" width="150" height="70" fill="#DDE1D4" stroke="#5B6349" stroke-width="1.4"></rect>
-            <ellipse cx="115" cy="75" rx="34" ry="20" fill="none" stroke="#5B6349" stroke-width="1.4"></ellipse>
-            <text x="115" y="130" text-anchor="middle" font-size="13" fill="#5B6349" letter-spacing="1.5">VANITY</text>
-            <rect x="270" y="40" width="90" height="90" fill="#DDE1D4" stroke="#5B6349" stroke-width="1.4"></rect>
-            <ellipse cx="315" cy="90" rx="24" ry="30" fill="none" stroke="#5B6349" stroke-width="1.4"></ellipse>
-            <text x="315" y="152" text-anchor="middle" font-size="13" fill="#5B6349" letter-spacing="1.5">WC</text>
-            <rect x="240" y="300" width="120" height="160" fill="#DDE1D4" stroke="#5B6349" stroke-width="1.4"></rect>
-            <line x1="240" y1="300" x2="360" y2="460" stroke="#B7B09E" stroke-width="1" stroke-dasharray="3 3"></line>
-            <circle cx="340" cy="322" r="7" fill="none" stroke="#5B6349" stroke-width="1.4"></circle>
-            <text x="300" y="392" text-anchor="middle" font-size="13" fill="#5B6349" letter-spacing="1.5">SHOWER</text>
-            {roomLength && <text x="200" y="26" text-anchor="middle" font-size="12" fill="#8A897C">{roomLength} m</text>}
-            {roomWidth && <text x="24" y="255" text-anchor="middle" font-size="12" fill="#8A897C" transform="rotate(-90 24 255)">{roomWidth} m</text>}
-          </svg>
-          <small>Illustrative layout at the minimum fit — customised to your room in the design file.</small>
-        </div>
-        )}
-      </div>
-    </section>
-  )}
-
   <!-- TECHNICAL DRAWINGS -->
   <section id="drawings" class="wx-section">
     <p class="wx-kicker">Documented before construction</p>
     <h2>Technical drawings.</h2>
     <p class="wx-body">Four drawing sets — sampled here for a 2.5 m × 2 m (5 m²) room and customised to your bathroom in the design file. Illustrative only; not for construction.</p>
     <div class="wx-draw-grid">
-      {TECH.map((t) => {
-        const dr = drawingOf(t.kind);
-        return (
-          <figure class="wx-draw">
-            <div class="wx-draw-img">
-              {dr
-                ? <img src={cloudinary(dr.image_url, 800)} alt={`${design.name} — ${t.label} sample`} loading="lazy" width="800" height="600" />
-                : <div class="wx-placeholder"><span>{t.label}</span><small>Coming soon</small></div>}
-              <div class="wx-watermark" aria-hidden="true"></div>
-            </div>
-            <figcaption><span>{t.label}</span><em>{t.tag}</em></figcaption>
-          </figure>
-        );
-      })}
+      {STANDARD_DRAWINGS.map((t) => (
+        <figure class="wx-draw">
+          <div class="wx-draw-img">
+            <img src={t.image} alt={`${t.label} — sample`} loading="lazy" width="800" height="600" />
+            <div class="wx-watermark" aria-hidden="true"></div>
+          </div>
+          <figcaption><span>{t.label}</span><em>{t.tag}</em></figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <!-- WHAT YOU PAY BEFORE CONSTRUCTION -->
+  <section id="fees" class="wx-panel-band">
+    <div class="wx-section">
+      <p class="wx-kicker">Before any construction is committed</p>
+      <h2>Two steps to a documented design.</h2>
+      <p class="wx-body">Both are paid before construction and are separate from the build cost. Nothing further is collected until the scope and fixed quotation are approved.</p>
+
+      <div class="wx-fee-grid">
+        <article class="wx-fee">
+          <span class="wx-fee-step">Step one</span>
+          <strong class="wx-fee-price">LKR {PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK')}</strong>
+          <h3>{PRE_CONSTRUCTION_FEES.inspection.title}</h3>
+          <p>{PRE_CONSTRUCTION_FEES.inspection.copy}</p>
+        </article>
+
+        <article class="wx-fee wx-fee--feature">
+          <span class="wx-fee-step">Step two<b>Refundable</b></span>
+          <strong class="wx-fee-price">LKR {PRE_CONSTRUCTION_FEES.designPackage.amount.toLocaleString('en-LK')}</strong>
+          <h3>{PRE_CONSTRUCTION_FEES.designPackage.title}</h3>
+          <p>{PRE_CONSTRUCTION_FEES.designPackage.copy}</p>
+          <ul>
+            {PRE_CONSTRUCTION_FEES.designPackage.includes.map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+      </div>
+
+      <div class="wx-fee-total">
+        <div>
+          <span>Site inspection and 3D modelling together</span>
+          <small>The design package is charged in addition to the site inspection.</small>
+        </div>
+        <strong>LKR {PRE_CONSTRUCTION_FEES.combined.toLocaleString('en-LK')}</strong>
+      </div>
+      <a class="wx-fee-cta" href={inspectionHref}>Book the site inspection →</a>
     </div>
   </section>
 
@@ -816,21 +790,10 @@ const productSchema = JSON.stringify({
   .wx-mat figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 14px; }
   .wx-mat figcaption span { font: 500 21px var(--lx-serif); }
   .wx-mat figcaption em { font: normal 11px var(--lx-sans); letter-spacing: .14em; text-transform: uppercase; color: #9A998C; text-align: right; }
-  .wx-plan-photo { width: 100%; height: auto; display: block; border-radius: 2px; }
 
   .wx-chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
   .wx-chip { padding: 12px 22px; border-radius: 100px; background: #fff; font-size: 14px; color: var(--wx-muted); }
   .wx-chip strong { color: var(--wx-sage); font-weight: 500; }
-
-  /* ── Floor plan ── */
-  .wx-plan-grid { display: grid; grid-template-columns: 1fr; gap: clamp(40px, 5vw, 72px); align-items: center; }
-  .wx-plan-stats { display: flex; gap: 36px; flex-wrap: wrap; margin-top: 30px; }
-  .wx-plan-stats strong { font: 500 34px var(--lx-serif); }
-  .wx-plan-stats strong span { font-size: 20px; }
-  .wx-plan-stats em { display: block; font: normal 12px var(--lx-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--wx-faint); }
-  .wx-plan-canvas { background: var(--wx-cream); border-radius: 2px; padding: clamp(22px, 3vw, 40px); }
-  .wx-plan-canvas svg { display: block; font-family: var(--lx-sans); }
-  .wx-plan-canvas small { display: block; margin-top: 12px; font-size: 12px; color: var(--wx-faint); }
 
   /* ── Technical drawings ── */
   .wx-draw-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 26px); margin-top: 40px; }
@@ -847,6 +810,27 @@ const productSchema = JSON.stringify({
     font: 500 1.05rem/3.2 var(--lx-sans); letter-spacing: .3em; text-align: center;
     color: rgba(247,243,234,.14); word-break: break-word;
   }
+
+  /* ── Pre-construction fees ── */
+  .wx-fee-grid { display: grid; grid-template-columns: 1fr; gap: clamp(14px, 2vw, 20px); margin-top: 40px; }
+  .wx-fee { background: #fff; padding: clamp(26px, 3vw, 36px); border-top: 2px solid var(--wx-sage); }
+  .wx-fee--feature { border-top-color: var(--wx-gold); }
+  .wx-fee-step { display: flex; align-items: center; gap: 10px; font: 400 11px var(--lx-sans); letter-spacing: .2em; text-transform: uppercase; color: var(--wx-faint); }
+  .wx-fee-step b { padding: 4px 10px; border-radius: 100px; background: var(--wx-gold); color: #fff; font: 600 9px var(--lx-sans); letter-spacing: .1em; }
+  .wx-fee-price { display: block; margin: 14px 0 6px; font: 500 clamp(32px, 4vw, 44px)/1 var(--lx-serif); }
+  .wx-fee h3 { margin: 0 0 10px; font: 500 clamp(19px, 2.2vw, 23px) var(--lx-serif); }
+  .wx-fee p { margin: 0; max-width: 46ch; font-size: 15px; line-height: 1.6; color: #7A7A70; }
+  .wx-fee ul { margin: 16px 0 0; padding: 16px 0 0 18px; border-top: 1px solid #EAE4D8; }
+  .wx-fee li { margin-bottom: 6px; font-size: 14px; color: var(--wx-muted); }
+  .wx-fee-total {
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    margin-top: clamp(14px, 2vw, 20px); padding: clamp(22px, 3vw, 30px) clamp(26px, 3vw, 36px);
+    background: var(--wx-forest); color: #EDE7DA;
+  }
+  .wx-fee-total span { display: block; font: 500 clamp(17px, 2.2vw, 21px) var(--lx-serif); }
+  .wx-fee-total small { display: block; margin-top: 6px; font-size: 13px; color: #A9AF97; }
+  .wx-fee-total strong { font: 500 clamp(30px, 4vw, 40px)/1 var(--lx-serif); color: var(--wx-gold); white-space: nowrap; }
+  .wx-fee-cta { display: inline-flex; margin-top: 18px; color: var(--wx-sage); font-size: 14px; font-weight: 500; text-decoration: none; }
 
   /* ── Video ── */
   .wx-video-grid { display: grid; grid-template-columns: 1fr; gap: clamp(30px, 4vw, 56px); align-items: center; }
@@ -919,8 +903,9 @@ const productSchema = JSON.stringify({
   @media (min-width: 900px) {
     .wxf-layout { grid-template-columns: 1.1fr 1fr; }
     .wx-from-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .wx-plan-grid, .wx-video-grid, .wx-quote-grid { grid-template-columns: 1fr 1fr; }
+    .wx-video-grid, .wx-quote-grid { grid-template-columns: 1fr 1fr; }
     .wx-mat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .wx-fee-grid { grid-template-columns: 1fr 1fr; }
     .wx-name-grid { grid-template-columns: auto 1fr; gap: 56px; }
   }
   @media (max-width: 860px) {

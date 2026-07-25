@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-labelledby="title desc">
-  <title id="title">Manel sample civil plan</title><desc id="desc">Illustrative 2.5 metre by 2 metre bathroom layout.</desc>
-  <rect width="1000" height="700" fill="#f7f3eb"/><g fill="none" stroke="#2b322a" stroke-width="7"><rect x="180" y="115" width="625" height="500"/><path d="M180 500h105M285 615v-115a115 115 0 0 1 115 115"/><rect x="575" y="135" width="210" height="185"/><path d="M575 345h210v250H575z" stroke-dasharray="14 10"/><ellipse cx="675" cy="468" rx="58" ry="80"/><rect x="235" y="165" width="220" height="90" rx="12"/><ellipse cx="345" cy="210" rx="62" ry="30"/></g>
-  <g font-family="Arial,sans-serif" fill="#5c6b56"><text x="180" y="65" font-size="26" font-weight="700">MANEL · CIVIL PLAN · SAMPLE</text><text x="520" y="665" font-size="20">Illustrative only · Not for construction</text><text x="620" y="230" font-size="18">SHOWER</text><text x="632" y="475" font-size="18">WC</text><text x="305" y="215" font-size="18">VANITY</text></g>
-  <g stroke="#c9a24b" stroke-width="3" fill="none"><path d="M180 90h625m-625-12v24m625-24v24"/><path d="M835 115v500m-12-500h24m-24 500h24"/></g><g font-family="Arial" fill="#c9a24b" font-size="22"><text x="455" y="86">2.5 m</text><text x="850" y="375" transform="rotate(90 850 375)">2.0 m</text></g>
-</svg>

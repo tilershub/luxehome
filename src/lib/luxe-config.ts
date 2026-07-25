@@ -78,6 +78,51 @@ export const DEFAULT_JOURNEY_STAGES = [
   'Work begins', 'Construction', 'Clean & handover',
 ];
 
+/** The four technical drawings are one shared set, sampled for a 2.5 m × 2 m
+    room. They are not uploaded per design — every design file is drawn to the
+    same conventions, so the samples on every design page are identical. */
+export const STANDARD_DRAWINGS = [
+  { kind: 'civil',          label: 'Civil Drawing',           tag: 'Plan & levels',      image: '/images/drawings/civil.webp' },
+  { kind: 'supply_water',   label: 'Water Supply Layout',     tag: 'Plumbing',           image: '/images/drawings/supply-water.webp' },
+  { kind: 'waste_drainage', label: 'Waste & Drainage Layout', tag: 'Plumbing',           image: '/images/drawings/waste-drainage.webp' },
+  { kind: 'electrical',     label: 'Electrical Layout',       tag: 'Points & lighting',  image: '/images/drawings/electrical.webp' },
+] as const;
+
+/** What a client pays before construction. The design package is refundable
+    and is charged on top of the site inspection. */
+export const PRE_CONSTRUCTION_FEES = {
+  inspection: {
+    amount: 10_000,
+    title: 'Site inspection',
+    copy: 'We measure the room, review services, site condition and access, then recommend the design that fits.',
+  },
+  designPackage: {
+    amount: 40_000,
+    refundable: true,
+    title: 'Customised design package',
+    copy: 'Your chosen design worked up around your actual room and issued as a complete set.',
+    includes: [
+      '3D video walkthrough of your room',
+      'Civil layout',
+      'Supply water drawing',
+      'Waste & drainage layout',
+      'Electrical diagram',
+    ],
+  },
+  /** Both stages taken together. */
+  combined: 50_000,
+} as const;
+
+/** Timeline pre-seeded into a new bathroom design, edited per design after. */
+export const DEFAULT_DESIGN_TIMELINE = [
+  { week_label: 'Week 1', title: 'Strip out & make good',   description: 'Demolition, waste removal and preparing the shell.' },
+  { week_label: 'Week 2', title: 'Services first fix',      description: 'Supply water, waste, drainage and electrical routed to the approved drawings.' },
+  { week_label: 'Week 3', title: 'Waterproofing & screed',  description: 'Tanking applied and tested, falls formed to the gully.' },
+  { week_label: 'Week 4', title: 'Tiling',                  description: 'Wall and floor tiling set out from the design, with trims and niches.' },
+  { week_label: 'Week 5', title: 'Ceiling, glass & second fix', description: 'Ceiling, lighting, cubicle glass, bathware, tapware and accessories.' },
+  { week_label: 'Week 6', title: 'Testing, clean & handover',   description: 'Commissioning, snagging, clean and the written warranty record.' },
+];
+
 /** Warranty is given per task, not as one blanket cover. Each part of the
     work carries its own documented period. The one place these live. */
 export const WARRANTY_SCHEDULE: Array<{ item: string; period: string }> = [
