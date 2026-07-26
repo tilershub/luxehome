@@ -154,7 +154,7 @@
     const routeParams = new URLSearchParams(location.search);
     let tab = ['designs', 'projects', 'team'].includes(routeParams.get('tab')) ? routeParams.get('tab') : 'designs';
     let spaces = [], designs = [], projects = [], team = [];
-    let childCounts = {}; // design_id -> {drawings, fixtures, materials, timeline, faq}
+    let childCounts = {}; // design_id -> {drawings, fixtures, materials, faq}
 
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const gv = (id) => document.getElementById(id)?.value?.trim() ?? '';
@@ -241,12 +241,11 @@
       const ids = designs.map((d) => d.id);
       childCounts = {};
       if (ids.length) {
-        const [dr, fx, pt, mt, tl, fq] = await Promise.all([
+        const [dr, fx, pt, mt, fq] = await Promise.all([
           sb.from('lx_design_drawings').select('design_id').in('design_id', ids),
           sb.from('lx_design_fixtures').select('design_id').in('design_id', ids),
           sb.from('lx_design_price_tiers').select('design_id').in('design_id', ids),
           sb.from('lx_design_materials').select('design_id').in('design_id', ids),
-          sb.from('lx_design_timeline').select('design_id').in('design_id', ids),
           sb.from('lx_design_faq').select('design_id').in('design_id', ids),
         ]);
         const tally = (rows, key) => (rows ?? []).forEach((r) => {
@@ -254,7 +253,7 @@
           childCounts[r.design_id][key] = (childCounts[r.design_id][key] || 0) + 1;
         });
         tally(dr.data, 'drawings'); tally(fx.data, 'fixtures'); tally(pt.data, 'priceTiers'); tally(mt.data, 'materials');
-        tally(tl.data, 'timeline'); tally(fq.data, 'faq');
+        tally(fq.data, 'faq');
       }
     }
 
@@ -266,7 +265,7 @@
       if ((c.priceTiers || 0) >= 3) score++;
       if ((c.fixtures || 0) >= 5) score++;
       if ((c.materials || 0) >= 4) score++;
-      if (d.workflow_text && (c.timeline || 0) > 0) score++;
+      if (d.workflow_text) score++;
       if ((c.faq || 0) >= 1) score++;
       return score;
     }
@@ -389,18 +388,17 @@
         featured: false, published: false, sort_order: designs.length + 1,
       };
 
-      let children = { drawings: [], fixtures: [], priceTiers: [], materials: [], timeline: [], faq: [], additionalCostPerSqm: null };
+      let children = { drawings: [], fixtures: [], priceTiers: [], materials: [], faq: [], additionalCostPerSqm: null };
       if (!isNew) {
-        const [dr, fx, pt, mt, tl, fq, ip] = await Promise.all([
+        const [dr, fx, pt, mt, fq, ip] = await Promise.all([
           sb.from('lx_design_drawings').select('*').eq('design_id', d.id),
           sb.from('lx_design_fixtures').select('*').eq('design_id', d.id).order('sort_order'),
           sb.from('lx_design_price_tiers').select('*').eq('design_id', d.id).order('sort_order'),
           sb.from('lx_design_materials').select('*').eq('design_id', d.id).order('sort_order'),
-          sb.from('lx_design_timeline').select('*').eq('design_id', d.id).order('sort_order'),
           sb.from('lx_design_faq').select('*').eq('design_id', d.id).order('sort_order'),
           sb.from('lx_design_internal_pricing').select('additional_cost_per_sqm_lkr').eq('design_id', d.id).maybeSingle(),
         ]);
-        children = { drawings: dr.data ?? [], fixtures: fx.data ?? [], priceTiers: pt.data ?? [], materials: mt.data ?? [], timeline: tl.data ?? [], faq: fq.data ?? [], additionalCostPerSqm: ip.data?.additional_cost_per_sqm_lkr ?? null };
+        children = { drawings: dr.data ?? [], fixtures: fx.data ?? [], priceTiers: pt.data ?? [], materials: mt.data ?? [], faq: fq.data ?? [], additionalCostPerSqm: ip.data?.additional_cost_per_sqm_lkr ?? null };
       } else {
         children.materials = DEFAULT_MATERIALS.map((m, i) => ({ ...m, sort_order: i }));
       }
@@ -481,17 +479,7 @@
           <button class="add-row-btn" id="add-material">+ Add material</button>`;
 
         if (subTab === 'workflow') return `
-          <div class="fld"><label>Workflow paragraph</label><textarea id="f-workflow">${esc(d.workflow_text)}</textarea></div>
-          <div class="sub-rows" id="timeline-rows">
-            ${children.timeline.map((t, i) => `
-              <div class="sub-row" style="grid-template-columns:110px 1fr auto" data-i="${i}">
-                <input data-f="week_label" placeholder="Week 1" value="${esc(t.week_label)}" />
-                <input data-f="title" placeholder="Stage title" value="${esc(t.title)}" />
-                <button class="sub-del" data-del="${i}">✕</button>
-                <textarea data-f="description" placeholder="Description" style="grid-column:1/-1">${esc(t.description ?? '')}</textarea>
-              </div>`).join('')}
-          </div>
-          <button class="add-row-btn" id="add-timeline">+ Add timeline step</button>`;
+          <div class="fld"><label>Workflow paragraph</label><textarea id="f-workflow">${esc(d.workflow_text)}</textarea></div>`;
 
         return `
           <div class="sub-rows" id="faq-rows">
@@ -547,7 +535,6 @@
           d.video_3d_url = gv('f-video3d'); d.video_work_url = gv('f-videowork');
         } else if (subTab === 'workflow') {
           d.workflow_text = gv('f-workflow');
-          children.timeline = collectRows('timeline-rows', ['week_label', 'title', 'description']);
         } else if (subTab === 'pricing') {
           children.priceTiers = collectRows('price-tier-rows', ['label', 'sqm', 'new_price_lkr', 'renovation_price_lkr'])
             .filter((tier) => tier.label && tier.sqm && tier.new_price_lkr && tier.renovation_price_lkr)
@@ -587,7 +574,7 @@
       function render() {
         main.innerHTML = `
           <div class="ed-tabs">
-            ${[['basics','Basics'],['pricing','Size Pricing'],['media','Drawings & Media'],['fixtures','Fixtures'],['materials','Materials'],['workflow','Workflow & Timeline'],['faq','Q&A']]
+            ${[['basics','Basics'],['pricing','Size Pricing'],['media','Drawings & Media'],['fixtures','Fixtures'],['materials','Materials'],['workflow','Workflow'],['faq','Q&A']]
               .map(([k, l]) => `<button class="ed-tab ${subTab === k ? 'active' : ''}" data-sub="${k}">${l}</button>`).join('')}
           </div>
           <div id="sub-body">${subTabHtml()}</div>
@@ -615,11 +602,10 @@
           'add-price-tier': () => { collectSubTab(); children.priceTiers.push({ label: '', sqm: null, new_price_lkr: null, renovation_price_lkr: null }); render(); },
           'add-fixture':  () => { collectSubTab(); children.fixtures.push({ category: '', name: '', brand: '', model_code: '', finish: '', quantity: 1, warranty_period: '', spec: '', notes: '', image_url: '', image_alt: '', included: true }); render(); },
           'add-material': () => { collectSubTab(); children.materials.push({ category: '', brand: '', item: '' }); render(); },
-          'add-timeline': () => { collectSubTab(); children.timeline.push({ week_label: `Week ${children.timeline.length + 1}`, title: '', description: '' }); render(); },
           'add-faq':      () => { collectSubTab(); children.faq.push({ question: '', answer: '' }); render(); },
         };
         Object.entries(adders).forEach(([id, fn]) => document.getElementById(id)?.addEventListener('click', fn));
-        const listKey = { 'price-tier-rows': 'priceTiers', 'fixture-rows': 'fixtures', 'material-rows': 'materials', 'timeline-rows': 'timeline', 'faq-rows': 'faq' };
+        const listKey = { 'price-tier-rows': 'priceTiers', 'fixture-rows': 'fixtures', 'material-rows': 'materials', 'faq-rows': 'faq' };
         main.querySelectorAll('.sub-del').forEach((btn) => btn.addEventListener('click', () => {
           collectSubTab();
           const container = btn.closest('.sub-rows');
@@ -680,7 +666,6 @@
             sort_order: i,
           }))],
           ['lx_design_materials', children.materials.map((c, i) => ({ design_id: designId, category: c.category || 'Other', brand: c.brand, item: c.item, sort_order: i }))],
-          ['lx_design_timeline', children.timeline.filter((c) => c.title).map((c, i) => ({ design_id: designId, week_label: c.week_label || `Week ${i + 1}`, title: c.title, description: c.description, sort_order: i }))],
           ['lx_design_faq', children.faq.filter((c) => c.question && c.answer).map((c, i) => ({ design_id: designId, question: c.question, answer: c.answer, sort_order: i }))],
         ];
         for (const [table, rows] of tables) {

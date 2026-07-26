@@ -38,7 +38,7 @@ const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
     { category: 'Waterproofing', brand: 'Tokyo Super 2K', item: 'Waterproofing', sort_order: 2 },
     { category: 'Electrical', brand: 'ACL', item: 'Wiring & Cables', sort_order: 3 },
   ],
-  timeline: [], faq: [],
+  faq: [],
 } : null);
 if (!design) return Astro.redirect('/designs');
 
@@ -558,24 +558,12 @@ const productSchema = JSON.stringify({
     </section>
   )}
 
-  <!-- WORKFLOW + TIMELINE -->
-  {(design.workflow_text || design.timeline.length > 0) && (
+  <!-- WORKFLOW -->
+  {design.workflow_text && (
     <section class="wx-section">
       <p class="wx-kicker">From approval to handover</p>
       <h2>How it gets built.</h2>
-      {design.workflow_text && <p class="wx-body">{design.workflow_text}</p>}
-      {design.timeline.length > 0 && (
-        <ol class="wx-timeline">
-          {design.timeline.map((t) => (
-            <li>
-              <span class="wx-tl-dot" aria-hidden="true"></span>
-              <div class="wx-tl-week">{t.week_label}</div>
-              <div class="wx-tl-title">{t.title}</div>
-              {t.description && <p>{t.description}</p>}
-            </li>
-          ))}
-        </ol>
-      )}
+      <p class="wx-body">{design.workflow_text}</p>
     </section>
   )}
 
@@ -880,15 +868,6 @@ const productSchema = JSON.stringify({
   .wx-quote { margin: 0; }
   .wx-quote blockquote { margin: 0 0 26px; font: 400 clamp(24px, 3.2vw, 34px)/1.35 var(--lx-serif); }
   .wx-quote figcaption { font: 400 13px var(--lx-sans); letter-spacing: .06em; color: #A9AF97; }
-
-  /* ── Timeline ── */
-  .wx-timeline { list-style: none; position: relative; margin-top: 30px; padding-left: 1.6rem; }
-  .wx-timeline::before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1px; background: #E2DCCF; }
-  .wx-timeline li { position: relative; padding: 0 0 1.4rem; }
-  .wx-tl-dot { position: absolute; left: -1.6rem; top: .45rem; width: 13px; height: 13px; border-radius: 50%; background: var(--wx-gold); border: 3px solid var(--wx-cream); }
-  .wx-tl-week { font: 500 .7rem var(--lx-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--wx-gold); }
-  .wx-tl-title { font: 600 1.2rem var(--lx-serif); }
-  .wx-timeline p { max-width: 56ch; font-size: .88rem; color: var(--wx-muted); }
 
   /* ── FAQ ── */
   .wx-faq { margin-top: 26px; }

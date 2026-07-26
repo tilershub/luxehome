@@ -222,16 +222,6 @@ export const WHY_LUXEHOME = [
   'Workmanship warranty',
 ];
 
-/** Timeline pre-seeded into a new bathroom design, edited per design after. */
-export const DEFAULT_DESIGN_TIMELINE = [
-  { week_label: 'Week 1', title: 'Strip out & make good',   description: 'Demolition, waste removal and preparing the shell.' },
-  { week_label: 'Week 2', title: 'Services first fix',      description: 'Supply water, waste, drainage and electrical routed to the approved drawings.' },
-  { week_label: 'Week 3', title: 'Waterproofing & screed',  description: 'Tanking applied and tested, falls formed to the gully.' },
-  { week_label: 'Week 4', title: 'Tiling',                  description: 'Wall and floor tiling set out from the design, with trims and niches.' },
-  { week_label: 'Week 5', title: 'Ceiling, glass & second fix', description: 'Ceiling, lighting, cubicle glass, bathware, tapware and accessories.' },
-  { week_label: 'Week 6', title: 'Testing, clean & handover',   description: 'Commissioning, snagging, clean and the written warranty record.' },
-];
-
 /** Warranty is given per task, not as one blanket cover. Each part of the
     work carries its own documented period. The one place these live. */
 export const WARRANTY_SCHEDULE: Array<{ item: string; period: string }> = [
@@ -273,6 +263,6 @@ export const COMPLETENESS_CHECKS = [
   { key: 'pricing',   label: '3 size prices' },
   { key: 'fixtures',  label: '≥5 fixtures' },
   { key: 'materials', label: '≥4 materials' },
-  { key: 'workflow',  label: 'workflow + timeline' },
+  { key: 'workflow',  label: 'workflow note' },
   { key: 'faq',       label: '≥1 FAQ' },
 ] as const;
