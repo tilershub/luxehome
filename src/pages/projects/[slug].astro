@@ -2,7 +2,7 @@
 export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
-import { getProjectBySlug, youtubeEmbed, type ProjectFull } from '../../lib/luxe';
+import { getProjectBySlug, youtubeEmbed, isYouTubeShort, type ProjectFull } from '../../lib/luxe';
 import { cloudinary } from '../../lib/luxe-config';
 
 const { slug } = Astro.params;
@@ -122,6 +122,7 @@ const reviewSchema = project.rating ? JSON.stringify({
             title={`${project.title} — Episode 01`}
             embedUrl={episode1}
             coverImage={cloudinary(project.before_image_url || projectVideoCover, 700)}
+            portrait={isYouTubeShort(project.episode_1_url)}
             eyebrow="Old space to 3D design"
             description="Tap to watch episode one in its original vertical format."
           />
@@ -131,6 +132,7 @@ const reviewSchema = project.rating ? JSON.stringify({
             title={`${project.title} — Episode 02`}
             embedUrl={episode2}
             coverImage={cloudinary(project.after_image_url || projectVideoCover, 700)}
+            portrait={isYouTubeShort(project.episode_2_url)}
             eyebrow="Completed bathroom tour"
             description="Tap to watch the final reveal in its original vertical format."
           />
@@ -157,6 +159,7 @@ const reviewSchema = project.rating ? JSON.stringify({
             title={`${project.title} — Project Walkthrough`}
             embedUrl={video}
             coverImage={cloudinary(projectVideoCover, 700)}
+            portrait={isYouTubeShort(project.video_url)}
             eyebrow="Project walkthrough"
             description="Tap to watch the vertical project walkthrough."
           />
