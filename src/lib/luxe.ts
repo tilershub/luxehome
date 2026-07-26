@@ -26,7 +26,7 @@ function sb(): SupabaseClient | null {
 export type Collection = 'standard' | 'premium' | 'signature';
 /** Per-design room photography. The four technical drawings are a shared
     preset (STANDARD_DRAWINGS) and are not stored per design. */
-export type DrawingKind = 'vanity' | 'water_closet' | 'shower' | 'ceiling';
+export type DrawingKind = 'vanity' | 'water_closet' | 'shower' | 'shower_cubicle' | 'ceiling';
 
 export interface Space {
   id: string; slug: string; name: string;

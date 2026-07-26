@@ -14,7 +14,7 @@ const designChildren:CmsChild[]=[
     {key:'sort_order',label:'Display order',type:'number'},
   ]},
   {label:'Internal pricing (admin only)',table:'lx_design_internal_pricing',foreignKey:'design_id',titleKey:'additional_cost_per_sqm_lkr',fields:[{key:'additional_cost_per_sqm_lkr',label:'Additional cost per m² (LKR) — hidden from website',type:'number',required:true},{key:'sort_order',label:'Display order',type:'number'}]},
-  {label:'Room images (vanity · water closet · shower · ceiling)',table:'lx_design_drawings',foreignKey:'design_id',titleKey:'kind',fields:[{key:'kind',label:'Image slot',type:'select',options:['vanity','water_closet','shower','ceiling']},{key:'image_url',label:'Image',type:'image',required:true},{key:'caption',label:'Walk-in caption (area images only, e.g. “Stone and warm mirror light”)'},{key:'sort_order',label:'Display order',type:'number'}]},
+  {label:'Room images (vanity · water closet · shower · shower cubicle · ceiling)',table:'lx_design_drawings',foreignKey:'design_id',titleKey:'kind',fields:[{key:'kind',label:'Image slot',type:'select',options:['vanity','water_closet','shower','shower_cubicle','ceiling']},{key:'image_url',label:'Image',type:'image',required:true},{key:'caption',label:'Walk-in caption (area images only, e.g. “Stone and warm mirror light”)'},{key:'sort_order',label:'Display order',type:'number'}]},
   {label:'Fixtures & finishes',table:'lx_design_fixtures',foreignKey:'design_id',titleKey:'name',fields:[
     {key:'category',label:'Category',type:'datalist',required:true},
     {key:'name',label:'Fixture / finish name',required:true},
