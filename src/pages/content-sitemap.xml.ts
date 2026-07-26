@@ -24,6 +24,7 @@ export const GET: APIRoute = async () => {
     entry('/designs'),
     entry('/projects'),
     entry('/blog'),
+    entry('/how-we-build'),
     ...designs
       .filter((design) => design.cover_image_url)
       .map((design) => entry(`/designs/${design.slug}`)),

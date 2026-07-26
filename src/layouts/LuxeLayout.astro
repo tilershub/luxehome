@@ -2,7 +2,7 @@
 /* LUXEhome catalogue layout — the new brand system:
    cream/sage/gold palette · Cormorant Garamond + Jost + Noto Sans Sinhala.
    Keeps the site's Meta Pixel, Contact-event tracking, and SEO plumbing. */
-import { WHATSAPP_NUMBER } from '../lib/luxe-config';
+import { WHATSAPP_NUMBER, GA_MEASUREMENT_IDS } from '../lib/luxe-config';
 
 interface Props {
   title?: string;
@@ -110,6 +110,33 @@ Astro.response.headers.set(
       <img height="1" width="1" style="display:none"
         src="https://www.facebook.com/tr?id=1904211696933513&ev=PageView&noscript=1" />
     </noscript>
+
+    <!-- Google Analytics 4. window.gtag and dataLayer exist immediately, so an
+         event fired before gtag.js arrives is queued rather than dropped — the
+         previous install defined gtag inside the script's onload, leaving
+         window.gtag undefined and silently discarding every conversion event.
+         The gtag.js fetch itself stays off the critical path. -->
+    <script is:inline define:vars={{ gaIds: GA_MEASUREMENT_IDS }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { window.dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      // Every configured property receives the same pageviews and events.
+      gaIds.forEach(function (id) { gtag('config', id); });
+      (function () {
+        function loadGa() {
+          if (window.__gaLoaded || !gaIds.length) return;
+          window.__gaLoaded = true;
+          var s = document.createElement('script');
+          s.async = true;
+          // One gtag.js serves every configured property.
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaIds[0];
+          document.head.appendChild(s);
+        }
+        var idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };
+        window.addEventListener('load', function () { idle(loadGa); });
+      })();
+    </script>
   </head>
   <body class="luxe-body">
     {!bare && (
@@ -138,6 +165,7 @@ Astro.response.headers.set(
         <a href="/designs">Bathroom designs</a>
         <a href="/projects">Projects</a>
         <a href="/how-it-works">How it works</a>
+        <a href="/how-we-build">How we build</a>
         <a href="/pricing-guide">Pricing</a>
         <a href="/blog">Journal</a>
         <a href="/about">About</a>
@@ -163,6 +191,7 @@ Astro.response.headers.set(
             <a href="/projects">Projects</a>
             <a href="/blog">Journal</a>
             <a href="/how-it-works">How it works</a>
+            <a href="/how-we-build">How we build</a>
             <a href="/materials-brands">Materials</a>
             <a href="/pricing-guide">Pricing</a>
             <a href="/team">Team</a>

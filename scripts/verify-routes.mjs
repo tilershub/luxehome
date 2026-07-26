@@ -20,7 +20,7 @@ const ssrRoutes = [
   '/', '/designs', '/designs/[slug]', '/projects', '/projects/[slug]',
   '/bathroom-designs', '/kitchen-designs', '/staircase-designs', '/floor-designs',
   '/shop', '/shop/[slug]', '/blog', '/blog/[slug]', '/[page]',
-  '/team', '/contact', '/book-site-inspection', '/start',
+  '/team', '/contact', '/book-site-inspection', '/start', '/how-we-build',
   '/content-sitemap.xml', '/api/meta-capi',
 ];
 

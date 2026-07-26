@@ -1,0 +1,142 @@
+---
+export const prerender = false;
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+import KeyHighlights from '../components/luxe/KeyHighlights.astro';
+import { BUILD_STAGES, WHY_LUXEHOME, WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
+
+const highlights = [
+  { value: String(BUILD_STAGES.length), title: 'Documented stages', copy: 'From consultation to handover, every project follows the same system.' },
+  { value: '24–48 hrs', title: 'Flood test', copy: 'Waterproofing is proven before a single tile is laid.' },
+  { value: String(WHY_LUXEHOME.length), title: 'Quality commitments', copy: 'Planning, drawings, workmanship, inspection and warranty.' },
+  { value: WARRANTY_SCHEDULE[0].period, title: 'Longest warranty', copy: `${WARRANTY_SCHEDULE[0].item}. Every task carries its own written period.` },
+];
+---
+
+<LuxeLayout
+  title="Built the LUXEhome Way — Our 12-Stage Bathroom Construction Process"
+  description="Every LUXEhome bathroom follows the same proven construction system: consultation, 3D design and technical drawings, material procurement, site protection, civil works, plumbing and electrical, premium waterproofing with a 24–48 hour flood test, precision tiling, ceiling and lighting, fixtures, final quality inspection and handover."
+>
+  <section class="hb-hero">
+    <p class="hb-kicker">Built the LUXEhome Way</p>
+    <h1>Every bathroom follows our proven construction system.</h1>
+    <p class="hb-lead">
+      From the first site inspection to the final quality check, every LUXEhome project
+      follows a carefully planned process that ensures outstanding craftsmanship,
+      long-term durability, and a luxury finish.
+    </p>
+    <div class="hb-hero-actions">
+      <a class="lx-btn-wa" href="/book-site-inspection">Book site inspection · LKR {PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK')}</a>
+      <a class="lx-btn-ghost" href="/designs">Explore bathroom designs</a>
+    </div>
+  </section>
+
+  <KeyHighlights items={highlights} />
+
+  <section class="hb-stages">
+    <ol>
+      {BUILD_STAGES.map((stage) => (
+        <li class="hb-stage lxr" id={`stage-${stage.n}`}>
+          <div class="hb-stage-index"><span>{stage.n}</span></div>
+          <div class="hb-stage-body">
+            <h2>{stage.title}</h2>
+            <p class="hb-stage-lead">{stage.lead}</p>
+            {stage.points && (
+              <ul class="hb-points">
+                {stage.points.map((point) => <li>{point}</li>)}
+              </ul>
+            )}
+            {stage.close && <p class="hb-stage-close">{stage.close}</p>}
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="hb-why">
+    <div class="hb-why-inner">
+      <div class="lxr">
+        <p class="hb-kicker">Why homeowners choose LUXEhome</p>
+        <h2>The standard behind every stage.</h2>
+      </div>
+      <ul class="lxr">
+        {WHY_LUXEHOME.map((reason) => <li>{reason}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="hb-warranty lxr">
+    <div>
+      <p class="hb-kicker">What it is worth afterwards</p>
+      <h2>Every task carries a written period.</h2>
+      <p>The work above is what the warranty is based on. Each part is recorded against your project at handover.</p>
+    </div>
+    <dl>
+      {WARRANTY_SCHEDULE.map((w) => (
+        <div><dt>{w.item}</dt><dd>{w.period}</dd></div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="hb-cta lxr">
+    <p class="hb-kicker">The practical next step</p>
+    <h2>Start with the room you actually have.</h2>
+    <p>We measure it, review the services and site condition, and confirm which design fits before anything is committed.</p>
+    <a class="lx-btn-wa" href="/book-site-inspection">Book site inspection · LKR {PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK')}</a>
+  </section>
+</LuxeLayout>
+
+<style>
+  .hb-hero, .hb-stages, .hb-warranty, .hb-cta, .hb-why-inner {
+    --hb-ink: #3B3B33; --hb-muted: #57564C; --hb-faint: #8A897C;
+    --hb-sage: #5B6349; --hb-gold: #C6A363; --hb-line: #E2DCCF;
+    max-width: 1240px; margin: 0 auto; padding-inline: clamp(20px, 5vw, 64px);
+  }
+  .hb-kicker { margin-bottom: 14px; font: 400 12px var(--lx-sans); letter-spacing: .22em; text-transform: uppercase; color: var(--hb-sage); }
+
+  .hb-hero { padding-block: clamp(56px, 9vh, 104px) clamp(36px, 6vh, 60px); }
+  .hb-hero h1 { margin: 0 0 20px; max-width: 20ch; font: 500 clamp(38px, 6.4vw, 72px)/1.02 var(--lx-serif); }
+  .hb-lead { max-width: 58ch; font-size: clamp(16px, 2vw, 19px); line-height: 1.7; color: var(--hb-muted); }
+  .hb-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+
+  .hb-stages { padding-block: clamp(46px, 7vh, 80px); }
+  .hb-stages ol { margin: 0; padding: 0; list-style: none; }
+  .hb-stage { display: grid; grid-template-columns: 1fr; gap: 12px; padding: clamp(26px, 4vw, 42px) 0; border-top: 1px solid var(--hb-line); scroll-margin-top: 90px; }
+  .hb-stage:last-child { border-bottom: 1px solid var(--hb-line); }
+  .hb-stage-index span { display: block; font: 500 clamp(30px, 4vw, 46px)/1 var(--lx-serif); color: var(--hb-gold); }
+  .hb-stage-body h2 { margin: 0 0 10px; font: 500 clamp(23px, 3vw, 32px) var(--lx-serif); }
+  .hb-stage-lead { margin: 0; max-width: 60ch; font-size: 15px; line-height: 1.75; color: var(--hb-muted); }
+  .hb-points { display: grid; grid-template-columns: 1fr; gap: 7px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .hb-points li { position: relative; padding-left: 24px; font-size: 14px; color: var(--hb-muted); }
+  .hb-points li::before { content: '✓'; position: absolute; left: 0; top: -1px; color: var(--hb-gold); font-size: 13px; }
+  .hb-stage-close { margin: 18px 0 0; max-width: 56ch; font: italic 400 15px/1.7 var(--lx-serif); color: var(--hb-sage); }
+
+  .hb-why { background: #EBE4D8; padding-block: clamp(46px, 7vh, 80px); margin-block: clamp(10px, 2vw, 20px); }
+  .hb-why-inner { display: grid; grid-template-columns: 1fr; gap: clamp(24px, 4vw, 48px); }
+  .hb-why h2 { margin: 0; max-width: 18ch; font: 500 clamp(26px, 3.8vw, 40px)/1.05 var(--lx-serif); }
+  .hb-why ul { display: grid; grid-template-columns: 1fr; gap: 10px 28px; margin: 0; padding: 0; list-style: none; }
+  .hb-why li { position: relative; padding-left: 26px; font-size: 15px; color: var(--hb-muted); }
+  .hb-why li::before { content: '✔'; position: absolute; left: 0; top: 0; color: var(--hb-gold); font-size: 13px; }
+
+  .hb-warranty { display: grid; grid-template-columns: 1fr; gap: clamp(24px, 4vw, 48px); padding-block: clamp(40px, 6vh, 68px); }
+  .hb-warranty h2 { margin: 0 0 12px; font: 500 clamp(26px, 3.6vw, 38px)/1.05 var(--lx-serif); }
+  .hb-warranty > div > p { max-width: 44ch; font-size: 15px; line-height: 1.7; color: var(--hb-muted); }
+  .hb-warranty dl { margin: 0; background: #fff; border-left: 2px solid var(--hb-gold); padding: clamp(16px, 2.4vw, 24px) clamp(22px, 3vw, 32px); }
+  .hb-warranty dl > div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid #EAE4D8; }
+  .hb-warranty dl > div:last-child { border-bottom: 0; }
+  .hb-warranty dt { font-size: 15px; color: var(--hb-muted); }
+  .hb-warranty dd { margin: 0; font: 500 18px var(--lx-serif); white-space: nowrap; }
+
+  .hb-cta { padding-block: clamp(40px, 6vh, 70px) clamp(64px, 10vh, 110px); text-align: center; }
+  .hb-cta h2 { margin: 0 0 14px; font: 500 clamp(28px, 4.6vw, 46px)/1.05 var(--lx-serif); }
+  .hb-cta > p { max-width: 50ch; margin: 0 auto 26px; font-size: clamp(15px, 1.9vw, 18px); line-height: 1.7; color: var(--hb-muted); }
+
+  @media (min-width: 700px) {
+    .hb-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hb-why ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 900px) {
+    .hb-stage { grid-template-columns: minmax(90px, 130px) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); }
+    .hb-warranty { grid-template-columns: .9fr 1.1fr; align-items: start; }
+    .hb-why-inner { grid-template-columns: .8fr 1.2fr; align-items: start; }
+  }
+</style>

@@ -1,0 +1,101 @@
+---
+/* A compact band of the few facts that decide a bathroom project.
+   Used on the home page for the brand, and on each design page for that
+   design — where the CMS "Card highlights" field overrides the defaults. */
+export interface Highlight {
+  /** Large figure — "15 yrs", "LKR 2.06M", "5 m²". Optional. */
+  value?: string | null;
+  title: string;
+  copy?: string | null;
+}
+
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  items: Highlight[];
+  tone?: 'light' | 'dark';
+}
+
+const { eyebrow, title, items, tone = 'light' } = Astro.props;
+const shown = items.filter((item) => item && item.title);
+---
+
+{shown.length > 0 && (
+  <section class:list={['kh', { 'kh--dark': tone === 'dark' }]} aria-label={title ?? 'Key highlights'}>
+    <div class="kh-inner">
+      {(eyebrow || title) && (
+        <div class="kh-head lxr">
+          {eyebrow && <p class="kh-eyebrow">{eyebrow}</p>}
+          {title && <h2>{title}</h2>}
+        </div>
+      )}
+      <ul class="kh-grid">
+        {shown.map((item) => (
+          <li class="kh-item lxr">
+            {item.value && <strong>{item.value}</strong>}
+            <h3>{item.title}</h3>
+            {item.copy && <p>{item.copy}</p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  .kh {
+    --kh-ink: #3B3B33;
+    --kh-muted: #6E6E63;
+    --kh-line: #E2DCCF;
+    --kh-accent: #5B6349;
+    --kh-gold: #C6A363;
+    background: #EBE4D8;
+    padding: clamp(46px, 7vh, 78px) clamp(20px, 5vw, 64px);
+    color: var(--kh-ink);
+  }
+  .kh--dark {
+    --kh-ink: #EDE7DA;
+    --kh-muted: #A9AF97;
+    --kh-line: rgba(237,231,218,.16);
+    --kh-accent: #A9AF97;
+    background: #262B23;
+  }
+
+  .kh-inner { max-width: 1240px; margin: 0 auto; }
+  .kh-head { margin-bottom: clamp(24px, 4vw, 40px); }
+  .kh-eyebrow {
+    margin-bottom: 12px;
+    font: 400 12px var(--lx-sans);
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--kh-accent);
+  }
+  .kh-head h2 { margin: 0; max-width: 22ch; font: 500 clamp(28px, 4.4vw, 46px)/1.05 var(--lx-serif); }
+
+  .kh-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--kh-line);
+  }
+  .kh-item { padding: 22px 0; border-bottom: 1px solid var(--kh-line); }
+  .kh-item strong {
+    display: block;
+    margin-bottom: 8px;
+    font: 500 clamp(30px, 3.6vw, 42px)/1 var(--lx-serif);
+    color: var(--kh-gold);
+  }
+  .kh-item h3 { margin: 0; font: 500 clamp(17px, 1.9vw, 20px) var(--lx-serif); }
+  .kh-item p { margin: 8px 0 0; max-width: 34ch; font-size: 14px; line-height: 1.6; color: var(--kh-muted); }
+
+  @media (min-width: 700px) {
+    .kh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(24px, 4vw, 56px); }
+  }
+  @media (min-width: 1000px) {
+    .kh-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .kh-item { padding: 26px 0 30px; }
+  }
+</style>

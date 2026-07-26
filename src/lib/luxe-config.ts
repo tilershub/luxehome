@@ -5,6 +5,10 @@
 /** The one place the WhatsApp number lives. */
 export const WHATSAPP_NUMBER = '94774503744';
 
+/** GA4 properties tagged on every public page through LuxeLayout. Each entry
+    gets its own gtag config call, so add an ID here to tag a second property. */
+export const GA_MEASUREMENT_IDS = ['G-XKXFPFS3VN'];
+
 export function waLink(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
@@ -120,6 +124,92 @@ export const PRE_CONSTRUCTION_FEES = {
   /** Both stages taken together. */
   combined: 50_000,
 } as const;
+
+/** "Built the LUXEhome Way" — the construction system every bathroom follows.
+    The dedicated page renders these in full; the BuildProcess highlight on the
+    home and design pages renders just the titles, so the two cannot drift. */
+export const BUILD_STAGES: Array<{
+  n: string; title: string; lead: string; points?: string[]; close?: string;
+}> = [
+  {
+    n: '01', title: 'Consultation & Site Inspection',
+    lead: 'We inspect your home, understand your requirements, take precise measurements, and identify technical requirements before any design work begins.',
+  },
+  {
+    n: '02', title: 'Design & Planning',
+    lead: 'We create a detailed 3D design and prepare the complete technical drawings including:',
+    points: ['Plumbing layout', 'Electrical layout', 'Tile layout', 'Ceiling layout', 'Material schedule'],
+    close: 'Everything is finalised before construction starts.',
+  },
+  {
+    n: '03', title: 'Material Procurement',
+    lead: 'Premium materials are sourced and quality checked.',
+    close: 'We carefully schedule deliveries so every stage has the correct materials at the right time.',
+  },
+  {
+    n: '04', title: 'Site Protection & Preparation',
+    lead: 'Your home is protected before work begins.',
+    points: ['Floor protection', 'Dust control', 'Material storage', 'Safety setup'],
+  },
+  {
+    n: '05', title: 'Demolition & Civil Works',
+    lead: 'Existing finishes are removed safely. This stage includes:',
+    points: ['Demolition', 'Debris removal', 'Floor correction', 'Wall plastering', 'Dummy walls', 'Structural modifications'],
+  },
+  {
+    n: '06', title: 'Plumbing & Electrical',
+    lead: 'Hidden systems are installed before surfaces are closed. Including:',
+    points: ['Water supply', 'Drainage', 'Hot water lines', 'Electrical wiring', 'Lighting preparation', 'Exhaust preparation'],
+    close: 'Every system is pressure tested before proceeding.',
+  },
+  {
+    n: '07', title: 'Premium Waterproofing',
+    lead: 'The most critical stage of the project. Our waterproofing system includes:',
+    points: ['Surface preparation', 'Corner reinforcement', 'Pipe penetration sealing', 'Multiple waterproof coats', 'Reinforcement mesh', '24–48 hour flood test'],
+    close: 'Only after passing the flood test does tiling begin.',
+  },
+  {
+    n: '08', title: 'Precision Tiling',
+    lead: 'Large-format tile installation using professional techniques.',
+    points: ['Laser alignment', 'Tile levelling system', 'Premium adhesive', 'Precision cutting', 'Premium grout', 'Silicone finishing'],
+    close: 'Every tile is installed for perfect alignment and long-term durability.',
+  },
+  {
+    n: '09', title: 'Ceiling & Lighting',
+    lead: 'We complete the architectural finishes. Including:',
+    points: ['Ceiling installation', 'Painting', 'LED lighting', 'Ambient lighting', 'Ventilation', 'Switches & sockets'],
+  },
+  {
+    n: '10', title: 'Fixture Installation',
+    lead: 'Premium bathroom fixtures are installed. Including:',
+    points: ['Vanity', 'Basin', 'Water closet', 'Shower system', 'Shower cubicle', 'Mirror', 'Accessories'],
+    close: 'Everything is levelled, sealed, and tested.',
+  },
+  {
+    n: '11', title: 'Final Quality Inspection',
+    lead: 'Before handover, every bathroom goes through our internal quality checklist. We inspect:',
+    points: ['Waterproofing', 'Tile alignment', 'Grouting', 'Silicone', 'Plumbing', 'Electrical', 'Water pressure', 'Drainage', 'Cleaning', 'Finish quality'],
+  },
+  {
+    n: '12', title: 'Handover & Warranty',
+    lead: 'Your bathroom is professionally cleaned and handed over. You’ll receive:',
+    points: ['Project walkthrough', 'Maintenance guidance', 'Warranty information', 'Care instructions'],
+  },
+];
+
+/** Why homeowners choose LUXEhome — shown under the construction system. */
+export const WHY_LUXEHOME = [
+  'Professional planning before construction',
+  'Technical drawings for every project',
+  'Premium waterproofing system',
+  'Precision workmanship',
+  'High-quality materials',
+  'Dedicated project management',
+  'Strict quality inspections',
+  'Clean, organised worksites',
+  'Transparent communication',
+  'Workmanship warranty',
+];
 
 /** Timeline pre-seeded into a new bathroom design, edited per design after. */
 export const DEFAULT_DESIGN_TIMELINE = [
