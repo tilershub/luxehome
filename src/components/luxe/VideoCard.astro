@@ -111,12 +111,14 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
         <div class="lv-poster" data-video-poster style={`background-image:url(${coverImage})`}>
           <span class="lv-poster-spinner" aria-hidden="true"></span>
         </div>
-        {/* Shown only if the embed never reports back — for example a video
-            whose owner has disabled embedding. Leaving is then the visitor's
-            explicit choice rather than an accident. */}
+        {/* Shown only if the embed never reports back. The visitor is never
+            sent to YouTube; the design's own render stays on screen and the
+            next step is offered instead. */}
         <div class="lv-fallback" data-video-fallback hidden>
-          <p>This walkthrough cannot play here.</p>
-          <a href={`https://www.youtube.com/watch?v=${videoId}`} target="_blank" rel="noopener noreferrer">Open on YouTube</a>
+          <p>The walkthrough is taking a moment.</p>
+          <small>Every view of this design is on the page below.</small>
+          <button type="button" data-video-retry>Try again</button>
+          <a href="/book-site-inspection">Book a site inspection</a>
         </div>
       </div>
     </div>
@@ -226,6 +228,18 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
       opener.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
       closer.focus();
+    });
+
+    const retry = card.querySelector<HTMLButtonElement>('[data-video-retry]');
+    retry?.addEventListener('click', () => {
+      const src = opener.dataset.videoSrc;
+      if (!src || !iframe) return;
+      if (fallback) fallback.hidden = true;
+      heardFromPlayer = false;
+      iframe.src = src;
+      embedTimer = window.setTimeout(() => {
+        if (!heardFromPlayer && fallback) fallback.hidden = false;
+      }, 3200);
     });
 
     /* Every tap inside the frame lands here, never on YouTube. */
@@ -423,21 +437,26 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
     justify-items: center;
     gap: 14px;
     padding: 24px;
-    background: rgba(14,18,14,.92);
+    background: rgba(14,18,14,.82);
     text-align: center;
   }
-  .lv-fallback p { margin: 0; color: rgba(247,243,235,.86); font: 500 1.05rem var(--lx-serif); }
+  .lv-fallback p { margin: 0; color: rgba(247,243,235,.92); font: 500 1.1rem var(--lx-serif); }
+  .lv-fallback small { color: rgba(247,243,235,.6); font-size: .76rem; }
+  .lv-fallback button,
   .lv-fallback a {
     padding: 12px 22px;
     border: 1px solid rgba(247,243,235,.4);
     border-radius: 100px;
+    background: transparent;
     color: #EDE7DA;
     font: 500 .74rem var(--lx-sans);
     letter-spacing: .1em;
     text-transform: uppercase;
     text-decoration: none;
+    cursor: pointer;
   }
-  .lv-fallback a:hover { background: rgba(247,243,235,.14); color: #EDE7DA; }
+  .lv-fallback a { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .lv-fallback button:hover { background: rgba(247,243,235,.14); }
 
   .lv-poster {
     position: absolute;
