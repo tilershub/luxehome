@@ -1,0 +1,118 @@
+<script>
+  const initialiseSwipeCarousels = () => {
+    document.querySelectorAll<HTMLElement>('[data-swipe-carousel]').forEach((carousel) => {
+      if (carousel.dataset.swipeReady === 'true') return;
+
+      const track = carousel.querySelector<HTMLElement>('[data-swipe-track]');
+      const slides = track
+        ? Array.from(track.querySelectorAll<HTMLElement>('[data-swipe-slide]'))
+        : [];
+      const dots = Array.from(carousel.querySelectorAll<HTMLButtonElement>('[data-swipe-dot]'));
+
+      if (!track || slides.length < 2 || dots.length !== slides.length) return;
+
+      carousel.dataset.swipeReady = 'true';
+      let activeIndex = -1;
+      let scrollFrame = 0;
+
+      const setActive = (nextIndex: number) => {
+        if (nextIndex === activeIndex) return;
+        activeIndex = nextIndex;
+
+        dots.forEach((dot, index) => {
+          const isActive = index === nextIndex;
+          dot.classList.toggle('is-active', isActive);
+          if (isActive) {
+            dot.setAttribute('aria-current', 'true');
+          } else {
+            dot.removeAttribute('aria-current');
+          }
+        });
+      };
+
+      const updateFromScroll = () => {
+        const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+        if (maxScroll === 0) {
+          setActive(0);
+          return;
+        }
+
+        const progress = Math.min(1, Math.max(0, track.scrollLeft / maxScroll));
+        setActive(Math.round(progress * (slides.length - 1)));
+      };
+
+      track.addEventListener('scroll', () => {
+        window.cancelAnimationFrame(scrollFrame);
+        scrollFrame = window.requestAnimationFrame(updateFromScroll);
+      }, { passive: true });
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          if (!slides[index]) return;
+
+          const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+          const left = maxScroll * (index / (slides.length - 1));
+          const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            ? 'auto'
+            : 'smooth';
+
+          setActive(index);
+          track.scrollTo({ left, behavior });
+        });
+      });
+
+      setActive(0);
+      window.requestAnimationFrame(updateFromScroll);
+    });
+  };
+
+  initialiseSwipeCarousels();
+  document.addEventListener('astro:page-load', initialiseSwipeCarousels);
+</script>
+
+<style is:global>
+  [data-swipe-track] {
+    scrollbar-width: none;
+  }
+
+  [data-swipe-track]::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-swipe-dots] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+    min-height: 1.75rem;
+  }
+
+  [data-swipe-dot] {
+    width: 7px;
+    height: 7px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    appearance: none;
+    background: var(--swipe-dot-muted, #C9C5BB);
+    cursor: pointer;
+    transition: background-color .2s ease, transform .2s ease;
+  }
+
+  [data-swipe-dot].is-active {
+    background: var(--swipe-dot-active, #5B6349);
+    transform: scale(1.25);
+  }
+
+  [data-swipe-dot]:focus-visible {
+    outline: 2px solid var(--swipe-dot-focus, #C6A363);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-swipe-dot] {
+      transition: none;
+    }
+  }
+</style>
