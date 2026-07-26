@@ -5,7 +5,7 @@ import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import KeyHighlights from '../../components/luxe/KeyHighlights.astro';
 import BuildProcess from '../../components/luxe/BuildProcess.astro';
-import { getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
+import { getDesignBySlug, getProjects, youtubeEmbed, isYouTubeShort, type DesignFixture, type DesignFull } from '../../lib/luxe';
 import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
@@ -501,6 +501,7 @@ const productSchema = JSON.stringify({
           title={`${design.name} 3D Walkthrough`}
           embedUrl={video3d}
           coverImage={cloudinary(design.cover_image_url, 700)}
+          portrait={isYouTubeShort(design.video_3d_url)}
           eyebrow="3D walkthrough"
           description="Tap to watch the complete vertical walkthrough."
         />

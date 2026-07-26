@@ -247,6 +247,13 @@ export async function getProductBySlug(slug: string): Promise<LuxeProduct | null
   return data as LuxeProduct | null;
 }
 
+/** True when the URL is a YouTube Short, i.e. shot vertically. The embed
+    player is always 16:9, so a Short has to be cropped to fill a portrait
+    frame rather than sat inside one. */
+export function isYouTubeShort(url: string | null | undefined): boolean {
+  return Boolean(url && url.includes('/shorts/'));
+}
+
 /** youtube-nocookie embed URL from any YouTube URL/ID, or null. */
 export function youtubeEmbed(url: string | null | undefined): string | null {
   if (!url) return null;

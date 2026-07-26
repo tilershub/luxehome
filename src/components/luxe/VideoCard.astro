@@ -6,6 +6,10 @@ interface Props {
   eyebrow?: string;
   duration?: string;
   description?: string;
+  /** YouTube Shorts are shot vertically. The embed player is always 16:9, so
+      a Short must be scaled up and cropped to fill a portrait frame — left as
+      it comes, it sits as a tiny pillarboxed strip at the top of a black box. */
+  portrait?: boolean;
 }
 
 const {
@@ -15,11 +19,31 @@ const {
   eyebrow = '3D walkthrough',
   duration,
   description = 'Open the vertical walkthrough without leaving this design.',
+  portrait = true,
 } = Astro.props;
 
 const dialogId = `video-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
-const separator = embedUrl.includes('?') ? '&' : '?';
-const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
+const videoId = embedUrl.match(/embed\/([a-zA-Z0-9_-]{11})/)?.[1] ?? '';
+
+/* Muted autoplay is the only kind iOS honours, so the video starts the moment
+   the sheet opens instead of handing over to YouTube's own red play button.
+   Sound is one tap away. Chrome is suppressed: no related videos, no
+   annotations, no branding, and no controls to be cropped by the fill. */
+const params = new URLSearchParams({
+  autoplay: '1',
+  mute: '1',
+  playsinline: '1',
+  rel: '0',
+  modestbranding: '1',
+  iv_load_policy: '3',
+  controls: portrait ? '0' : '1',
+  enablejsapi: '1',
+});
+if (portrait && videoId) {
+  params.set('loop', '1');
+  params.set('playlist', videoId);
+}
+const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toString()}`;
 ---
 
 <article class="lv-card lxr" data-video-card>
@@ -55,9 +79,23 @@ const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
     aria-label={title}
     hidden
   >
-    <div class="lv-player-shell">
-      <button class="lv-close" type="button" data-video-close aria-label="Close video">×</button>
-      <div class="lv-player" data-video-frame></div>
+    <div class="lv-shell">
+      <div class="lv-shell-bar">
+        <span class="lv-shell-title">{title}</span>
+        <div class="lv-shell-actions">
+          {portrait && (
+            <button class="lv-sound" type="button" data-video-sound aria-pressed="false" aria-label="Turn sound on">
+              <svg class="lv-icon-muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="m16 9 4 6M20 9l-4 6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+              <svg class="lv-icon-loud" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+              <span>Sound</span>
+            </button>
+          )}
+          <button class="lv-close" type="button" data-video-close aria-label="Close video">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class:list={['lv-player', { 'is-portrait': portrait }]} data-video-frame></div>
     </div>
   </div>
 </article>
@@ -71,13 +109,29 @@ const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
     const modal = card.querySelector<HTMLElement>('[data-video-modal]');
     const frame = card.querySelector<HTMLElement>('[data-video-frame]');
     const closer = card.querySelector<HTMLButtonElement>('[data-video-close]');
+    const sound = card.querySelector<HTMLButtonElement>('[data-video-sound]');
     if (!opener || !modal || !frame || !closer) return;
+
+    let iframe: HTMLIFrameElement | null = null;
+
+    /** Drives the embedded player without loading YouTube's API script. */
+    const command = (func: string) => {
+      iframe?.contentWindow?.postMessage(
+        JSON.stringify({ event: 'command', func, args: [] }),
+        '*'
+      );
+    };
 
     const close = () => {
       frame.replaceChildren();
+      iframe = null;
       modal.hidden = true;
       opener.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
+      if (sound) {
+        sound.setAttribute('aria-pressed', 'false');
+        sound.setAttribute('aria-label', 'Turn sound on');
+      }
       opener.focus();
     };
 
@@ -85,7 +139,7 @@ const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
       const src = opener.dataset.videoSrc;
       if (!src) return;
 
-      const iframe = document.createElement('iframe');
+      iframe = document.createElement('iframe');
       iframe.src = src;
       iframe.title = opener.getAttribute('aria-label') || 'LUXEhome walkthrough';
       iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
@@ -95,6 +149,13 @@ const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
       opener.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
       closer.focus();
+    });
+
+    sound?.addEventListener('click', () => {
+      const on = sound.getAttribute('aria-pressed') === 'true';
+      command(on ? 'mute' : 'unMute');
+      sound.setAttribute('aria-pressed', on ? 'false' : 'true');
+      sound.setAttribute('aria-label', on ? 'Turn sound on' : 'Turn sound off');
     });
 
     closer.addEventListener('click', close);
@@ -153,11 +214,7 @@ const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
     transition: transform .2s ease, background .2s ease;
   }
   .lv-play svg { width: 25px; height: 25px; fill: currentColor; margin-left: 3px; }
-  .lv-cover-copy {
-    position: absolute;
-    inset: auto 0 0;
-    padding: 1.3rem;
-  }
+  .lv-cover-copy { position: absolute; inset: auto 0 0; padding: 1.3rem; }
   .lv-cover-copy small,
   .lv-cover-copy strong,
   .lv-cover-copy em { display: block; }
@@ -168,10 +225,7 @@ const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
     letter-spacing: .18em;
     text-transform: uppercase;
   }
-  .lv-cover-copy strong {
-    margin-top: .3rem;
-    font: 600 1.55rem/1.05 var(--lx-serif);
-  }
+  .lv-cover-copy strong { margin-top: .3rem; font: 600 1.55rem/1.05 var(--lx-serif); }
   .lv-cover-copy em {
     margin-top: .35rem;
     color: rgba(247,243,235,.76);
@@ -186,6 +240,7 @@ const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
     line-height: 1.55;
   }
 
+  /* ── Player sheet ── */
   .lv-modal[hidden] { display: none; }
   .lv-modal {
     position: fixed;
@@ -193,43 +248,80 @@ const playerUrl = `${embedUrl}${separator}autoplay=1&playsinline=1`;
     z-index: 1000;
     display: grid;
     place-items: center;
-    padding: 1rem;
-    background: rgba(16,21,17,.9);
-    backdrop-filter: blur(8px);
+    padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+    background: rgba(14,18,14,.94);
+    backdrop-filter: blur(14px);
   }
-  .lv-player-shell { position: relative; }
+  .lv-shell { display: flex; flex-direction: column; gap: .7rem; max-width: 100%; }
+  .lv-shell-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .lv-shell-title {
+    color: rgba(247,243,235,.9);
+    font: 500 .82rem var(--lx-sans);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lv-shell-actions { display: flex; align-items: center; gap: .5rem; flex: 0 0 auto; }
+
+  .lv-sound, .lv-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    height: 40px;
+    border: 1px solid rgba(247,243,235,.28);
+    border-radius: 100px;
+    background: rgba(247,243,235,.06);
+    color: rgba(247,243,235,.92);
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .lv-sound { padding: 0 .95rem; font: 500 .72rem var(--lx-sans); letter-spacing: .1em; text-transform: uppercase; }
+  .lv-close { width: 40px; padding: 0; }
+  .lv-sound:hover, .lv-close:hover { background: rgba(247,243,235,.16); border-color: rgba(247,243,235,.5); }
+  .lv-sound:focus-visible, .lv-close:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 2px; }
+  .lv-sound svg, .lv-close svg { width: 17px; height: 17px; fill: currentColor; }
+  .lv-sound .lv-icon-loud { display: none; }
+  .lv-sound[aria-pressed='true'] .lv-icon-loud { display: block; }
+  .lv-sound[aria-pressed='true'] .lv-icon-muted { display: none; }
+  .lv-sound[aria-pressed='true'] { background: var(--gold); border-color: var(--gold); color: #fff; }
+
   .lv-player {
-    width: min(420px, calc(100vw - 2rem), 49.5dvh);
+    position: relative;
+    width: min(430px, calc(100vw - 2rem), 46dvh);
     aspect-ratio: 9 / 16;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 16px;
     background: #000;
-    box-shadow: 0 24px 70px rgba(0,0,0,.45);
+    box-shadow: 0 30px 80px rgba(0,0,0,.55);
   }
+  .lv-player:not(.is-portrait) { width: min(980px, calc(100vw - 2rem)); aspect-ratio: 16 / 9; }
   .lv-player iframe { width: 100%; height: 100%; border: 0; display: block; }
-  .lv-close {
+
+  /* A Short is a vertical video pillarboxed inside YouTube's fixed 16:9
+     player. Widening that player to 256/81 of the frame makes the video
+     itself exactly fill the frame, cropping the black bars either side. */
+  .lv-player.is-portrait iframe {
     position: absolute;
-    z-index: 1;
-    top: .7rem;
-    right: .7rem;
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    border: 1px solid rgba(255,255,255,.45);
-    border-radius: 50%;
-    background: rgba(22,30,23,.78);
-    color: #fff;
-    font: 300 1.75rem/1 var(--lx-sans);
-    cursor: pointer;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: calc(100% * 256 / 81);
+    height: 100%;
+    max-width: none;
   }
 
   @media (max-width: 640px) {
     .lv-card { width: min(82vw, 300px); }
+    .lv-player { width: min(100%, calc(100vw - 2rem), 62dvh); }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .lv-cover img,
-    .lv-play { transition: none; }
+    .lv-play,
+    .lv-sound,
+    .lv-close { transition: none; }
   }
 </style>
