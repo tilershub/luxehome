@@ -114,12 +114,10 @@ project referenced in `src/lib/luxe-supabase.ts`.
 
 ## Analytics
 
-- **GA4** — two properties are tagged, `G-DLJDBQZ8N2` (in use) and
-  `G-XKXFPFS3VN` (wired into the old site layout); both receive the same
-  pageviews and events. Loaded from `LuxeLayout`, so every public page is
+- **GA4** `G-XKXFPFS3VN` — loaded from `LuxeLayout`, so every public page is
   covered while `/admin` is not. `window.gtag` is defined up front so events
-  fired before the library loads are queued. Edit `GA_MEASUREMENT_IDS` in
-  `luxe-config.ts` to drop or add a property.
+  fired before the library loads are queued. Add an ID to
+  `GA_MEASUREMENT_IDS` in `luxe-config.ts` to tag a second property.
 - **Meta Pixel** `1904211696933513` — PageView, `Contact` on WhatsApp and phone
   clicks, `Lead` on booking submission, deduplicated against the server-side
   Conversions API via a shared `event_id`.
