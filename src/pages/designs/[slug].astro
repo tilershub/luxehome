@@ -4,6 +4,7 @@ import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import KeyHighlights from '../../components/luxe/KeyHighlights.astro';
+import BuildProcess from '../../components/luxe/BuildProcess.astro';
 import { getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
 import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
@@ -542,7 +543,6 @@ const productSchema = JSON.stringify({
     <section class="wx-section">
       <p class="wx-kicker">From approval to handover</p>
       <h2>How it gets built.</h2>
-      <p class="wx-body"><a class="wx-inline-link" href="/how-we-build">See every construction stage in detail →</a></p>
       {design.workflow_text && <p class="wx-body">{design.workflow_text}</p>}
       {design.timeline.length > 0 && (
         <ol class="wx-timeline">
@@ -558,6 +558,8 @@ const productSchema = JSON.stringify({
       )}
     </section>
   )}
+
+  <BuildProcess title="The same construction system, in every bathroom." />
 
   <!-- FAQ -->
   {design.faq.length > 0 && (

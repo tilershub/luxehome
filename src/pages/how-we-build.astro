@@ -2,98 +2,31 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import KeyHighlights from '../components/luxe/KeyHighlights.astro';
-import { WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
+import { BUILD_STAGES, WHY_LUXEHOME, WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
 
-/* The construction sequence itself. /how-it-works covers the client journey
-   from first message to handover; this page covers what physically happens in
-   the room, and what is checked before each stage is allowed to close. */
-const STAGES = [
-  {
-    n: '01',
-    title: 'Protection and strip out',
-    lead: 'The room is emptied back to a sound, square shell.',
-    body: 'Access routes and finished areas outside the bathroom are sheeted before anything is lifted. Old tiles, fittings and failed screed come out, waste is bagged and removed rather than left on site, and the exposed shell is checked for movement, damp and any structural surprise. On a new build this stage is setting out instead: confirming the opening, levels and service entry points against the drawings.',
-    checks: ['Existing walls and floor sound and square', 'Hidden damp or movement reported before work continues', 'Waste removed, not stockpiled'],
-  },
-  {
-    n: '02',
-    title: 'First fix — plumbing and drainage',
-    lead: 'Supply water and waste are set out to the approved drawings.',
-    body: 'Supply lines are run and pressure tested before anything is closed up. Waste and drainage are set to fall, with the gully and trap positions taken from the drainage layout rather than improvised on site. Getting falls right at this stage is what stops standing water later — it cannot be corrected once tiling starts.',
-    checks: ['Supply pressure tested before closing up', 'Falls set to the drainage layout', 'Pipe routes photographed for the record'],
-    warranty: 'Plumbing',
-  },
-  {
-    n: '03',
-    title: 'First fix — electrical',
-    lead: 'Points, lighting and ventilation are wired to the electrical diagram.',
-    body: 'Cable routes, switch drops, light positions, the extractor and any heated or backlit fitting are wired to the diagram signed off in your design file. Positions are confirmed against the vanity and mirror setting-out first, so a switch never lands where a cabinet will go.',
-    checks: ['Circuits run to the approved diagram', 'Positions confirmed against vanity and mirror', 'Wiring photographed before it is covered'],
-    warranty: 'Wiring',
-  },
-  {
-    n: '04',
-    title: 'Waterproofing',
-    lead: 'The layer everything else depends on.',
-    body: 'Tokyo Super 2K is applied across the floor and up the wet walls, with corners, pipe penetrations and the gully detailed by hand. Coats are allowed to cure properly rather than rushed, and the finished tanking is flood tested before a single tile is laid. This is the one stage that cannot be inspected after handover, so it is documented while it is open.',
-    checks: ['Corners, penetrations and gully detailed', 'Full cure between coats', 'Flood tested and photographed before tiling'],
-    warranty: 'Waterproofing',
-  },
-  {
-    n: '05',
-    title: 'Screed and levels',
-    lead: 'Falls are formed so water goes where it should.',
-    body: 'The screed is laid to carry water to the gully from every part of the floor, including under the shower screen line. Wall surfaces are checked for flatness at the same time, because large-format tile will telegraph any deviation in the substrate.',
-    checks: ['Fall confirmed to the gully from all corners', 'Wall flatness checked for large-format tile', 'Threshold and door levels resolved'],
-  },
-  {
-    n: '06',
-    title: 'Tiling',
-    lead: 'Set out from the design, not from the nearest corner.',
-    body: 'The tile layout is set out so cuts land where the design intends and joints line through between floor and wall. Swisstek adhesive and grout are used throughout with a levelling system on large formats, and niches, trims and internal corners are formed as detailed in the design file.',
-    checks: ['Set-out agreed before the first tile is fixed', 'Levelling system on large-format tile', 'Niche and trim details as drawn'],
-  },
-  {
-    n: '07',
-    title: 'Ceiling, glass and second fix',
-    lead: 'The room becomes the design.',
-    body: 'Ceiling and lighting go in, then the shower cubicle in 10 mm tempered glass, then bathware, tapware, mirror, vanity and accessories — each the item named in your fixture schedule, not a substitute. Silicone lines and sealant work are finished last so nothing is disturbed.',
-    checks: ['Fixtures match the approved schedule', 'Glass measured after tiling, never before', 'Sealant lines finished clean'],
-    warranty: 'Ceiling',
-  },
-  {
-    n: '08',
-    title: 'Testing, clean and handover',
-    lead: 'Nothing is signed off until it has been run.',
-    body: 'Every outlet, drain, light and fan is tested under use. The room is snagged, corrected and cleaned properly rather than swept. You receive the written warranty record with the period against each part of the work, along with care guidance for the finishes.',
-    checks: ['Every outlet and drain run and checked', 'Snags corrected before handover', 'Written warranty record issued'],
-  },
-];
-
-const longest = WARRANTY_SCHEDULE[0];
 const highlights = [
-  { value: String(STAGES.length), title: 'Documented stages', copy: 'Each one closed off and photographed before the next begins.' },
-  { value: 'Flood tested', title: 'Waterproofing proven', copy: 'Tested while open — the one layer nobody can inspect afterwards.' },
-  { value: longest.period, title: 'Longest warranty', copy: `${longest.item}. Every task carries its own written period.` },
-  { value: 'One team', title: 'Single accountability', copy: 'Design, procurement, civil work and trades coordinated by LUXEhome.' },
+  { value: String(BUILD_STAGES.length), title: 'Documented stages', copy: 'From consultation to handover, every project follows the same system.' },
+  { value: '24–48 hrs', title: 'Flood test', copy: 'Waterproofing is proven before a single tile is laid.' },
+  { value: String(WHY_LUXEHOME.length), title: 'Quality commitments', copy: 'Planning, drawings, workmanship, inspection and warranty.' },
+  { value: WARRANTY_SCHEDULE[0].period, title: 'Longest warranty', copy: `${WARRANTY_SCHEDULE[0].item}. Every task carries its own written period.` },
 ];
 ---
 
 <LuxeLayout
-  title="How We Build — Every Stage of a LUXEhome Bathroom"
-  description="The construction sequence behind a LUXEhome bathroom: strip out, plumbing and electrical first fix, flood-tested waterproofing, screed and falls, tiling, ceiling and glass, then testing and handover with a written warranty record."
+  title="Built the LUXEhome Way — Our 12-Stage Bathroom Construction Process"
+  description="Every LUXEhome bathroom follows the same proven construction system: consultation, 3D design and technical drawings, material procurement, site protection, civil works, plumbing and electrical, premium waterproofing with a 24–48 hour flood test, precision tiling, ceiling and lighting, fixtures, final quality inspection and handover."
 >
   <section class="hb-hero">
-    <p class="hb-kicker">How we build</p>
-    <h1>Eight stages, each closed before the next begins.</h1>
+    <p class="hb-kicker">Built the LUXEhome Way</p>
+    <h1>Every bathroom follows our proven construction system.</h1>
     <p class="hb-lead">
-      A bathroom is judged on the parts you can see and ruined by the parts you cannot.
-      This is the sequence we follow in every room, and what has to be proven at each
-      stage before the work is allowed to move on.
+      From the first site inspection to the final quality check, every LUXEhome project
+      follows a carefully planned process that ensures outstanding craftsmanship,
+      long-term durability, and a luxury finish.
     </p>
     <div class="hb-hero-actions">
       <a class="lx-btn-wa" href="/book-site-inspection">Book site inspection · LKR {PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK')}</a>
-      <a class="lx-btn-ghost" href="/how-it-works">See the client journey</a>
+      <a class="lx-btn-ghost" href="/designs">Explore bathroom designs</a>
     </div>
   </section>
 
@@ -101,29 +34,40 @@ const highlights = [
 
   <section class="hb-stages">
     <ol>
-      {STAGES.map((stage) => (
+      {BUILD_STAGES.map((stage) => (
         <li class="hb-stage lxr" id={`stage-${stage.n}`}>
-          <div class="hb-stage-index">
-            <span>{stage.n}</span>
-            {stage.warranty && <em>{WARRANTY_SCHEDULE.find((w) => w.item === stage.warranty)?.period} warranty</em>}
-          </div>
+          <div class="hb-stage-index"><span>{stage.n}</span></div>
           <div class="hb-stage-body">
             <h2>{stage.title}</h2>
             <p class="hb-stage-lead">{stage.lead}</p>
-            <p class="hb-stage-copy">{stage.body}</p>
-            <ul class="hb-checks">
-              {stage.checks.map((check) => <li>{check}</li>)}
-            </ul>
+            {stage.points && (
+              <ul class="hb-points">
+                {stage.points.map((point) => <li>{point}</li>)}
+              </ul>
+            )}
+            {stage.close && <p class="hb-stage-close">{stage.close}</p>}
           </div>
         </li>
       ))}
     </ol>
   </section>
 
+  <section class="hb-why">
+    <div class="hb-why-inner">
+      <div class="lxr">
+        <p class="hb-kicker">Why homeowners choose LUXEhome</p>
+        <h2>The standard behind every stage.</h2>
+      </div>
+      <ul class="lxr">
+        {WHY_LUXEHOME.map((reason) => <li>{reason}</li>)}
+      </ul>
+    </div>
+  </section>
+
   <section class="hb-warranty lxr">
     <div>
       <p class="hb-kicker">What it is worth afterwards</p>
-      <h2>Every stage carries a written period.</h2>
+      <h2>Every task carries a written period.</h2>
       <p>The work above is what the warranty is based on. Each part is recorded against your project at handover.</p>
     </div>
     <dl>
@@ -142,7 +86,7 @@ const highlights = [
 </LuxeLayout>
 
 <style>
-  .hb-hero, .hb-stages, .hb-warranty, .hb-cta {
+  .hb-hero, .hb-stages, .hb-warranty, .hb-cta, .hb-why-inner {
     --hb-ink: #3B3B33; --hb-muted: #57564C; --hb-faint: #8A897C;
     --hb-sage: #5B6349; --hb-gold: #C6A363; --hb-line: #E2DCCF;
     max-width: 1240px; margin: 0 auto; padding-inline: clamp(20px, 5vw, 64px);
@@ -156,20 +100,22 @@ const highlights = [
 
   .hb-stages { padding-block: clamp(46px, 7vh, 80px); }
   .hb-stages ol { margin: 0; padding: 0; list-style: none; }
-  .hb-stage { display: grid; grid-template-columns: 1fr; gap: 14px; padding: clamp(28px, 4vw, 44px) 0; border-top: 1px solid var(--hb-line); scroll-margin-top: 90px; }
+  .hb-stage { display: grid; grid-template-columns: 1fr; gap: 12px; padding: clamp(26px, 4vw, 42px) 0; border-top: 1px solid var(--hb-line); scroll-margin-top: 90px; }
   .hb-stage:last-child { border-bottom: 1px solid var(--hb-line); }
-  .hb-stage-index span { display: block; font: 500 clamp(30px, 4vw, 44px)/1 var(--lx-serif); color: var(--hb-gold); }
-  .hb-stage-index em {
-    display: inline-block; margin-top: 10px; padding: 5px 11px; border-radius: 100px;
-    background: #EBE4D8; color: var(--hb-sage);
-    font: 600 10px var(--lx-sans); font-style: normal; letter-spacing: .1em; text-transform: uppercase;
-  }
-  .hb-stage-body h2 { margin: 0 0 8px; font: 500 clamp(23px, 3vw, 32px) var(--lx-serif); }
-  .hb-stage-lead { margin: 0 0 14px; max-width: 46ch; font: italic 400 clamp(16px, 1.9vw, 19px) var(--lx-serif); color: var(--hb-sage); }
-  .hb-stage-copy { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.75; color: var(--hb-muted); }
-  .hb-checks { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 7px; }
-  .hb-checks li { position: relative; padding-left: 24px; max-width: 54ch; font-size: 14px; color: var(--hb-muted); }
-  .hb-checks li::before { content: '✓'; position: absolute; left: 0; top: -1px; color: var(--hb-gold); font-size: 13px; }
+  .hb-stage-index span { display: block; font: 500 clamp(30px, 4vw, 46px)/1 var(--lx-serif); color: var(--hb-gold); }
+  .hb-stage-body h2 { margin: 0 0 10px; font: 500 clamp(23px, 3vw, 32px) var(--lx-serif); }
+  .hb-stage-lead { margin: 0; max-width: 60ch; font-size: 15px; line-height: 1.75; color: var(--hb-muted); }
+  .hb-points { display: grid; grid-template-columns: 1fr; gap: 7px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .hb-points li { position: relative; padding-left: 24px; font-size: 14px; color: var(--hb-muted); }
+  .hb-points li::before { content: '✓'; position: absolute; left: 0; top: -1px; color: var(--hb-gold); font-size: 13px; }
+  .hb-stage-close { margin: 18px 0 0; max-width: 56ch; font: italic 400 15px/1.7 var(--lx-serif); color: var(--hb-sage); }
+
+  .hb-why { background: #EBE4D8; padding-block: clamp(46px, 7vh, 80px); margin-block: clamp(10px, 2vw, 20px); }
+  .hb-why-inner { display: grid; grid-template-columns: 1fr; gap: clamp(24px, 4vw, 48px); }
+  .hb-why h2 { margin: 0; max-width: 18ch; font: 500 clamp(26px, 3.8vw, 40px)/1.05 var(--lx-serif); }
+  .hb-why ul { display: grid; grid-template-columns: 1fr; gap: 10px 28px; margin: 0; padding: 0; list-style: none; }
+  .hb-why li { position: relative; padding-left: 26px; font-size: 15px; color: var(--hb-muted); }
+  .hb-why li::before { content: '✔'; position: absolute; left: 0; top: 0; color: var(--hb-gold); font-size: 13px; }
 
   .hb-warranty { display: grid; grid-template-columns: 1fr; gap: clamp(24px, 4vw, 48px); padding-block: clamp(40px, 6vh, 68px); }
   .hb-warranty h2 { margin: 0 0 12px; font: 500 clamp(26px, 3.6vw, 38px)/1.05 var(--lx-serif); }
@@ -184,8 +130,13 @@ const highlights = [
   .hb-cta h2 { margin: 0 0 14px; font: 500 clamp(28px, 4.6vw, 46px)/1.05 var(--lx-serif); }
   .hb-cta > p { max-width: 50ch; margin: 0 auto 26px; font-size: clamp(15px, 1.9vw, 18px); line-height: 1.7; color: var(--hb-muted); }
 
-  @media (min-width: 800px) {
-    .hb-stage { grid-template-columns: minmax(120px, 170px) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); }
+  @media (min-width: 700px) {
+    .hb-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hb-why ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 900px) {
+    .hb-stage { grid-template-columns: minmax(90px, 130px) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); }
     .hb-warranty { grid-template-columns: .9fr 1.1fr; align-items: start; }
+    .hb-why-inner { grid-template-columns: .8fr 1.2fr; align-items: start; }
   }
 </style>

@@ -3,6 +3,7 @@ export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import ProjectCard from '../components/luxe/ProjectCard.astro';
 import KeyHighlights from '../components/luxe/KeyHighlights.astro';
+import BuildProcess from '../components/luxe/BuildProcess.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
 import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
 import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
@@ -187,6 +188,8 @@ const projects = (await getProjects())
       ))}
     </div>
   </section>
+
+  <BuildProcess />
 
   {projects.length > 0 && (
     <section class="home-projects" aria-labelledby="home-projects-title">
