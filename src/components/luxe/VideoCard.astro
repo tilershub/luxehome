@@ -95,7 +95,14 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
           </button>
         </div>
       </div>
-      <div class:list={['lv-player', { 'is-portrait': portrait }]} data-video-frame></div>
+      <div class:list={['lv-player', { 'is-portrait': portrait }]}>
+        <div data-video-frame></div>
+        {/* Our own cover holds the frame until the player is actually playing,
+            so YouTube's poster — title, channel and red button — is never seen. */}
+        <div class="lv-poster" data-video-poster style={`background-image:url(${coverImage})`}>
+          <span class="lv-poster-spinner" aria-hidden="true"></span>
+        </div>
+      </div>
     </div>
   </div>
 </article>
@@ -110,9 +117,11 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
     const frame = card.querySelector<HTMLElement>('[data-video-frame]');
     const closer = card.querySelector<HTMLButtonElement>('[data-video-close]');
     const sound = card.querySelector<HTMLButtonElement>('[data-video-sound]');
+    const poster = card.querySelector<HTMLElement>('[data-video-poster]');
     if (!opener || !modal || !frame || !closer) return;
 
     let iframe: HTMLIFrameElement | null = null;
+    let posterTimer: number | undefined;
 
     /** Drives the embedded player without loading YouTube's API script. */
     const command = (func: string) => {
@@ -122,7 +131,27 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
       );
     };
 
+    const revealPlayer = () => {
+      window.clearTimeout(posterTimer);
+      poster?.classList.add('is-gone');
+    };
+
+    /* YouTube only reports state once the embed has been asked to listen. */
+    window.addEventListener('message', (event: MessageEvent) => {
+      if (!iframe || !/youtube(-nocookie)?\.com$/.test(new URL(event.origin).hostname)) return;
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data?.event === 'onReady') {
+          iframe.contentWindow?.postMessage(JSON.stringify({ event: 'listening' }), '*');
+        }
+        // 1 = playing, 3 = buffering: either means the poster has been replaced.
+        if (data?.event === 'onStateChange' && (data.info === 1 || data.info === 3)) revealPlayer();
+      } catch { /* not a player message */ }
+    });
+
     const close = () => {
+      window.clearTimeout(posterTimer);
+      poster?.classList.remove('is-gone');
       frame.replaceChildren();
       iframe = null;
       modal.hidden = true;
@@ -145,6 +174,11 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
       iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
       iframe.allowFullscreen = true;
       frame.replaceChildren(iframe);
+      iframe.addEventListener('load', () => {
+        iframe?.contentWindow?.postMessage(JSON.stringify({ event: 'listening' }), '*');
+      });
+      // Safety net: never leave the cover stuck if no state ever arrives.
+      posterTimer = window.setTimeout(revealPlayer, 1600);
       modal.hidden = false;
       opener.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
@@ -299,6 +333,35 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
   }
   .lv-player:not(.is-portrait) { width: min(980px, calc(100vw - 2rem)); aspect-ratio: 16 / 9; }
   .lv-player iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .lv-player > [data-video-frame] { width: 100%; height: 100%; }
+
+  .lv-poster {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background-size: cover;
+    background-position: center;
+    transition: opacity .45s ease;
+  }
+  .lv-poster::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(14,18,14,.45);
+  }
+  .lv-poster.is-gone { opacity: 0; pointer-events: none; }
+  .lv-poster-spinner {
+    position: relative;
+    z-index: 1;
+    width: 34px;
+    height: 34px;
+    border: 2px solid rgba(247,243,235,.28);
+    border-top-color: rgba(247,243,235,.92);
+    border-radius: 50%;
+    animation: lvSpin .9s linear infinite;
+  }
+  @keyframes lvSpin { to { transform: rotate(360deg); } }
 
   /* A Short is a vertical video pillarboxed inside YouTube's fixed 16:9
      player. Widening that player to 256/81 of the frame makes the video
@@ -319,6 +382,8 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .lv-poster { transition: none; }
+    .lv-poster-spinner { animation-duration: 2.4s; }
     .lv-cover img,
     .lv-play,
     .lv-sound,
