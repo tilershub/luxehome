@@ -5,8 +5,10 @@
 /** The one place the WhatsApp number lives. */
 export const WHATSAPP_NUMBER = '94774503744';
 
-/** GA4 measurement ID, used by every public page through LuxeLayout. */
-export const GA_MEASUREMENT_ID = 'G-XKXFPFS3VN';
+/** GA4 properties, tagged on every public page through LuxeLayout. Both
+    receive the same events: G-DLJDBQZ8N2 is the property in use, and
+    G-XKXFPFS3VN is the one that was wired into the old site layout. */
+export const GA_MEASUREMENT_IDS = ['G-DLJDBQZ8N2', 'G-XKXFPFS3VN'];
 
 export function waLink(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;

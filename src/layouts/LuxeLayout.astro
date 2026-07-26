@@ -2,7 +2,7 @@
 /* LUXEhome catalogue layout — the new brand system:
    cream/sage/gold palette · Cormorant Garamond + Jost + Noto Sans Sinhala.
    Keeps the site's Meta Pixel, Contact-event tracking, and SEO plumbing. */
-import { WHATSAPP_NUMBER, GA_MEASUREMENT_ID } from '../lib/luxe-config';
+import { WHATSAPP_NUMBER, GA_MEASUREMENT_IDS } from '../lib/luxe-config';
 
 interface Props {
   title?: string;
@@ -116,19 +116,21 @@ Astro.response.headers.set(
          previous install defined gtag inside the script's onload, leaving
          window.gtag undefined and silently discarding every conversion event.
          The gtag.js fetch itself stays off the critical path. -->
-    <script is:inline define:vars={{ gaId: GA_MEASUREMENT_ID }}>
+    <script is:inline define:vars={{ gaIds: GA_MEASUREMENT_IDS }}>
       window.dataLayer = window.dataLayer || [];
       function gtag() { window.dataLayer.push(arguments); }
       window.gtag = gtag;
       gtag('js', new Date());
-      gtag('config', gaId);
+      // Both properties receive the same pageviews and conversion events.
+      gaIds.forEach(function (id) { gtag('config', id); });
       (function () {
         function loadGa() {
-          if (window.__gaLoaded) return;
+          if (window.__gaLoaded || !gaIds.length) return;
           window.__gaLoaded = true;
           var s = document.createElement('script');
           s.async = true;
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+          // One gtag.js serves every configured property.
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaIds[0];
           document.head.appendChild(s);
         }
         var idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };

@@ -64,7 +64,7 @@ there and every page follows:
 | Export | What it controls |
 | --- | --- |
 | `WHATSAPP_NUMBER` | Every WhatsApp link |
-| `GA_MEASUREMENT_ID` | GA4 property |
+| `GA_MEASUREMENT_IDS` | GA4 properties tagged on every public page |
 | `WARRANTY_SCHEDULE` | Warranty per task — bathware 15y, waterproofing 10y, plumbing 10y, wiring 10y, taps & showers 5y, ceiling 5y, light fixtures 1y, tempered glass 1y |
 | `PRE_CONSTRUCTION_FEES` | Site inspection LKR 10,000 · refundable design package LKR 40,000 · LKR 50,000 together |
 | `STANDARD_DRAWINGS` | The four technical drawings, shared by every design |
@@ -114,9 +114,12 @@ project referenced in `src/lib/luxe-supabase.ts`.
 
 ## Analytics
 
-- **GA4** `G-XKXFPFS3VN` — loaded from `LuxeLayout`, so every public page is
+- **GA4** — two properties are tagged, `G-DLJDBQZ8N2` (in use) and
+  `G-XKXFPFS3VN` (wired into the old site layout); both receive the same
+  pageviews and events. Loaded from `LuxeLayout`, so every public page is
   covered while `/admin` is not. `window.gtag` is defined up front so events
-  fired before the library loads are queued.
+  fired before the library loads are queued. Edit `GA_MEASUREMENT_IDS` in
+  `luxe-config.ts` to drop or add a property.
 - **Meta Pixel** `1904211696933513` — PageView, `Contact` on WhatsApp and phone
   clicks, `Lead` on booking submission, deduplicated against the server-side
   Conversions API via a shared `event_id`.
