@@ -68,7 +68,7 @@ export const FIXTURE_CATEGORIES: Record<string, string[]> = {
     'Shower', 'Angle Valve', 'Accessories',
     'Gully Cover', 'Magic Hose', 'Flexible Hose', 'Magic Bend',
     'Mirror', 'Vanity Cupboard', 'Shower Cubicle',
-    'Tile', 'Ceiling', 'Light Fixtures', 'Niche',
+    'Water Heater', 'Exhaust Fan', 'Light Fixtures',
     'Door', 'Window', 'Other',
   ],
 
@@ -83,6 +83,37 @@ export const FIXTURE_CATEGORIES: Record<string, string[]> = {
   floors: [
     'Tile / Material', 'Skirting', 'Waterproofing', 'Floor Preparation',
     'Transitions & Trims', 'Other',
+  ],
+};
+
+/** Material and surface presets used by the admin checklist. These are
+    intentionally category-only: the exact brand, item and finish must be
+    confirmed for each design before the row appears on the public page. */
+export const MATERIAL_CATEGORIES: Record<string, string[]> = {
+  bathrooms: [
+    'Wall Tiles', 'Floor Tiles', 'Tile Adhesive', 'Grout',
+    'Waterproofing System', 'Plumbing Pipes & Fittings',
+    'Electrical Wiring & Cables', 'Ceiling System / Finish',
+    'Paint / Coating', 'Vanity Material / Finish', 'Niche Finish',
+    'Shower Glass & Hardware Finish', 'Silicone & Sealants',
+    'Door & Window Finish', 'Other',
+  ],
+  kitchens: [
+    'Floor Tiles', 'Wall Tiles / Backsplash', 'Pantry Material & Finish',
+    'Countertop', 'Tile Adhesive', 'Grout', 'Waterproofing System',
+    'Plumbing Pipes & Fittings', 'Electrical Wiring & Cables',
+    'Ceiling System / Finish', 'Paint / Coating', 'Silicone & Sealants',
+    'Other',
+  ],
+  staircases: [
+    'Step / Tread Material', 'Riser Finish', 'Skirting',
+    'Railing & Handrail Finish', 'Adhesive', 'Grout',
+    'Lighting Finish', 'Paint / Coating', 'Sealants', 'Other',
+  ],
+  floors: [
+    'Floor Tile / Material', 'Skirting', 'Tile Adhesive', 'Grout',
+    'Floor Preparation', 'Waterproofing System',
+    'Transitions & Trims', 'Sealants', 'Other',
   ],
 };
 
