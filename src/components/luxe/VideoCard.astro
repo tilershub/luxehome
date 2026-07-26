@@ -406,7 +406,11 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
     width: min(1040px, calc(100vw - 2rem));
     max-width: calc(100vw - 2rem);
   }
-  .lv-player iframe { width: 100%; height: 100%; border: 0; display: block; }
+  /* The iframe is created in JavaScript, so it never carries Astro's scoping
+     attribute — a plain `iframe` selector inside this scoped block would be
+     compiled to `iframe[data-astro-cid-…]` and match nothing. :global() is
+     required for every rule that targets it. */
+  .lv-player :global(iframe) { width: 100%; height: 100%; border: 0; display: block; }
   .lv-frame { position: absolute; inset: 0; z-index: 1; }
 
   /* Sits above the iframe so no tap can ever reach YouTube. */
@@ -501,11 +505,12 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
   /* A Short is a vertical video pillarboxed inside YouTube's fixed 16:9
      player. Widening that player to 256/81 of the frame makes the video
      itself exactly fill the frame, cropping the black bars either side. */
-  .lv-player.is-portrait iframe {
+  .lv-player.is-portrait :global(iframe) {
     position: absolute;
     top: 50%;
     left: 50%;
-    translate: -50% -50%;
+    /* transform rather than the newer translate property, for older Safari */
+    transform: translate(-50%, -50%);
     width: calc(100% * 256 / 81);
     height: 100%;
     max-width: none;
