@@ -2,7 +2,7 @@
 /* LUXEhome catalogue layout — the new brand system:
    cream/sage/gold palette · Cormorant Garamond + Jost + Noto Sans Sinhala.
    Keeps the site's Meta Pixel, Contact-event tracking, and SEO plumbing. */
-import { WHATSAPP_NUMBER } from '../lib/luxe-config';
+import { WHATSAPP_NUMBER, GA_MEASUREMENT_ID } from '../lib/luxe-config';
 
 interface Props {
   title?: string;
@@ -110,6 +110,31 @@ Astro.response.headers.set(
       <img height="1" width="1" style="display:none"
         src="https://www.facebook.com/tr?id=1904211696933513&ev=PageView&noscript=1" />
     </noscript>
+
+    <!-- Google Analytics 4. window.gtag and dataLayer exist immediately, so an
+         event fired before gtag.js arrives is queued rather than dropped — the
+         previous install defined gtag inside the script's onload, leaving
+         window.gtag undefined and silently discarding every conversion event.
+         The gtag.js fetch itself stays off the critical path. -->
+    <script is:inline define:vars={{ gaId: GA_MEASUREMENT_ID }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { window.dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', gaId);
+      (function () {
+        function loadGa() {
+          if (window.__gaLoaded) return;
+          window.__gaLoaded = true;
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+          document.head.appendChild(s);
+        }
+        var idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };
+        window.addEventListener('load', function () { idle(loadGa); });
+      })();
+    </script>
   </head>
   <body class="luxe-body">
     {!bare && (
