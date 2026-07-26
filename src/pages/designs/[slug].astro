@@ -177,7 +177,13 @@ const nameStory = design.name_story
     : design.description
     || `The ${design.name} carries its namesake’s character into a fully documented ${collectionLabel} bathroom.`);
 
-const materialsWithPhotos = design.materials.filter((m) => m.image_url);
+/* Category-only checklist rows can be prepared in admin before the exact
+   product is confirmed. Keep those drafts out of the public page until they
+   contain a brand, item, usage note or image. */
+const materials = [...design.materials]
+  .filter((m) => Boolean(m.brand?.trim() || m.item?.trim() || m.usage_label?.trim() || m.image_url))
+  .sort((a, b) => a.sort_order - b.sort_order);
+const materialsWithPhotos = materials.filter((m) => m.image_url);
 
 /* Video structured data ties the walkthrough to THIS page, so a video rich
    result links here rather than to youtube.com. Works with an embedded or a
@@ -326,67 +332,82 @@ const productSchema = JSON.stringify({
   <section id="fixtures" class="wx-section" data-fixture-explorer>
     <div class="wx-heading-row">
       <div>
-        <p class="wx-kicker">Walk up to the vanity</p>
-        <h2>Every fixture, up close.</h2>
+        <p class="wx-kicker">Products installed in the bathroom</p>
+        <h2>Fixtures &amp; fittings.</h2>
       </div>
-      <p class="wx-aside">Choose a fitting to see the exact specification{fixtures.some((f) => f.reference_price_label) ? ' and its reference price' : ''}.</p>
+      <p class="wx-aside">Sanitaryware, tapware, furniture, glass and accessories. Choose an item to see its exact specification{fixtures.some((f) => f.reference_price_label) ? ' and reference price' : ''}.</p>
     </div>
 
     {fixtures.length > 0 ? (
-      <div class="wxf-layout">
-        <div class="wxf-canvas">
-          {fixtures.map((f, i) => (
-            <img
-              class:list={['wxf-canvas-img', { on: i === 0 }]}
-              data-fixture-img={i}
-              src={cloudinary(f.image_url || roomImage || design.cover_image_url || '', 900)}
-              alt={f.image_alt || `${f.brand ? `${f.brand} ` : ''}${f.name}`}
-              loading={i === 0 ? 'eager' : 'lazy'}
-              width="900" height="1125"
-            />
+      <>
+        <ul class="wx-checklist wx-fixture-checklist" aria-label="Fixtures and fittings checklist">
+          {fixtures.map((f) => (
+            <li class:list={['wx-check-item', { 'is-optional': f.included === false }]}>
+              <span class="wx-check-mark" aria-hidden="true">{f.included === false ? '+' : '✓'}</span>
+              <span class="wx-check-copy">
+                <strong>{f.category}</strong>
+                <small>{f.brand ? `${f.brand} · ` : ''}{f.name}{f.quantity > 1 ? ` × ${f.quantity}` : ''}</small>
+              </span>
+              <em>{f.included === false ? 'Optional' : 'Included'}</em>
+            </li>
           ))}
-        </div>
-        <div class="wxf-right">
-          <div class="wxf-panels">
+        </ul>
+
+        <div class="wxf-layout">
+          <div class="wxf-canvas">
             {fixtures.map((f, i) => (
-              <div class:list={['wxf-panel', { on: i === 0 }]} data-fixture-panel={i}>
-                <div>
-                  <div class="wxf-n">{romanNumeral(i + 1).toLowerCase()} · {f.category}</div>
-                  <h3>{f.brand ? `${f.brand} — ` : ''}{f.name}</h3>
-                  {f.spec && <p class="wxf-spec">{f.spec}</p>}
-                  <dl class="wxf-meta">
-                    {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
-                    {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
-                    {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
-                    {f.warranty_period && <><dt>Warranty</dt><dd>{f.warranty_period}</dd></>}
-                  </dl>
-                  <span class:list={['wxf-badge', { optional: f.included === false }]}>{f.included === false ? 'Optional upgrade' : 'Included'}</span>
+              <img
+                class:list={['wxf-canvas-img', { on: i === 0 }]}
+                data-fixture-img={i}
+                src={cloudinary(f.image_url || roomImage || design.cover_image_url || '', 900)}
+                alt={f.image_alt || `${f.brand ? `${f.brand} ` : ''}${f.name}`}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                width="900" height="1125"
+              />
+            ))}
+          </div>
+          <div class="wxf-right">
+            <div class="wxf-panels">
+              {fixtures.map((f, i) => (
+                <div class:list={['wxf-panel', { on: i === 0 }]} data-fixture-panel={i}>
+                  <div>
+                    <div class="wxf-n">{romanNumeral(i + 1).toLowerCase()} · {f.category}</div>
+                    <h3>{f.brand ? `${f.brand} — ` : ''}{f.name}</h3>
+                    {f.spec && <p class="wxf-spec">{f.spec}</p>}
+                    <dl class="wxf-meta">
+                      {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
+                      {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
+                      {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
+                      {f.warranty_period && <><dt>Warranty</dt><dd>{f.warranty_period}</dd></>}
+                    </dl>
+                    <span class:list={['wxf-badge', { optional: f.included === false }]}>{f.included === false ? 'Optional upgrade' : 'Included'}</span>
+                  </div>
+                  {f.reference_price_label && (
+                    <div class="wxf-price"><span>Reference price</span><strong>{f.reference_price_label}</strong></div>
+                  )}
                 </div>
-                {f.reference_price_label && (
-                  <div class="wxf-price"><span>Reference price</span><strong>{f.reference_price_label}</strong></div>
-                )}
-              </div>
-            ))}
-          </div>
-          <div class="wxf-tabs" role="tablist" aria-label="Fixtures in this design">
-            {fixtures.map((f, i) => (
-              <button
-                type="button"
-                data-fixture-tab={i}
-                class:list={[{ on: i === 0 }]}
-                role="tab"
-                aria-selected={i === 0 ? 'true' : 'false'}
-              >
-                <em aria-hidden="true">{String(i + 1).padStart(2, '0')}</em>
-                <span>{f.name}</span>
-                {f.reference_price_label && <small>{f.reference_price_label}</small>}
-              </button>
-            ))}
+              ))}
+            </div>
+            <div class="wxf-tabs" role="tablist" aria-label="Fixtures and fittings in this design">
+              {fixtures.map((f, i) => (
+                <button
+                  type="button"
+                  data-fixture-tab={i}
+                  class:list={[{ on: i === 0 }]}
+                  role="tab"
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                >
+                  <em aria-hidden="true">{String(i + 1).padStart(2, '0')}</em>
+                  <span>{f.name}</span>
+                  {f.reference_price_label && <small>{f.reference_price_label}</small>}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </>
     ) : (
-      <div class="wxf-empty"><strong>The full schedule is being prepared.</strong><p>The confirmed tiles, bathware, tapware, shower, lighting and accessory specification will be published here. A site inspection can still confirm whether this layout is suitable for your room.</p><a href={inspectionHref}>Check this design against my bathroom →</a></div>
+      <div class="wxf-empty"><strong>The full schedule is being prepared.</strong><p>The confirmed sanitaryware, tapware, shower, furniture, glass and accessory specification will be published here. A site inspection can still confirm whether this layout is suitable for your room.</p><a href={inspectionHref}>Check this design against my bathroom →</a></div>
     )}
   </section>
 
@@ -445,10 +466,15 @@ const productSchema = JSON.stringify({
   </section>
 
   <!-- MATERIALS -->
-  {design.materials.length > 0 && (
+  {materials.length > 0 && (
     <section id="materials" class="wx-section">
-      <p class="wx-kicker">Reach out and touch</p>
-      <h2>Materials &amp; finishes.</h2>
+      <div class="wx-heading-row">
+        <div>
+          <p class="wx-kicker">Surfaces, colours and construction layers</p>
+          <h2>Materials &amp; finishes.</h2>
+        </div>
+        <p class="wx-aside">Tiles, waterproofing, adhesives, grout, ceiling and decorative finishes that shape the room and protect it over time.</p>
+      </div>
       {materialsWithPhotos.length > 0 && (
         <div class="wx-mat-grid">
           {materialsWithPhotos.map((m) => (
@@ -464,11 +490,18 @@ const productSchema = JSON.stringify({
           ))}
         </div>
       )}
-      <div class="wx-chips">
-        {design.materials.map((m) => (
-          <span class="wx-chip"><strong>{m.brand}</strong>{m.item ? ` · ${m.item}` : ''}</span>
+      <ul class="wx-checklist wx-material-checklist" aria-label="Materials and finishes checklist">
+        {materials.map((m) => (
+          <li class="wx-check-item">
+            <span class="wx-check-mark" aria-hidden="true">✓</span>
+            <span class="wx-check-copy">
+              <strong>{m.category}</strong>
+              <small>{m.brand}{m.item ? ` · ${m.item}` : ''}</small>
+            </span>
+            <em>{m.usage_label || 'Specified'}</em>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   )}
 
@@ -796,6 +829,52 @@ const productSchema = JSON.stringify({
     padding: 16px 20px 26px;
   }
 
+  /* ── Specification checklists ── */
+  .wx-checklist {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0 0 clamp(28px, 4vw, 42px);
+    padding: 0;
+    list-style: none;
+  }
+  .wx-check-item {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 15px 16px;
+    border: 1px solid #E2DCCF;
+    border-radius: 8px;
+    background: rgba(255,255,255,.66);
+  }
+  .wx-check-mark {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--wx-sage);
+    color: #fff;
+    font: 600 14px var(--lx-sans);
+  }
+  .wx-check-copy { min-width: 0; }
+  .wx-check-copy strong,
+  .wx-check-copy small { display: block; overflow-wrap: anywhere; }
+  .wx-check-copy strong { font: 500 17px/1.15 var(--lx-serif); color: var(--wx-ink); }
+  .wx-check-copy small { margin-top: 4px; font-size: 11px; line-height: 1.35; color: #858579; }
+  .wx-check-item > em {
+    font: normal 600 9px var(--lx-sans);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--wx-sage);
+    text-align: right;
+  }
+  .wx-check-item.is-optional .wx-check-mark { background: var(--wx-gold); color: var(--wx-ink); }
+  .wx-check-item.is-optional > em { color: #9A7A3D; }
+  .wx-material-checklist { margin-top: 34px; margin-bottom: 0; }
+
   /* ── Fixture explorer ── */
   .wxf-layout { display: grid; grid-template-columns: 1fr; gap: 28px; align-items: start; }
   .wxf-canvas { position: relative; aspect-ratio: 4 / 5; border-radius: 2px; overflow: hidden; background: var(--wx-mist); }
@@ -851,7 +930,7 @@ const productSchema = JSON.stringify({
   .wx-fineprint { margin-top: 22px; max-width: 82ch; font-size: 13px; color: #9AA089; }
   .wx-dark-cta { display: inline-flex; margin-top: 18px; color: var(--wx-gold); font-size: 13px; font-weight: 500; letter-spacing: .04em; text-decoration: none; }
 
-  /* ── Materials chips ── */
+  /* ── Material images ── */
   .wx-mat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 26px); margin-top: 34px; }
   .wx-mat { margin: 0; }
   .wx-mat-img { aspect-ratio: 4 / 5; border-radius: 2px; overflow: hidden; background: var(--wx-mist); }
@@ -859,10 +938,6 @@ const productSchema = JSON.stringify({
   .wx-mat figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 14px; }
   .wx-mat figcaption span { font: 500 21px var(--lx-serif); }
   .wx-mat figcaption em { font: normal 11px var(--lx-sans); letter-spacing: .14em; text-transform: uppercase; color: #9A998C; text-align: right; }
-
-  .wx-chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
-  .wx-chip { padding: 12px 22px; border-radius: 100px; background: #fff; font-size: 14px; color: var(--wx-muted); }
-  .wx-chip strong { color: var(--wx-sage); font-weight: 500; }
 
   /* ── Technical drawings ── */
   .wx-draw-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 26px); margin-top: 40px; }
@@ -969,6 +1044,7 @@ const productSchema = JSON.stringify({
     .wx-name-grid { grid-template-columns: auto 1fr; gap: 56px; }
   }
   @media (max-width: 860px) {
+    .wx-checklist { grid-template-columns: 1fr; }
     .wx-related { grid-template-columns: 1fr; }
     .wx-tier-head { display: none; }
     .wx-tier-row { grid-template-columns: 1fr 1fr; gap: 4px 12px; }

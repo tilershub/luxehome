@@ -7,7 +7,7 @@ const { module }=Astro.props as {module:CmsModule};
 <script>
   import {createClient} from '@supabase/supabase-js';
   import {LUXE_SUPABASE_KEY as key,LUXE_SUPABASE_URL as url} from '../../lib/luxe-supabase';
-  import {FIXTURE_CATEGORIES} from '../../lib/luxe-config';
+  import {FIXTURE_CATEGORIES,MATERIAL_CATEGORIES} from '../../lib/luxe-config';
   const root=document.getElementById('manager'),modal=document.getElementById('cms-modal'),cfg=JSON.parse(root.dataset.module);
   let sb,rows=[],lookups={spaces:[],designs:[]};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -66,12 +66,31 @@ const { module }=Astro.props as {module:CmsModule};
   async function renderChildren(parent){
     const holder=document.getElementById('children');
     const groups=await Promise.all(cfg.children.map(async def=>{const {data,error}=await sb.from(def.table).select('*').eq(def.foreignKey,parent.id).order('sort_order',{ascending:true});return {def,items:data||[],error}}));
-    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Design file section</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${group.def.table==='lx_design_fixtures'&&!group.items.length?`<button class="seed" data-fixture-seed="${index}">Create full checklist</button>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(group.def.table==='lx_design_drawings'?choiceLabel(item[group.def.titleKey]):item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
+    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Design file section</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${['lx_design_fixtures','lx_design_materials'].includes(group.def.table)?`<button class="seed" data-checklist-seed="${index}">Complete checklist</button>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(group.def.table==='lx_design_drawings'?choiceLabel(item[group.def.titleKey]):item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
     holder.querySelectorAll('[data-child-new]').forEach(button=>button.onclick=()=>childEditor(groups[Number(button.dataset.childNew)],null,parent));
-    holder.querySelectorAll('[data-fixture-seed]').forEach(button=>button.onclick=()=>seedFixtureSchedule(parent));
+    holder.querySelectorAll('[data-checklist-seed]').forEach(button=>button.onclick=()=>seedDesignChecklist(parent,groups[Number(button.dataset.checklistSeed)]));
     holder.querySelectorAll('[data-child-id]').forEach(el=>{const group=groups[Number(el.dataset.childGroup)];el.onclick=()=>childEditor(group,group.items.find(item=>String(item.id)===el.dataset.childId),parent)});
   }
-  async function seedFixtureSchedule(parent){const space=lookups.spaces.find(s=>s.id===parent.space_id),categories=(FIXTURE_CATEGORIES[space?.slug]||[]).filter(name=>name!=='Other');if(!categories.length)return toast('Select a design space first');if(!confirm(`Create ${categories.length} fixture checklist rows for this ${space.name} design?`))return;const rows=categories.map((category,index)=>({design_id:parent.id,category,name:category,quantity:1,included:true,sort_order:index}));const {error}=await sb.from('lx_design_fixtures').insert(rows);if(error)return toast(error.message);toast('Fixture checklist created');renderChildren(parent)}
+  async function seedDesignChecklist(parent,group){
+    const space=lookups.spaces.find(s=>s.id===parent.space_id);
+    if(!space)return toast('Select a design space first');
+    const isFixtures=group.def.table==='lx_design_fixtures';
+    const categories=(isFixtures?FIXTURE_CATEGORIES:MATERIAL_CATEGORIES)[space.slug]||[];
+    const existing=new Set(group.items.map(item=>String(item.category||'').trim().toLowerCase()));
+    const missing=categories
+      .map((category,index)=>({category,index}))
+      .filter(({category})=>category!=='Other'&&!existing.has(category.toLowerCase()));
+    if(!missing.length)return toast('Checklist is already complete');
+    const label=isFixtures?'fixtures and fittings':'materials and finishes';
+    if(!confirm(`Add ${missing.length} missing ${label} checklist rows for this ${space.name} design?`))return;
+    const rows=missing.map(({category,index})=>isFixtures
+      ? {design_id:parent.id,category,name:category,quantity:1,included:true,sort_order:index}
+      : {design_id:parent.id,category,brand:'',item:null,sort_order:index});
+    const {error}=await sb.from(group.def.table).insert(rows);
+    if(error)return toast(error.message);
+    toast(`${isFixtures?'Fixtures & fittings':'Materials & finishes'} checklist completed`);
+    renderChildren(parent);
+  }
   /* Photos come straight off a phone camera roll — often 4000px HEIC or JPEG.
      Convert to WebP and cap the long edge before upload so pages stay fast
      and every browser can display the result (Chrome cannot render HEIC). */
