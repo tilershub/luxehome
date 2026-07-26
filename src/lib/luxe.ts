@@ -68,7 +68,6 @@ export interface DesignPriceTier {
   sort_order: number;
 }
 export interface DesignMaterial { category: string; brand: string; item: string | null; sort_order: number; image_url?: string | null; usage_label?: string | null; }
-export interface DesignTimelineStep { week_label: string; title: string; description: string | null; sort_order: number; }
 export interface DesignFaq { question: string; answer: string; sort_order: number; }
 
 export interface DesignFull extends Design {
@@ -76,7 +75,6 @@ export interface DesignFull extends Design {
   fixtures: DesignFixture[];
   price_tiers: DesignPriceTier[];
   materials: DesignMaterial[];
-  timeline: DesignTimelineStep[];
   faq: DesignFaq[];
 }
 
@@ -163,14 +161,13 @@ export async function getDesignBySlug(slug: string): Promise<DesignFull | null> 
     .maybeSingle();
   if (!design) return null;
 
-  const [drawings, fixtures, priceTiers, materials, timeline, faq] = await Promise.all([
+  const [drawings, fixtures, priceTiers, materials, faq] = await Promise.all([
     c.from('lx_design_drawings').select('*').eq('design_id', design.id).order('sort_order'),
     // Select all fields so deployments remain compatible while the additive
     // warranty column migration is being rolled out.
     c.from('lx_design_fixtures').select('*').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_price_tiers').select('label,sqm,new_price_lkr,renovation_price_lkr,sort_order').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_materials').select('*').eq('design_id', design.id).order('sort_order'),
-    c.from('lx_design_timeline').select('week_label,title,description,sort_order').eq('design_id', design.id).order('sort_order'),
     c.from('lx_design_faq').select('question,answer,sort_order').eq('design_id', design.id).order('sort_order'),
   ]);
 
@@ -180,7 +177,6 @@ export async function getDesignBySlug(slug: string): Promise<DesignFull | null> 
     fixtures: fixtures.data ?? [],
     price_tiers: priceTiers.data ?? [],
     materials: materials.data ?? [],
-    timeline: timeline.data ?? [],
     faq: faq.data ?? [],
   };
 }

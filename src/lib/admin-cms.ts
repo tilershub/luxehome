@@ -32,7 +32,6 @@ const designChildren:CmsChild[]=[
     {key:'sort_order',label:'Display order',type:'number'},
   ]},
   {label:'Materials & finishes',table:'lx_design_materials',foreignKey:'design_id',titleKey:'brand',fields:[{key:'category',label:'Category',required:true},{key:'brand',label:'Brand / material name',required:true},{key:'item',label:'Item'},{key:'usage_label',label:'Where it is used (e.g. “Wall & floor”, “Vanity”)'},{key:'image_url',label:'Material photo',type:'image'},{key:'sort_order',label:'Sort order',type:'number'}]},
-  {label:'Workflow timeline',table:'lx_design_timeline',foreignKey:'design_id',titleKey:'title',fields:[{key:'week_label',label:'Week',required:true},{key:'title',label:'Title',required:true},{key:'description',label:'Description',type:'textarea'},{key:'sort_order',label:'Sort order',type:'number'}]},
   {label:'Questions & answers',table:'lx_design_faq',foreignKey:'design_id',titleKey:'question',fields:[{key:'question',label:'Question',required:true},{key:'answer',label:'Answer',type:'textarea',required:true},{key:'sort_order',label:'Sort order',type:'number'}]},
 ];
 const projectChildren:CmsChild[]=[
