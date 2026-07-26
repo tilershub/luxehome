@@ -3,7 +3,7 @@ export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import { getProjectBySlug, youtubeEmbed, isYouTubeShort, type ProjectFull } from '../../lib/luxe';
-import { cloudinary } from '../../lib/luxe-config';
+import { cloudinary, absoluteUrl } from '../../lib/luxe-config';
 
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);
@@ -19,6 +19,19 @@ const projectVideoCover = project.after_image_url || project.before_image_url;
 const inspectionHref = project.design
   ? `/book-site-inspection?design=${encodeURIComponent(project.design.slug)}&source_project=${encodeURIComponent(project.slug)}`
   : `/book-site-inspection?source_project=${encodeURIComponent(project.slug)}`;
+
+const primaryVideo = video || episode2 || episode1;
+const videoSchema = (primaryVideo && project.after_image_url) ? JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'VideoObject',
+  name: `${project.title} — completed bathroom walkthrough`,
+  description: `A walkthrough of the completed ${project.title} bathroom by LUXEhome${project.location ? `, ${project.location}` : ''}.`,
+  thumbnailUrl: [absoluteUrl(cloudinary(project.after_image_url, 1200))],
+  uploadDate: project.created_at ?? undefined,
+  embedUrl: primaryVideo,
+  publisher: { '@type': 'Organization', name: 'LUXEhome', url: 'https://luxehome.lk' },
+  regionsAllowed: 'LK',
+}) : null;
 
 const reviewSchema = project.rating ? JSON.stringify({
   '@context': 'https://schema.org',
@@ -42,6 +55,7 @@ const reviewSchema = project.rating ? JSON.stringify({
 >
   <Fragment slot="head">
     {reviewSchema && <script is:inline type="application/ld+json" set:html={reviewSchema}></script>}
+    {videoSchema && <script is:inline type="application/ld+json" set:html={videoSchema}></script>}
   </Fragment>
 
   <!-- Hero -->

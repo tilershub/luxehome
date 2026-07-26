@@ -49,6 +49,7 @@ export interface Design {
   workflow_text: string | null;
   highlights: string[];
   featured: boolean; sort_order: number;
+  created_at?: string;
   space?: Space;
 }
 
@@ -91,6 +92,7 @@ export interface LuxeProject {
   rating: number | null; review_text: string | null; review_by: string | null;
   review_screenshot_url?: string | null;
   featured: boolean;
+  created_at?: string;
   design?: Pick<Design, 'slug' | 'name' | 'collection'> | null;
 }
 
