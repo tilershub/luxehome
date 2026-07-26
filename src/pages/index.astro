@@ -4,6 +4,7 @@ import LuxeLayout from '../layouts/LuxeLayout.astro';
 import ProjectCard from '../components/luxe/ProjectCard.astro';
 import KeyHighlights from '../components/luxe/KeyHighlights.astro';
 import BuildProcess from '../components/luxe/BuildProcess.astro';
+import SwipeCarouselController from '../components/luxe/SwipeCarouselController.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
 import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
 import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
@@ -183,7 +184,7 @@ const projects = (await getProjects())
 
     <div class="home-design-collections">
       {collectionGroups.map((collection, collectionIndex) => (
-        <section class="home-design-collection" aria-labelledby={`home-${collection.key}-title`}>
+        <section class="home-design-collection" aria-labelledby={`home-${collection.key}-title`} data-swipe-carousel>
           <div class="home-collection-heading lxr">
             <div>
               <span>{String(collectionIndex + 1).padStart(2, '0')}</span>
@@ -198,9 +199,10 @@ const projects = (await getProjects())
             aria-label={`${collection.label} bathroom designs`}
             aria-describedby={`home-${collection.key}-swipe`}
             tabindex="0"
+            data-swipe-track
           >
             {collection.designs.map((design) => (
-              <a class:list={['home-design-card', 'lxr', { 'is-placeholder': !design.cover }]} href={`/designs/${design.slug}`}>
+              <a class:list={['home-design-card', 'lxr', { 'is-placeholder': !design.cover }]} href={`/designs/${design.slug}`} data-swipe-slide>
                 <div class="home-design-image">
                   {design.cover ? (
                     <img src={cloudinary(design.cover, 800)} alt={`${design.name} bathroom design`} loading="lazy" width="800" height="1000" />
@@ -226,6 +228,17 @@ const projects = (await getProjects())
                   <strong>{design.cover ? 'View complete design' : 'View design details'} <span aria-hidden="true">→</span></strong>
                 </div>
               </a>
+            ))}
+          </div>
+          <div class="home-carousel-dots" data-swipe-dots role="group" aria-label={`${collection.label} carousel position`}>
+            {collection.designs.map((design, index) => (
+              <button
+                type="button"
+                class:list={[{ 'is-active': index === 0 }]}
+                data-swipe-dot
+                aria-label={`Show ${design.name}, image ${index + 1} of ${collection.designs.length}`}
+                aria-current={index === 0 ? 'true' : undefined}
+              ></button>
             ))}
           </div>
         </section>
@@ -274,6 +287,7 @@ const projects = (await getProjects())
       <a href="/designs">Browse designs first</a>
     </div>
   </section>
+  <SwipeCarouselController />
 </LuxeLayout>
 
 <style>
@@ -411,14 +425,14 @@ const projects = (await getProjects())
     overscroll-behavior-inline: contain;
     scroll-padding-inline: .15rem;
     scroll-snap-type: x mandatory;
-    scrollbar-color: var(--gold) var(--cream-deep);
-    scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
   }
-  .home-design-rail::-webkit-scrollbar { height: 6px; }
-  .home-design-rail::-webkit-scrollbar-track { border-radius: 999px; background: var(--cream-deep); }
-  .home-design-rail::-webkit-scrollbar-thumb { border-radius: 999px; background: var(--gold); }
   .home-design-rail:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+  .home-carousel-dots {
+    --swipe-dot-active: var(--sage-deep);
+    --swipe-dot-focus: var(--gold);
+    padding-top: .25rem;
+  }
   .home-design-card {
     position: relative;
     flex: 0 0 min(90vw, 500px);
