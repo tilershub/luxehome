@@ -256,9 +256,9 @@ export const PLANNER = {
   },
 } as const;
 
-/** File completeness checks for the admin designs list (7 checks). */
+/** File completeness checks for the legacy admin designs list (7 checks). */
 export const COMPLETENESS_CHECKS = [
-  { key: 'drawings',  label: '≥6 drawings' },
+  { key: 'drawings',  label: '5 room images' },
   { key: 'video',     label: '3D video' },
   { key: 'pricing',   label: '3 size prices' },
   { key: 'fixtures',  label: '≥5 fixtures' },

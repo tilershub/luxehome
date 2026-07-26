@@ -260,7 +260,7 @@
     function completeness(d) {
       const c = childCounts[d.id] || {};
       let score = 0;
-      if ((c.drawings || 0) >= 6) score++;
+      if ((c.drawings || 0) >= 5) score++;
       if (ytId(d.video_3d_url)) score++;
       if ((c.priceTiers || 0) >= 3) score++;
       if ((c.fixtures || 0) >= 5) score++;
@@ -369,10 +369,9 @@
 
     /* ── Design editor ── */
     const DRAWING_SLOTS = [
-      ['render_1', '3D Render 1'], ['render_2', '3D Render 2'],
-      ['render_3', '3D Render 3'], ['render_4', '3D Render 4'],
-      ['civil', 'Civil Drawing'], ['supply_water', 'Supply Water'],
-      ['waste_drainage', 'Waste & Drainage'], ['electrical', 'Electrical'],
+      ['vanity', 'Vanity'], ['water_closet', 'Water Closet'],
+      ['shower', 'Shower'], ['shower_cubicle', 'Shower Cubicle'],
+      ['ceiling', 'Ceiling'],
     ];
 
     async function designEditor(d) {
@@ -574,7 +573,7 @@
       function render() {
         main.innerHTML = `
           <div class="ed-tabs">
-            ${[['basics','Basics'],['pricing','Size Pricing'],['media','Drawings & Media'],['fixtures','Fixtures'],['materials','Materials'],['workflow','Workflow'],['faq','Q&A']]
+            ${[['basics','Basics'],['pricing','Size Pricing'],['media','Room Images & Media'],['fixtures','Fixtures'],['materials','Materials'],['workflow','Workflow'],['faq','Q&A']]
               .map(([k, l]) => `<button class="ed-tab ${subTab === k ? 'active' : ''}" data-sub="${k}">${l}</button>`).join('')}
           </div>
           <div id="sub-body">${subTabHtml()}</div>
