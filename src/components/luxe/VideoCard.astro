@@ -385,16 +385,27 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
   .lv-sound[aria-pressed='true'] .lv-icon-muted { display: none; }
   .lv-sound[aria-pressed='true'] { background: var(--gold); border-color: var(--gold); color: #fff; }
 
+  /* Driven from the height so the video fills the screen it is given: it takes
+     the full viewport height minus the title bar, unless that would make it
+     wider than the screen, in which case width wins. Sizing the width from
+     dvh instead left it far smaller than the space available. */
   .lv-player {
     position: relative;
-    width: min(430px, calc(100vw - 2rem), 46dvh);
     aspect-ratio: 9 / 16;
+    height: min(calc(100dvh - 6.5rem), calc((100vw - 2rem) * 16 / 9));
+    width: auto;
+    max-width: min(560px, calc(100vw - 2rem));
     overflow: hidden;
     border-radius: 16px;
     background: #000;
     box-shadow: 0 30px 80px rgba(0,0,0,.55);
   }
-  .lv-player:not(.is-portrait) { width: min(980px, calc(100vw - 2rem)); aspect-ratio: 16 / 9; }
+  .lv-player:not(.is-portrait) {
+    aspect-ratio: 16 / 9;
+    height: auto;
+    width: min(1040px, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+  }
   .lv-player iframe { width: 100%; height: 100%; border: 0; display: block; }
   .lv-frame { position: absolute; inset: 0; z-index: 1; }
 
@@ -502,7 +513,13 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
 
   @media (max-width: 640px) {
     .lv-card { width: min(82vw, 300px); }
-    .lv-player { width: min(100%, calc(100vw - 2rem), 62dvh); }
+    /* Edge to edge on a phone, with only the safe areas and title bar spared. */
+    .lv-modal { padding: max(.6rem, env(safe-area-inset-top)) .6rem max(.6rem, env(safe-area-inset-bottom)); }
+    .lv-player {
+      height: min(calc(100dvh - 5rem), calc((100vw - 1.2rem) * 16 / 9));
+      max-width: calc(100vw - 1.2rem);
+      border-radius: 14px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
