@@ -189,7 +189,7 @@ const projects = (await getProjects())
               <span>{String(collectionIndex + 1).padStart(2, '0')}</span>
               <h3 id={`home-${collection.key}-title`}>{collection.label}</h3>
             </div>
-            <p id={`home-${collection.key}-swipe`}>Swipe to explore <span aria-hidden="true">↔</span></p>
+            <p id={`home-${collection.key}-swipe`}>Swipe or scroll <span aria-hidden="true">↔</span></p>
           </div>
 
           <div
@@ -391,7 +391,7 @@ const projects = (await getProjects())
   .home-collection-heading > div > span { color: var(--gold); font: 600 .75rem var(--lx-serif); }
   .home-collection-heading h3 { color: var(--sage-deep); font-size: clamp(1.65rem, 3.5vw, 2.25rem); }
   .home-collection-heading > p {
-    display: none;
+    display: flex;
     align-items: center;
     gap: .45rem;
     color: color-mix(in srgb, var(--ink) 58%, transparent);
@@ -421,7 +421,7 @@ const projects = (await getProjects())
   .home-design-rail:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
   .home-design-card {
     position: relative;
-    flex: 0 0 clamp(270px, 32vw, 360px);
+    flex: 0 0 min(90vw, 500px);
     display: block;
     aspect-ratio: 4 / 5;
     overflow: hidden;
@@ -539,7 +539,6 @@ const projects = (await getProjects())
     .home-first-step { grid-template-columns: 1fr; }
     .home-path-grid,
     .home-project-grid { grid-template-columns: 1fr; }
-    .home-collection-heading > p { display: flex; }
     .home-trust-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
@@ -554,7 +553,6 @@ const projects = (await getProjects())
     .home-collection-heading { align-items: center; }
     .home-collection-heading > div { display: block; }
     .home-collection-heading > div > span { display: block; margin-bottom: .15rem; }
-    .home-design-card { flex-basis: min(82vw, 310px); }
     .home-path-card { grid-template-columns: auto 1fr; }
     .home-path-card > b { display: none; }
     .home-trust-grid { grid-template-columns: 1fr; }
