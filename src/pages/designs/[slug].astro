@@ -198,6 +198,7 @@ const productSchema = JSON.stringify({
   title={`${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design | ${priceLabel} | LUXEhome`}
   description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then book a site inspection to check the fit.`}
   ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
+  ogImageAlt={`${design.name} — ${collectionLabel} bathroom design by LUXEhome`}
 >
   <Fragment slot="head">
     <script is:inline type="application/ld+json" set:html={productSchema}></script>

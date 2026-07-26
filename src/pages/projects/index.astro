@@ -3,7 +3,7 @@ export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import { getProjects } from '../../lib/luxe';
-import { waLink } from '../../lib/luxe-config';
+import { waLink, cloudinary } from '../../lib/luxe-config';
 
 const projects = (await getProjects())
   .filter((project) => project.after_image_url)
@@ -12,6 +12,8 @@ const projects = (await getProjects())
 
 <LuxeLayout
   title="Completed Bathroom Project Stories — LUXEhome"
+  ogImage={projects[0]?.after_image_url ? cloudinary(projects[0].after_image_url, 1200) : undefined}
+  ogImageAlt="Completed LUXEhome bathroom projects in Sri Lanka"
   description="Real LUXEhome bathroom projects documented from inquiry and design through construction, problem-solving, the team and final handover."
 >
   <section class="pj-hero">

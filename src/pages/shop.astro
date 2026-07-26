@@ -17,7 +17,9 @@ const fallback = [
 const stored = await getProducts(); const products = stored.length ? stored : fallback;
 const groups = ['Featured','Bathroom','Kitchen'];
 ---
-<LuxeLayout title="Shop — LUXEhome" description="Products specified by LUXEhome for better bathrooms, kitchens and complete rooms.">
+<LuxeLayout
+  ogImage={products[0]?.cover_image_url || undefined}
+  ogImageAlt="LUXEhome specified bathroom products" title="Shop — LUXEhome" description="Products specified by LUXEhome for better bathrooms, kitchens and complete rooms.">
   <section class="shop-hero"><p class="lx-eyebrow">Specified by LUXEhome</p><h1>Products selected for better rooms.</h1><p>A curated selection of fixtures, furniture and finishes chosen to work with our designs.</p><nav>{groups.map((group)=><a href={`#${group.toLowerCase()}`}>{group}</a>)}</nav></section>
   <div class="shop-body">{groups.map((group)=><section id={group.toLowerCase()}><p class="lx-eyebrow">{group} collection</p><h2>{group === 'Featured' ? 'Curated selection' : group === 'Bathroom' ? 'Fixtures & furniture' : 'Function, finished beautifully'}</h2><div class="product-grid">{products.filter((p:any)=>(p.category||'Featured').toLowerCase()===group.toLowerCase()).map((p:any)=><a class="product" href={`/shop/${p.slug}`}><div class="image">{p.cover_image_url?<img src={p.cover_image_url} alt={p.name} loading="lazy"/>:<span>{p.name}</span>}</div><div class="body"><h3>{p.name}</h3><p>{p.short_description}</p><strong>{Number(p.price_lkr)>0?`From LKR ${Number(p.price_lkr).toLocaleString('en-LK')}`:'Price on request'}</strong><span class="link">View product →</span></div></a>)}</div></section>)}</div>
   <section class="shop-cta"><div><p class="lx-eyebrow">Need tiles, flooring or finishing materials?</p><h2>Choose them with the design.</h2></div><a href={waLink('Hi LUXEhome! I need help selecting materials.')} target="_blank" rel="noopener noreferrer">Ask for material options</a></section>

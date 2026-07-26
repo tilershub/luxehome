@@ -4,7 +4,9 @@ import LuxeLayout from '../layouts/LuxeLayout.astro';
 import SpaceDesigns from '../components/luxe/SpaceDesigns.astro';
 import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
 ---
-<LuxeLayout title="Sri Lankan Bathroom Designs — LUXEhome">
+<LuxeLayout
+  ogImage="/spaces/bathroom.webp"
+  ogImageAlt="LUXEhome bathroom designs" title="Sri Lankan Bathroom Designs — LUXEhome">
   <SpaceDesigns
     space="bathrooms"
     designs={CATALOGUE_DESIGNS.filter((design) => design.space === 'bathrooms' && design.coverImage)}

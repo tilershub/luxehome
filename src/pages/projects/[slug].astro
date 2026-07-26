@@ -38,6 +38,7 @@ const reviewSchema = project.rating ? JSON.stringify({
   title={`${project.title} — Project Story | LUXEhome`}
   description={`${project.title}${project.location ? `, ${project.location}` : ''} — the full LUXEhome project story: before and after, the week-by-week journey, what we found on site and how we fixed it.`}
   ogImage={project.after_image_url ? cloudinary(project.after_image_url, 1200) : undefined}
+  ogImageAlt={`${project.title} — completed LUXEhome bathroom${project.location ? `, ${project.location}` : ''}`}
 >
   <Fragment slot="head">
     {reviewSchema && <script is:inline type="application/ld+json" set:html={reviewSchema}></script>}
