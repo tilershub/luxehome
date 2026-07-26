@@ -4,7 +4,7 @@ import LuxeLayout from '../layouts/LuxeLayout.astro';
 import ProjectCard from '../components/luxe/ProjectCard.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
 import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
-import { cloudinary, formatLKRM } from '../lib/luxe-config';
+import { cloudinary, formatLKRM, formatArea } from '../lib/luxe-config';
 
 interface HomeDesign {
   slug: string;
@@ -161,7 +161,7 @@ const projects = (await getProjects())
         <a class="home-design-card lxr" href={`/designs/${design.slug}`}>
           <div class="home-design-image">
             <img src={cloudinary(design.cover, 800)} alt={`${design.name} bathroom design`} loading="lazy" width="800" height="600" />
-            <span>{design.minSqm ? `Minimum ${design.minSqm} m²` : 'Custom fit'}</span>
+            <span>{formatArea(design.minSqm) ? `Minimum ${formatArea(design.minSqm)} m²` : 'Custom fit'}</span>
           </div>
           <div class="home-design-body">
             <p class="lx-eyebrow">{design.collection} collection</p>

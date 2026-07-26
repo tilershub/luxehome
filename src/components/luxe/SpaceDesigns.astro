@@ -1,7 +1,7 @@
 ---
 import type { CatalogueDesign } from '../../lib/luxe-catalogue';
 import { SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
-import { formatLKRM, waLink } from '../../lib/luxe-config';
+import { formatLKRM, waLink, formatArea } from '../../lib/luxe-config';
 interface Props { space: CatalogueDesign['space']; designs: CatalogueDesign[]; }
 const { space, designs } = Astro.props;
 const presentation = SPACE_PRESENTATION[space];
@@ -43,7 +43,7 @@ const collections = [
       <div class="design-grid">{group.map((item) => <a class="design-card" href={`/designs/${item.slug}`}>
         <div class="art"><img src={item.coverImage} alt={`${item.name} ${spaceLabel} design`} loading="lazy" /></div>
         <div class="body">
-          <div class="meta"><span>{collection.key}</span><span>{item.minSqm ? `Minimum ${item.minSqm} m²` : 'Custom fit'}</span></div>
+          <div class="meta"><span>{collection.key}</span><span>{formatArea(item.minSqm) ? `Minimum ${formatArea(item.minSqm)} m²` : 'Custom fit'}</span></div>
           <h3>{item.name}</h3><p>{item.tagline}</p>
           <dl>
             {item.startingPrice && <><dt>New bathroom</dt><dd>{formatLKRM(item.startingPrice)}</dd></>}

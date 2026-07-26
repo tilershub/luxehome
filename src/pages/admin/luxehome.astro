@@ -423,7 +423,7 @@
           <div class="fld"><label>Description</label><textarea id="f-desc">${esc(d.description)}</textarea></div>
           <div class="fld-row">
             <div class="fld"><label>Card price / lowest starting price (LKR) *</label><input id="f-price" type="number" value="${d.starting_price_lkr || ''}" /></div>
-            <div class="fld"><label>Min size (m², blank = any)</label><input id="f-minsqm" type="number" step="0.5" value="${d.min_sqm ?? ''}" /></div>
+            <div class="fld"><label>Min size (m², blank = any)</label><input id="f-minsqm" type="number" step="any" value="${d.min_sqm ?? ''}" /></div>
           </div>
           <div class="fld-row">
             <div class="fld"><label>New bathroom starting price (LKR)</label><input id="f-new-price" type="number" value="${d.new_starting_price_lkr ?? ''}" /></div>
@@ -441,7 +441,7 @@
             ${children.priceTiers.map((tier, i) => `
               <div class="sub-row price-tier-row" data-i="${i}">
                 <input data-f="label" placeholder="Recommended fit" value="${esc(tier.label)}" />
-                <input data-f="sqm" type="number" min="0.5" step="0.5" placeholder="m²" value="${tier.sqm ?? ''}" />
+                <input data-f="sqm" type="number" min="0" step="any" placeholder="m²" value="${tier.sqm ?? ''}" />
                 <input data-f="new_price_lkr" type="number" min="0" step="1000" placeholder="New price" value="${tier.new_price_lkr ?? ''}" />
                 <input data-f="renovation_price_lkr" type="number" min="0" step="1000" placeholder="Renovation price" value="${tier.renovation_price_lkr ?? ''}" />
                 <button class="sub-del" data-del="${i}">✕</button>
