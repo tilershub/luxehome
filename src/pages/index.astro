@@ -416,14 +416,15 @@ const projects = (await getProjects())
   }
   .home-collection-heading > p span { color: var(--gold); font: 600 1rem var(--lx-serif); }
   .home-design-rail {
+    --home-card-width: min(90vw, 500px);
     display: flex;
     gap: 1rem;
     min-width: 0;
     margin-inline: -.15rem;
-    padding: .15rem .15rem 1rem;
+    padding: .15rem max(.15rem, calc((100% - var(--home-card-width)) / 2)) 1rem;
     overflow-x: auto;
     overscroll-behavior-inline: contain;
-    scroll-padding-inline: .15rem;
+    scroll-padding-inline: max(.15rem, calc((100% - var(--home-card-width)) / 2));
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }
@@ -435,7 +436,7 @@ const projects = (await getProjects())
   }
   .home-design-card {
     position: relative;
-    flex: 0 0 min(90vw, 500px);
+    flex: 0 0 var(--home-card-width);
     display: block;
     aspect-ratio: 4 / 5;
     overflow: hidden;
@@ -443,7 +444,7 @@ const projects = (await getProjects())
     background: var(--sage-deep);
     color: var(--cream);
     text-decoration: none;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
     scroll-snap-stop: always;
     box-shadow: 0 14px 34px rgba(43,50,42,.1);
     transition: transform .25s ease, box-shadow .25s ease;
