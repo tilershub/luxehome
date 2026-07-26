@@ -2,7 +2,7 @@
 export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getDesigns, type Design } from '../../lib/luxe';
-import { formatLKRM, cloudinary } from '../../lib/luxe-config';
+import { formatLKRM, cloudinary , formatArea } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS } from '../../lib/luxe-catalogue';
 
 const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
@@ -90,7 +90,7 @@ const collections = [
                 <a href={`/designs/${design.slug}`} class="dz-card lxr">
                   <div class="dz-card-img">
                     <img src={cloudinary(design.cover_image_url, 800)} alt={`${design.name} bathroom design`} loading="lazy" width="800" height="600" />
-                    <span class="dz-badge">{design.min_sqm ? `Minimum ${design.min_sqm} m²` : 'Custom fit'}</span>
+                    <span class="dz-badge">{formatArea(design.min_sqm) ? `Minimum ${formatArea(design.min_sqm)} m²` : 'Custom fit'}</span>
                   </div>
                   <div class="dz-card-body">
                     <p class="lx-eyebrow">{collection.label.replace(' Collection', '')}</p>

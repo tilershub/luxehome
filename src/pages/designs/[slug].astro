@@ -4,7 +4,7 @@ import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import { getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES } from '../../lib/luxe-config';
+import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
 const { slug } = Astro.params;
@@ -120,9 +120,9 @@ const priceTiers = design.price_tiers.length > 0
 const perSqmRate = (() => {
   if (priceTiers.length < 2) return null;
   const [a, b] = priceTiers;
-  const span = b.sqm - a.sqm;
+  const span = Number(b.sqm) - Number(a.sqm);
   if (span <= 0) return null;
-  const rate = (b.new_price_lkr - a.new_price_lkr) / span;
+  const rate = (Number(b.new_price_lkr) - Number(a.new_price_lkr)) / span;
   return rate > 0 ? Math.round(rate) : null;
 })();
 
@@ -343,8 +343,8 @@ const productSchema = JSON.stringify({
       <h2 class="wx-dark-title">A starting price for the minimum room.</h2>
       <p class="wx-body wx-body--dark">
         {renoPrice
-          ? `Both prices hold the full ${design.name} specification for a ${design.min_sqm ?? priceTiers[0]?.sqm ?? '—'} m² room.${perSqmRate ? ' Every additional square metre of floor, wall and construction area is added at a flat rate.' : ''}`
-          : `The starting price holds the full ${design.name} specification for a ${design.min_sqm ?? priceTiers[0]?.sqm ?? '—'} m² room.${perSqmRate ? ' Every additional square metre of floor, wall and construction area is added at a flat rate.' : ''}`}
+          ? `Both prices hold the full ${design.name} specification for a ${formatArea(design.min_sqm) ?? formatArea(priceTiers[0]?.sqm) ?? '—'} m² room.${perSqmRate ? ' Every additional square metre of floor, wall and construction area is added at a flat rate.' : ''}`
+          : `The starting price holds the full ${design.name} specification for a ${formatArea(design.min_sqm) ?? formatArea(priceTiers[0]?.sqm) ?? '—'} m² room.${perSqmRate ? ' Every additional square metre of floor, wall and construction area is added at a flat rate.' : ''}`}
       </p>
 
       <div class="wx-from-grid">
@@ -352,14 +352,14 @@ const productSchema = JSON.stringify({
           <div class="wx-from-card">
             <span>New bathroom</span>
             <div><small>From</small><strong>{lkrM(newPrice)}</strong></div>
-            <em>{design.min_sqm ? `Minimum ${design.min_sqm} m²` : 'Minimum fit'} · complete build</em>
+            <em>{formatArea(design.min_sqm) ? `Minimum ${formatArea(design.min_sqm)} m²` : 'Minimum fit'} · complete build</em>
           </div>
         )}
         {renoPrice && (
           <div class="wx-from-card">
             <span>Renovation</span>
             <div><small>From</small><strong>{lkrM(renoPrice)}</strong></div>
-            <em>{design.min_sqm ? `Minimum ${design.min_sqm} m²` : 'Minimum fit'} · existing room</em>
+            <em>{formatArea(design.min_sqm) ? `Minimum ${formatArea(design.min_sqm)} m²` : 'Minimum fit'} · existing room</em>
           </div>
         )}
       </div>
@@ -371,7 +371,7 @@ const productSchema = JSON.stringify({
           {priceTiers.map((tier) => (
             <div class="wx-tier-row" role="row">
               <span class="wx-tier-label">{tier.label}</span>
-              <span class="wx-tier-area">{tier.sqm} m²</span>
+              <span class="wx-tier-area">{formatArea(tier.sqm)} m²</span>
               <span>{lkrM(tier.new_price_lkr)}</span>
               <span class="wx-tier-reno">{lkrM(tier.renovation_price_lkr)}</span>
             </div>
