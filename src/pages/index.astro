@@ -217,7 +217,7 @@ const projects = (await getProjects())
                   <span>{formatArea(design.minSqm) ? `Minimum ${formatArea(design.minSqm)} m²` : 'Custom fit'}</span>
                 </div>
                 <div class="home-design-body">
-                  <h3>{design.name}</h3>
+                  <h4>{design.name}</h4>
                   <p>{design.tagline}</p>
                   <dl>
                     {design.newPrice && <><dt>New bathroom</dt><dd>{formatLKRM(design.newPrice)}</dd></>}
@@ -445,6 +445,7 @@ const projects = (await getProjects())
     place-content: center;
     justify-items: center;
     gap: .65rem;
+    padding-bottom: 22%;
     overflow: hidden;
     background:
       radial-gradient(circle at 22% 16%, rgba(204,176,113,.3), transparent 30%),
@@ -496,7 +497,7 @@ const projects = (await getProjects())
     backdrop-filter: blur(8px);
   }
   .home-design-body { position: absolute; inset: auto 0 0; padding: 1rem 1.15rem 1.2rem; }
-  .home-design-body h3 { margin: 0 0 .25rem; color: var(--cream); font-size: 2rem; }
+  .home-design-body h4 { margin: 0 0 .25rem; color: var(--cream); font-size: 2rem; }
   .home-design-body > p { display: -webkit-box; overflow: hidden; color: rgba(247,243,235,.74); font-size: .76rem; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
   .home-design-body dl { display: grid; grid-template-columns: 1fr auto; gap: .18rem .7rem; margin: .75rem 0; padding-top: .65rem; border-top: 1px solid rgba(247,243,235,.2); }
   .home-design-body dt { color: rgba(247,243,235,.68); font-size: .65rem; }
