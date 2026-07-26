@@ -75,6 +75,8 @@ const projects = (await getProjects())
 <LuxeLayout
   title="Complete Bathroom Design & Construction in Sri Lanka — LUXEhome"
   description="Choose a fully documented LUXEhome bathroom design, then book a LKR 10,000 site inspection. We measure, confirm the fit and manage new bathrooms or renovations through handover."
+  ogImage={heroDesign ? cloudinary(heroDesign.cover, 1200) : undefined}
+  ogImageAlt={heroDesign ? `${heroDesign.name} bathroom by LUXEhome` : undefined}
 >
   <section class="home-hero">
     <div class="home-hero-copy">

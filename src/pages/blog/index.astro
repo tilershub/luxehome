@@ -21,6 +21,8 @@ const [featured, ...rest] = filtered;
 <LuxeLayout
   title="Ideas & Advice — The LUXEhome Journal"
   description="Practical design, materials, quotation and construction guidance from the LUXEhome team in Sri Lanka — written for homeowners planning real projects."
+  ogImage={featured?.cover_image || undefined}
+  ogImageAlt="The LUXEhome Journal"
 >
   <section class="journal-hero">
     <p class="lx-eyebrow lxr">The LUXEhome journal</p>

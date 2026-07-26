@@ -57,6 +57,8 @@ const collections = [
 <LuxeLayout
   title="Bathroom Designs — Complete Design Files | LUXEhome"
   description="Browse fully developed LUXEhome bathroom designs with room-size guidance, new and renovation starting prices, renders, technical drawings, fixtures and warranties."
+  ogImage={designs[0]?.cover_image_url ? cloudinary(designs[0].cover_image_url, 1200) : undefined}
+  ogImageAlt="LUXEhome bathroom design collection"
 >
   <section class="dz-hero">
     <p class="lx-eyebrow lxr">The Sri Lankan floral collection</p>

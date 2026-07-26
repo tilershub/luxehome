@@ -6,7 +6,7 @@ import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import KeyHighlights from '../../components/luxe/KeyHighlights.astro';
 import BuildProcess from '../../components/luxe/BuildProcess.astro';
 import { getDesignBySlug, getProjects, youtubeEmbed, isYouTubeShort, type DesignFixture, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea } from '../../lib/luxe-config';
+import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea, absoluteUrl } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 
 const { slug } = Astro.params;
@@ -177,6 +177,23 @@ const nameStory = design.name_story
 
 const materialsWithPhotos = design.materials.filter((m) => m.image_url);
 
+/* Video structured data ties the walkthrough to THIS page, so a video rich
+   result links here rather than to youtube.com. Works with an embedded or a
+   self-hosted file — only contentUrl/embedUrl changes. */
+const videoSchema = (video3d && design.cover_image_url) ? JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'VideoObject',
+  name: `${design.name} — 3D bathroom walkthrough`,
+  description: `A vertical 3D walkthrough of the ${design.name} ${collectionLabel} bathroom by LUXEhome: vanity, water closet, shower and the complete room.`,
+  thumbnailUrl: [absoluteUrl(cloudinary(design.cover_image_url, 1200))],
+  uploadDate: design.created_at ?? undefined,
+  // contentUrl must be a media file. While the video is hosted on YouTube,
+  // embedUrl alone is correct; self-hosting an MP4 would add contentUrl.
+  embedUrl: video3d,
+  publisher: { '@type': 'Organization', name: 'LUXEhome', url: 'https://luxehome.lk' },
+  regionsAllowed: 'LK',
+}) : null;
+
 const productSchema = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Product',
@@ -198,9 +215,11 @@ const productSchema = JSON.stringify({
   title={`${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design | ${priceLabel} | LUXEhome`}
   description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then book a site inspection to check the fit.`}
   ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
+  ogImageAlt={`${design.name} — ${collectionLabel} bathroom design by LUXEhome`}
 >
   <Fragment slot="head">
     <script is:inline type="application/ld+json" set:html={productSchema}></script>
+    {videoSchema && <script is:inline type="application/ld+json" set:html={videoSchema}></script>}
   </Fragment>
 
   <!-- HERO · THE DOORWAY -->

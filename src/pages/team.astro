@@ -4,7 +4,9 @@ import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { getTeam } from '../lib/luxe';
 const members=await getTeam();
 ---
-<LuxeLayout title="A permanent core. Verified specialists. — LUXEhome" description="Meet the permanent LUXEhome team and TILERSHUB Verified specialists responsible for design, construction quality and handover.">
+<LuxeLayout
+  ogImage={members[0]?.photo_url || undefined}
+  ogImageAlt="The LUXEhome team" title="A permanent core. Verified specialists. — LUXEhome" description="Meet the permanent LUXEhome team and TILERSHUB Verified specialists responsible for design, construction quality and handover.">
   <section class="team-hero"><p class="lx-eyebrow">The people responsible</p><h1>A permanent core. Verified specialists.</h1><p>Every project has clear ownership from client communication through procurement, site quality and handover.</p></section>
   <section class="team-grid">{members.length?members.map(member=><article>{member.photo_url?<img src={member.photo_url} alt={member.name} loading="lazy"/>:<div class="portrait">{member.name.slice(0,1)}</div>}<p class="lx-eyebrow">{member.permanent?'Permanent team':'Project specialist'}</p><h2>{member.name}</h2><strong>{member.role}</strong><p>{member.bio}</p>{member.tilershub_verified&&<span>✓ TILERSHUB Verified</span>}</article>):<><article><h2>Design & Client Experience</h2><p>Guides the brief, design selection and approvals.</p></article><article><h2>Project Manager</h2><p>Coordinates procurement, programme and specialist teams.</p></article><article><h2>Quality Supervisor</h2><p>Checks critical construction stages before work proceeds.</p></article><article><h2>TILERSHUB Verified Specialists</h2><p>Trade teams selected for the needs and location of each project.</p></article></>}</section>
 </LuxeLayout>

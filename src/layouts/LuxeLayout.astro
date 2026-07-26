@@ -2,12 +2,15 @@
 /* LUXEhome catalogue layout — the new brand system:
    cream/sage/gold palette · Cormorant Garamond + Jost + Noto Sans Sinhala.
    Keeps the site's Meta Pixel, Contact-event tracking, and SEO plumbing. */
-import { WHATSAPP_NUMBER, GA_MEASUREMENT_IDS } from '../lib/luxe-config';
+import { WHATSAPP_NUMBER, GA_MEASUREMENT_IDS, absoluteUrl } from '../lib/luxe-config';
 
 interface Props {
   title?: string;
   description?: string;
+  /** Share image for this page. Relative paths are made absolute. */
   ogImage?: string;
+  /** Describes the share image for screen readers and some crawlers. */
+  ogImageAlt?: string;
   /** Hide site nav/footer chrome (used by /start). */
   bare?: boolean;
 }
@@ -16,8 +19,14 @@ const {
   title = 'LUXEhome — Complete Bathroom Design & Construction, Sri Lanka',
   description = 'Choose a fully documented bathroom design, then book a LKR 10,000 site inspection. LUXEhome measures, adapts and builds bathrooms in Sri Lanka.',
   ogImage = 'https://luxehome.lk/og-bathroom.jpg',
+  ogImageAlt,
   bare = false,
 } = Astro.props;
+
+/* A CMS image can arrive as a repo path, and a share with a relative
+   og:image renders with no image at all. */
+const shareImage = absoluteUrl(ogImage) ?? 'https://luxehome.lk/og-bathroom.jpg';
+const shareImageAlt = ogImageAlt ?? title;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
@@ -50,12 +59,15 @@ Astro.response.headers.set(
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="LUXEhome" />
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:secure_url" content={shareImage} />
+    <meta property="og:image:alt" content={shareImageAlt} />
     <meta property="og:locale" content="en_LK" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image" content={shareImage} />
+    <meta name="twitter:image:alt" content={shareImageAlt} />
 
     <!-- Fonts: Cormorant Garamond (display) · Jost (body) · Noto Sans Sinhala -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

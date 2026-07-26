@@ -2,4 +2,6 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro'; import SpaceDesigns from '../components/luxe/SpaceDesigns.astro'; import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
 ---
-<LuxeLayout title="Sri Lankan Highland Staircase Designs — LUXEhome"><SpaceDesigns space="staircases" designs={CATALOGUE_DESIGNS.filter((d) => d.space === 'staircases')} /></LuxeLayout>
+<LuxeLayout
+  ogImage="/spaces/staircase.webp"
+  ogImageAlt="LUXEhome staircase designs" title="Sri Lankan Highland Staircase Designs — LUXEhome"><SpaceDesigns space="staircases" designs={CATALOGUE_DESIGNS.filter((d) => d.space === 'staircases')} /></LuxeLayout>

@@ -29,6 +29,17 @@ export function formatLKRM(rupees: number): string {
   return `From LKR ${label}M`;
 }
 
+export const SITE_URL = 'https://luxehome.lk';
+
+/** Social crawlers cannot resolve a relative path — "/images/x.jpg" is simply
+    dropped, and the share falls back to no image at all. Every og:image must
+    be absolute. */
+export function absoluteUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${SITE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
 /** Areas are numeric in Postgres and come back as strings ("3.50"), so render
     them without trailing zeros: 3.5 m², 5 m², 5.3 m². */
 export function formatArea(value: number | string | null | undefined): string | null {

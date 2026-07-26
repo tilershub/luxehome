@@ -96,11 +96,29 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
         </div>
       </div>
       <div class:list={['lv-player', { 'is-portrait': portrait }]}>
-        <div data-video-frame></div>
+        <div class="lv-frame" data-video-frame></div>
+        {/* Taps must never reach the iframe: any click inside a YouTube embed
+            can navigate to youtube.com, and a cross-origin frame cannot be
+            intercepted. This layer takes every tap and drives the player over
+            postMessage instead, so the visitor never leaves the site. */}
+        <button class="lv-guard" type="button" data-video-guard aria-label="Pause video">
+          <span class="lv-guard-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg>
+          </span>
+        </button>
         {/* Our own cover holds the frame until the player is actually playing,
             so YouTube's poster — title, channel and red button — is never seen. */}
         <div class="lv-poster" data-video-poster style={`background-image:url(${coverImage})`}>
           <span class="lv-poster-spinner" aria-hidden="true"></span>
+        </div>
+        {/* Shown only if the embed never reports back. The visitor is never
+            sent to YouTube; the design's own render stays on screen and the
+            next step is offered instead. */}
+        <div class="lv-fallback" data-video-fallback hidden>
+          <p>The walkthrough is taking a moment.</p>
+          <small>Every view of this design is on the page below.</small>
+          <button type="button" data-video-retry>Try again</button>
+          <a href="/book-site-inspection">Book a site inspection</a>
         </div>
       </div>
     </div>
@@ -118,10 +136,15 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
     const closer = card.querySelector<HTMLButtonElement>('[data-video-close]');
     const sound = card.querySelector<HTMLButtonElement>('[data-video-sound]');
     const poster = card.querySelector<HTMLElement>('[data-video-poster]');
+    const guard = card.querySelector<HTMLButtonElement>('[data-video-guard]');
+    const fallback = card.querySelector<HTMLElement>('[data-video-fallback]');
     if (!opener || !modal || !frame || !closer) return;
 
     let iframe: HTMLIFrameElement | null = null;
     let posterTimer: number | undefined;
+    let embedTimer: number | undefined;
+    let playing = false;
+    let heardFromPlayer = false;
 
     /** Drives the embedded player without loading YouTube's API script. */
     const command = (func: string) => {
@@ -136,6 +159,12 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
       poster?.classList.add('is-gone');
     };
 
+    const setPlaying = (value: boolean) => {
+      playing = value;
+      guard?.classList.toggle('is-paused', !value);
+      guard?.setAttribute('aria-label', value ? 'Pause video' : 'Play video');
+    };
+
     /* YouTube only reports state once the embed has been asked to listen. */
     window.addEventListener('message', (event: MessageEvent) => {
       if (!iframe || !/youtube(-nocookie)?\.com$/.test(new URL(event.origin).hostname)) return;
@@ -145,12 +174,20 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
           iframe.contentWindow?.postMessage(JSON.stringify({ event: 'listening' }), '*');
         }
         // 1 = playing, 3 = buffering: either means the poster has been replaced.
-        if (data?.event === 'onStateChange' && (data.info === 1 || data.info === 3)) revealPlayer();
+        heardFromPlayer = true;
+        window.clearTimeout(embedTimer);
+        if (data?.event === 'onStateChange') {
+          if (data.info === 1 || data.info === 3) revealPlayer();
+          if (data.info === 1) setPlaying(true);
+          if (data.info === 2 || data.info === 0) setPlaying(false);
+        }
       } catch { /* not a player message */ }
     });
 
     const close = () => {
       window.clearTimeout(posterTimer);
+      window.clearTimeout(embedTimer);
+      if (fallback) fallback.hidden = true;
       poster?.classList.remove('is-gone');
       frame.replaceChildren();
       iframe = null;
@@ -179,10 +216,36 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
       });
       // Safety net: never leave the cover stuck if no state ever arrives.
       posterTimer = window.setTimeout(revealPlayer, 1600);
+      setPlaying(true);
+      // An embed that never answers cannot be played inline — offer the link.
+      heardFromPlayer = false;
+      embedTimer = window.setTimeout(() => {
+        if (heardFromPlayer) return;
+        revealPlayer();
+        if (fallback) fallback.hidden = false;
+      }, 3200);
       modal.hidden = false;
       opener.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
       closer.focus();
+    });
+
+    const retry = card.querySelector<HTMLButtonElement>('[data-video-retry]');
+    retry?.addEventListener('click', () => {
+      const src = opener.dataset.videoSrc;
+      if (!src || !iframe) return;
+      if (fallback) fallback.hidden = true;
+      heardFromPlayer = false;
+      iframe.src = src;
+      embedTimer = window.setTimeout(() => {
+        if (!heardFromPlayer && fallback) fallback.hidden = false;
+      }, 3200);
+    });
+
+    /* Every tap inside the frame lands here, never on YouTube. */
+    guard?.addEventListener('click', () => {
+      command(playing ? 'pauseVideo' : 'playVideo');
+      setPlaying(!playing);
     });
 
     sound?.addEventListener('click', () => {
@@ -333,11 +396,72 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
   }
   .lv-player:not(.is-portrait) { width: min(980px, calc(100vw - 2rem)); aspect-ratio: 16 / 9; }
   .lv-player iframe { width: 100%; height: 100%; border: 0; display: block; }
-  .lv-player > [data-video-frame] { width: 100%; height: 100%; }
+  .lv-frame { position: absolute; inset: 0; z-index: 1; }
+
+  /* Sits above the iframe so no tap can ever reach YouTube. */
+  .lv-guard {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .lv-guard:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: -4px; }
+  .lv-guard-icon {
+    display: grid;
+    place-items: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(247,243,235,.94);
+    color: #5B6349;
+    opacity: 0;
+    transform: scale(.9);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .lv-guard.is-paused .lv-guard-icon { opacity: 1; transform: none; }
+  .lv-guard-icon svg { width: 27px; height: 27px; fill: currentColor; margin-left: 3px; }
+
+  .lv-fallback[hidden] { display: none; }
+  .lv-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    padding: 24px;
+    background: rgba(14,18,14,.82);
+    text-align: center;
+  }
+  .lv-fallback p { margin: 0; color: rgba(247,243,235,.92); font: 500 1.1rem var(--lx-serif); }
+  .lv-fallback small { color: rgba(247,243,235,.6); font-size: .76rem; }
+  .lv-fallback button,
+  .lv-fallback a {
+    padding: 12px 22px;
+    border: 1px solid rgba(247,243,235,.4);
+    border-radius: 100px;
+    background: transparent;
+    color: #EDE7DA;
+    font: 500 .74rem var(--lx-sans);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .lv-fallback a { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .lv-fallback button:hover { background: rgba(247,243,235,.14); }
 
   .lv-poster {
     position: absolute;
     inset: 0;
+    z-index: 3;
     display: grid;
     place-items: center;
     background-size: cover;
@@ -382,7 +506,7 @@ const playerUrl = `${embedUrl}${embedUrl.includes('?') ? '&' : '?'}${params.toSt
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .lv-poster { transition: none; }
+    .lv-poster, .lv-guard-icon { transition: none; }
     .lv-poster-spinner { animation-duration: 2.4s; }
     .lv-cover img,
     .lv-play,
