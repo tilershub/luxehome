@@ -3,6 +3,7 @@ export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import ProjectCard from '../../components/luxe/ProjectCard.astro';
+import KeyHighlights from '../../components/luxe/KeyHighlights.astro';
 import { getDesignBySlug, getProjects, youtubeEmbed, type DesignFixture, type DesignFull } from '../../lib/luxe';
 import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
@@ -143,6 +144,17 @@ const fixtures: DesignFixture[] = [...design.fixtures]
 const roomImage = renders[0]?.image ?? design.cover_image_url;
 const romanNumeral = (n: number) => ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'][n - 1] ?? String(n);
 
+/* The CMS "Card highlights" field finally does something: one highlight per
+   line. With none set, the highlights are derived from the design file. */
+const designHighlights = design.highlights.length > 0
+  ? design.highlights.map((line) => ({ title: line }))
+  : [
+      ...(formatArea(design.min_sqm) ? [{ value: `${formatArea(design.min_sqm)} m²`, title: 'Minimum room', copy: 'Smaller rooms are assessed on site before the design is confirmed.' }] : []),
+      ...(newPrice ? [{ value: lkrM(newPrice), title: 'New bathroom from', copy: 'The complete listed specification at the minimum fit.' }] : []),
+      { value: WARRANTY_SCHEDULE[0].period, title: 'Longest warranty', copy: `${WARRANTY_SCHEDULE[0].item}. Every task carries its own written period.` },
+      ...(fixtures.length ? [{ value: String(fixtures.length), title: 'Specified fixtures', copy: 'Named products with brand, model, finish and warranty.' }] : []),
+    ];
+
 const allRelated = storedDesign?.id
   ? await getProjects({ designId: storedDesign.id })
   : (await getProjects()).filter((project) => project.design?.slug === design.slug);
@@ -213,6 +225,8 @@ const productSchema = JSON.stringify({
       <span aria-hidden="true">↓</span>
     </button>
   </header>
+
+  <KeyHighlights items={designHighlights} />
 
   <!-- THRESHOLD -->
   <section class="wx-threshold">
@@ -528,6 +542,7 @@ const productSchema = JSON.stringify({
     <section class="wx-section">
       <p class="wx-kicker">From approval to handover</p>
       <h2>How it gets built.</h2>
+      <p class="wx-body"><a class="wx-inline-link" href="/how-we-build">See every construction stage in detail →</a></p>
       {design.workflow_text && <p class="wx-body">{design.workflow_text}</p>}
       {design.timeline.length > 0 && (
         <ol class="wx-timeline">

@@ -2,9 +2,10 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import ProjectCard from '../components/luxe/ProjectCard.astro';
+import KeyHighlights from '../components/luxe/KeyHighlights.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
 import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
-import { cloudinary, formatLKRM, formatArea } from '../lib/luxe-config';
+import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
 
 interface HomeDesign {
   slug: string;
@@ -56,6 +57,13 @@ const renovationPrices = designs.flatMap((design) => design.renovationPrice ? [d
 const newFrom = newPrices.length ? Math.min(...newPrices) : null;
 const renovationFrom = renovationPrices.length ? Math.min(...renovationPrices) : null;
 const heroDesign = designs[0] ?? null;
+
+const homeHighlights = [
+  { value: String(designs.length ? CATALOGUE_DESIGNS.filter((d) => d.space === 'bathrooms').length : 9), title: 'Complete designs', copy: 'Three collections — Standard, Premium and Signature — each documented before it is published.' },
+  { value: `LKR ${PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK')}`, title: 'One clear first step', copy: 'A measured site inspection. No construction deposit at this stage.' },
+  { value: WARRANTY_SCHEDULE[0].period, title: 'Longest warranty', copy: `${WARRANTY_SCHEDULE[0].item}. Every task carries its own written period.` },
+  { value: 'Fixed', title: 'Quotation before work', copy: 'Scope, selections, payment stages and exclusions agreed in writing.' },
+];
 
 const projects = (await getProjects())
   .filter((project) => project.after_image_url)
@@ -113,6 +121,8 @@ const projects = (await getProjects())
       <article class="lxr"><span>03</span><h3>Decide</h3><p>We recommend the right design, budget path and next action.</p></article>
     </div>
   </section>
+
+  <KeyHighlights items={homeHighlights} />
 
   <section class="home-paths" aria-labelledby="project-type-title">
     <div class="home-section-heading lxr">

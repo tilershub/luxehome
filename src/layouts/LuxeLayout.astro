@@ -121,7 +121,7 @@ Astro.response.headers.set(
       function gtag() { window.dataLayer.push(arguments); }
       window.gtag = gtag;
       gtag('js', new Date());
-      // Both properties receive the same pageviews and conversion events.
+      // Every configured property receives the same pageviews and events.
       gaIds.forEach(function (id) { gtag('config', id); });
       (function () {
         function loadGa() {
@@ -165,6 +165,7 @@ Astro.response.headers.set(
         <a href="/designs">Bathroom designs</a>
         <a href="/projects">Projects</a>
         <a href="/how-it-works">How it works</a>
+        <a href="/how-we-build">How we build</a>
         <a href="/pricing-guide">Pricing</a>
         <a href="/blog">Journal</a>
         <a href="/about">About</a>
@@ -190,6 +191,7 @@ Astro.response.headers.set(
             <a href="/projects">Projects</a>
             <a href="/blog">Journal</a>
             <a href="/how-it-works">How it works</a>
+            <a href="/how-we-build">How we build</a>
             <a href="/materials-brands">Materials</a>
             <a href="/pricing-guide">Pricing</a>
             <a href="/team">Team</a>
