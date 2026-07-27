@@ -357,7 +357,13 @@ const productSchema = JSON.stringify({
           <div class="wxf-canvas">
             {fixtures.map((f, i) => (
               <img
-                class:list={['wxf-canvas-img', { on: i === 0 }]}
+                class:list={[
+                  'wxf-canvas-img',
+                  {
+                    on: i === 0,
+                    'wxf-canvas-img--product': Boolean(f.image_url),
+                  },
+                ]}
                 data-fixture-img={i}
                 src={cloudinary(f.image_url || roomImage || design.cover_image_url || '', 900)}
                 alt={f.image_alt || `${f.brand ? `${f.brand} ` : ''}${f.name}`}
@@ -877,8 +883,9 @@ const productSchema = JSON.stringify({
 
   /* ── Fixture explorer ── */
   .wxf-layout { display: grid; grid-template-columns: 1fr; gap: 28px; align-items: start; }
-  .wxf-canvas { position: relative; aspect-ratio: 4 / 5; border-radius: 2px; overflow: hidden; background: var(--wx-mist); }
-  .wxf-canvas-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .55s ease; }
+  .wxf-canvas { position: relative; aspect-ratio: 4 / 5; border-radius: 2px; overflow: hidden; background: #fff; }
+  .wxf-canvas-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity .55s ease; }
+  .wxf-canvas-img--product { object-fit: contain; background: #fff; }
   .wxf-canvas-img.on { opacity: 1; }
   .wxf-right { display: flex; flex-direction: column; gap: 18px; }
   .wxf-panels { position: relative; display: grid; background: #fff; border-radius: 2px; overflow: hidden; }
