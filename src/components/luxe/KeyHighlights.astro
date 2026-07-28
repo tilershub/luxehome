@@ -65,7 +65,7 @@ const shown = items.filter((item) => item && item.title);
   .kh-head { margin-bottom: clamp(24px, 4vw, 40px); }
   .kh-eyebrow {
     margin-bottom: 12px;
-    font: 400 12px var(--lx-sans);
+    font: 600 13px var(--lx-sans);
     letter-spacing: .22em;
     text-transform: uppercase;
     color: var(--kh-accent);
@@ -89,7 +89,7 @@ const shown = items.filter((item) => item && item.title);
     color: var(--kh-gold);
   }
   .kh-item h3 { margin: 0; font: 500 clamp(17px, 1.9vw, 20px) var(--lx-serif); }
-  .kh-item p { margin: 8px 0 0; max-width: 34ch; font-size: 14px; line-height: 1.6; color: var(--kh-muted); }
+  .kh-item p { margin: 8px 0 0; max-width: 34ch; font-size: 16px; line-height: 1.65; color: color-mix(in srgb, var(--kh-muted) 82%, var(--kh-ink)); }
 
   @media (min-width: 700px) {
     .kh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(24px, 4vw, 56px); }
