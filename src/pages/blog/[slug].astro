@@ -45,6 +45,7 @@ const jsonLd = JSON.stringify({
   <script type="application/ld+json" set:html={jsonLd} slot="head" />
 
   <article class="post">
+    <div class="post-progress" aria-hidden="true"><span></span></div>
     <header class="post-hero">
       <nav class="post-breadcrumb" aria-label="Breadcrumb">
         <a href="/">Home</a><span aria-hidden="true">›</span>
@@ -102,18 +103,60 @@ const jsonLd = JSON.stringify({
       </div>
     </section>
   )}
+
+  <script is:inline>
+    (function () {
+      var article = document.querySelector('.post');
+      var bar = document.querySelector('.post-progress span');
+      if (!article || !bar) return;
+      var ticking = false;
+      function updateProgress() {
+        var start = article.offsetTop;
+        var distance = Math.max(article.offsetHeight - window.innerHeight, 1);
+        var progress = Math.min(1, Math.max(0, (window.scrollY - start) / distance));
+        bar.style.transform = 'scaleX(' + progress + ')';
+        ticking = false;
+      }
+      function requestUpdate() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(updateProgress);
+      }
+      updateProgress();
+      window.addEventListener('scroll', requestUpdate, { passive: true });
+      window.addEventListener('resize', requestUpdate);
+    })();
+  </script>
 </LuxeLayout>
 
 <style>
   .post,
   .post-related { width: min(1160px, calc(100% - 34px)); margin-inline: auto; }
 
+  .post-progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 400;
+    height: 3px;
+    background: transparent;
+    pointer-events: none;
+  }
+  .post-progress span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left center;
+    will-change: transform;
+  }
+
   .post-hero { max-width: 780px; margin-inline: auto; padding: clamp(2.8rem, 7vw, 5rem) 0 clamp(1.6rem, 4vw, 2.4rem); }
-  .post-breadcrumb { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.2rem; font-size: .72rem; color: color-mix(in srgb, var(--ink) 52%, transparent); }
+  .post-breadcrumb { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.2rem; font-size: .82rem; font-weight: 500; color: color-mix(in srgb, var(--ink) 70%, transparent); }
   .post-breadcrumb a { color: inherit; text-decoration: none; }
   .post-breadcrumb a:hover { color: var(--sage-deep); }
   .post-hero h1 { margin: .6rem 0 .9rem; font-size: clamp(2.5rem, 5.6vw, 4.2rem); }
-  .post-byline { color: color-mix(in srgb, var(--ink) 58%, transparent); font-size: .82rem; }
+  .post-byline { color: color-mix(in srgb, var(--ink) 72%, transparent); font-size: .9rem; }
 
   .post-cover { margin: 0 auto clamp(1.8rem, 4vw, 2.8rem); }
   .post-cover img {
@@ -125,20 +168,20 @@ const jsonLd = JSON.stringify({
     box-shadow: 0 20px 50px rgba(43,50,42,.12);
   }
 
-  .post-body { max-width: 720px; margin-inline: auto; }
-  .prose { font-size: .98rem; line-height: 1.85; }
-  .prose :global(h2) { margin: 2.4rem 0 .8rem; font-size: clamp(1.7rem, 3.2vw, 2.3rem); }
-  .prose :global(h3) { margin: 1.8rem 0 .6rem; font-size: 1.35rem; }
-  .prose :global(p) { margin-bottom: 1.15rem; color: color-mix(in srgb, var(--ink) 82%, transparent); }
+  .post-body { max-width: 700px; margin-inline: auto; }
+  .prose { font-size: clamp(1.0625rem, 1rem + .25vw, 1.125rem); line-height: 1.82; }
+  .prose :global(h2) { margin: 2.6rem 0 .9rem; font-size: clamp(1.9rem, 3.2vw, 2.35rem); scroll-margin-top: 6rem; }
+  .prose :global(h3) { margin: 2rem 0 .7rem; font-size: 1.5rem; scroll-margin-top: 6rem; }
+  .prose :global(p) { margin-bottom: 1.3rem; color: color-mix(in srgb, var(--ink) 93%, transparent); }
   .prose :global(strong) { font-weight: 600; color: var(--ink); }
-  .prose :global(ul), .prose :global(ol) { margin: 0 0 1.15rem; padding-left: 1.35rem; color: color-mix(in srgb, var(--ink) 82%, transparent); }
-  .prose :global(li) { margin-bottom: .4rem; }
+  .prose :global(ul), .prose :global(ol) { margin: 0 0 1.3rem; padding-left: 1.4rem; color: color-mix(in srgb, var(--ink) 93%, transparent); }
+  .prose :global(li) { margin-bottom: .55rem; padding-left: .15rem; }
   .prose :global(a) { color: var(--sage-deep); text-decoration: underline; text-underline-offset: 3px; }
   .prose :global(a:hover) { color: var(--gold); }
   .prose :global(img) { max-width: 100%; height: auto; border-radius: 10px; margin: 1.4rem 0; }
-  .prose :global(blockquote) { margin: 1.5rem 0; padding: .2rem 0 .2rem 1.2rem; border-left: 3px solid var(--gold); color: color-mix(in srgb, var(--ink) 68%, transparent); font: 500 1.08rem/1.7 var(--lx-serif); }
+  .prose :global(blockquote) { margin: 1.7rem 0; padding: .25rem 0 .25rem 1.2rem; border-left: 3px solid var(--gold); color: color-mix(in srgb, var(--ink) 82%, transparent); font: 500 1.18rem/1.7 var(--lx-serif); }
   .prose :global(hr) { margin: 2.4rem 0; border: 0; border-top: 1px solid var(--cream-deep); }
-  .prose :global(table) { width: 100%; margin: 1.5rem 0 1.8rem; border-collapse: collapse; font-size: .86rem; }
+  .prose :global(table) { display: block; width: 100%; margin: 1.5rem 0 1.8rem; overflow-x: auto; border-collapse: collapse; font-size: .94rem; -webkit-overflow-scrolling: touch; }
   .prose :global(th) { padding: .6rem .9rem; background: var(--sage-deep); color: var(--cream); text-align: left; font-weight: 500; }
   .prose :global(td) { padding: .55rem .9rem; border-bottom: 1px solid var(--cream-deep); }
   .prose :global(tr:nth-child(even) td) { background: color-mix(in srgb, var(--cream) 55%, #fff); }
@@ -158,15 +201,16 @@ const jsonLd = JSON.stringify({
   }
   .post-cta .lx-eyebrow { color: var(--gold-soft); }
   .post-cta h2 { margin: .3rem 0 .4rem; font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
-  .post-cta p:not(.lx-eyebrow) { max-width: 46ch; color: rgba(247,243,235,.75); font-size: .88rem; }
+  .post-cta p:not(.lx-eyebrow) { max-width: 46ch; color: rgba(247,243,235,.9); font-size: 1rem; }
   .post-cta > a {
     flex: 0 0 auto;
     padding: .8rem 1.2rem;
     border-radius: 999px;
     background: var(--gold);
     color: #fff;
-    font-size: .8rem;
-    font-weight: 500;
+    min-height: 48px;
+    font-size: .92rem;
+    font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
   }
@@ -174,7 +218,7 @@ const jsonLd = JSON.stringify({
   .post-related { padding: clamp(2.6rem, 6vw, 4.2rem) 0 4rem; margin-top: clamp(2.4rem, 6vw, 4rem); border-top: 1px solid rgba(43,50,42,.12); }
   .post-related-heading { display: flex; justify-content: space-between; align-items: end; gap: 1.5rem; margin-bottom: 1.4rem; }
   .post-related-heading h2 { margin-top: .35rem; font-size: clamp(1.9rem, 4vw, 2.8rem); }
-  .post-related-heading > a { color: var(--sage-deep); font-size: .78rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .post-related-heading > a { color: var(--sage-deep); font-size: .9rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
   .post-related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
   .post-related-card {
     overflow: hidden;
@@ -193,6 +237,12 @@ const jsonLd = JSON.stringify({
   .post-related-body h3 { margin-top: .3rem; font-size: 1.25rem; }
 
   @media (max-width: 760px) {
+    .post-hero { padding-top: 2.2rem; }
+    .post-hero h1 { font-size: clamp(2.35rem, 11.5vw, 3.25rem); line-height: 1.08; }
+    .post-cover { margin-inline: -1px; }
+    .post-cover img { border-radius: 10px; }
+    .prose { line-height: 1.78; }
+    .prose :global(h2) { margin-top: 2.35rem; }
     .post-cta { display: block; }
     .post-cta > a { display: inline-flex; margin-top: 1rem; }
     .post-related-grid { grid-template-columns: 1fr; }

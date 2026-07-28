@@ -280,7 +280,11 @@ Astro.response.headers.set(
     --lx-sinhala: 'Noto Sans Sinhala', sans-serif;
   }
 
-  html.luxe { scroll-behavior: smooth; }
+  html.luxe {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   /* Zero-specificity reset (:where) so the layout's own class rules always win */
   :where(html.luxe) *,
   :where(html.luxe) *::before,
@@ -290,13 +294,28 @@ Astro.response.headers.set(
     background: var(--cream);
     color: var(--ink);
     font-family: var(--lx-sans);
-    font-weight: 300;
-    line-height: 1.7;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.68;
     -webkit-font-smoothing: antialiased;
   }
 
-  .luxe h1, .luxe h2, .luxe h3 { font-family: var(--lx-serif); font-weight: 600; line-height: 1.15; }
+  .luxe h1, .luxe h2, .luxe h3 {
+    font-family: var(--lx-serif);
+    font-weight: 600;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .luxe p, .luxe li { text-wrap: pretty; }
   .luxe .sinhala { font-family: var(--lx-sinhala); }
+  .luxe :target { scroll-margin-top: 6rem; }
+  .luxe a, .luxe button, .luxe input, .luxe select, .luxe textarea {
+    -webkit-tap-highlight-color: rgba(92,107,86,.18);
+  }
+  .luxe :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
 
   /* ── Wordmark ── */
   .lx-wordmark {
@@ -325,9 +344,9 @@ Astro.response.headers.set(
   }
   .lx-nav-links { display: flex; gap: 1.6rem; margin-left: auto; }
   .lx-nav-links a {
-    font-size: .82rem;
-    font-weight: 400;
-    letter-spacing: .1em;
+    font-size: .86rem;
+    font-weight: 500;
+    letter-spacing: .075em;
     text-transform: uppercase;
     color: var(--ink);
     text-decoration: none;
@@ -335,7 +354,7 @@ Astro.response.headers.set(
   }
   .lx-nav-links a:hover { color: var(--sage-deep); }
   .lx-nav-wa {
-    font-size: .78rem;
+    font-size: .84rem;
     font-weight: 500;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -366,9 +385,13 @@ Astro.response.headers.set(
     padding: .6rem clamp(1.2rem, 5vw, 4rem) 1.2rem;
   }
   .lx-mobile-menu a {
-    padding: .8rem 0;
-    font-size: .95rem;
-    letter-spacing: .05em;
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: .72rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: .025em;
     color: var(--ink);
     text-decoration: none;
     border-bottom: 1px solid var(--cream-deep);
@@ -390,23 +413,24 @@ Astro.response.headers.set(
   .lx-footer-inner { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.2rem; }
   .lx-wordmark--footer { color: var(--cream); }
   .lx-wordmark--footer em { color: var(--gold-soft); }
-  .lx-footer-tag { font-size: .85rem; color: color-mix(in srgb, var(--cream) 70%, transparent); }
+  .lx-footer-tag { font-size: .95rem; color: color-mix(in srgb, var(--cream) 82%, transparent); }
   .lx-footer-links { display: flex; gap: 1.4rem; flex-wrap: wrap; }
   .lx-footer-links a {
-    font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
-    color: color-mix(in srgb, var(--cream) 80%, transparent); text-decoration: none;
+    font-size: .86rem; letter-spacing: .07em; text-transform: uppercase;
+    color: color-mix(in srgb, var(--cream) 88%, transparent); text-decoration: none;
   }
   .lx-footer-links a:hover { color: var(--gold-soft); }
-  .lx-footer-contact { font-size: .85rem; display: flex; gap: .6rem; color: color-mix(in srgb, var(--cream) 70%, transparent); }
+  .lx-footer-contact { font-size: .95rem; display: flex; gap: .6rem; color: color-mix(in srgb, var(--cream) 80%, transparent); }
   .lx-footer-contact a { color: var(--gold-soft); text-decoration: none; }
   .lx-footer-legal { display: flex; gap: 1rem; flex-wrap: wrap; padding-top: .7rem; border-top: 1px solid color-mix(in srgb, var(--cream) 15%, transparent); }
-  .lx-footer-legal a { color: color-mix(in srgb, var(--cream) 62%, transparent); font-size: .72rem; text-decoration: none; }
+  .lx-footer-legal a { color: color-mix(in srgb, var(--cream) 76%, transparent); font-size: .82rem; text-decoration: none; }
 
   /* ── Shared primitives ── */
   .lx-eyebrow {
-    font-size: .72rem;
-    font-weight: 500;
-    letter-spacing: .22em;
+    font-size: .78rem;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: .16em;
     text-transform: uppercase;
     color: var(--sage-deep);
   }
@@ -418,7 +442,7 @@ Astro.response.headers.set(
     background: var(--sage-deep);
     color: var(--cream);
     font-family: var(--lx-sans);
-    font-size: .82rem;
+    font-size: .9rem;
     font-weight: 500;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -437,9 +461,9 @@ Astro.response.headers.set(
     justify-content: center;
     background: transparent;
     color: var(--ink);
-    font-size: .82rem;
-    font-weight: 400;
-    letter-spacing: .08em;
+    font-size: .9rem;
+    font-weight: 500;
+    letter-spacing: .06em;
     text-transform: uppercase;
     padding: .9rem 1.8rem;
     min-height: 48px;
@@ -449,6 +473,38 @@ Astro.response.headers.set(
     transition: border-color .2s, color .2s;
   }
   .lx-btn-ghost:hover { border-color: var(--sage-deep); color: var(--sage-deep); }
+
+  @media (max-width: 720px) {
+    .luxe-body {
+      font-size: 1.0625rem;
+      line-height: 1.7;
+    }
+    .lx-nav { padding-block: .8rem; }
+    .lx-wordmark { font-size: 1.35rem; }
+    .lx-mobile-menu {
+      top: 57px;
+      max-height: calc(100dvh - 57px);
+      overflow-y: auto;
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+    .lx-footer { padding-top: 3rem; padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+    .lx-footer-links { gap: .25rem 1rem; }
+    .lx-footer-links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+    }
+    .lx-btn-wa,
+    .lx-btn-ghost {
+      min-height: 50px;
+      padding-inline: 1.2rem;
+    }
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
 
   /* ── Scroll reveal ── */
   html.js .lxr { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
