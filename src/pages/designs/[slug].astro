@@ -1147,6 +1147,58 @@ const productSchema = JSON.stringify({
     .wx-hero { min-height: 520px; }
     .wx-step { height: 72svh; min-height: 520px; }
     .wx-draw-grid { grid-template-columns: 1fr; }
+    #materials.wx-section {
+      padding-block: 56px;
+      padding-inline: 16px;
+    }
+    #materials .wx-heading-row {
+      display: block;
+      margin-bottom: 24px;
+    }
+    #materials .wx-heading-row .wx-aside {
+      max-width: none;
+      margin-top: 12px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    #materials .wx-mat-grid {
+      grid-template-columns: 1fr;
+      gap: 22px;
+      margin-top: 24px;
+    }
+    #materials .wx-mat figcaption { align-items: flex-start; }
+    #materials .wx-material-checklist {
+      gap: 10px;
+      margin-top: 24px;
+    }
+    #materials .wx-check-item {
+      grid-template-columns: 28px minmax(0, 1fr);
+      align-items: start;
+      gap: 10px 12px;
+      padding: 16px 14px;
+    }
+    #materials .wx-check-mark {
+      width: 28px;
+      height: 28px;
+    }
+    #materials .wx-check-copy strong {
+      font-size: 19px;
+      line-height: 1.2;
+    }
+    #materials .wx-check-copy small {
+      margin-top: 5px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    #materials .wx-check-item > em {
+      grid-column: 2;
+      margin-top: 0;
+      font-size: 10px;
+      line-height: 1.45;
+      letter-spacing: .06em;
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
     .wx-bar a { padding: 15px 22px; }
     .wx-bar a span { font-size: 13px; }
   }
