@@ -174,7 +174,12 @@ const AREAS = [
   { kind: 'cover',        n: 'I',   kicker: 'At the door',        title: 'The first glance across the room' },
   { kind: 'vanity',       n: 'II',  kicker: 'The vanity',         title: 'Stone and warm mirror light' },
   { kind: 'water_closet', n: 'III', kicker: 'The water closet',   title: 'Concealed, quiet and neatly set out' },
-  { kind: 'shower',       n: 'IV',  kicker: 'The shower',         title: 'The walk-in shower and niche' },
+  {
+    kind: 'shower',
+    n: 'IV',
+    kicker: design.slug === 'pichcha' ? 'The bathtub' : 'The shower',
+    title: design.slug === 'pichcha' ? 'The freestanding bath and concealed mixer' : 'The walk-in shower and niche',
+  },
   { kind: 'shower_cubicle', n: 'V', kicker: 'The shower cubicle', title: 'Glass, hardware and precise sealing' },
   { kind: 'ceiling',      n: 'VI',  kicker: 'Looking up',         title: 'The ceiling, lighting and ventilation' },
 ] as const;
@@ -228,8 +233,25 @@ const hasSubstance = (f: DesignFixture) =>
 const fixtures: DesignFixture[] = [...design.fixtures]
   .filter(hasSubstance)
   .sort((a, b) => (a.sort_order - b.sort_order) || (categoryRank(a) - categoryRank(b)));
-const roomImage = renders[0]?.image ?? design.cover_image_url;
-const romanNumeral = (n: number) => ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'][n - 1] ?? String(n);
+
+/* Product photographs remain uncropped. When a fixture has no product image,
+   pair it with the most relevant approved room render instead of repeating the
+   first room image for every card. */
+const fixtureImageFor = (fixture: DesignFixture) => {
+  if (fixture.image_url) return fixture.image_url;
+
+  const label = `${fixture.category} ${fixture.name}`.toLowerCase();
+  const drawingKind =
+    /(bathtub|bath tub|bath mixer|bath spout|bath niche)/.test(label) ? 'shower' :
+    /(shower cubicle|shower enclosure|shower glass)/.test(label) ? 'shower_cubicle' :
+    /(water closet|toilet|bidet|angle valve|paper holder|magic hose|flexible hose|magic bend)/.test(label) ? 'water_closet' :
+    /(wash basin|basin mixer|tap|vanity|mirror)/.test(label) ? 'vanity' :
+    /(shower|gully|floor drain)/.test(label) ? 'shower_cubicle' :
+    /(ceiling|light|exhaust|water heater)/.test(label) ? 'ceiling' :
+    null;
+
+  return (drawingKind ? drawingOf(drawingKind)?.image_url : null) || design.cover_image_url || '';
+};
 
 /* The CMS "Card highlights" field finally does something: one highlight per
    line. With none set, the highlights are derived from the design file. */
@@ -413,89 +435,84 @@ const productSchema = JSON.stringify({
   )}
 
   <!-- FIXTURES · UP CLOSE -->
-  <section id="fixtures" class="wx-section" data-fixture-explorer>
+  <section id="fixtures" class="wx-section" data-swipe-carousel>
     <div class="wx-heading-row">
       <div>
         <p class="wx-kicker">Products installed in the bathroom</p>
         <h2>Fixtures &amp; fittings.</h2>
       </div>
-      <p class="wx-aside">Sanitaryware, tapware, furniture, glass and accessories. Choose an item to see its exact specification{fixtures.some((f) => f.reference_price_label) ? ' and reference price' : ''}.</p>
+      <p class="wx-aside" id="fixtures-swipe-help">Swipe left or right to explore one specified item at a time. Each card shows its image, exact specification{fixtures.some((f) => f.reference_price_label) ? ' and reference price' : ''}.</p>
     </div>
 
     {fixtures.length > 0 ? (
-      <>
-        <ul class="wx-checklist wx-fixture-checklist" aria-label="Fixtures and fittings checklist">
-          {fixtures.map((f) => (
-            <li class:list={['wx-check-item', { 'is-optional': f.included === false }]}>
-              <span class="wx-check-mark" aria-hidden="true">{f.included === false ? '+' : '✓'}</span>
-              <span class="wx-check-copy">
-                <strong>{f.category}</strong>
-                <small>{f.brand ? `${f.brand} · ` : ''}{f.name}{f.quantity > 1 ? ` × ${f.quantity}` : ''}</small>
-              </span>
-              <em>{f.included === false ? 'Optional' : 'Included'}</em>
-            </li>
-          ))}
-        </ul>
-
-        <div class="wxf-layout">
-          <div class="wxf-canvas">
-            {fixtures.map((f, i) => (
-              <img
-                class:list={[
-                  'wxf-canvas-img',
-                  {
-                    on: i === 0,
-                    'wxf-canvas-img--product': Boolean(f.image_url),
-                  },
-                ]}
-                data-fixture-img={i}
-                src={cloudinary(f.image_url || roomImage || design.cover_image_url || '', 900)}
-                alt={f.image_alt || `${f.brand ? `${f.brand} ` : ''}${f.name}`}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                width="900" height="1125"
-              />
-            ))}
-          </div>
-          <div class="wxf-right">
-            <div class="wxf-panels">
-              {fixtures.map((f, i) => (
-                <div class:list={['wxf-panel', { on: i === 0 }]} data-fixture-panel={i}>
-                  <div>
-                    <div class="wxf-n">{romanNumeral(i + 1).toLowerCase()} · {f.category}</div>
-                    <h3>{f.brand ? `${f.brand} — ` : ''}{f.name}</h3>
-                    {f.spec && <p class="wxf-spec">{f.spec}</p>}
-                    <dl class="wxf-meta">
-                      {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
-                      {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
-                      {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
-                      {f.warranty_period && <><dt>Warranty</dt><dd>{f.warranty_period}</dd></>}
-                    </dl>
-                    <span class:list={['wxf-badge', { optional: f.included === false }]}>{f.included === false ? 'Optional upgrade' : 'Included'}</span>
+      <div class="wxf-carousel">
+        <div
+          class="wxf-track"
+          data-swipe-track
+          role="region"
+          aria-label={`Fixtures and fittings in ${design.name}`}
+          aria-describedby="fixtures-swipe-help"
+          tabindex="0"
+        >
+          {fixtures.map((f, i) => {
+            const cardImage = fixtureImageFor(f);
+            const usesRoomImage = !f.image_url;
+            return (
+              <article
+                class="wxf-card"
+                data-swipe-slide
+                aria-label={`${f.name}, item ${i + 1} of ${fixtures.length}`}
+              >
+                <div class:list={['wxf-card-media', { 'is-room-image': usesRoomImage }]}>
+                  <img
+                    src={cloudinary(cardImage, 900)}
+                    alt={f.image_alt || (usesRoomImage
+                      ? `${f.name} in the ${design.name} bathroom design`
+                      : `${f.brand ? `${f.brand} ` : ''}${f.name}`)}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    width="900"
+                    height="1125"
+                  />
+                  <span class="wxf-count" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')} / {String(fixtures.length).padStart(2, '0')}
+                  </span>
+                </div>
+                <div class="wxf-card-body">
+                  <div class="wxf-card-top">
+                    <span class="wxf-category">{f.category}</span>
+                    <span class:list={['wxf-badge', { optional: f.included === false }]}>
+                      {f.included === false ? 'Optional upgrade' : 'Included'}
+                    </span>
                   </div>
+                  <h3>{f.brand ? `${f.brand} — ` : ''}{f.name}</h3>
+                  {f.spec && <p class="wxf-spec">{f.spec}</p>}
+                  {f.notes && <p class="wxf-notes">{f.notes}</p>}
+                  <dl class="wxf-meta">
+                    {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
+                    {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
+                    {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
+                    {f.warranty_period && <><dt>Warranty</dt><dd>{f.warranty_period}</dd></>}
+                  </dl>
                   {f.reference_price_label && (
                     <div class="wxf-price"><span>Reference price</span><strong>{f.reference_price_label}</strong></div>
                   )}
                 </div>
-              ))}
-            </div>
-            <div class="wxf-tabs" role="tablist" aria-label="Fixtures and fittings in this design">
-              {fixtures.map((f, i) => (
-                <button
-                  type="button"
-                  data-fixture-tab={i}
-                  class:list={[{ on: i === 0 }]}
-                  role="tab"
-                  aria-selected={i === 0 ? 'true' : 'false'}
-                >
-                  <em aria-hidden="true">{String(i + 1).padStart(2, '0')}</em>
-                  <span>{f.name}</span>
-                  {f.reference_price_label && <small>{f.reference_price_label}</small>}
-                </button>
-              ))}
-            </div>
-          </div>
+              </article>
+            );
+          })}
         </div>
-      </>
+        <div class="wxf-dots" data-swipe-dots role="group" aria-label={`${design.name} fixture carousel position`}>
+          {fixtures.map((f, i) => (
+            <button
+              type="button"
+              class:list={[{ 'is-active': i === 0 }]}
+              data-swipe-dot
+              aria-label={`Show ${f.name}, item ${i + 1} of ${fixtures.length}`}
+              aria-current={i === 0 ? 'true' : undefined}
+            ></button>
+          ))}
+        </div>
+      </div>
     ) : (
       <div class="wxf-empty"><strong>The full schedule is being prepared.</strong><p>The confirmed sanitaryware, tapware, shower, furniture, glass and accessory specification will be published here. A site inspection can still confirm whether this layout is suitable for your room.</p><a href={inspectionHref}>Check this design against my bathroom →</a></div>
     )}
@@ -797,26 +814,6 @@ const productSchema = JSON.stringify({
     }, { passive: true });
   }
 
-  // Fixture explorer
-  var explorer = document.querySelector('[data-fixture-explorer]');
-  if (explorer) {
-    explorer.addEventListener('click', function (event) {
-      var tab = event.target.closest('[data-fixture-tab]');
-      if (!tab) return;
-      var index = tab.getAttribute('data-fixture-tab');
-      explorer.querySelectorAll('[data-fixture-tab]').forEach(function (el) {
-        var on = el === tab;
-        el.classList.toggle('on', on);
-        el.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      explorer.querySelectorAll('[data-fixture-panel]').forEach(function (el) {
-        el.classList.toggle('on', el.getAttribute('data-fixture-panel') === index);
-      });
-      explorer.querySelectorAll('[data-fixture-img]').forEach(function (el) {
-        el.classList.toggle('on', el.getAttribute('data-fixture-img') === index);
-      });
-    });
-  }
 })();
 </script>
 
@@ -965,33 +962,69 @@ const productSchema = JSON.stringify({
   .wx-check-item.is-optional > em { color: #9A7A3D; }
   .wx-material-checklist { margin-top: 34px; margin-bottom: 0; }
 
-  /* ── Fixture explorer ── */
-  .wxf-layout { display: grid; grid-template-columns: 1fr; gap: 28px; align-items: start; }
-  .wxf-canvas { position: relative; aspect-ratio: 4 / 5; border-radius: 2px; overflow: hidden; background: #fff; }
-  .wxf-canvas-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity .55s ease; }
-  .wxf-canvas-img--product { object-fit: contain; background: #fff; }
-  .wxf-canvas-img.on { opacity: 1; }
-  .wxf-right { display: flex; flex-direction: column; gap: 18px; }
-  .wxf-panels { position: relative; display: grid; background: #fff; border-radius: 2px; overflow: hidden; }
-  .wxf-panel { grid-area: 1 / 1; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(26px, 3vw, 40px); opacity: 0; transform: translateY(12px); transition: opacity .55s ease, transform .55s ease; pointer-events: none; visibility: hidden; }
-  .wxf-panel.on { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
-  .wxf-n { margin-bottom: 20px; font: italic 400 20px var(--lx-serif); color: var(--wx-sage); }
-  .wxf-panel h3 { margin: 0 0 12px; font: 500 clamp(26px, 3.2vw, 38px)/1.05 var(--lx-serif); }
+  /* ── Fixtures & fittings swipe cards ── */
+  .wxf-carousel {
+    --swipe-dot-active: var(--wx-sage);
+    --swipe-dot-focus: var(--wx-gold);
+    width: min(100%, 760px);
+    margin: 0 auto;
+  }
+  .wxf-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-inline: contain;
+    border-radius: 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .wxf-card {
+    flex: 0 0 100%;
+    min-width: 0;
+    overflow: hidden;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    border: 1px solid #E2DCCF;
+    border-radius: 14px;
+    background: #fff;
+  }
+  .wxf-card-media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    padding: clamp(18px, 4vw, 42px);
+    overflow: hidden;
+    background: #fff;
+  }
+  .wxf-card-media img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
+  .wxf-card-media.is-room-image { padding: 0; background: var(--wx-mist); }
+  .wxf-card-media.is-room-image img { object-fit: cover; }
+  .wxf-count {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: rgba(38,43,35,.82);
+    color: #fff;
+    font: 600 10px var(--lx-sans);
+    letter-spacing: .12em;
+    backdrop-filter: blur(8px);
+  }
+  .wxf-card-body { padding: clamp(24px, 4vw, 42px); }
+  .wxf-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .wxf-category { font: 600 11px var(--lx-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--wx-sage); }
+  .wxf-card h3 { margin: 0 0 12px; font: 500 clamp(26px, 4vw, 38px)/1.08 var(--lx-serif); }
   .wxf-spec { max-width: 40ch; margin: 0 0 14px; font-size: 16px; line-height: 1.6; color: #7A7A70; }
-  .wxf-meta { display: grid; grid-template-columns: auto 1fr; gap: .2rem .8rem; margin: 0 0 16px; font-size: 13px; }
+  .wxf-notes { max-width: 52ch; margin: -4px 0 14px; font-size: 13px; line-height: 1.55; color: var(--wx-faint); }
+  .wxf-meta { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem .8rem; margin: 0; font-size: 13px; }
   .wxf-meta dt { color: var(--wx-faint); }
   .wxf-meta dd { margin: 0; overflow-wrap: anywhere; }
-  .wxf-badge { display: inline-block; width: max-content; padding: 6px 12px; border-radius: 100px; background: var(--wx-sage); color: #fff; font: 600 10px var(--lx-sans); letter-spacing: .08em; text-transform: uppercase; }
+  .wxf-badge { flex: none; display: inline-block; width: max-content; padding: 6px 12px; border-radius: 100px; background: var(--wx-sage); color: #fff; font: 600 10px var(--lx-sans); letter-spacing: .08em; text-transform: uppercase; }
   .wxf-badge.optional { background: var(--wx-gold); color: var(--wx-ink); }
   .wxf-price { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 18px; border-top: 1px solid #EAE4D8; }
   .wxf-price span { font: 400 11px var(--lx-sans); letter-spacing: .18em; text-transform: uppercase; color: var(--wx-faint); }
   .wxf-price strong { font: 500 26px var(--lx-serif); }
-  .wxf-tabs { display: flex; flex-direction: column; max-height: 340px; overflow-y: auto; scrollbar-width: thin; }
-  .wxf-tabs button { display: flex; align-items: center; gap: 16px; padding: 14px 4px; border: 0; border-top: 1px solid #E2DCCF; background: none; color: #9A998C; font-family: var(--lx-sans); text-align: left; cursor: pointer; transition: color .3s ease; }
-  .wxf-tabs button:hover, .wxf-tabs button.on { color: var(--wx-ink); }
-  .wxf-tabs em { width: 26px; font: italic 400 14px var(--lx-serif); opacity: .7; }
-  .wxf-tabs span { flex: 1; font-size: 14px; letter-spacing: .04em; }
-  .wxf-tabs small { font-size: 12px; color: #9A998C; white-space: nowrap; }
+  .wxf-dots { flex-wrap: wrap; gap: .4rem; padding: 18px 8px 0; }
+  .wxf-dots [data-swipe-dot] { width: 6px; height: 6px; }
   .wxf-empty { padding: 1.4rem; background: #fff; border: 1px dashed var(--wx-sage); border-radius: 8px; }
   .wxf-empty p { max-width: 65ch; margin: .35rem 0 .7rem; color: var(--wx-muted); }
   .wxf-empty a { color: var(--wx-sage); font-weight: 600; }
@@ -1127,7 +1160,6 @@ const productSchema = JSON.stringify({
 
   /* ── Responsive ── */
   @media (min-width: 900px) {
-    .wxf-layout { grid-template-columns: 1.1fr 1fr; }
     .wx-from-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .wx-video-grid, .wx-quote-grid { grid-template-columns: 1fr 1fr; }
     .wx-mat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -1147,6 +1179,24 @@ const productSchema = JSON.stringify({
     .wx-hero { min-height: 520px; }
     .wx-step { height: 72svh; min-height: 520px; }
     .wx-draw-grid { grid-template-columns: 1fr; }
+    #fixtures.wx-section {
+      padding-block: 56px;
+      padding-inline: 16px;
+    }
+    #fixtures .wx-heading-row {
+      display: block;
+      margin-bottom: 24px;
+    }
+    #fixtures .wx-heading-row .wx-aside {
+      max-width: none;
+      margin-top: 12px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .wxf-card-body { padding: 24px 20px 28px; }
+    .wxf-card-top { align-items: flex-start; }
+    .wxf-card h3 { font-size: 29px; }
+    .wxf-price { align-items: flex-start; flex-direction: column; gap: 4px; }
     #materials.wx-section {
       padding-block: 56px;
       padding-inline: 16px;
@@ -1206,6 +1256,6 @@ const productSchema = JSON.stringify({
   @media (prefers-reduced-motion: reduce) {
     .wx-hero-media img { animation: none; }
     .wx-cue-line { animation: none; }
-    .wxf-canvas-img, .wxf-panel, .wx-bar { transition: none; }
+    .wx-bar { transition: none; }
   }
 </style>
