@@ -23,7 +23,14 @@ function sb(): SupabaseClient | null {
 
 /* ── Types ─────────────────────────────────────────────────── */
 
-export type Collection = 'standard' | 'premium' | 'signature';
+export type Collection =
+  | 'standard'
+  | 'premium'
+  | 'signature'
+  | 'flora'
+  | 'island'
+  | 'heritage'
+  | 'gems';
 /** Per-design room photography. The four technical drawings are a shared
     preset (STANDARD_DRAWINGS) and are not stored per design. */
 export type DrawingKind = 'vanity' | 'water_closet' | 'shower' | 'shower_cubicle' | 'ceiling';

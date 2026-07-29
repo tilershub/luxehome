@@ -1,6 +1,7 @@
 ---
 import type { CatalogueDesign } from '../../lib/luxe-catalogue';
 import { SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
+import { BATHROOM_COLLECTIONS } from '../../lib/bathroom-taxonomy';
 import { formatLKRM, waLink, formatArea } from '../../lib/luxe-config';
 interface Props { space: CatalogueDesign['space']; designs: CatalogueDesign[]; }
 const { space, designs } = Astro.props;
@@ -8,11 +9,17 @@ const presentation = SPACE_PRESENTATION[space];
 const spaceLabel = space.slice(0, -1);
 const publishedDesigns = designs.filter((design) => design.coverImage);
 const hasPublishedDesigns = publishedDesigns.length > 0;
-const collections = [
-  { key: 'standard', eyebrow: space === 'staircases' ? 'Simple & enduring' : 'Fresh & versatile' },
-  { key: 'premium', eyebrow: 'Elevated & crafted' },
-  { key: 'signature', eyebrow: 'Architectural & iconic' },
-] as const;
+const collections = space === 'bathrooms'
+  ? BATHROOM_COLLECTIONS.map(({ key, label, level, note }) => ({
+      key,
+      label,
+      eyebrow: `Level ${level} · ${note}`,
+    }))
+  : [
+      { key: 'standard', label: 'Standard Collection', eyebrow: space === 'staircases' ? 'Simple & enduring' : 'Fresh & versatile' },
+      { key: 'premium', label: 'Premium Collection', eyebrow: 'Elevated & crafted' },
+      { key: 'signature', label: 'Signature Collection', eyebrow: 'Architectural & iconic' },
+    ];
 ---
 <section class="space-hero">
   <p class="lx-eyebrow">{presentation.eyebrow}</p>
@@ -39,11 +46,11 @@ const collections = [
     const group = publishedDesigns.filter((item) => item.collection === collection.key);
     if (group.length === 0) return null;
     return <section class="collection">
-      <p class="lx-eyebrow">{collection.eyebrow}</p><h2>{collection.key[0].toUpperCase() + collection.key.slice(1)} Collection</h2>
+      <p class="lx-eyebrow">{collection.eyebrow}</p><h2>{collection.label}</h2>
       <div class="design-grid">{group.map((item) => <a class="design-card" href={`/designs/${item.slug}`}>
         <div class="art"><img src={item.coverImage} alt={`${item.name} ${spaceLabel} design`} loading="lazy" /></div>
         <div class="body">
-          <div class="meta"><span>{collection.key}</span><span>{formatArea(item.minSqm) ? `Minimum ${formatArea(item.minSqm)} m²` : 'Custom fit'}</span></div>
+          <div class="meta"><span>{collection.label.replace(' Collection', '')}</span><span>{formatArea(item.minSqm) ? `Minimum ${formatArea(item.minSqm)} m²` : 'Custom fit'}</span></div>
           <h3>{item.name}</h3><p>{item.tagline}</p>
           <dl>
             {item.startingPrice && <><dt>New bathroom</dt><dd>{formatLKRM(item.startingPrice)}</dd></>}

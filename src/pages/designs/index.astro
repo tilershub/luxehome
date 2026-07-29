@@ -4,6 +4,10 @@ import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getDesigns, type Design } from '../../lib/luxe';
 import { formatLKRM, cloudinary , formatArea } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS } from '../../lib/luxe-catalogue';
+import {
+  BATHROOM_COLLECTIONS,
+  normalizeBathroomDesignIdentity,
+} from '../../lib/bathroom-taxonomy';
 
 const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
 const readyCatalogue = CATALOGUE_DESIGNS.filter((item) => item.space === 'bathrooms' && item.coverImage);
@@ -35,23 +39,20 @@ for (const [index, item] of readyCatalogue.entries()) {
 }
 
 for (const stored of storedDesigns) {
-  const fallback = readyCatalogue.find((item) => item.slug === stored.slug);
-  const cover = stored.cover_image_url || fallback?.coverImage;
+  const normalized = normalizeBathroomDesignIdentity(stored);
+  const fallback = readyCatalogue.find((item) => item.slug === normalized.slug);
+  const cover = normalized.cover_image_url || fallback?.coverImage;
   if (!cover) continue;
-  designMap.set(stored.slug, {
-    ...stored,
+  designMap.set(normalized.slug, {
+    ...normalized,
     cover_image_url: cover,
-    new_starting_price_lkr: stored.new_starting_price_lkr || stored.starting_price_lkr || fallback?.startingPrice || null,
-    renovation_starting_price_lkr: stored.renovation_starting_price_lkr || fallback?.renovationStartingPrice || null,
+    new_starting_price_lkr: normalized.new_starting_price_lkr || normalized.starting_price_lkr || fallback?.startingPrice || null,
+    renovation_starting_price_lkr: normalized.renovation_starting_price_lkr || fallback?.renovationStartingPrice || null,
   });
 }
 
 const designs = [...designMap.values()].sort((a, b) => a.sort_order - b.sort_order);
-const collections = [
-  { key: 'standard', label: 'Standard Collection' },
-  { key: 'premium', label: 'Premium Collection' },
-  { key: 'signature', label: 'Signature Collection' },
-] as const;
+const collections = BATHROOM_COLLECTIONS;
 ---
 
 <LuxeLayout
@@ -61,7 +62,7 @@ const collections = [
   ogImageAlt="LUXEhome bathroom design collection"
 >
   <section class="dz-hero">
-    <p class="lx-eyebrow lxr">The Sri Lankan floral collection</p>
+    <p class="lx-eyebrow lxr">Four expressions of Sri Lankan luxury</p>
     <h1 class="lxr">Choose a bathroom design,<br /><em>not a guess.</em></h1>
     <p class="dz-intro lxr">
       Every published design is fully developed—renders, room-size guidance, new and renovation
@@ -86,6 +87,7 @@ const collections = [
         if (group.length === 0) return null;
         return (
           <section class="dz-collection">
+            <p class="lx-eyebrow">Level {collection.level}</p>
             <h2 class="dz-col-title lxr">{collection.label}</h2>
             <div class="dz-grid">
               {group.map((design) => (

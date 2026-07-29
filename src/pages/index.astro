@@ -5,6 +5,11 @@ import ProjectCard from '../components/luxe/ProjectCard.astro';
 import SwipeCarouselController from '../components/luxe/SwipeCarouselController.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
 import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
+import {
+  BATHROOM_COLLECTIONS,
+  collectionShortLabel,
+  normalizeBathroomDesignIdentity,
+} from '../lib/bathroom-taxonomy';
 import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
 
 interface HomeDesign {
@@ -36,42 +41,21 @@ for (const item of bathroomCatalogue) {
 }
 
 for (const item of storedDesigns) {
-  const fallback = bathroomCatalogue.find((candidate) => candidate.slug === item.slug);
-  designMap.set(item.slug, {
-    slug: item.slug,
-    name: item.name,
-    collection: item.collection,
-    tagline: item.tagline || fallback?.tagline || 'A complete, documented LUXEhome bathroom.',
-    minSqm: item.min_sqm,
-    newPrice: item.new_starting_price_lkr || item.starting_price_lkr || fallback?.startingPrice || null,
-    renovationPrice: item.renovation_starting_price_lkr || fallback?.renovationStartingPrice || null,
-    cover: item.cover_image_url || fallback?.coverImage || null,
+  const normalized = normalizeBathroomDesignIdentity(item);
+  const fallback = bathroomCatalogue.find((candidate) => candidate.slug === normalized.slug);
+  designMap.set(normalized.slug, {
+    slug: normalized.slug,
+    name: normalized.name,
+    collection: normalized.collection,
+    tagline: normalized.tagline || fallback?.tagline || 'A complete, documented LUXEhome bathroom.',
+    minSqm: normalized.min_sqm,
+    newPrice: normalized.new_starting_price_lkr || normalized.starting_price_lkr || fallback?.startingPrice || null,
+    renovationPrice: normalized.renovation_starting_price_lkr || fallback?.renovationStartingPrice || null,
+    cover: normalized.cover_image_url || fallback?.coverImage || null,
   });
 }
 
-const collectionGroups = [
-  {
-    key: 'standard',
-    label: 'Standard Collection',
-    note: 'Essential comfort, carefully resolved.',
-    copy: 'Clear layouts and enduring finishes for compact, practical bathrooms.',
-    slugs: ['araliya', 'kumudu', 'olu'],
-  },
-  {
-    key: 'premium',
-    label: 'Premium Collection',
-    note: 'More space for everyday ritual.',
-    copy: 'Elevated fixtures, considered storage and a more atmospheric material palette.',
-    slugs: ['nelum', 'orchid', 'sandun'],
-  },
-  {
-    key: 'signature',
-    label: 'Signature Collection',
-    note: 'A private retreat, designed in full.',
-    copy: 'Our most expressive bathrooms, shaped around light, material and generous bathing zones.',
-    slugs: ['manel', 'binara', 'idda', 'pichcha'],
-  },
-].map((collection) => ({
+const collectionGroups = BATHROOM_COLLECTIONS.map((collection) => ({
   ...collection,
   designs: collection.slugs
     .map((slug) => designMap.get(slug))
@@ -83,16 +67,16 @@ const newPrices = designs.flatMap((design) => design.newPrice ? [design.newPrice
 const renovationPrices = designs.flatMap((design) => design.renovationPrice ? [design.renovationPrice] : []);
 const newFrom = newPrices.length ? Math.min(...newPrices) : null;
 const renovationFrom = renovationPrices.length ? Math.min(...renovationPrices) : null;
-const pichchaDesign = designMap.get('pichcha');
-const heroDesign = pichchaDesign?.cover
-  ? pichchaDesign
+const moonstoneDesign = designMap.get('moonstone');
+const heroDesign = moonstoneDesign?.cover
+  ? moonstoneDesign
   : designs.find((design) => design.cover) ?? null;
 const heroCover = heroDesign?.cover ?? null;
 const inspectionPrice = PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK');
 
 const spaFacts = [
   { value: String(designs.length || 10), label: 'Curated bathroom designs' },
-  { value: '03', label: 'Distinct collections' },
+  { value: '04', label: 'Distinct collections' },
   { value: '01', label: 'Accountable project team' },
   { value: WARRANTY_SCHEDULE[0].period, label: 'Longest applicable warranty' },
 ];
@@ -159,7 +143,7 @@ const projects = (await getProjects())
     {heroDesign && (
       <a class="spa-hero-caption lxr" href={`/designs/${heroDesign.slug}`}>
         <span>{heroDesign.name}</span>
-        <small>{heroDesign.collection} collection</small>
+        <small>{collectionShortLabel(heroDesign.collection)} Collection</small>
       </a>
     )}
     <a class="spa-scroll-cue" href="#spa-introduction">
@@ -200,7 +184,7 @@ const projects = (await getProjects())
   <section class="spa-designs" id="bathroom-collections" aria-labelledby="bathroom-collections-title">
     <header class="spa-section-head lxr">
       <div>
-        <p class="spa-eyebrow">The floral collection</p>
+        <p class="spa-eyebrow">Four expressions of Sri Lankan luxury</p>
         <h2 id="bathroom-collections-title">Find the atmosphere that feels like home.</h2>
       </div>
       <p>
@@ -219,7 +203,7 @@ const projects = (await getProjects())
           <header class="spa-collection-head lxr">
             <div class="spa-collection-number">{String(collectionIndex + 1).padStart(2, '0')}</div>
             <div>
-              <p>{collection.note}</p>
+              <p>Level {collection.level} · {collection.note}</p>
               <h3 id={`spa-${collection.key}-title`}>{collection.label}</h3>
             </div>
             <div class="spa-collection-copy">
@@ -265,7 +249,7 @@ const projects = (await getProjects())
                 <div class="spa-design-info">
                   <div class="spa-design-title">
                     <div>
-                      <small>{design.collection} collection</small>
+                      <small>{collectionShortLabel(design.collection)} Collection</small>
                       <h4>{design.name}</h4>
                     </div>
                     <span aria-hidden="true">↗</span>
@@ -420,7 +404,7 @@ const projects = (await getProjects())
   <section class="spa-final" aria-labelledby="spa-final-title">
     <img
       src="/images/designs/pichcha/pichcha-bathtub-focus-v2.webp"
-      alt="Freestanding bathtub with illuminated niche in the Pichcha bathroom"
+      alt="Freestanding bathtub with illuminated niche in the Moonstone bathroom"
       width="1586"
       height="992"
       loading="lazy"

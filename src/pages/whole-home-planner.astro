@@ -7,12 +7,12 @@ const sizes = Object.entries(PLANNER.sizeMultipliers).map(([key, value]) => ({ k
 ---
 <LuxeLayout
   title="Whole-Home Bathroom Planner — LUXEhome"
-  description="Plan every bathroom in the house — mix Standard, Premium and Signature designs per room and see the combined investment before booking your LUXEhome inspection."
+  description="Plan every bathroom in the house — mix Flora, Island, Heritage and Ceylon Gems designs per room before booking your LUXEhome inspection."
 >
   <section class="planner-hero">
     <p class="lx-eyebrow">Plan the whole home</p>
     <h1>Every bathroom, one plan.</h1>
-    <p>Most homes mix collections — a Signature master bathroom, Standard for the rest. Set each bathroom separately and see the combined investment.</p>
+    <p>Most homes mix collections — perhaps Heritage for the main bathroom and Flora for compact rooms. Set each bathroom separately and see the combined investment.</p>
   </section>
 
   <section class="planner" aria-label="Whole-home bathroom planner">
@@ -38,12 +38,17 @@ const sizes = Object.entries(PLANNER.sizeMultipliers).map(([key, value]) => ({ k
 
     const MAX_ROOMS = 8;
     let rooms = [
-      { collection: 'signature', size: 'standard' },
-      { collection: 'standard', size: 'compact' },
+      { collection: 'heritage', size: 'standard' },
+      { collection: 'flora', size: 'compact' },
     ];
 
     const byKey = (list, key) => list.find((item) => item.key === key);
-    const priceOf = (room) => byKey(collections, room.collection).basePrice * byKey(sizes, room.size).factor;
+    const priceOf = (room) => {
+      const collection = byKey(collections, room.collection);
+      const size = byKey(sizes, room.size);
+      if (!collection || !size || collection.basePrice === null) return null;
+      return collection.basePrice * size.factor;
+    };
     const fmt = (rupees) => {
       const m = rupees / 1_000_000;
       return `LKR ${m >= 10 ? m.toFixed(1).replace(/\.0$/, '') : (Math.round(m * 100) / 100)}M`;
@@ -56,21 +61,28 @@ const sizes = Object.entries(PLANNER.sizeMultipliers).map(([key, value]) => ({ k
     }
 
     function render() {
-      roomsEl.innerHTML = rooms.map((room, i) => `
+      roomsEl.innerHTML = rooms.map((room, i) => {
+        const roomPrice = priceOf(room);
+        return `
         <article class="pr-room" data-index="${i}">
           <header>
             <h2>Bathroom ${String(i + 1).padStart(2, '0')}</h2>
             <div class="pr-head-end">
-              <strong>From ${fmt(priceOf(room))}</strong>
+              <strong>${roomPrice === null ? 'Custom price' : `From ${fmt(roomPrice)}`}</strong>
               ${rooms.length > 1 ? '<button type="button" class="pr-remove" aria-label="Remove this bathroom">Remove</button>' : ''}
             </div>
           </header>
           <div class="pr-collection">${chipGroup(collections, room.collection, 'Collection')}</div>
           <div class="pr-size">${chipGroup(sizes, room.size, 'Typical size')}</div>
-        </article>`).join('');
+        </article>`;
+      }).join('');
 
-      const total = rooms.reduce((sum, room) => sum + priceOf(room), 0);
-      grandEl.textContent = `From ${fmt(total)}`;
+      const roomPrices = rooms.map(priceOf);
+      const pricedTotal = roomPrices.reduce((sum, price) => sum + (price ?? 0), 0);
+      const customCount = roomPrices.filter((price) => price === null).length;
+      grandEl.textContent = pricedTotal > 0
+        ? `From ${fmt(pricedTotal)}${customCount ? ' + custom' : ''}`
+        : 'Custom price';
       const counts = collections
         .map((c) => ({ label: c.label, n: rooms.filter((room) => room.collection === c.key).length }))
         .filter((c) => c.n > 0)
@@ -97,7 +109,7 @@ const sizes = Object.entries(PLANNER.sizeMultipliers).map(([key, value]) => ({ k
     });
 
     addBtn.addEventListener('click', () => {
-      if (rooms.length < MAX_ROOMS) rooms.push({ collection: 'standard', size: 'standard' });
+      if (rooms.length < MAX_ROOMS) rooms.push({ collection: 'flora', size: 'standard' });
       render();
     });
 
