@@ -275,9 +275,10 @@ export const BRAND_STRIP = [
 /** Whole-house planner multipliers (editable in one place). */
 export const PLANNER = {
   collections: {
-    standard:  { label: 'Standard',  basePrice: 1_000_000 },
-    premium:   { label: 'Premium',   basePrice: 1_600_000 },
-    signature: { label: 'Signature', basePrice: 2_175_000 },
+    flora:    { label: 'Level 1 · Flora',        basePrice: 1_000_000 },
+    island:   { label: 'Level 2 · Island',       basePrice: 1_394_000 },
+    heritage: { label: 'Level 3 · Heritage',     basePrice: 1_767_000 },
+    gems:     { label: 'Level 4 · Ceylon Gems',  basePrice: null },
   },
   /** Size multipliers applied to a collection's base price. */
   sizeMultipliers: {

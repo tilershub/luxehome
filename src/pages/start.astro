@@ -3,8 +3,14 @@ export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
 import { formatLKRM, cloudinary, BRAND_STRIP, PLANNER } from '../lib/luxe-config';
+import {
+  collectionShortLabel,
+  normalizeBathroomDesignIdentity,
+} from '../lib/bathroom-taxonomy';
 
-const featured = (await getDesigns({ featured: true })).slice(0, 3);
+const featured = (await getDesigns({ featured: true }))
+  .map(normalizeBathroomDesignIdentity)
+  .slice(0, 3);
 const heroProject = (await getProjects({ featured: true })).find((p) => p.before_image_url && p.after_image_url) ?? null;
 
 const DELIVERABLES = [
@@ -80,9 +86,9 @@ const FAQ = [
                 : <div class="st-ph"><em>{d.name}</em></div>}
             </div>
             <div class="st-design-body">
-              <p class="lx-eyebrow">{d.collection}</p>
+              <p class="lx-eyebrow">{collectionShortLabel(d.collection)}</p>
               <h3>{d.name}</h3>
-              <div class="st-design-price">{formatLKRM(d.starting_price_lkr)}</div>
+              <div class="st-design-price">{d.starting_price_lkr > 0 ? formatLKRM(d.starting_price_lkr) : 'Custom price'}</div>
             </div>
           </a>
         ))}
@@ -199,9 +205,12 @@ const FAQ = [
     var col = document.querySelector('#pl-collections .on');
     var size = document.querySelector('#pl-sizes .on');
     if (!col || !size) return;
-    var total = count * parseFloat(col.dataset.base) * parseFloat(size.dataset.factor);
     document.getElementById('pl-count').textContent = count;
-    document.getElementById('pl-total').textContent = fmtM(total);
+    var base = parseFloat(col.dataset.base || '');
+    var factor = parseFloat(size.dataset.factor || '');
+    document.getElementById('pl-total').textContent = Number.isFinite(base) && Number.isFinite(factor)
+      ? fmtM(count * base * factor)
+      : 'Custom price';
   }
   document.getElementById('pl-minus')?.addEventListener('click', function () { count = Math.max(1, count - 1); planTotal(); });
   document.getElementById('pl-plus')?.addEventListener('click', function () { count = Math.min(10, count + 1); planTotal(); });

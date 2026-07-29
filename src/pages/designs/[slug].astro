@@ -9,6 +9,12 @@ import SwipeCarouselController from '../../components/luxe/SwipeCarouselControll
 import { getDesignBySlug, getProjects, youtubeEmbed, isYouTubeShort, type DesignFixture, type DesignFull } from '../../lib/luxe';
 import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea, absoluteUrl } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
+import {
+  collectionShortLabel,
+  LEGACY_BATHROOM_DESIGN_REDIRECTS,
+  LEGACY_SLUG_BY_CURRENT,
+  normalizeBathroomDesignIdentity,
+} from '../../lib/bathroom-taxonomy';
 
 const PREMIUM_NIFI_700_ACCESSORIES: DesignFixture[] = [
   {
@@ -93,9 +99,21 @@ const PREMIUM_NIFI_700_ACCESSORIES: DesignFixture[] = [
   },
 ];
 
-const { slug } = Astro.params;
-const storedDesign = await getDesignBySlug(slug!);
-const catalogueDesign = CATALOGUE_DESIGNS.find((item) => item.space === 'bathrooms' && item.slug === slug);
+const requestedSlug = Astro.params.slug!;
+const currentSlug = LEGACY_BATHROOM_DESIGN_REDIRECTS[
+  requestedSlug as keyof typeof LEGACY_BATHROOM_DESIGN_REDIRECTS
+];
+if (currentSlug) return Astro.redirect(`/designs/${currentSlug}`, 301);
+
+const legacySlug = LEGACY_SLUG_BY_CURRENT[requestedSlug];
+const storedDesignRaw = await getDesignBySlug(requestedSlug)
+  ?? (legacySlug ? await getDesignBySlug(legacySlug) : null);
+const storedDesign = storedDesignRaw
+  ? normalizeBathroomDesignIdentity(storedDesignRaw)
+  : null;
+const catalogueDesign = CATALOGUE_DESIGNS.find(
+  (item) => item.space === 'bathrooms' && item.slug === requestedSlug,
+);
 const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
   id: '', slug: catalogueDesign.slug, name: catalogueDesign.name, space_id: catalogueDesign.space,
   collection: catalogueDesign.collection, tagline: catalogueDesign.tagline,
@@ -109,7 +127,7 @@ const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
   highlights: [], featured: false, sort_order: 0,
   space: { id: catalogueDesign.space, slug: catalogueDesign.space, name: SPACE_PRESENTATION[catalogueDesign.space].name, sinhala_name: null, sort_order: 0 },
   drawings: [],
-  fixtures: catalogueDesign.collection === 'premium' ? PREMIUM_NIFI_700_ACCESSORIES : [],
+  fixtures: catalogueDesign.collection === 'island' ? PREMIUM_NIFI_700_ACCESSORIES : [],
   price_tiers: (catalogueDesign.pricingTiers ?? []).map((tier, sort_order) => ({
     label: tier.label,
     sqm: tier.sqm,
@@ -127,15 +145,14 @@ const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
 } : null);
 if (!design) return Astro.redirect('/designs');
 
-// Repository-backed Manel samples keep the canonical page complete even before
+// Repository-backed Sigiriya samples keep the canonical page complete even before
 // the same assets are uploaded through the CMS. CMS values always win.
-if (design.slug === 'manel') {
+if (design.slug === 'sigiriya-bathroom') {
   design.starting_price_lkr = 2_060_000;
   design.new_starting_price_lkr = 2_060_000;
   design.renovation_starting_price_lkr = 2_175_000;
   design.min_sqm = 5;
   design.cover_image_url ||= '/images/designs/manel/cover.jpeg';
-  design.inspiration_image_url ||= '/images/designs/manel/manel-flower.jpeg';
   design.video_3d_url ||= 'https://youtube.com/shorts/LHkPOUT4ku8';
   design.workflow_text ||= 'We inspect, customise and approve the complete design file before procurement and construction begin.';
   if (design.materials.length === 0) {
@@ -158,7 +175,7 @@ if (design.slug === 'manel') {
   }
 }
 
-const collectionLabel = design.collection.charAt(0).toUpperCase() + design.collection.slice(1);
+const collectionLabel = collectionShortLabel(design.collection);
 const priceLabel = design.starting_price_lkr > 0 ? formatLKRM(design.starting_price_lkr) : 'Starting price to be confirmed';
 const newPrice = design.new_starting_price_lkr || design.starting_price_lkr || null;
 const renoPrice = design.renovation_starting_price_lkr ?? null;
@@ -177,8 +194,8 @@ const AREAS = [
   {
     kind: 'shower',
     n: 'IV',
-    kicker: design.slug === 'pichcha' ? 'The bathtub' : 'The shower',
-    title: design.slug === 'pichcha' ? 'The freestanding bath and concealed mixer' : 'The walk-in shower and niche',
+    kicker: design.slug === 'moonstone' ? 'The bathtub' : 'The shower',
+    title: design.slug === 'moonstone' ? 'The freestanding bath and concealed mixer' : 'The walk-in shower and niche',
   },
   { kind: 'shower_cubicle', n: 'V', kicker: 'The shower cubicle', title: 'Glass, hardware and precise sealing' },
   { kind: 'ceiling',      n: 'VI',  kicker: 'Looking up',         title: 'The ceiling, lighting and ventilation' },
@@ -276,10 +293,13 @@ const testimonials = allRelated
     who: [project.review_by, project.location].filter(Boolean).join(' · ') || 'LUXEhome client',
   }));
 
-const nameHeading = design.name_heading || `Inspired by the ${design.name} flower.`;
+const nameHeading = design.name_heading
+  || (design.collection === 'flora'
+    ? `Inspired by the ${design.name} flower.`
+    : `Inspired by ${design.name}.`);
 const nameStory = design.name_story
-  || (design.slug === 'manel'
-    ? 'Named after Sri Lanka’s blue water lily, this design translates its deep blue character and quiet symmetry into a composed Signature bathroom.'
+  || (design.slug === 'sigiriya-bathroom'
+    ? 'Sigiriya translates monumental stone, precise geometry and the calm intelligence of its historic water gardens into a composed Heritage bathroom.'
     : design.description
     || `The ${design.name} carries its namesake’s character into a fully documented ${collectionLabel} bathroom.`);
 

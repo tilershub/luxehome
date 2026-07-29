@@ -378,7 +378,7 @@
       newBtn.style.display = 'none';
       const isNew = !d;
       d = d || {
-        name: '', slug: '', space_id: spaces[0]?.id ?? '', collection: 'standard',
+        name: '', slug: '', space_id: spaces[0]?.id ?? '', collection: 'flora',
         tagline: '', description: '', starting_price_lkr: 0, min_sqm: null,
         new_starting_price_lkr: null, renovation_starting_price_lkr: null,
         highlights: [],
@@ -414,7 +414,7 @@
           <div class="fld"><label>Additional cost per m² (LKR) — admin only, hidden from website</label><input id="f-additional-sqm" type="number" min="0" step="1000" value="${children.additionalCostPerSqm ?? ''}" /></div>
           <div class="fld-row">
             <div class="fld"><label>Space</label><select id="f-space">${spaces.map((s) => `<option value="${s.id}" ${s.id === d.space_id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>
-            <div class="fld"><label>Collection</label><select id="f-collection">${['standard','premium','signature'].map((c) => `<option ${c === d.collection ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+            <div class="fld"><label>Collection</label><select id="f-collection">${['flora','island','heritage','gems','standard','premium','signature'].map((c) => `<option ${c === d.collection ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
           </div>
           <div class="fld"><label>Tagline</label><input id="f-tagline" value="${esc(d.tagline)}" /></div>
           <div class="fld"><label>Description</label><textarea id="f-desc">${esc(d.description)}</textarea></div>
