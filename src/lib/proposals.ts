@@ -10,6 +10,30 @@ export interface ProposalMaterial {
   brand: string;
   specification: string;
   image_url?: string;
+  logo_urls?: string[];
+}
+
+export const PROPOSAL_BRANDS = [
+  { name: 'Tokyo Cement Group', logoUrl: '/images/brands/tokyo-cement.webp', matches: [/\btokyo\b/i] },
+  { name: 'S-lon', logoUrl: '/images/brands/slon.webp', matches: [/\bs[\s-]?lon\b/i] },
+  { name: 'Swisstek', logoUrl: '/images/brands/swisstek.webp', matches: [/\bswisstek\b/i] },
+  { name: 'ACL Cables', logoUrl: '/images/brands/acl-cables.webp', matches: [/\bacl\b/i] },
+  { name: 'Swiss Bathware', logoUrl: '/images/brands/swiss-bathware.webp', matches: [/\bswiss(?:\s+bathware)?\b/i] },
+  { name: 'Rocell', logoUrl: '/images/brands/rocell.webp', matches: [/\brocell\b/i] },
+  { name: 'Mega Tile', logoUrl: '/images/brands/mega-tile.webp', matches: [/\bmega(?:\s+tile)?s?\b/i] },
+] as const;
+
+export function proposalBrandLogoUrls(brand: string): string[] {
+  return PROPOSAL_BRANDS
+    .filter((entry) => entry.matches.some((pattern) => pattern.test(brand)))
+    .map((entry) => entry.logoUrl);
+}
+
+export function withProposalBrandLogos(material: ProposalMaterial): ProposalMaterial {
+  return {
+    ...material,
+    logo_urls: proposalBrandLogoUrls(material.brand),
+  };
 }
 
 export interface ProposalTimelineItem {
@@ -114,7 +138,7 @@ export const DEFAULT_MATERIALS: ProposalMaterial[] = [
   { system: 'Tapware', brand: 'Swiss / approved', specification: 'Basin, shower and matching control fittings' },
   { system: 'Tiles', brand: 'Rocell / Mega / approved', specification: 'Final model, size and finish listed after selection' },
   { system: 'Glass and mirror', brand: 'Tempered glass / 5 mm mirror', specification: 'Measured after finished tile surfaces' },
-];
+].map(withProposalBrandLogos);
 
 export const DEFAULT_TIMELINE: ProposalTimelineItem[] = [
   { week: 'Week 1', title: 'Mobilisation and preparation', description: 'Protection, procurement, demolition and debris removal.' },
