@@ -25,6 +25,7 @@
   import { LUXE_SUPABASE_KEY as key, LUXE_SUPABASE_URL as url } from '../../lib/luxe-supabase';
   import {
     addCalendarDays,
+    applyCurrentWarrantyPolicy,
     calculateProposalPayments,
     createProposalDraft,
     DEFAULT_MATERIALS,
@@ -143,7 +144,10 @@
       materials: cleanArray<ProposalMaterial>(row.materials, fallback.materials).map(withProposalBrandLogos),
       timeline: cleanArray<ProposalTimelineItem>(row.timeline, fallback.timeline),
       quality_items: cleanArray<ProposalQualityItem>(row.quality_items, fallback.quality_items),
-      warranties: cleanArray<ProposalWarranty>(row.warranties, fallback.warranties),
+      warranties: applyCurrentWarrantyPolicy(
+        cleanArray<ProposalWarranty>(row.warranties, fallback.warranties),
+        row.status || fallback.status,
+      ),
     };
   }
 
@@ -414,12 +418,12 @@
           </section>
 
           <section class="form-section" id="proposal-step-5">
-            <div class="section-heading"><span>05</span><div><h3>Programme, quality and warranties</h3><p>These defaults can be adjusted to the measured project before approval.</p></div></div>
+            <div class="section-heading"><span>05</span><div><h3>Programme, quality and warranties</h3><p>Keep LUXEhome workmanship at 24 months. Record longer product or system cover only when written manufacturer or supplier terms support it.</p></div></div>
             <h4>Indicative programme</h4>
             ${arrayRows('timeline', current.timeline, [{ key: 'week', label: 'Week' }, { key: 'title', label: 'Stage' }, { key: 'description', label: 'Work', textarea: true }], 6)}
             <h4>Quality checks</h4>
             ${arrayRows('quality', current.quality_items, [{ key: 'title', label: 'Check' }, { key: 'description', label: 'Control', textarea: true }], 6)}
-            <h4>Applicable warranties</h4>
+            <h4>Warranty and aftercare record</h4>
             ${arrayRows('warranties', current.warranties, [{ key: 'item', label: 'Item' }, { key: 'period', label: 'Period' }, { key: 'basis', label: 'Basis', textarea: true }], 8)}
           </section>
 
@@ -789,7 +793,7 @@
 
     const qualityBody = `<p class="pdf-lead">Critical work is checked before it is covered. Evidence and stage updates form part of the project communication record.</p><div class="pdf-card-grid">${quality.map((item, index) => `<div class="pdf-card"><span>${String(index + 1).padStart(2, '0')}</span><h3>${esc(item.title)}</h3><p>${esc(item.description)}</p></div>`).join('')}</div><div class="pdf-strip gold"><b>WATERPROOFING PAYMENT AND TESTING</b><p>The 20% milestone is collected once waterproofing is complete and before the flood test begins. If testing identifies an issue, LUXEhome corrects and retests it without an additional charge. Tiling starts only after the test passes.</p></div>`;
 
-    const warrantyBody = `<p class="pdf-lead">Applicable warranty periods are confirmed against the supplied products and completed construction scope. Manufacturer conditions and the signed project record apply.</p><div class="pdf-table warranty-table"><div class="table-head"><b>ITEM</b><b>PERIOD</b><b>BASIS</b></div>${warranties.map((item) => `<div class="table-row"><strong>${esc(item.item)}</strong><b>${esc(item.period)}</b><span>${esc(item.basis)}</span></div>`).join('')}</div><div class="pdf-panel compact"><span>AT HANDOVER</span><h3>Final inspection, care guidance and a written warranty record.</h3><p>The client receives the final scope record and applicable warranty schedule. Concerns are reported with the project reference, photos and reasonable access for assessment.</p></div><div class="pdf-strip"><p>Not covered: misuse, damage, normal wear, unauthorised third-party alterations, failure to follow care instructions, or matters outside the written construction scope.</p></div>`;
+    const warrantyBody = `<p class="pdf-lead">LUXEhome workmanship is covered for 24 months from the documented handover date. Product and supplier warranties are recorded separately and apply only under their own written conditions.</p><div class="pdf-table warranty-table"><div class="table-head"><b>COVER</b><b>PERIOD</b><b>BASIS</b></div>${warranties.map((item) => `<div class="table-row"><strong>${esc(item.item)}</strong><b>${esc(item.period)}</b><span>${esc(item.basis)}</span></div>`).join('')}</div><div class="pdf-panel compact"><span>AT HANDOVER</span><h3>Final inspection, care guidance and a written warranty record.</h3><p>The documented handover date begins the LUXEhome workmanship period. Concerns are reported with the project reference, photos or video and reasonable access for assessment.</p></div><div class="pdf-strip"><p>Not covered: misuse, accidental damage, normal wear, routine maintenance or cosmetic discolouration, post-handover blockages, abnormal water pressure or water quality, building movement, unauthorised third-party alterations, product defects outside LUXEhome workmanship, or matters outside the written scope.</p></div>`;
 
     const paymentRows = [
       ['Already paid', 'Project initiation deposit', formatLkr(proposal.initiation_credit_lkr)],
@@ -818,7 +822,7 @@
       + pdfPage(5, '04 / Materials and finishes', 'Specified openly. Approved before purchase.', materialsBody)
       + pdfPage(6, '05 / Indicative programme', 'Six weeks, sequenced around quality checks.', timelineBody)
       + pdfPage(7, '06 / Quality control', 'Critical work is checked before it is covered.', qualityBody)
-      + pdfPage(8, '07 / Warranty and aftercare', 'Responsibilities recorded at handover.', warrantyBody)
+      + pdfPage(8, '07 / Warranty and aftercare', '24-month workmanship. Product cover kept separate.', warrantyBody)
       + pdfPage(9, '08 / Final quotation', 'One contract value. Five visible milestones.', paymentBody)
       + pdfPage(10, '09 / Acceptance', 'Thirty days to decide with the complete picture.', acceptanceBody);
     previewTitle.textContent = `${proposal.proposal_number || 'Draft proposal'} / R${proposal.revision}`;

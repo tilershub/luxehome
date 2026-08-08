@@ -248,17 +248,13 @@ export const WHY_LUXEHOME = [
   'Workmanship warranty',
 ];
 
-/** Warranty is given per task, not as one blanket cover. Each part of the
-    work carries its own documented period. The one place these live. */
+/** LUXEhome's workmanship promise is kept separate from third-party product
+    and supplier warranties. These labels are the public single source of truth. */
 export const WARRANTY_SCHEDULE: Array<{ item: string; period: string }> = [
-  { item: 'Bathware',          period: '15 years' },
-  { item: 'Waterproofing',     period: '10 years' },
-  { item: 'Plumbing',          period: '10 years' },
-  { item: 'Wiring',            period: '10 years' },
-  { item: 'Taps & showers',    period: '5 years' },
-  { item: 'Ceiling',           period: '5 years' },
-  { item: 'Light fixtures',    period: '1 year' },
-  { item: 'Tempered glass',    period: '1 year' },
+  { item: 'LUXEhome workmanship',    period: '24 months' },
+  { item: 'Handover snag review',    period: '30 days' },
+  { item: 'Product warranties',      period: 'Manufacturer terms' },
+  { item: 'Supplier-backed systems', period: 'Written per project' },
 ];
 
 /** Brands strip for home / landing pages. */

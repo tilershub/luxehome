@@ -159,15 +159,56 @@ export const DEFAULT_QUALITY: ProposalQualityItem[] = [
 ];
 
 export const DEFAULT_WARRANTIES: ProposalWarranty[] = [
-  { item: 'Bathware', period: 'Up to 15 years', basis: 'Manufacturer and supplied-model conditions' },
-  { item: 'Waterproofing workmanship', period: '10 years', basis: 'Within the agreed wet-area construction scope' },
-  { item: 'Plumbing workmanship', period: '10 years', basis: 'Internal bathroom supply and waste scope' },
-  { item: 'Electrical workmanship', period: '10 years', basis: 'Bathroom wiring completed by LUXEhome' },
-  { item: 'Taps and showers', period: 'Up to 5 years', basis: 'Manufacturer and product conditions' },
-  { item: 'Ceiling workmanship', period: '5 years', basis: 'Installed ceiling system and agreed scope' },
-  { item: 'Light fixtures', period: 'Up to 1 year', basis: 'Manufacturer and supplied-model conditions' },
-  { item: 'Tempered glass', period: 'Up to 1 year', basis: 'Hardware and installation conditions apply' },
+  {
+    item: 'LUXEhome workmanship',
+    period: '24 months',
+    basis: 'Eligible waterproofing, plumbing, electrical, tiling, ceiling and installation workmanship within the agreed written scope',
+  },
+  {
+    item: 'Handover snag review',
+    period: '30 days',
+    basis: 'Completion items reported after documented handover; this review does not shorten the workmanship period',
+  },
+  {
+    item: 'Products and fixtures',
+    period: 'Manufacturer terms',
+    basis: 'Selected-model warranty, exclusions and proof-of-purchase conditions apply separately',
+  },
+  {
+    item: 'Supplier-backed systems',
+    period: 'Project-specific',
+    basis: 'Longer cover applies only when formally registered and issued in writing for this project',
+  },
+  {
+    item: 'Client-supplied products',
+    period: 'Installation only',
+    basis: 'LUXEhome covers eligible installation workmanship, not defects in the supplied product',
+  },
 ];
+
+const LEGACY_DEFAULT_WARRANTY_ITEMS = [
+  'Bathware',
+  'Waterproofing workmanship',
+  'Plumbing workmanship',
+  'Electrical workmanship',
+  'Taps and showers',
+  'Ceiling workmanship',
+  'Light fixtures',
+  'Tempered glass',
+];
+
+/** Move unissued drafts off the former 15/10/5-year default without silently
+ * rewriting an approved, sent or accepted proposal snapshot. */
+export function applyCurrentWarrantyPolicy(
+  warranties: ProposalWarranty[],
+  status: ProposalStatus,
+): ProposalWarranty[] {
+  const isLegacyDefault = warranties.length === LEGACY_DEFAULT_WARRANTY_ITEMS.length
+    && LEGACY_DEFAULT_WARRANTY_ITEMS.every((item) => warranties.some((warranty) => warranty.item === item));
+  return status === 'draft' && isLegacyDefault
+    ? structuredClone(DEFAULT_WARRANTIES)
+    : warranties;
+}
 
 export interface ProposalPaymentSchedule {
   initiationCredit: number;
