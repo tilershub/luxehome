@@ -142,29 +142,27 @@ export const STANDARD_DRAWINGS = [
   { kind: 'electrical',     label: 'Electrical Layout',       tag: 'Points & lighting',  image: '/images/drawings/electrical.webp' },
 ] as const;
 
-/** What a client pays before construction. The design package is refundable
-    and is charged on top of the site inspection. */
-export const PRE_CONSTRUCTION_FEES = {
-  inspection: {
-    amount: 10_000,
-    title: 'Site inspection',
-    copy: 'We measure the room, review services, site condition and access, then recommend the design that fits.',
-  },
-  designPackage: {
-    amount: 40_000,
-    refundable: true,
-    title: 'Customised design package',
-    copy: 'Your chosen design worked up around your actual room and issued as a complete set.',
-    includes: [
-      '3D video walkthrough of your room',
-      'Civil layout',
-      'Supply water drawing',
-      'Waste & drainage layout',
-      'Electrical diagram',
-    ],
-  },
-  /** Both stages taken together. */
-  combined: 50_000,
+/** What a client pays before construction: one consultation package, charged
+    once and credited in full against the construction contract. This replaced
+    the earlier two-step LKR 10,000 inspection + LKR 40,000 adaptation split. */
+export const CONSULTATION_PACKAGE = {
+  amount: 50_000,
+  title: 'Design consultation package',
+  copy: 'One fee covers the visit, the design and the numbers—everything you need to decide whether to build.',
+  includes: [
+    'Site visit and evaluation',
+    'Full design for your room',
+    '3D video and images',
+    'Material selection',
+    'Final quotation',
+  ],
+  /** Deliverables that are deliberately outside the package. */
+  excludes: [
+    'Construction drawings',
+    'Technical pack',
+  ],
+  excludesNote: 'Construction drawings and the technical pack are issued under a construction agreement.',
+  creditNote: 'The full LKR 50,000 is credited against your construction contract.',
 } as const;
 
 /** "Built the LUXEhome Way" — the construction system every bathroom follows.

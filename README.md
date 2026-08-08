@@ -66,7 +66,7 @@ there and every page follows:
 | `WHATSAPP_NUMBER` | Every WhatsApp link |
 | `GA_MEASUREMENT_IDS` | GA4 properties tagged on every public page |
 | `WARRANTY_SCHEDULE` | Warranty per task — bathware 15y, waterproofing 10y, plumbing 10y, wiring 10y, taps & showers 5y, ceiling 5y, light fixtures 1y, tempered glass 1y |
-| `PRE_CONSTRUCTION_FEES` | Site inspection LKR 10,000 · refundable design package LKR 40,000 · LKR 50,000 together |
+| `CONSULTATION_PACKAGE` | The single LKR 50,000 design consultation — what it includes, what it excludes, and that it is credited against the construction contract |
 | `STANDARD_DRAWINGS` | The four technical drawings, shared by every design |
 | `FIXTURE_CATEGORIES` | Bathroom fixture schedule and its display order |
 | `DEFAULT_DESIGN_TIMELINE` | Six-week timeline seeded into a new design |

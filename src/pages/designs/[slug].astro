@@ -7,7 +7,7 @@ import KeyHighlights from '../../components/luxe/KeyHighlights.astro';
 import BuildProcess from '../../components/luxe/BuildProcess.astro';
 import SwipeCarouselController from '../../components/luxe/SwipeCarouselController.astro';
 import { getDesignBySlug, getProjects, youtubeEmbed, isYouTubeShort, type DesignFixture, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea, absoluteUrl } from '../../lib/luxe-config';
+import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, CONSULTATION_PACKAGE, formatArea, absoluteUrl } from '../../lib/luxe-config';
 import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
 import {
   collectionShortLabel,
@@ -388,7 +388,7 @@ const productSchema = JSON.stringify({
     <p class="wx-statement">A complete bathroom, documented to the last fitting — <em>before</em> a single tile is laid.</p>
     <div class="wx-threshold-cta">
       <a href={inspectionHref}><span>Inspect my bathroom for this design</span><b aria-hidden="true">→</b></a>
-      <small>LKR 10,000 · No measurements needed</small>
+      <small>LKR 50,000 · No measurements needed</small>
     </div>
   </section>
 
@@ -654,36 +654,38 @@ const productSchema = JSON.stringify({
   <section id="fees" class="wx-panel-band">
     <div class="wx-section">
       <p class="wx-kicker">Before any construction is committed</p>
-      <h2>Two steps to a documented design.</h2>
-      <p class="wx-body">Both are paid before construction and are separate from the build cost. Nothing further is collected until the scope and fixed quotation are approved.</p>
+      <h2>One consultation. One fee.</h2>
+      <p class="wx-body">{CONSULTATION_PACKAGE.copy} Nothing further is collected until the scope and fixed quotation are approved.</p>
 
       <div class="wx-fee-grid">
-        <article class="wx-fee">
-          <span class="wx-fee-step">Step one</span>
-          <strong class="wx-fee-price">LKR {PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK')}</strong>
-          <h3>{PRE_CONSTRUCTION_FEES.inspection.title}</h3>
-          <p>{PRE_CONSTRUCTION_FEES.inspection.copy}</p>
+        <article class="wx-fee wx-fee--feature">
+          <span class="wx-fee-step">The only pre-construction fee<b>Credited</b></span>
+          <strong class="wx-fee-price">LKR {CONSULTATION_PACKAGE.amount.toLocaleString('en-LK')}</strong>
+          <h3>{CONSULTATION_PACKAGE.title}</h3>
+          <p>Everything below is delivered for your actual room, not a showroom example.</p>
+          <ul>
+            {CONSULTATION_PACKAGE.includes.map((item) => <li>{item}</li>)}
+          </ul>
         </article>
 
-        <article class="wx-fee wx-fee--feature">
-          <span class="wx-fee-step">Step two<b>Refundable</b></span>
-          <strong class="wx-fee-price">LKR {PRE_CONSTRUCTION_FEES.designPackage.amount.toLocaleString('en-LK')}</strong>
-          <h3>{PRE_CONSTRUCTION_FEES.designPackage.title}</h3>
-          <p>{PRE_CONSTRUCTION_FEES.designPackage.copy}</p>
+        <article class="wx-fee">
+          <span class="wx-fee-step">Not included</span>
+          <h3>Construction drawings and technical pack.</h3>
+          <p>{CONSULTATION_PACKAGE.excludesNote}</p>
           <ul>
-            {PRE_CONSTRUCTION_FEES.designPackage.includes.map((item) => <li>{item}</li>)}
+            {CONSULTATION_PACKAGE.excludes.map((item) => <li>{item}</li>)}
           </ul>
         </article>
       </div>
 
       <div class="wx-fee-total">
         <div>
-          <span>Site inspection and 3D modelling together</span>
-          <small>The design package is charged in addition to the site inspection.</small>
+          <span>Credited against your construction contract</span>
+          <small>{CONSULTATION_PACKAGE.creditNote}</small>
         </div>
-        <strong>LKR {PRE_CONSTRUCTION_FEES.combined.toLocaleString('en-LK')}</strong>
+        <strong>LKR {CONSULTATION_PACKAGE.amount.toLocaleString('en-LK')}</strong>
       </div>
-      <a class="wx-fee-cta" href={inspectionHref}>Book the site inspection →</a>
+      <a class="wx-fee-cta" href={inspectionHref}>Book the consultation →</a>
     </div>
   </section>
 
@@ -785,18 +787,19 @@ const productSchema = JSON.stringify({
     <p class="wx-kicker">The practical next step</p>
     <h2>Will the {design.name} work in your bathroom?</h2>
     <p>We measure the room, review the site conditions and confirm the right fit before you commit to construction.</p>
-    <a href={inspectionHref} class="wx-book-btn">Book site inspection · LKR 10,000</a>
+    <a href={inspectionHref} class="wx-book-btn">Book consultation · LKR 50,000</a>
     <small>No construction deposit is collected at this stage.</small>
   </section>
 
   <!-- STICKY BOOK BAR -->
   <div class="wx-bar" id="wx-bar">
     <a href={inspectionHref}>
-      <span>Book {design.name} inspection</span>
-      <strong>LKR 10,000</strong>
+      <span>Book {design.name} consultation</span>
+      <strong>LKR 50,000</strong>
     </a>
   </div>
   <SwipeCarouselController />
+
 </LuxeLayout>
 
 <script is:inline>

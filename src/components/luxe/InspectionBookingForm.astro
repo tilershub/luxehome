@@ -19,7 +19,7 @@ const bathroomDesignNames = [...new Set([
     <h2>Request received.</h2>
     <p>
       We will confirm the service area and appointment on WhatsApp, then send the
-      LKR 10,000 payment details. Please do not pay until the booking is confirmed.
+      LKR 50,000 payment details. Please do not pay until the booking is confirmed.
     </p>
     <a id="inspection-whatsapp-backup" href="#" target="_blank" rel="noopener noreferrer">
       Continue to WhatsApp
@@ -28,7 +28,7 @@ const bathroomDesignNames = [...new Set([
 
   <form id="inspection-request-form">
     <div class="ibf-heading">
-      <p class="lx-eyebrow">Bathroom site inspection</p>
+      <p class="lx-eyebrow">Bathroom design consultation</p>
       <h2>Request your visit.</h2>
       <p>You do not need drawings or measurements. Tell us what you know; we will measure the rest.</p>
     </div>
@@ -109,23 +109,24 @@ const bathroomDesignNames = [...new Set([
 
     <div class="ibf-fee">
       <div>
-        <span>Professional site inspection</span>
-        <strong>LKR 10,000</strong>
+        <span>Design consultation package</span>
+        <strong>LKR 50,000</strong>
       </div>
       <ul>
-        <li>Room measurements and site-condition review</li>
-        <li>Design-fit and preliminary budget guidance</li>
-        <li>Clear recommendation for the next step</li>
+        <li>Site visit and evaluation</li>
+        <li>Full design, 3D video and images</li>
+        <li>Material selection and final quotation</li>
+        <li>Credited against your construction contract</li>
       </ul>
     </div>
 
     <label class="ibf-consent">
       <input type="checkbox" name="fee_acknowledgement" required />
-      <span>I understand the inspection fee is LKR 10,000. LUXEhome will confirm the location and appointment before asking me to pay.</span>
+      <span>I understand the consultation fee is LKR 50,000. LUXEhome will confirm the location and appointment before asking me to pay.</span>
     </label>
 
     <button class="ibf-submit" id="inspection-submit" type="submit">
-      <span>Request My Site Inspection</span>
+      <span>Request My Consultation</span>
       <span hidden>Preparing your request…</span>
     </button>
     <p class="ibf-footnote">No construction deposit is collected at this stage.</p>
@@ -227,7 +228,7 @@ const bathroomDesignNames = [...new Set([
       const details: Record<string, string> = {
         project_type: projectType,
         size_status: sizeStatus,
-        inspection_fee_lkr: '10000',
+        consultation_fee_lkr: '50000',
         payment_status: 'Awaiting appointment confirmation',
       };
       if (preferredDesign) details.preferred_design = preferredDesign;
@@ -239,7 +240,7 @@ const bathroomDesignNames = [...new Set([
         `Project: ${projectType}`,
         preferredDesign ? `Preferred design: ${preferredDesign}` : 'Preferred design: Please recommend',
         `Measurements: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
-        'Inspection fee: LKR 10,000 — payment after booking confirmation',
+        'Consultation fee: LKR 50,000 — payment after booking confirmation',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
 
@@ -247,7 +248,7 @@ const bathroomDesignNames = [...new Set([
         const lead: LeadInsert = {
           name,
           phone,
-          service: 'Bathroom Site Inspection',
+          service: 'Bathroom Design Consultation',
           location,
           service_details: details,
           notes: notes || null,
@@ -275,9 +276,9 @@ const bathroomDesignNames = [...new Set([
       const metaEventId = crypto.randomUUID();
       if (typeof (window as any).fbq === 'function') {
         (window as any).fbq('track', 'Lead', {
-          content_name: 'Bathroom Site Inspection',
+          content_name: 'Bathroom Design Consultation',
           content_category: projectType,
-          value: 10000,
+          value: 50000,
           currency: 'LKR',
         }, { eventID: metaEventId });
       }
@@ -289,12 +290,12 @@ const bathroomDesignNames = [...new Set([
           event_source_url: window.location.href,
           phone,
           name,
-          service: 'Bathroom Site Inspection',
+          service: 'Bathroom Design Consultation',
         }),
       }).catch(() => {});
 
       const message = [
-        'Bathroom Site Inspection Request — LUXEHOME',
+        'Bathroom Design Consultation Request — LUXEHOME',
         '',
         `Name: ${name}`,
         `Phone: ${phone}`,
@@ -304,7 +305,7 @@ const bathroomDesignNames = [...new Set([
         `Bathroom size: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
         preferredDate ? `Preferred date: ${preferredDate}` : '',
         preferredTime ? `Preferred time: ${preferredTime}` : '',
-        'Inspection fee: LKR 10,000 — payment after location and appointment confirmation',
+        'Consultation fee: LKR 50,000 — payment after location and appointment confirmation',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
       const whatsappUrl = `https://wa.me/94774503744?text=${encodeURIComponent(message)}`;
@@ -317,8 +318,8 @@ const bathroomDesignNames = [...new Set([
       if (typeof (window as any).gtag === 'function') {
         (window as any).gtag('event', 'lead_form_submit', {
           event_category: 'Lead',
-          event_label: 'Bathroom Site Inspection',
-          value: 10000,
+          event_label: 'Bathroom Design Consultation',
+          value: 50000,
         });
       }
     });

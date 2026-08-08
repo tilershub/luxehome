@@ -10,7 +10,7 @@ import {
   collectionShortLabel,
   normalizeBathroomDesignIdentity,
 } from '../lib/bathroom-taxonomy';
-import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
+import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, CONSULTATION_PACKAGE } from '../lib/luxe-config';
 
 interface HomeDesign {
   slug: string;
@@ -72,7 +72,7 @@ const heroDesign = moonstoneDesign?.cover
   ? moonstoneDesign
   : designs.find((design) => design.cover) ?? null;
 const heroCover = heroDesign?.cover ?? null;
-const inspectionPrice = PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK');
+const consultationPrice = CONSULTATION_PACKAGE.amount.toLocaleString('en-LK');
 
 const spaFacts = [
   { value: String(designs.length || 10), label: 'Curated bathroom designs' },
@@ -135,7 +135,7 @@ const projects = (await getProjects())
         </p>
         <div class="spa-hero-actions lxr">
           <a class="spa-button spa-button--light" href="#bathroom-collections">Explore the collections</a>
-          <a class="spa-button spa-button--glass" href="/book-site-inspection">Book a site inspection</a>
+          <a class="spa-button spa-button--glass" href="/book-site-inspection">Book a consultation</a>
         </div>
       </div>
     </div>
@@ -320,10 +320,10 @@ const projects = (await getProjects())
       <div class="spa-inspection lxr">
         <div>
           <small>Your first step</small>
-          <strong>Site inspection · LKR {inspectionPrice}</strong>
+          <strong>Design consultation · LKR {consultationPrice}</strong>
           <p>No bathroom measurements are needed before booking.</p>
         </div>
-        <a class="spa-button spa-button--mist" href="/book-site-inspection">Book a site inspection</a>
+        <a class="spa-button spa-button--mist" href="/book-site-inspection">Book a consultation</a>
       </div>
     </div>
   </section>
@@ -415,7 +415,7 @@ const projects = (await getProjects())
       <h2 id="spa-final-title">Your retreat begins with one good inspection.</h2>
       <p>We will measure the space, assess what is possible and help you choose the right design path.</p>
       <div>
-        <a class="spa-button spa-button--light" href="/book-site-inspection">Book inspection · LKR {inspectionPrice}</a>
+        <a class="spa-button spa-button--light" href="/book-site-inspection">Book consultation · LKR {consultationPrice}</a>
         <a class="spa-final-link" href="/designs">Browse all designs</a>
       </div>
     </div>

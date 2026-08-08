@@ -11,7 +11,7 @@ const {data:storedPage}=sb?await sb.from('lx_pages').select('title,eyebrow,lead,
 const page={...fallbackPage,...Object.fromEntries(Object.entries(storedPage||{}).filter(([,value])=>value))};
 ---
 <LuxeLayout title={storedPage?.seo_title||`${page.title} — LUXEhome`} description={storedPage?.meta_description||page.lead} ogImage={storedPage?.og_image||undefined} ogImageAlt={page.title}>
-  <section class="info-hero"><p class="lx-eyebrow">{page.eyebrow}</p><h1>{page.title}</h1><p>{page.lead}</p><div class="actions"><a class="lx-btn-wa" href="/book-site-inspection">Book site inspection</a><a class="lx-btn-ghost" href="/designs">Browse designs</a></div></section>
+  <section class="info-hero"><p class="lx-eyebrow">{page.eyebrow}</p><h1>{page.title}</h1><p>{page.lead}</p><div class="actions"><a class="lx-btn-wa" href="/book-site-inspection">Book consultation</a><a class="lx-btn-ghost" href="/designs">Browse designs</a></div></section>
   <section class="info-section"><div class="info-grid">{page.cards.map((card) => <article><h2>{card.title}</h2><p>{card.copy}</p></article>)}</div></section>
   <section class="info-cta"><div><p class="lx-eyebrow">Start with clarity</p><h2>Ready to discuss your home?</h2></div><a href={waLink(`Hi LUXEhome! I am interested in ${page.title}`)} target="_blank" rel="noopener noreferrer">Talk on WhatsApp</a></section>
 </LuxeLayout>
