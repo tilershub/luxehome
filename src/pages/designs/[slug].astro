@@ -124,8 +124,8 @@ const designHighlights = design.highlights.length > 0
   : [
       ...(formatArea(design.min_sqm) ? [{ value: `${formatArea(design.min_sqm)} m²`, title: 'Minimum room', copy: 'Smaller rooms are assessed on site before the design is confirmed.' }] : []),
       ...(newPrice ? [{ value: lkrM(newPrice), title: 'New bathroom from', copy: 'The complete listed specification at the minimum fit.' }] : []),
-      { value: WARRANTY_SCHEDULE[0].period, title: 'Longest warranty', copy: `${WARRANTY_SCHEDULE[0].item}. Every task carries its own written period.` },
-      ...(fixtures.length ? [{ value: String(fixtures.length), title: 'Specified fixtures', copy: 'Named products with brand, model, finish and warranty.' }] : []),
+      { value: WARRANTY_SCHEDULE[0].period, title: 'Workmanship warranty', copy: 'LUXEhome installation workmanship, documented from handover.' },
+      ...(fixtures.length ? [{ value: String(fixtures.length), title: 'Specified fixtures', copy: 'Named products with brand, model, finish and manufacturer warranty where available.' }] : []),
     ];
 
 const allRelated = storedDesign?.id
@@ -356,7 +356,7 @@ const productSchema = JSON.stringify({
                     {f.model_code && <><dt>Model</dt><dd>{f.model_code}</dd></>}
                     {f.finish && <><dt>Finish</dt><dd>{f.finish}</dd></>}
                     {f.quantity > 1 && <><dt>Quantity</dt><dd>{f.quantity}</dd></>}
-                    {f.warranty_period && <><dt>Warranty</dt><dd>{f.warranty_period}</dd></>}
+                    {f.warranty_period && <><dt>Manufacturer warranty</dt><dd>{f.warranty_period}</dd></>}
                   </dl>
                   {f.reference_price_label && (
                     <div class="wxf-price"><span>Reference price</span><strong>{f.reference_price_label}</strong></div>
@@ -606,7 +606,7 @@ const productSchema = JSON.stringify({
   <section id="warranty" class="wx-section">
     <p class="wx-kicker">Warranty &amp; aftercare</p>
     <h2>Protected after handover.</h2>
-    <p class="wx-body">Each part of the work carries its own written warranty, recorded against your project at handover. <a class="wx-inline-link" href="/warranty-aftercare">Read how warranty support works →</a></p>
+    <p class="wx-body">LUXEhome workmanship is covered for 24 months from handover. Product and supplier warranties are recorded separately under their own written terms. <a class="wx-inline-link" href="/warranty-aftercare">Read how warranty support works →</a></p>
     <div class="wx-warranty">
       <dl class="wx-warranty-schedule">
         {WARRANTY_SCHEDULE.map((w) => (
@@ -614,7 +614,7 @@ const productSchema = JSON.stringify({
         ))}
       </dl>
     </div>
-    <p class="wx-fineprint wx-fineprint--light">Periods run from handover and follow the agreed scope and care guidance. Where a specific product carries its own manufacturer cover, that period is listed against the item in the fixture schedule above.</p>
+    <p class="wx-fineprint wx-fineprint--light">The workmanship period runs from the documented handover date and follows the agreed scope, exclusions and care guidance. Any manufacturer or supplier warranty applies only under its own written conditions.</p>
   </section>
 
   <!-- CLOSING CTA -->
