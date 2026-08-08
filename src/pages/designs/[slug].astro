@@ -800,6 +800,26 @@ const productSchema = JSON.stringify({
   </div>
   <SwipeCarouselController />
 
+  {/* ViewContent for this design. fbq is stubbed and queued in LuxeLayout's
+      head, so this fires correctly even before fbevents.js has loaded. */}
+  <script
+    is:inline
+    define:vars={{
+      designName: design.name,
+      designSlug: design.slug,
+      collectionName: `${collectionLabel} Collection`,
+      contentValue: newPrice ?? null,
+    }}
+  >
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'ViewContent', Object.assign({
+        content_type: 'product',
+        content_ids: [designSlug],
+        content_name: designName,
+        content_category: collectionName,
+      }, contentValue ? { value: contentValue, currency: 'LKR' } : {}));
+    }
+  </script>
 </LuxeLayout>
 
 <script is:inline>

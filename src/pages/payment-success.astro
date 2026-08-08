@@ -1,0 +1,74 @@
+---
+/* Landing page for a completed LKR 50,000 consultation payment. There is no
+   gateway wired to the consultation yet — payment details go out on WhatsApp
+   once the appointment is confirmed — so this is the URL the team sends (or
+   sets as a gateway return_url) after the fee is settled. It exists so the
+   Meta Purchase event has somewhere to fire. */
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+import { CONSULTATION_PACKAGE } from '../lib/luxe-config';
+---
+<LuxeLayout
+  title="Payment received — LUXEhome"
+  description="Your LUXEhome design consultation payment has been received."
+>
+  <meta slot="head" name="robots" content="noindex, nofollow" />
+
+  <section class="pay-ok">
+    <span class="pay-ok-mark" aria-hidden="true">✓</span>
+    <p class="lx-eyebrow">Payment received</p>
+    <h1>Your consultation is confirmed.</h1>
+    <p class="pay-ok-lead">
+      Thank you. We have your LKR {CONSULTATION_PACKAGE.amount.toLocaleString('en-LK')} design
+      consultation fee. Your project manager will confirm the visit on WhatsApp and take it
+      from there.
+    </p>
+
+    <div class="pay-ok-card">
+      <span>What happens next</span>
+      <ul>
+        {CONSULTATION_PACKAGE.includes.map((item) => <li>{item}</li>)}
+      </ul>
+      <small>{CONSULTATION_PACKAGE.creditNote}</small>
+    </div>
+
+    <div class="pay-ok-actions">
+      <a class="lx-btn-wa" href="/designs">Browse designs</a>
+      <a class="lx-btn-ghost" href="/how-it-works">How it works</a>
+    </div>
+  </section>
+
+  {/* Purchase. fbq is stubbed and queued in LuxeLayout's head, so this fires
+      correctly even before fbevents.js has loaded. */}
+  <script is:inline define:vars={{ feeAmount: CONSULTATION_PACKAGE.amount }}>
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'Purchase', {
+        value: feeAmount,
+        currency: 'LKR',
+        content_name: 'Design consultation package',
+        content_type: 'product',
+      });
+    }
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'purchase', {
+        value: feeAmount,
+        currency: 'LKR',
+        items: [{ item_name: 'Design consultation package' }],
+      });
+    }
+  </script>
+</LuxeLayout>
+
+<style>
+  .pay-ok { width: min(760px, calc(100% - 34px)); margin-inline: auto; padding: clamp(3.5rem, 9vw, 7rem) 0; }
+  .pay-ok-mark { display: grid; place-items: center; width: 54px; height: 54px; margin-bottom: 1.4rem; border-radius: 50%; background: var(--sage-deep); color: var(--cream); font-size: 1.35rem; }
+  .pay-ok h1 { margin: .5rem 0 1.1rem; font-size: clamp(3rem, 7vw, 4.8rem); }
+  .pay-ok-lead { max-width: 60ch; font: 500 clamp(1.05rem, 2.3vw, 1.28rem)/1.5 var(--lx-serif); }
+  .pay-ok-card { margin-top: 2rem; padding: clamp(1.3rem, 4vw, 1.9rem); border-radius: 12px; background: #fff; border: 1px solid var(--cream-deep); }
+  .pay-ok-card > span { color: var(--sage-deep); font-size: .78rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; }
+  .pay-ok-card ul { display: grid; gap: .55rem; margin: .9rem 0 0; padding: 0; list-style: none; }
+  .pay-ok-card li { position: relative; padding-left: 1.35rem; color: color-mix(in srgb, var(--ink) 88%, transparent); font-size: .98rem; }
+  .pay-ok-card li::before { content: '✓'; position: absolute; left: 0; color: var(--gold); font-weight: 600; }
+  .pay-ok-card small { display: block; margin-top: 1rem; padding-top: .8rem; border-top: 1px solid var(--cream-deep); color: color-mix(in srgb, var(--ink) 70%, transparent); font-size: .86rem; }
+  .pay-ok-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.8rem; }
+  @media (max-width: 600px) { .pay-ok-actions a { width: 100%; } }
+</style>
