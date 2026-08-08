@@ -6,98 +6,14 @@ import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import KeyHighlights from '../../components/luxe/KeyHighlights.astro';
 import BuildProcess from '../../components/luxe/BuildProcess.astro';
 import SwipeCarouselController from '../../components/luxe/SwipeCarouselController.astro';
-import { getDesignBySlug, getProjects, youtubeEmbed, isYouTubeShort, type DesignFixture, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PRE_CONSTRUCTION_FEES, formatArea, absoluteUrl } from '../../lib/luxe-config';
-import { CATALOGUE_DESIGNS, SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
+import { getDesignBySlug, getProjects, youtubeEmbed, isYouTubeShort, type DesignFull } from '../../lib/luxe';
+import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PROJECT_INITIATION, formatArea, absoluteUrl } from '../../lib/luxe-config';
 import {
   collectionShortLabel,
   LEGACY_BATHROOM_DESIGN_REDIRECTS,
   LEGACY_SLUG_BY_CURRENT,
   normalizeBathroomDesignIdentity,
 } from '../../lib/bathroom-taxonomy';
-
-const PREMIUM_NIFI_700_ACCESSORIES: DesignFixture[] = [
-  {
-    category: 'Paper Holder',
-    name: 'NIFI 700 Paper Holder',
-    brand: 'Swiss Bathware',
-    model_code: 'NIFI 700 PH',
-    finish: null,
-    quantity: 1,
-    included: true,
-    spec: 'NIFI 700 paper holder. 170 × 70 × 25 mm.',
-    notes: null,
-    warranty_period: null,
-    reference_price_label: null,
-    image_url: 'https://ctxugrhuanygycjgijcf.supabase.co/storage/v1/object/public/luxehome-media/designs/1785129129343-445e9847-e5fc-4339-99c6-05fb36fda508.webp',
-    image_alt: 'Swiss Bathware NIFI 700 paper holder',
-    sort_order: 2,
-  },
-  {
-    category: 'Robe Hook',
-    name: 'NIFI 700 Robe Hook',
-    brand: 'Swiss Bathware',
-    model_code: 'NIFI 700 RH',
-    finish: null,
-    quantity: 1,
-    included: true,
-    spec: 'NIFI 700 robe hook. 60 × 45 × 25 mm.',
-    notes: null,
-    warranty_period: null,
-    reference_price_label: null,
-    image_url: 'https://ctxugrhuanygycjgijcf.supabase.co/storage/v1/object/public/luxehome-media/designs/1785129263722-00feddc5-704a-47e8-877a-11c5a607f336.webp',
-    image_alt: 'Swiss Bathware NIFI 700 robe hook',
-    sort_order: 7,
-  },
-  {
-    category: 'Towel Bar',
-    name: 'NIFI 700 Towel Bar',
-    brand: 'Swiss Bathware',
-    model_code: 'NIFI 700 TB',
-    finish: null,
-    quantity: 1,
-    included: true,
-    spec: 'NIFI 700 towel bar. 600 × 68 × 25 mm.',
-    notes: null,
-    warranty_period: null,
-    reference_price_label: null,
-    image_url: 'https://ctxugrhuanygycjgijcf.supabase.co/storage/v1/object/public/luxehome-media/designs/1785129279899-51ada35b-700e-43a5-b474-6e282db2aba0.webp',
-    image_alt: 'Swiss Bathware NIFI 700 towel bar',
-    sort_order: 8,
-  },
-  {
-    category: 'Tumbler Holder',
-    name: 'NIFI 700 Tumbler Holder',
-    brand: 'Swiss Bathware',
-    model_code: 'NIFI 700 TH',
-    finish: null,
-    quantity: 1,
-    included: true,
-    spec: 'NIFI 700 tumbler holder. 110 × 95 × 25 mm.',
-    notes: null,
-    warranty_period: null,
-    reference_price_label: null,
-    image_url: 'https://ctxugrhuanygycjgijcf.supabase.co/storage/v1/object/public/luxehome-media/designs/1785129301649-9615dbad-1c15-4adf-aa63-a92b2ef3592e.webp',
-    image_alt: 'Swiss Bathware NIFI 700 tumbler holder',
-    sort_order: 9,
-  },
-  {
-    category: 'Soap Tray',
-    name: 'NIFI 700 Soap Tray',
-    brand: 'Swiss Bathware',
-    model_code: 'NIFI 700 ST',
-    finish: null,
-    quantity: 1,
-    included: true,
-    spec: 'NIFI 700 soap tray. 180 × 95 × 25 mm.',
-    notes: null,
-    warranty_period: null,
-    reference_price_label: null,
-    image_url: 'https://ctxugrhuanygycjgijcf.supabase.co/storage/v1/object/public/luxehome-media/designs/1785129326338-984154e2-8e38-4a5f-b46a-e39b12d4ffac.webp',
-    image_alt: 'Swiss Bathware NIFI 700 soap tray',
-    sort_order: 10,
-  },
-];
 
 const requestedSlug = Astro.params.slug!;
 const currentSlug = LEGACY_BATHROOM_DESIGN_REDIRECTS[
@@ -111,69 +27,8 @@ const storedDesignRaw = await getDesignBySlug(requestedSlug)
 const storedDesign = storedDesignRaw
   ? normalizeBathroomDesignIdentity(storedDesignRaw)
   : null;
-const catalogueDesign = CATALOGUE_DESIGNS.find(
-  (item) => item.space === 'bathrooms' && item.slug === requestedSlug,
-);
-const design: DesignFull | null = storedDesign ?? (catalogueDesign ? {
-  id: '', slug: catalogueDesign.slug, name: catalogueDesign.name, space_id: catalogueDesign.space,
-  collection: catalogueDesign.collection, tagline: catalogueDesign.tagline,
-  description: 'A complete LUXEhome design file, customised for your room and documented before construction begins.',
-  starting_price_lkr: catalogueDesign.startingPrice ?? 0, min_sqm: catalogueDesign.minSqm,
-  new_starting_price_lkr: catalogueDesign.startingPrice ?? null,
-  renovation_starting_price_lkr: catalogueDesign.renovationStartingPrice ?? null,
-  cover_image_url: catalogueDesign.coverImage ?? null, video_3d_url: null, video_work_url: null,
-  inspiration_image_url: null,
-  workflow_text: 'We inspect, customise and approve the complete design file before procurement and construction begin.',
-  highlights: [], featured: false, sort_order: 0,
-  space: { id: catalogueDesign.space, slug: catalogueDesign.space, name: SPACE_PRESENTATION[catalogueDesign.space].name, sinhala_name: null, sort_order: 0 },
-  drawings: [],
-  fixtures: catalogueDesign.collection === 'island' ? PREMIUM_NIFI_700_ACCESSORIES : [],
-  price_tiers: (catalogueDesign.pricingTiers ?? []).map((tier, sort_order) => ({
-    label: tier.label,
-    sqm: tier.sqm,
-    new_price_lkr: tier.newPrice,
-    renovation_price_lkr: tier.renovationPrice,
-    sort_order,
-  })),
-  materials: [
-    { category: 'Adhesive', brand: 'Swisstek', item: 'Tile Adhesive', sort_order: 0 },
-    { category: 'Grout', brand: 'Swisstek', item: 'Grout', sort_order: 1 },
-    { category: 'Waterproofing', brand: 'Tokyo Super 2K', item: 'Waterproofing', sort_order: 2 },
-    { category: 'Electrical', brand: 'ACL', item: 'Wiring & Cables', sort_order: 3 },
-  ],
-  faq: [],
-} : null);
+const design: DesignFull | null = storedDesign?.cover_image_url ? storedDesign : null;
 if (!design) return Astro.redirect('/designs');
-
-// Repository-backed Sigiriya samples keep the canonical page complete even before
-// the same assets are uploaded through the CMS. CMS values always win.
-if (design.slug === 'sigiriya-bathroom') {
-  design.starting_price_lkr = 1_775_000;
-  design.new_starting_price_lkr = 1_775_000;
-  design.renovation_starting_price_lkr = 1_884_000;
-  design.min_sqm = 4.5;
-  design.cover_image_url ||= '/images/designs/manel/cover.jpeg';
-  design.video_3d_url ||= 'https://youtube.com/shorts/LHkPOUT4ku8';
-  design.workflow_text ||= 'We inspect, customise and approve the complete design file before procurement and construction begin.';
-  if (design.materials.length === 0) {
-    design.materials.push(
-      { category: 'Adhesive', brand: 'Swisstek', item: 'Tile Adhesive', sort_order: 0 },
-      { category: 'Grout', brand: 'Swisstek', item: 'Grout', sort_order: 1 },
-      { category: 'Waterproofing', brand: 'Tokyo Super 2K', item: 'Waterproofing', sort_order: 2 },
-      { category: 'Electrical', brand: 'ACL', item: 'Wiring & Cables', sort_order: 3 },
-    );
-  }
-  const samples = {
-    vanity: '/images/designs/manel/render-1.jpeg',
-    water_closet: '/images/designs/manel/render-2.jpeg',
-    shower: '/images/designs/manel/render-3.jpeg',
-  } as const;
-  for (const [kind, image_url] of Object.entries(samples)) {
-    if (!design.drawings.some((drawing) => drawing.kind === kind)) {
-      design.drawings.push({ kind: kind as keyof typeof samples, image_url });
-    }
-  }
-}
 
 const collectionLabel = collectionShortLabel(design.collection);
 const priceLabel = design.starting_price_lkr > 0 ? formatLKRM(design.starting_price_lkr) : 'Starting price to be confirmed';
@@ -216,15 +71,7 @@ const steps = AREAS.flatMap((area) => {
 const renders = steps.slice(1);
 
 const video3d = youtubeEmbed(design.video_3d_url);
-const priceTiers = design.price_tiers.length > 0
-  ? design.price_tiers
-  : (catalogueDesign?.pricingTiers ?? []).map((tier, sort_order) => ({
-      label: tier.label,
-      sqm: tier.sqm,
-      new_price_lkr: tier.newPrice,
-      renovation_price_lkr: tier.renovationPrice,
-      sort_order,
-    }));
+const priceTiers = design.price_tiers;
 
 // Flat per-m² rate, derived from the first two published tiers.
 const perSqmRate = (() => {
@@ -347,7 +194,7 @@ const productSchema = JSON.stringify({
 
 <LuxeLayout
   title={`${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design | ${priceLabel} | LUXEhome`}
-  description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then book a site inspection to check the fit.`}
+  description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then start the LKR 50,000 project initiation for your bathroom.`}
   ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
   ogImageAlt={`${design.name} — ${collectionLabel} bathroom design by LUXEhome`}
 >
@@ -359,9 +206,7 @@ const productSchema = JSON.stringify({
   <!-- HERO · THE DOORWAY -->
   <header class="wx-hero" id="wx-hero">
     <div class="wx-hero-media" id="wx-hero-media">
-      {design.cover_image_url
-        ? <img src={cloudinary(design.cover_image_url, 1600)} alt={`${design.name} — the view from the doorway`} width="1600" height="1000" fetchpriority="high" />
-        : <div class="wx-placeholder wx-placeholder--hero"><strong>LUXE</strong><em>home</em><span>{design.name}</span></div>}
+      <img src={cloudinary(design.cover_image_url, 1600)} alt={`${design.name} — the view from the doorway`} width="1600" height="1000" fetchpriority="high" />
     </div>
     <div class="wx-hero-shade" aria-hidden="true"></div>
     <div class="wx-hero-copy">
@@ -387,8 +232,8 @@ const productSchema = JSON.stringify({
     <p class="wx-kicker">You are standing at the doorway</p>
     <p class="wx-statement">A complete bathroom, documented to the last fitting — <em>before</em> a single tile is laid.</p>
     <div class="wx-threshold-cta">
-      <a href={inspectionHref}><span>Inspect my bathroom for this design</span><b aria-hidden="true">→</b></a>
-      <small>LKR 10,000 · No measurements needed</small>
+      <a href={inspectionHref}><span>Start my bathroom with this design</span><b aria-hidden="true">→</b></a>
+      <small>LKR 50,000 · Fully credited if LUXEhome builds it</small>
     </div>
   </section>
 
@@ -534,7 +379,7 @@ const productSchema = JSON.stringify({
         </div>
       </div>
     ) : (
-      <div class="wxf-empty"><strong>The full schedule is being prepared.</strong><p>The confirmed sanitaryware, tapware, shower, furniture, glass and accessory specification will be published here. A site inspection can still confirm whether this layout is suitable for your room.</p><a href={inspectionHref}>Check this design against my bathroom →</a></div>
+      <div class="wxf-empty"><strong>The full schedule is being prepared.</strong><p>The confirmed sanitaryware, tapware, shower, furniture, glass and accessory specification will be published here. The project initiation will confirm whether this layout is suitable for your room.</p><a href={inspectionHref}>Start this design for my bathroom →</a></div>
     )}
   </section>
 
@@ -587,7 +432,7 @@ const productSchema = JSON.stringify({
           <strong>+ LKR {perSqmRate.toLocaleString('en-LK')} <span>/ m²</span></strong>
         </div>
       )}
-      <p class="wx-fineprint">Final area is confirmed on site inspection. Larger or complex rooms are quoted from the same rate. Room proportions, ceiling height, access, service relocation and structural changes are assessed separately.</p>
+      <p class="wx-fineprint">Final area is confirmed during the site visit. Larger or complex rooms are quoted from the same rate. Room proportions, ceiling height, access, service relocation and structural changes are assessed separately.</p>
       <a class="wx-dark-cta" href={inspectionHref}>Check this design against my bathroom →</a>
     </div>
   </section>
@@ -650,40 +495,32 @@ const productSchema = JSON.stringify({
     </div>
   </section>
 
-  <!-- WHAT YOU PAY BEFORE CONSTRUCTION -->
+  <!-- PROJECT INITIATION -->
   <section id="fees" class="wx-panel-band">
     <div class="wx-section">
-      <p class="wx-kicker">Before any construction is committed</p>
-      <h2>Two steps to a documented design.</h2>
-      <p class="wx-body">Both are paid before construction and are separate from the build cost. Nothing further is collected until the scope and fixed quotation are approved.</p>
+      <p class="wx-kicker">One clear first commitment</p>
+      <h2>Start one bathroom for LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')}.</h2>
+      <p class="wx-body">The initiation deposit covers the site consultation, detailed design and complete construction proposal for one bathroom. The proposal is delivered within seven working days after the site visit.</p>
 
       <div class="wx-fee-grid">
-        <article class="wx-fee">
-          <span class="wx-fee-step">Step one</span>
-          <strong class="wx-fee-price">LKR {PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK')}</strong>
-          <h3>{PRE_CONSTRUCTION_FEES.inspection.title}</h3>
-          <p>{PRE_CONSTRUCTION_FEES.inspection.copy}</p>
-        </article>
-
         <article class="wx-fee wx-fee--feature">
-          <span class="wx-fee-step">Step two<b>Refundable</b></span>
-          <strong class="wx-fee-price">LKR {PRE_CONSTRUCTION_FEES.designPackage.amount.toLocaleString('en-LK')}</strong>
-          <h3>{PRE_CONSTRUCTION_FEES.designPackage.title}</h3>
-          <p>{PRE_CONSTRUCTION_FEES.designPackage.copy}</p>
+          <span class="wx-fee-step">One bathroom<b>100% construction credit</b></span>
+          <strong class="wx-fee-price">LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')}</strong>
+          <h3>{PROJECT_INITIATION.title}</h3>
+          <p>{PROJECT_INITIATION.copy}</p>
           <ul>
-            {PRE_CONSTRUCTION_FEES.designPackage.includes.map((item) => <li>{item}</li>)}
+            {PROJECT_INITIATION.includes.map((item) => <li>{item}</li>)}
           </ul>
         </article>
+        <article class="wx-fee">
+          <span class="wx-fee-step">How the credit works</span>
+          <h3>It becomes your construction advance.</h3>
+          <p>{PROJECT_INITIATION.credit} For example, a LKR 2,000,000 contract has LKR 1,950,000 remaining after the deposit already paid.</p>
+          <p>If you do not proceed, the deposit is retained for the consultation, design and proposal work already completed.</p>
+          <p>{PROJECT_INITIATION.multipleBathrooms}</p>
+        </article>
       </div>
-
-      <div class="wx-fee-total">
-        <div>
-          <span>Site inspection and 3D modelling together</span>
-          <small>The design package is charged in addition to the site inspection.</small>
-        </div>
-        <strong>LKR {PRE_CONSTRUCTION_FEES.combined.toLocaleString('en-LK')}</strong>
-      </div>
-      <a class="wx-fee-cta" href={inspectionHref}>Book the site inspection →</a>
+      <a class="wx-fee-cta" href={inspectionHref}>Start this bathroom project →</a>
     </div>
   </section>
 
@@ -784,16 +621,16 @@ const productSchema = JSON.stringify({
   <section id="book" class="wx-closing">
     <p class="wx-kicker">The practical next step</p>
     <h2>Will the {design.name} work in your bathroom?</h2>
-    <p>We measure the room, review the site conditions and confirm the right fit before you commit to construction.</p>
-    <a href={inspectionHref} class="wx-book-btn">Book site inspection · LKR 10,000</a>
-    <small>No construction deposit is collected at this stage.</small>
+    <p>We visit, measure and develop the detailed design, material direction and complete construction proposal.</p>
+    <a href={inspectionHref} class="wx-book-btn">Start project · LKR 50,000</a>
+    <small>100% credited toward this bathroom’s LUXEhome construction balance.</small>
   </section>
 
   <!-- STICKY BOOK BAR -->
   <div class="wx-bar" id="wx-bar">
     <a href={inspectionHref}>
-      <span>Book {design.name} inspection</span>
-      <strong>LKR 10,000</strong>
+      <span>Start {design.name} for my bathroom</span>
+      <strong>LKR 50,000</strong>
     </a>
   </div>
   <SwipeCarouselController />

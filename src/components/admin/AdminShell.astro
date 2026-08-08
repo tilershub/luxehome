@@ -2,7 +2,7 @@
 import AdminAuthGate from './AdminAuthGate.astro';
 interface Props { title:string; active?:string; }
 const {title,active='dashboard'}=Astro.props;
-const nav=[['dashboard','Dashboard','/admin'],['designs','Designs','/admin/cms/designs'],['projects','Projects','/admin/cms/projects'],['blog','Blog Articles','/admin/cms/blog'],['pages','Website Pages','/admin/cms/pages'],['products','Products','/admin/cms/products'],['categories','Categories','/admin/cms/categories'],['inspections','Site Inspections','/admin/cms/inspections'],['team','Team','/admin/cms/team'],['media','Media Library','/admin/cms/media'],['settings','Global Settings','/admin/cms/settings']];
+const nav=[['dashboard','Dashboard','/admin'],['designs','Designs','/admin/cms/designs'],['projects','Projects','/admin/cms/projects'],['blog','Blog Articles','/admin/cms/blog'],['pages','Website Pages','/admin/cms/pages'],['products','Products','/admin/cms/products'],['categories','Categories','/admin/cms/categories'],['inspections','Project Initiations','/admin/cms/inspections'],['team','Team','/admin/cms/team'],['media','Media Library','/admin/cms/media'],['settings','Global Settings','/admin/cms/settings']];
 ---
 <!doctype html>
 <html lang="en">

@@ -82,7 +82,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           ...(userAgent ? { client_user_agent: userAgent } : {}),
         },
         custom_data: {
-          content_name: 'Site Inspection Request',
+          content_name: 'Bathroom Project Initiation',
           ...(service ? { content_category: service } : {}),
         },
       },
