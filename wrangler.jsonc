@@ -6,6 +6,9 @@
   "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-02-22",
   "compatibility_flags": ["nodejs_compat"],
+  // Preserve encrypted runtime secrets added in the Cloudflare dashboard.
+  // Without this, each Git-triggered `wrangler deploy` deletes them.
+  "keep_vars": true,
   "assets": {
     "directory": "./dist",
     // Requests that match a file are served from ./dist; everything else
