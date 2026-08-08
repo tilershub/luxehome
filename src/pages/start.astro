@@ -10,24 +10,27 @@ import {
 
 const featured = (await getDesigns({ featured: true }))
   .map(normalizeBathroomDesignIdentity)
+  .filter((design) => design.cover_image_url)
   .slice(0, 3);
 const heroProject = (await getProjects({ featured: true })).find((p) => p.before_image_url && p.after_image_url) ?? null;
 
 const DELIVERABLES = [
-  ['4× 3D renders', 'See your finished space before a single tile is bought.'],
-  ['Civil drawing', 'Structural layout, dimensions, and levels.'],
-  ['Supply water drawing', 'Every line, valve, and connection point.'],
-  ['Waste & drainage drawing', 'Falls, traps, and outlets — engineered, not improvised.'],
-  ['Electrical drawing', 'Points, circuits, and switch positions.'],
-  ['Complete fixture list', 'Every product named with brand and spec.'],
-  ['Fixed quotation', 'One price for your exact space. It does not change.'],
-  ['Week-by-week plan', 'What happens, when, and what you approve at each step.'],
+  ['Site consultation & measurements', 'We assess the actual room, services, access and existing conditions.'],
+  ['Five design images', 'See the detailed bathroom direction created for your measured room.'],
+  ['3D walkthrough video', 'A video link lets you experience the proposed bathroom before construction.'],
+  ['Material selection', 'The proposed finishes and materials are listed, with reference images where useful.'],
+  ['Final construction quotation', 'A clear price and scope for LUXEhome to build the bathroom.'],
+  ['Timeline, quality & warranties', 'The programme, quality commitments, applicable warranties and project values are documented.'],
+  ['One complete proposal PDF', 'All proposal details are delivered together within seven working days after the site visit.'],
 ];
 
 const FAQ = [
-  ['Do I need to know the bathroom size?', 'No. Request the LKR 10,000 site inspection and choose “please measure it.” We measure the room and assess the site before recommending the next step.'],
-  ['Is the price really fixed?', 'The design-page prices are starting guides. Once we inspect the room, adapt the design and confirm the scope, you receive the final quotation for approval.'],
-  ['When do I pay the 10% construction confirmation?', 'Only after the inspection, design adaptation, scope and final quotation are approved—not when you first request the visit.'],
+  ['Do I need to know the bathroom size?', 'No. Start the project and choose “please measure it.” We take the measurements during the site visit.'],
+  ['What does the LKR 50,000 cover?', 'It covers the site consultation, detailed design and one complete proposal for one bathroom.'],
+  ['Is it an extra charge?', 'Not if LUXEhome builds that bathroom. The full LKR 50,000 is recorded as an advance and deducted from the remaining construction balance.'],
+  ['What if I do not proceed?', 'The deposit is retained to cover the consultation, design and proposal work already completed.'],
+  ['What if I have several bathrooms?', 'Start with one bathroom and review its complete proposal first. Each additional proposal has its own LKR 50,000 initiation deposit, credited to its related LUXEhome construction contract.'],
+  ['When will I receive the proposal?', 'Within seven working days after the site visit.'],
   ['I live overseas — can you manage everything?', 'Most of our clients are abroad. Design approval happens on a video call, you get weekly WhatsApp photo and video updates, and you approve every milestone before payment.'],
   ['How long does a bathroom take?', 'Typically 3–5 weeks depending on the design and site condition. Your design file includes a week-by-week plan.'],
   ['What warranty do I get?', 'A written warranty against each part of the work — 15 years on bathware, 10 on waterproofing, plumbing and wiring, 5 on tapware, showers and the ceiling.'],
@@ -36,13 +39,13 @@ const FAQ = [
 
 <LuxeLayout
   bare={true}
-  title="Start Your Bathroom Project — LUXEhome Site Inspection"
-  description="Choose a named LUXEhome bathroom design, then request a LKR 10,000 site inspection. No measurements are needed before booking."
+  title="Start Your Bathroom Project — LKR 50,000 | LUXEhome"
+  description="Start one LUXEhome bathroom with a LKR 50,000 initiation deposit for the site visit, detailed design and complete proposal. Fully credited if LUXEhome builds it."
 >
   <!-- Minimal header -->
   <header class="st-hdr">
     <span class="lx-wordmark"><strong>LUXE</strong><em>home</em></span>
-    <a href="/book-site-inspection" class="st-hdr-wa">Book inspection · LKR 10,000</a>
+    <a href="/book-site-inspection" class="st-hdr-wa">Start project · LKR 50,000</a>
   </header>
 
   <!-- Hero -->
@@ -50,11 +53,11 @@ const FAQ = [
     <p class="lx-eyebrow lxr">Measured first · Verified teams · Written warranties</p>
     <h1 class="lxr">Your dream bathroom,<br /><em>built without the stress.</em></h1>
     <p class="st-sub lxr">
-      Choose a named design, then let us inspect and measure the actual room. We confirm the fit,
-      adapt the design and prepare the final quotation before any construction deposit.
+      Start with one bathroom. We visit and measure the actual room, create the detailed design,
+      select materials and deliver the complete construction proposal within seven working days after the visit.
     </p>
     <div class="st-hero-actions lxr">
-      <a class="lx-btn-wa" href="/book-site-inspection">Book Inspection · LKR 10,000</a>
+      <a class="lx-btn-wa" href="/book-site-inspection">Start My Bathroom Project · LKR 50,000</a>
       <a class="lx-btn-ghost" href="/designs">Browse bathroom designs</a>
     </div>
 
@@ -81,9 +84,7 @@ const FAQ = [
         {featured.map((d) => (
           <a href={`/designs/${d.slug}`} class="st-design lxr">
             <div class="st-design-img">
-              {d.cover_image_url
-                ? <img src={cloudinary(d.cover_image_url, 600)} alt={d.name} loading="lazy" width="600" height="430" />
-                : <div class="st-ph"><em>{d.name}</em></div>}
+              <img src={cloudinary(d.cover_image_url!, 600)} alt={d.name} loading="lazy" width="600" height="430" />
             </div>
             <div class="st-design-body">
               <p class="lx-eyebrow">{collectionShortLabel(d.collection)}</p>
@@ -99,7 +100,7 @@ const FAQ = [
   <!-- Design file explainer -->
   <section class="st-sec st-file">
     <h2 class="lxr">What you get before work begins</h2>
-    <p class="st-file-sub lxr">Every LUXEhome design comes as a complete file — eight deliverables, no guesswork:</p>
+    <p class="st-file-sub lxr">The LKR 50,000 initiation deposit covers one bathroom and one complete decision package:</p>
     <ol class="st-deliv">
       {DELIVERABLES.map(([t, d], i) => (
         <li class="lxr">
@@ -113,6 +114,7 @@ const FAQ = [
   <!-- Whole-house planner -->
   <section class="st-sec">
     <h2 class="lxr">Planning more than one bathroom?</h2>
+    <p class="st-file-sub lxr">Use the planner for an early whole-home estimate, but initiate only one bathroom first. Review its complete proposal before deciding on the remaining rooms.</p>
     <div class="st-planner lxr">
       <div class="st-plan-row">
         <label>Bathrooms</label>
@@ -155,9 +157,9 @@ const FAQ = [
   <section class="st-sec st-lead">
     <p class="lx-eyebrow lxr">The practical first step</p>
     <h2 class="lxr">You do not need bathroom measurements.</h2>
-    <p class="st-lead-sub lxr">Share your contact and property location. We confirm the visit, then collect the LKR 10,000 inspection fee.</p>
-    <a href="/book-site-inspection" class="lx-btn-wa lxr">Request My Site Inspection</a>
-    <small class="lxr">No construction deposit is collected at this stage.</small>
+    <p class="st-lead-sub lxr">Share your contact and property location. We confirm the visit, then send the LKR 50,000 initiation payment details for one bathroom.</p>
+    <a href="/book-site-inspection" class="lx-btn-wa lxr">Start My Bathroom Project</a>
+    <small class="lxr">100% credited to the construction balance if LUXEhome builds that bathroom.</small>
   </section>
 
   <!-- FAQ -->
@@ -173,9 +175,9 @@ const FAQ = [
     <p>Custom design &amp; build · Sri Lanka · 077 450 3744</p>
   </footer>
 
-  <!-- Sticky mobile inspection bar -->
+  <!-- Sticky mobile initiation bar -->
   <div class="st-sticky">
-    <a href="/book-site-inspection">Book inspection · LKR 10,000</a>
+    <a href="/book-site-inspection">Start project · LKR 50,000</a>
   </div>
 </LuxeLayout>
 

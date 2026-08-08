@@ -4,13 +4,12 @@ import LuxeLayout from '../layouts/LuxeLayout.astro';
 import ProjectCard from '../components/luxe/ProjectCard.astro';
 import SwipeCarouselController from '../components/luxe/SwipeCarouselController.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
-import { CATALOGUE_DESIGNS } from '../lib/luxe-catalogue';
 import {
   BATHROOM_COLLECTIONS,
   collectionShortLabel,
   normalizeBathroomDesignIdentity,
 } from '../lib/bathroom-taxonomy';
-import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, PRE_CONSTRUCTION_FEES } from '../lib/luxe-config';
+import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, PROJECT_INITIATION } from '../lib/luxe-config';
 
 interface HomeDesign {
   slug: string;
@@ -20,69 +19,49 @@ interface HomeDesign {
   minSqm: number | null;
   newPrice: number | null;
   renovationPrice: number | null;
-  cover: string | null;
+  cover: string;
 }
 
 const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
-const bathroomCatalogue = CATALOGUE_DESIGNS.filter((item) => item.space === 'bathrooms');
-const designMap = new Map<string, HomeDesign>();
-
-for (const item of bathroomCatalogue) {
-  designMap.set(item.slug, {
+const designs: HomeDesign[] = storedDesigns
+  .filter((item) => item.cover_image_url)
+  .map(normalizeBathroomDesignIdentity)
+  .map((item) => ({
     slug: item.slug,
     name: item.name,
     collection: item.collection,
-    tagline: item.tagline,
-    minSqm: item.minSqm,
-    newPrice: item.startingPrice,
-    renovationPrice: item.renovationStartingPrice ?? null,
-    cover: item.coverImage ?? null,
-  });
-}
-
-for (const item of storedDesigns) {
-  const normalized = normalizeBathroomDesignIdentity(item);
-  const fallback = bathroomCatalogue.find((candidate) => candidate.slug === normalized.slug);
-  designMap.set(normalized.slug, {
-    slug: normalized.slug,
-    name: normalized.name,
-    collection: normalized.collection,
-    tagline: normalized.tagline || fallback?.tagline || 'A complete, documented LUXEhome bathroom.',
-    minSqm: normalized.min_sqm,
-    newPrice: normalized.new_starting_price_lkr || normalized.starting_price_lkr || fallback?.startingPrice || null,
-    renovationPrice: normalized.renovation_starting_price_lkr || fallback?.renovationStartingPrice || null,
-    cover: normalized.cover_image_url || fallback?.coverImage || null,
-  });
-}
+    tagline: item.tagline || 'A complete, documented LUXEhome bathroom.',
+    minSqm: item.min_sqm,
+    newPrice: item.new_starting_price_lkr || item.starting_price_lkr || null,
+    renovationPrice: item.renovation_starting_price_lkr || null,
+    cover: item.cover_image_url!,
+  }));
 
 const collectionGroups = BATHROOM_COLLECTIONS.map((collection) => ({
   ...collection,
-  designs: collection.slugs
-    .map((slug) => designMap.get(slug))
-    .filter((design): design is HomeDesign => Boolean(design)),
-}));
+  designs: designs.filter((design) => design.collection === collection.key),
+})).filter((collection) => collection.designs.length > 0);
 
-const designs = collectionGroups.flatMap((collection) => collection.designs);
 const newPrices = designs.flatMap((design) => design.newPrice ? [design.newPrice] : []);
 const renovationPrices = designs.flatMap((design) => design.renovationPrice ? [design.renovationPrice] : []);
 const newFrom = newPrices.length ? Math.min(...newPrices) : null;
 const renovationFrom = renovationPrices.length ? Math.min(...renovationPrices) : null;
-const moonstoneDesign = designMap.get('moonstone');
+const moonstoneDesign = designs.find((design) => design.slug === 'moonstone');
 const heroDesign = moonstoneDesign?.cover
   ? moonstoneDesign
   : designs.find((design) => design.cover) ?? null;
 const heroCover = heroDesign?.cover ?? null;
-const inspectionPrice = PRE_CONSTRUCTION_FEES.inspection.amount.toLocaleString('en-LK');
+const initiationPrice = PROJECT_INITIATION.amount.toLocaleString('en-LK');
 
 const spaFacts = [
-  { value: String(designs.length || 10), label: 'Curated bathroom designs' },
-  { value: '04', label: 'Distinct collections' },
+  { value: String(designs.length), label: 'Published bathroom designs' },
+  { value: String(collectionGroups.length).padStart(2, '0'), label: 'Published collections' },
   { value: '01', label: 'Accountable project team' },
   { value: WARRANTY_SCHEDULE[0].period, label: 'Longest applicable warranty' },
 ];
 
 const journey = [
-  { n: '01', title: 'Inspect', copy: 'We measure the room and assess services, drainage, access and site condition.' },
+  { n: '01', title: 'Initiate', copy: 'We confirm one bathroom, visit the site, measure the room and assess its technical conditions.' },
   { n: '02', title: 'Design', copy: 'The layout, atmosphere, fixtures and technical details are resolved before work.' },
   { n: '03', title: 'Build', copy: 'One coordinated team manages construction, waterproofing, installation and quality.' },
   { n: '04', title: 'Handover', copy: 'Testing, finishing, cleaning and applicable warranties complete the experience.' },
@@ -103,7 +82,7 @@ const projects = (await getProjects())
 
 <LuxeLayout
   title="Luxury Bathroom Design & Construction in Sri Lanka — LUXEhome"
-  description="Discover calm, modern bathroom designs by LUXEhome. We manage site inspection, design, construction, waterproofing, installation and handover in Sri Lanka."
+  description="Discover published LUXEhome bathroom designs. Start one bathroom with a site consultation, detailed design and complete construction proposal, then build with one accountable team."
   ogImage={heroCover ? cloudinary(heroCover, 1200) : undefined}
   ogImageAlt={heroDesign ? `${heroDesign.name} bathroom by LUXEhome` : undefined}
 >
@@ -135,7 +114,7 @@ const projects = (await getProjects())
         </p>
         <div class="spa-hero-actions lxr">
           <a class="spa-button spa-button--light" href="#bathroom-collections">Explore the collections</a>
-          <a class="spa-button spa-button--glass" href="/book-site-inspection">Book a site inspection</a>
+          <a class="spa-button spa-button--glass" href="/book-site-inspection">Start my bathroom project</a>
         </div>
       </div>
     </div>
@@ -184,7 +163,7 @@ const projects = (await getProjects())
   <section class="spa-designs" id="bathroom-collections" aria-labelledby="bathroom-collections-title">
     <header class="spa-section-head lxr">
       <div>
-        <p class="spa-eyebrow">Four expressions of Sri Lankan luxury</p>
+        <p class="spa-eyebrow">Published LUXEhome bathroom designs</p>
         <h2 id="bathroom-collections-title">Find the atmosphere that feels like home.</h2>
       </div>
       <p>
@@ -222,26 +201,19 @@ const projects = (await getProjects())
           >
             {collection.designs.map((design, designIndex) => (
               <a
-                class:list={['spa-design-card', 'lxr', { 'is-placeholder': !design.cover }]}
+                class="spa-design-card lxr"
                 href={`/designs/${design.slug}`}
                 data-swipe-slide
                 aria-label={`Explore ${design.name}, design ${designIndex + 1} of ${collection.designs.length}`}
               >
                 <div class="spa-design-media">
-                  {design.cover ? (
-                    <img
-                      src={cloudinary(design.cover, 900)}
-                      alt={`${design.name} bathroom design`}
-                      loading="lazy"
-                      width="900"
-                      height="1125"
-                    />
-                  ) : (
-                    <span class="spa-design-placeholder" aria-label={`${design.name} design visual coming soon`}>
-                      <b aria-hidden="true">{design.name.charAt(0)}</b>
-                      <small>Design visual coming soon</small>
-                    </span>
-                  )}
+                  <img
+                    src={cloudinary(design.cover, 900)}
+                    alt={`${design.name} bathroom design`}
+                    loading="lazy"
+                    width="900"
+                    height="1125"
+                  />
                   <span class="spa-design-count" aria-hidden="true">
                     {String(designIndex + 1).padStart(2, '0')} / {String(collection.designs.length).padStart(2, '0')}
                   </span>
@@ -319,11 +291,11 @@ const projects = (await getProjects())
 
       <div class="spa-inspection lxr">
         <div>
-          <small>Your first step</small>
-          <strong>Site inspection · LKR {inspectionPrice}</strong>
-          <p>No bathroom measurements are needed before booking.</p>
+          <small>Your first step · one bathroom</small>
+          <strong>Project initiation deposit · LKR {initiationPrice}</strong>
+          <p>Site visit, detailed design and complete proposal. 100% credited if LUXEhome builds it.</p>
         </div>
-        <a class="spa-button spa-button--mist" href="/book-site-inspection">Book a site inspection</a>
+        <a class="spa-button spa-button--mist" href="/book-site-inspection">Start my bathroom project</a>
       </div>
     </div>
   </section>
@@ -365,7 +337,7 @@ const projects = (await getProjects())
     {(newFrom || renovationFrom) && (
       <p class="spa-price-note lxr">
         Starting prices reflect the minimum room and listed design specification.
-        Your confirmed quotation follows inspection, measurements and scope approval.
+        Your confirmed quotation follows the site visit, detailed design, material selection and scope approval.
       </p>
     )}
   </section>
@@ -401,25 +373,27 @@ const projects = (await getProjects())
     </div>
   </section>
 
-  <section class="spa-final" aria-labelledby="spa-final-title">
-    <img
-      src="/images/designs/pichcha/pichcha-bathtub-focus-v2.webp"
-      alt="Freestanding bathtub with illuminated niche in the Moonstone bathroom"
-      width="1586"
-      height="992"
-      loading="lazy"
-    />
-    <span class="spa-final-shade" aria-hidden="true"></span>
-    <div class="spa-final-copy lxr">
-      <p class="spa-eyebrow spa-eyebrow--light">Your room, carefully considered</p>
-      <h2 id="spa-final-title">Your retreat begins with one good inspection.</h2>
-      <p>We will measure the space, assess what is possible and help you choose the right design path.</p>
-      <div>
-        <a class="spa-button spa-button--light" href="/book-site-inspection">Book inspection · LKR {inspectionPrice}</a>
-        <a class="spa-final-link" href="/designs">Browse all designs</a>
+  {heroCover && (
+    <section class="spa-final" aria-labelledby="spa-final-title">
+      <img
+        src={cloudinary(heroCover, 1600)}
+        alt={`${heroDesign?.name ?? 'Published LUXEhome'} bathroom design`}
+        width="1600"
+        height="1000"
+        loading="lazy"
+      />
+      <span class="spa-final-shade" aria-hidden="true"></span>
+      <div class="spa-final-copy lxr">
+        <p class="spa-eyebrow spa-eyebrow--light">Your room, carefully considered</p>
+        <h2 id="spa-final-title">Your retreat begins with one complete proposal.</h2>
+        <p>Start with one bathroom. We visit, measure, design and deliver the final proposal within seven working days after the site visit.</p>
+        <div>
+          <a class="spa-button spa-button--light" href="/book-site-inspection">Start project · LKR {initiationPrice}</a>
+          <a class="spa-final-link" href="/designs">Browse all designs</a>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  )}
 
   <SwipeCarouselController />
 </LuxeLayout>

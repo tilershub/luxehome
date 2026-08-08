@@ -1,13 +1,16 @@
 ---
 import type { CatalogueDesign } from '../../lib/luxe-catalogue';
+import type { Design } from '../../lib/luxe';
 import { SPACE_PRESENTATION } from '../../lib/luxe-catalogue';
-import { BATHROOM_COLLECTIONS } from '../../lib/bathroom-taxonomy';
+import { BATHROOM_COLLECTIONS, normalizeBathroomDesignIdentity } from '../../lib/bathroom-taxonomy';
 import { formatLKRM, waLink, formatArea } from '../../lib/luxe-config';
-interface Props { space: CatalogueDesign['space']; designs: CatalogueDesign[]; }
+interface Props { space: CatalogueDesign['space']; designs: Design[]; }
 const { space, designs } = Astro.props;
 const presentation = SPACE_PRESENTATION[space];
 const spaceLabel = space.slice(0, -1);
-const publishedDesigns = designs.filter((design) => design.coverImage);
+const publishedDesigns = designs
+  .filter((design) => design.cover_image_url)
+  .map((design) => space === 'bathrooms' ? normalizeBathroomDesignIdentity(design) : design);
 const hasPublishedDesigns = publishedDesigns.length > 0;
 const collections = space === 'bathrooms'
   ? BATHROOM_COLLECTIONS.map(({ key, label, level, note }) => ({
@@ -48,13 +51,13 @@ const collections = space === 'bathrooms'
     return <section class="collection">
       <p class="lx-eyebrow">{collection.eyebrow}</p><h2>{collection.label}</h2>
       <div class="design-grid">{group.map((item) => <a class="design-card" href={`/designs/${item.slug}`}>
-        <div class="art"><img src={item.coverImage} alt={`${item.name} ${spaceLabel} design`} loading="lazy" /></div>
+        <div class="art"><img src={item.cover_image_url!} alt={`${item.name} ${spaceLabel} design`} loading="lazy" /></div>
         <div class="body">
-          <div class="meta"><span>{collection.label.replace(' Collection', '')}</span><span>{formatArea(item.minSqm) ? `Minimum ${formatArea(item.minSqm)} m²` : 'Custom fit'}</span></div>
+          <div class="meta"><span>{collection.label.replace(' Collection', '')}</span><span>{formatArea(item.min_sqm) ? `Minimum ${formatArea(item.min_sqm)} m²` : 'Custom fit'}</span></div>
           <h3>{item.name}</h3><p>{item.tagline}</p>
           <dl>
-            {item.startingPrice && <><dt>New bathroom</dt><dd>{formatLKRM(item.startingPrice)}</dd></>}
-            {item.renovationStartingPrice && <><dt>Renovation</dt><dd>{formatLKRM(item.renovationStartingPrice)}</dd></>}
+            {(item.new_starting_price_lkr || item.starting_price_lkr) > 0 && <><dt>New bathroom</dt><dd>{formatLKRM(item.new_starting_price_lkr || item.starting_price_lkr)}</dd></>}
+            {item.renovation_starting_price_lkr && <><dt>Renovation</dt><dd>{formatLKRM(item.renovation_starting_price_lkr)}</dd></>}
           </dl>
           <strong>View complete design →</strong>
         </div>
@@ -67,10 +70,10 @@ const collections = space === 'bathrooms'
     <div>
       <p class="lx-eyebrow">Your {presentation.name.toLowerCase()}, fully resolved</p>
       <h2>{space === 'bathrooms' ? 'We will measure the room.' : 'Which design feels like home?'}</h2>
-      {space === 'bathrooms' && <p>No dimensions are required to request the visit.</p>}
+      {space === 'bathrooms' && <p>No dimensions are required. The deposit includes the site visit, detailed design and complete proposal.</p>}
     </div>
     {space === 'bathrooms'
-      ? <a href="/book-site-inspection">Book inspection · LKR 10,000</a>
+      ? <a href="/book-site-inspection">Start project · LKR 50,000</a>
       : <a href={waLink(`Hi LUXEhome! I would like help choosing a ${space} design.`)} target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a>}
   </section>
 )}

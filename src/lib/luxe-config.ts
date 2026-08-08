@@ -128,7 +128,7 @@ export const DEFAULT_MATERIALS: Array<{ category: string; brand: string; item: s
 
 /** Journey stages pre-seeded into every new project in admin. */
 export const DEFAULT_JOURNEY_STAGES = [
-  'First inquiry', 'Site visit', 'Design & approval',
+  'Project initiation', 'Site consultation', 'Proposal & approval',
   'Work begins', 'Construction', 'Clean & handover',
 ];
 
@@ -142,29 +142,24 @@ export const STANDARD_DRAWINGS = [
   { kind: 'electrical',     label: 'Electrical Layout',       tag: 'Points & lighting',  image: '/images/drawings/electrical.webp' },
 ] as const;
 
-/** What a client pays before construction. The design package is refundable
-    and is charged on top of the site inspection. */
-export const PRE_CONSTRUCTION_FEES = {
-  inspection: {
-    amount: 10_000,
-    title: 'Site inspection',
-    copy: 'We measure the room, review services, site condition and access, then recommend the design that fits.',
-  },
-  designPackage: {
-    amount: 40_000,
-    refundable: true,
-    title: 'Customised design package',
-    copy: 'Your chosen design worked up around your actual room and issued as a complete set.',
-    includes: [
-      '3D video walkthrough of your room',
-      'Civil layout',
-      'Supply water drawing',
-      'Waste & drainage layout',
-      'Electrical diagram',
-    ],
-  },
-  /** Both stages taken together. */
-  combined: 50_000,
+/** The single paid start to a LUXEhome bathroom project. It covers one
+    bathroom proposal and becomes an advance against construction when the
+    client appoints LUXEhome to build that bathroom. */
+export const PROJECT_INITIATION = {
+  amount: 50_000,
+  title: 'Bathroom project initiation deposit',
+  copy: 'One site consultation, a detailed bathroom design and a complete construction proposal for one bathroom.',
+  credit: '100% credited toward the LUXEhome construction balance for that bathroom.',
+  delivery: 'The complete proposal is delivered within seven working days after the site visit.',
+  includes: [
+    'Site consultation, measurements and technical review',
+    'Detailed bathroom design with five presentation images',
+    'Material and finish selection, with reference images where useful',
+    'Project timeline, quality commitments and applicable warranties',
+    'Final construction quotation in one proposal PDF',
+    '3D walkthrough video link',
+  ],
+  multipleBathrooms: 'For multiple bathrooms, begin with one. Review its complete proposal before deciding whether to initiate the remaining bathrooms.',
 } as const;
 
 /** "Built the LUXEhome Way" — the construction system every bathroom follows.
@@ -174,7 +169,7 @@ export const BUILD_STAGES: Array<{
   n: string; title: string; lead: string; points?: string[]; close?: string;
 }> = [
   {
-    n: '01', title: 'Consultation & Site Inspection',
+    n: '01', title: 'Site Consultation & Measurements',
     lead: 'We inspect your home, understand your requirements, take precise measurements, and identify technical requirements before any design work begins.',
   },
   {
