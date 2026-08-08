@@ -52,5 +52,48 @@ export const PUBLIC_INFO_PAGES: PublicInfoPage[] = [
   { slug:'terms', eyebrow:'Legal', title:'Terms & conditions.', lead:'The terms governing quotations, approvals, variations, construction and handover.', cards:[{title:'Quotations',copy:'Validity, scope, assumptions, exclusions and changes must be documented.'},{title:'Client responsibilities',copy:'Access, approvals, utilities, timely decisions and agreed payments.'},{title:'Variations',copy:'Additional or changed work requires written approval and may affect cost and time.'},{title:'Handover',copy:'Completion, defects review, care instructions and warranty commencement.'}] },
   { slug:'privacy', eyebrow:'Legal', title:'Privacy policy.', lead:'How inquiry, booking, analytics and communication data is collected and used.', cards:[{title:'Information collected',copy:'Contact details, property location, project information, submitted photos and site usage data.'},{title:'How it is used',copy:'Responding to inquiries, preparing services, improving the website and maintaining project records.'},{title:'Sharing and retention',copy:'Data is shared only with necessary service providers or where legally required.'},{title:'Contact',copy:'Contact LUXEhome to request access, correction or deletion.'}] },
   { slug:'warranty-terms', eyebrow:'Legal', title:'Warranty terms.', lead:'The documented conditions of the warranty periods LUXEhome gives against each part of the work.', cards:[{title:'Cover periods',copy:'Each task carries its own period from handover, as recorded in the project warranty schedule.'},{title:'Covered work',copy:'Eligible workmanship defects within the agreed construction scope.'},{title:'Warranty by task',copy:'Bathware, waterproofing, plumbing, wiring, tapware, showers, ceiling, light fixtures and tempered glass each carry the period stated in the project warranty record.'},{title:'Not covered',copy:'Misuse, third-party alteration, normal wear and matters outside the agreed scope.'},{title:'Reporting',copy:'Provide the project reference, evidence and reasonable access for assessment.'}] },
-  { slug:'payment-cancellation', eyebrow:'Legal', title:'Payment & cancellation policy.', lead:'Clear payment stages protect the client, design work, procurement and construction programme.', cards:[{title:'Project initiation · LKR 50,000 per bathroom',copy:'Payment is requested only after the service area and site appointment are confirmed. It covers the consultation, measurements, detailed design and complete proposal for one bathroom.'},{title:'Proposal delivery',copy:'The complete proposal is delivered within seven working days after the site visit and includes five design images, material selection, timeline, quality commitments, applicable warranties and the final construction quotation, plus a 3D walkthrough video link.'},{title:'Credited to construction',copy:'If LUXEhome is appointed to construct that bathroom, 100% of the LKR 50,000 is recorded as an advance and deducted from the remaining construction balance. It does not reduce the agreed contract value.'},{title:'If construction does not proceed',copy:'The initiation deposit is retained to cover the consultation, design and proposal work already completed.'},{title:'Multiple bathrooms',copy:'Each bathroom proposal requires its own LKR 50,000 initiation deposit. A client may start with one bathroom and review that proposal before initiating any others.'},{title:'Cancellation or delay',copy:'Cancellation, delayed approvals or payments are assessed against completed work, commitments and documented costs, and may move project dates.'}] },
+  {
+    slug: 'payment-cancellation',
+    eyebrow: 'Payment terms',
+    title: 'Clear payments, tied to visible progress.',
+    lead: 'The LKR 50,000 project initiation deposit becomes part of the construction payment. The remaining amount is collected through five documented construction milestones.',
+    cards: [
+      {
+        title: 'Before construction · LKR 50,000',
+        copy: 'The project initiation deposit is requested only after the service area and site appointment are confirmed. It covers the site consultation, measurements, detailed design and complete proposal for one bathroom. The proposal is delivered within seven working days after the site visit. If construction does not proceed, the deposit is retained for the completed professional work.',
+      },
+      {
+        title: '01 · Construction commencement · 50%',
+        copy: 'The first construction payment is 50% of the final agreed contract value. The LKR 50,000 initiation deposit already paid is included within this 50%, not added on top. Once the agreement is signed and the cleared balance of this payment is received, procurement and mobilisation begin. On-site work starts within seven working days, subject to approved selections, site access and the agreed commencement date.',
+      },
+      {
+        title: '02 · Waterproofing milestone · 20%',
+        copy: 'This payment is due when the waterproofing application is complete and the bathroom is ready for flood testing. The 20% is collected before the flood test begins. If testing identifies an issue, LUXEhome corrects and retests the waterproofing without an additional charge. Tiling begins only after the flood test passes.',
+      },
+      {
+        title: '03 · Tiling milestone · 10%',
+        copy: 'This payment is due after the contracted bathroom tiling and grouting work is completed.',
+      },
+      {
+        title: '04 · Fixtures milestone · 10%',
+        copy: 'This payment is due after the ceiling, lighting, bathware, tapware, vanity, mirror and bathroom accessories included in the contract are installed.',
+      },
+      {
+        title: '05 · Final completion · 10%',
+        copy: 'The final payment is due after the shower cubicle, final testing, agreed snag corrections and cleaning are completed and the bathroom is ready for handover.',
+      },
+      {
+        title: 'Example · LKR 1,500,000 bathroom',
+        copy: 'The 50% commencement amount is LKR 750,000. Because the LKR 50,000 initiation deposit has already been paid, only LKR 700,000 is then due. The remaining payments are LKR 300,000 at waterproofing, followed by LKR 150,000 at tiling, LKR 150,000 at fixtures and LKR 150,000 at final completion. The total remains LKR 1,500,000.',
+      },
+      {
+        title: 'Several bathrooms',
+        copy: 'For multi-bathroom construction, the proposal states how payment milestones apply across the agreed phases. Each initiation deposit is credited only to its related bathroom or construction scope.',
+      },
+      {
+        title: 'Changes, cancellation or delay',
+        copy: 'Changes to the approved scope require written agreement and may affect the price and programme. Cancellation, delayed selections, unavailable site access or overdue payments are assessed against completed work, ordered materials, supplier commitments and documented costs, and may move the project dates or pause work.',
+      },
+    ],
+  },
 ];
