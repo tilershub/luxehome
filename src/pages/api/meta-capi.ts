@@ -15,9 +15,13 @@ function normalizePhone(raw: string): string {
 }
 
 const PIXEL_ID = '1904211696933513';
+const GRAPH_API_VERSION = 'v26.0';
 
-export const POST: APIRoute = async ({ request }) => {
-  const accessToken = import.meta.env.META_ACCESS_TOKEN;
+export const POST: APIRoute = async ({ request, locals }) => {
+  // Cloudflare secrets are runtime bindings. import.meta.env is a build-time
+  // value and stays undefined when a secret is added in the Worker dashboard.
+  const accessToken = locals.runtime?.env?.META_ACCESS_TOKEN
+    ?? import.meta.env.META_ACCESS_TOKEN;
 
   if (!accessToken) {
     return new Response(JSON.stringify({ ok: false, error: 'CAPI not configured' }), {
@@ -87,7 +91,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const res = await fetch(
-      `https://graph.facebook.com/v19.0/${PIXEL_ID}/events?access_token=${accessToken}`,
+      `https://graph.facebook.com/${GRAPH_API_VERSION}/${PIXEL_ID}/events?access_token=${accessToken}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

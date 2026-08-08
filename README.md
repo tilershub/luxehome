@@ -103,7 +103,8 @@ files and deploys no worker at all — every server-rendered route and every
 `/api` endpoint then returns 404 while static assets keep working, which makes
 the failure easy to misread.
 
-Secrets are set on the Worker, not in the repo:
+Secrets are runtime bindings set on the Worker, not build variables and never
+committed to the repo:
 
 ```bash
 npx wrangler secret put META_ACCESS_TOKEN   # Meta Conversions API
@@ -120,7 +121,8 @@ project referenced in `src/lib/luxe-supabase.ts`.
   `GA_MEASUREMENT_IDS` in `luxe-config.ts` to tag a second property.
 - **Meta Pixel** `1904211696933513` — PageView, `Contact` on WhatsApp and phone
   clicks, `Lead` on booking submission, deduplicated against the server-side
-  Conversions API via a shared `event_id`.
+  Conversions API via a shared `event_id`. The server endpoint reads the
+  encrypted `META_ACCESS_TOKEN` runtime binding and uses Graph API v26.0.
 
 ## Contact
 
