@@ -1,0 +1,9 @@
+---
+export const prerender = true;
+import AdminShell from '../../components/admin/AdminShell.astro';
+import ProposalBuilder from '../../components/admin/ProposalBuilder.astro';
+---
+
+<AdminShell title="Project Proposals" active="proposals">
+  <ProposalBuilder />
+</AdminShell>
