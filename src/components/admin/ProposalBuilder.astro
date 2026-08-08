@@ -1,0 +1,929 @@
+<section class="proposal-workspace">
+  <div id="proposal-app" class="proposal-app">
+    <div class="proposal-loading">Loading proposals...</div>
+  </div>
+</section>
+
+<div id="proposal-preview" class="proposal-preview" hidden>
+  <div class="preview-toolbar">
+    <div>
+      <span>PDF preview</span>
+      <strong id="preview-title">Project proposal</strong>
+    </div>
+    <div class="preview-actions">
+      <button id="preview-download" type="button">Download PDF</button>
+      <button id="preview-close" type="button" class="secondary">Close</button>
+    </div>
+  </div>
+  <div id="proposal-pdf-pages" class="proposal-pdf-pages"></div>
+</div>
+
+<div id="proposal-toast" class="proposal-toast" role="status" aria-live="polite"></div>
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+  import { LUXE_SUPABASE_KEY as key, LUXE_SUPABASE_URL as url } from '../../lib/luxe-supabase';
+  import {
+    addCalendarDays,
+    calculateProposalPayments,
+    createProposalDraft,
+    DEFAULT_MATERIALS,
+    formatLkr,
+    type ProposalMaterial,
+    type ProposalQualityItem,
+    type ProposalRecord,
+    type ProposalScopeItem,
+    type ProposalTimelineItem,
+    type ProposalWarranty,
+  } from '../../lib/proposals';
+
+  interface InspectionRow {
+    id: string;
+    name: string;
+    phone: string;
+    email?: string | null;
+    location?: string | null;
+    notes?: string | null;
+    status?: string | null;
+    created_at?: string;
+  }
+
+  interface DesignRow {
+    id: string;
+    name: string;
+    slug: string;
+    collection?: string | null;
+    cover_image_url?: string | null;
+    video_3d_url?: string | null;
+    published?: boolean;
+  }
+
+  interface DrawingRow {
+    design_id: string;
+    kind?: string | null;
+    image_url: string;
+    caption?: string | null;
+    sort_order?: number | null;
+  }
+
+  interface MaterialRow {
+    design_id: string;
+    category?: string | null;
+    brand?: string | null;
+    item?: string | null;
+    usage_label?: string | null;
+    image_url?: string | null;
+    sort_order?: number | null;
+  }
+
+  interface FixtureRow {
+    design_id: string;
+    category?: string | null;
+    name?: string | null;
+    brand?: string | null;
+    spec?: string | null;
+    image_url?: string | null;
+    included?: boolean | null;
+    sort_order?: number | null;
+  }
+
+  const app = document.getElementById('proposal-app') as HTMLElement;
+  const preview = document.getElementById('proposal-preview') as HTMLElement;
+  const pagesRoot = document.getElementById('proposal-pdf-pages') as HTMLElement;
+  const toastNode = document.getElementById('proposal-toast') as HTMLElement;
+  const previewTitle = document.getElementById('preview-title') as HTMLElement;
+  const sb = createClient(url, key);
+
+  let proposals: ProposalRecord[] = [];
+  let inspections: InspectionRow[] = [];
+  let designs: DesignRow[] = [];
+  let drawings: DrawingRow[] = [];
+  let designMaterials: MaterialRow[] = [];
+  let fixtures: FixtureRow[] = [];
+  let current: ProposalRecord | null = null;
+  let activeFilter = 'all';
+  let downloadBusy = false;
+
+  const drawingKinds = new Set([
+    'render_1', 'render_2', 'render_3', 'render_4',
+    'vanity', 'water_closet', 'shower', 'shower_cubicle', 'ceiling',
+  ]);
+
+  const esc = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[character] || character));
+
+  const attr = (value: unknown) => esc(value).replace(/`/g, '&#96;');
+
+  const cleanArray = <T>(value: unknown, fallback: T[]): T[] => Array.isArray(value) ? value as T[] : structuredClone(fallback);
+
+  function notify(message: string, error = false) {
+    toastNode.textContent = message;
+    toastNode.classList.toggle('error', error);
+    toastNode.classList.add('show');
+    window.setTimeout(() => toastNode.classList.remove('show'), 3200);
+  }
+
+  function normaliseProposal(row: Partial<ProposalRecord>): ProposalRecord {
+    const fallback = createProposalDraft();
+    return {
+      ...fallback,
+      ...row,
+      revision: Number(row.revision ?? 0),
+      contract_value_lkr: Number(row.contract_value_lkr ?? 0),
+      initiation_credit_lkr: Number(row.initiation_credit_lkr ?? 50_000),
+      validity_days: Number(row.validity_days ?? 30),
+      commencement_days: Number(row.commencement_days ?? 7),
+      room_sqm: row.room_sqm ? Number(row.room_sqm) : null,
+      selected_image_urls: cleanArray<string>(row.selected_image_urls, []),
+      scope_items: cleanArray<ProposalScopeItem>(row.scope_items, fallback.scope_items),
+      exclusions: cleanArray<string>(row.exclusions, fallback.exclusions),
+      materials: cleanArray<ProposalMaterial>(row.materials, fallback.materials),
+      timeline: cleanArray<ProposalTimelineItem>(row.timeline, fallback.timeline),
+      quality_items: cleanArray<ProposalQualityItem>(row.quality_items, fallback.quality_items),
+      warranties: cleanArray<ProposalWarranty>(row.warranties, fallback.warranties),
+    };
+  }
+
+  function effectiveStatus(proposal: ProposalRecord) {
+    if (!['accepted', 'declined'].includes(proposal.status)
+      && proposal.valid_until
+      && proposal.valid_until < new Date().toISOString().slice(0, 10)) return 'expired';
+    return proposal.status;
+  }
+
+  function statusLabel(status: string) {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  }
+
+  function formatDate(value?: string | null) {
+    if (!value) return 'Not set';
+    return new Intl.DateTimeFormat('en-LK', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(`${value.slice(0, 10)}T00:00:00`));
+  }
+
+  async function loadData() {
+    if (import.meta.env.DEV && new URLSearchParams(location.search).get('sample') === '1') {
+      designs = [{ id: 'dev-moonstone', name: 'Moonstone', slug: 'moonstone', collection: 'gems', cover_image_url: '/images/designs/pichcha/pichcha-cover-v2.webp', video_3d_url: 'https://luxehome.lk/designs/moonstone', published: true }];
+      drawings = [
+        ['vanity', '/images/designs/pichcha/pichcha-long-vanity-v2.webp'],
+        ['water_closet', '/images/designs/pichcha/pichcha-water-closet-focus-v2.webp'],
+        ['shower', '/images/designs/pichcha/pichcha-shower-fixture-v2.webp'],
+        ['shower_cubicle', '/images/designs/pichcha/pichcha-shower-cubicle-v2.webp'],
+      ].map(([kind, image_url], index) => ({ design_id: 'dev-moonstone', kind, image_url, sort_order: index }));
+      current = normaliseProposal({
+        ...createProposalDraft(),
+        proposal_number: 'LX-P-2026-0001',
+        client_name: 'Sample Homeowner',
+        client_phone: '077 000 0000',
+        property_location: 'Nugegoda, Sri Lanka',
+        room_dimensions: '3,000 x 3,000 mm',
+        room_sqm: 9,
+        client_brief: 'A calm, highly functional private retreat with better circulation, generous vanity storage and a glass shower enclosure.',
+        site_findings: 'Measured site conditions, approved final layout and written material selections govern the construction quotation.',
+        design_id: 'dev-moonstone',
+        design_name: 'Moonstone',
+        design_collection: 'gems',
+        selected_image_urls: [
+          '/images/designs/pichcha/pichcha-cover-v2.webp',
+          '/images/designs/pichcha/pichcha-long-vanity-v2.webp',
+          '/images/designs/pichcha/pichcha-water-closet-focus-v2.webp',
+          '/images/designs/pichcha/pichcha-shower-fixture-v2.webp',
+          '/images/designs/pichcha/pichcha-shower-cubicle-v2.webp',
+        ],
+        video_url: 'https://luxehome.lk/designs/moonstone',
+        contract_value_lkr: 3_250_000,
+      });
+      renderEditor();
+      return;
+    }
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      location.assign('/admin');
+      return;
+    }
+
+    const [proposalResult, inspectionResult, designResult] = await Promise.all([
+      sb.from('lx_proposals').select('*').order('updated_at', { ascending: false }),
+      sb.from('lx_site_inspections').select('id,name,phone,email,location,notes,status,created_at').order('created_at', { ascending: false }).limit(200),
+      sb.from('lx_designs').select('id,name,slug,collection,cover_image_url,video_3d_url,published,lx_spaces!inner(slug)').eq('published', true).eq('lx_spaces.slug', 'bathrooms').order('sort_order'),
+    ]);
+
+    if (proposalResult.error) {
+      app.innerHTML = `<div class="module-error"><strong>Proposal module unavailable</strong><p>${esc(proposalResult.error.message)}</p></div>`;
+      return;
+    }
+
+    proposals = (proposalResult.data || []).map((row) => normaliseProposal(row as Partial<ProposalRecord>));
+    inspections = (inspectionResult.data || []) as InspectionRow[];
+    designs = (designResult.data || []) as DesignRow[];
+
+    const designIds = designs.map((design) => design.id);
+    if (designIds.length) {
+      const [drawingResult, materialResult, fixtureResult] = await Promise.all([
+        sb.from('lx_design_drawings').select('design_id,kind,image_url,caption,sort_order').in('design_id', designIds).order('sort_order'),
+        sb.from('lx_design_materials').select('design_id,category,brand,item,usage_label,image_url,sort_order').in('design_id', designIds).order('sort_order'),
+        sb.from('lx_design_fixtures').select('design_id,category,name,brand,spec,image_url,included,sort_order').in('design_id', designIds).order('sort_order'),
+      ]);
+      drawings = (drawingResult.data || []) as DrawingRow[];
+      designMaterials = (materialResult.data || []) as MaterialRow[];
+      fixtures = (fixtureResult.data || []) as FixtureRow[];
+    }
+
+    const requestedId = new URLSearchParams(location.search).get('id');
+    if (requestedId) {
+      const found = proposals.find((proposal) => proposal.id === requestedId);
+      if (found) {
+        current = normaliseProposal(found);
+        renderEditor();
+        return;
+      }
+    }
+    renderList();
+  }
+
+  function renderList() {
+    current = null;
+    const counts = ['draft', 'approved', 'sent', 'accepted', 'expired'].reduce<Record<string, number>>((result, status) => {
+      result[status] = proposals.filter((proposal) => effectiveStatus(proposal) === status).length;
+      return result;
+    }, {});
+    const visible = proposals.filter((proposal) => activeFilter === 'all' || effectiveStatus(proposal) === activeFilter);
+
+    app.innerHTML = `
+      <div class="proposal-list-head">
+        <div><p class="mini-eyebrow">Sales documents</p><h2>Project proposals</h2><p>Create the complete decision PDF promised after a paid initiation and measured site visit.</p></div>
+        <button id="new-proposal" class="primary-action" type="button">+ Create proposal</button>
+      </div>
+      <div class="proposal-stats">
+        ${[
+          ['Drafts', counts.draft || 0], ['Approved', counts.approved || 0], ['Sent', counts.sent || 0], ['Accepted', counts.accepted || 0],
+        ].map(([label, value]) => `<div><strong>${value}</strong><span>${label}</span></div>`).join('')}
+      </div>
+      <div class="proposal-filters" role="tablist">
+        ${['all', 'draft', 'approved', 'sent', 'accepted', 'expired'].map((status) => `<button type="button" data-filter="${status}" class="${activeFilter === status ? 'active' : ''}">${statusLabel(status)}</button>`).join('')}
+      </div>
+      <div class="proposal-list">
+        ${visible.length ? visible.map((proposal) => {
+          const status = effectiveStatus(proposal);
+          return `<button class="proposal-card" type="button" data-proposal-id="${proposal.id}">
+            <div class="proposal-card-top"><span class="status status-${status}">${statusLabel(status)}</span><small>${esc(proposal.proposal_number || 'New proposal')} / R${proposal.revision}</small></div>
+            <strong>${esc(proposal.client_name || 'Unnamed client')}</strong>
+            <p>${esc(proposal.design_name || 'Design not selected')} - ${esc(proposal.property_location || 'Location not entered')}</p>
+            <div class="proposal-card-bottom"><span>${formatLkr(proposal.contract_value_lkr)}</span><span>Valid through ${formatDate(proposal.valid_until)}</span></div>
+          </button>`;
+        }).join('') : '<div class="empty-state"><strong>No proposals in this view.</strong><p>Create the first proposal or change the status filter.</p></div>'}
+      </div>`;
+
+    document.getElementById('new-proposal')?.addEventListener('click', () => {
+      current = createProposalDraft();
+      renderEditor();
+    });
+    app.querySelectorAll<HTMLElement>('[data-filter]').forEach((button) => button.addEventListener('click', () => {
+      activeFilter = button.dataset.filter || 'all';
+      renderList();
+    }));
+    app.querySelectorAll<HTMLElement>('[data-proposal-id]').forEach((button) => button.addEventListener('click', () => {
+      const proposal = proposals.find((item) => item.id === button.dataset.proposalId);
+      if (!proposal) return;
+      current = normaliseProposal(proposal);
+      history.replaceState(null, '', `/admin/proposals?id=${current.id}`);
+      renderEditor();
+    }));
+  }
+
+  function designMedia(designId?: string | null) {
+    if (!designId) return [] as Array<{ url: string; label: string }>;
+    const design = designs.find((item) => item.id === designId);
+    const candidates: Array<{ url: string; label: string }> = [];
+    if (design?.cover_image_url) candidates.push({ url: design.cover_image_url, label: 'Cover / whole room' });
+    drawings
+      .filter((item) => item.design_id === designId && item.image_url && drawingKinds.has(item.kind || ''))
+      .forEach((item) => candidates.push({
+        url: item.image_url,
+        label: item.caption || String(item.kind || 'Design view').replaceAll('_', ' '),
+      }));
+    return candidates.filter((item, index, list) => list.findIndex((candidate) => candidate.url === item.url) === index);
+  }
+
+  function materialRowsForDesign(designId: string) {
+    const materials = designMaterials.filter((item) => item.design_id === designId).map<ProposalMaterial>((item) => ({
+      system: item.category || 'Material',
+      brand: item.brand || item.item || 'Approved selection',
+      specification: [item.item, item.usage_label].filter(Boolean).join(' - ') || 'Final selection recorded before purchase',
+      image_url: item.image_url || undefined,
+    }));
+    const fixtureMaterials = fixtures
+      .filter((item) => item.design_id === designId && item.included !== false)
+      .map<ProposalMaterial>((item) => ({
+        system: item.category || 'Fixture',
+        brand: [item.brand, item.name].filter(Boolean).join(' - ') || 'Approved fixture',
+        specification: item.spec || 'Model and finish recorded before purchase',
+        image_url: item.image_url || undefined,
+      }));
+    return [...materials, ...fixtureMaterials].slice(0, 8);
+  }
+
+  function arrayRows<T extends Record<string, unknown>>(name: string, rows: T[], fields: Array<{ key: keyof T; label: string; textarea?: boolean }>, limit: number) {
+    return `<div class="editable-list" data-array="${name}">
+      ${rows.slice(0, limit).map((row, index) => `<div class="editable-row" data-index="${index}">
+        <div class="editable-row-fields">${fields.map((field) => `<label>${esc(field.label)}${field.textarea
+          ? `<textarea data-key="${String(field.key)}">${esc(row[field.key])}</textarea>`
+          : `<input data-key="${String(field.key)}" value="${attr(row[field.key])}">`}</label>`).join('')}</div>
+        <button type="button" class="remove-row" data-remove="${name}" data-index="${index}" aria-label="Remove ${name} row">Remove</button>
+      </div>`).join('')}
+      <button type="button" class="add-row" data-add="${name}" ${rows.length >= limit ? 'disabled' : ''}>+ Add item</button>
+      <small>Maximum ${limit} items in this proposal layout.</small>
+    </div>`;
+  }
+
+  function renderEditor() {
+    if (!current) return renderList();
+    const locked = current.status !== 'draft';
+    const selectedDesign = designs.find((design) => design.id === current?.design_id);
+    const media = designMedia(current.design_id);
+    const payment = calculateProposalPayments(current.contract_value_lkr, current.initiation_credit_lkr);
+    const displayNumber = current.proposal_number || 'Assigned when saved';
+
+    app.innerHTML = `
+      <div class="editor-head">
+        <button id="proposal-back" class="text-button" type="button">Back to proposals</button>
+        <div class="editor-title"><div><span class="status status-${effectiveStatus(current)}">${statusLabel(effectiveStatus(current))}</span><small>${esc(displayNumber)} / R${current.revision}</small></div><h2>${esc(current.client_name || 'New project proposal')}</h2><p>${locked ? 'Issued snapshot - create a revision to change scope or price.' : 'Draft autosaves only when you press Save draft.'}</p></div>
+        <div class="editor-actions">
+          ${locked ? `
+            <button id="proposal-preview-button" type="button" class="secondary-action">Preview</button>
+            <button id="proposal-download-button" type="button" class="primary-action">Download PDF</button>
+            ${current.status === 'approved' ? '<button id="proposal-mark-sent" type="button" class="secondary-action">Mark sent</button>' : ''}
+            ${['approved', 'sent'].includes(current.status) ? '<button id="proposal-mark-accepted" type="button" class="secondary-action">Mark accepted</button>' : ''}
+            <button id="proposal-revision" type="button" class="secondary-action">Create revision</button>
+          ` : `
+            <button id="proposal-preview-button" type="button" class="secondary-action">Preview</button>
+            <button id="proposal-save" type="button" class="secondary-action">Save draft</button>
+            <button id="proposal-approve" type="button" class="primary-action">Approve and lock</button>
+          `}
+        </div>
+      </div>
+
+      <div class="editor-progress">
+        ${['Client', 'Design', 'Scope', 'Materials', 'Programme', 'Price'].map((label, index) => `<a href="#proposal-step-${index + 1}"><span>${String(index + 1).padStart(2, '0')}</span>${label}</a>`).join('')}
+      </div>
+
+      <form id="proposal-form" class="proposal-form" ${locked ? 'data-locked="true"' : ''}>
+        <section class="form-section" id="proposal-step-1">
+          <div class="section-heading"><span>01</span><div><h3>Client and measured site</h3><p>Start from a paid initiation or enter the client manually.</p></div></div>
+          <div class="form-grid">
+            <label class="wide">Project initiation record<select id="p-source" ${locked ? 'disabled' : ''}><option value="">Manual proposal</option>${inspections.map((inspection) => `<option value="${inspection.id}" ${inspection.id === current?.source_inspection_id ? 'selected' : ''}>${esc(inspection.name)} - ${esc(inspection.location || 'No location')} (${esc(inspection.status || 'new')})</option>`).join('')}</select></label>
+            <label>Client name<input id="p-client-name" required value="${attr(current.client_name)}" ${locked ? 'disabled' : ''}></label>
+            <label>Phone / WhatsApp<input id="p-client-phone" value="${attr(current.client_phone)}" ${locked ? 'disabled' : ''}></label>
+            <label>Email<input id="p-client-email" type="email" value="${attr(current.client_email)}" ${locked ? 'disabled' : ''}></label>
+            <label>Property location<input id="p-location" required value="${attr(current.property_location)}" ${locked ? 'disabled' : ''}></label>
+            <label>Project type<select id="p-project-type" ${locked ? 'disabled' : ''}><option value="renovation" ${current.project_type === 'renovation' ? 'selected' : ''}>Renovation</option><option value="new" ${current.project_type === 'new' ? 'selected' : ''}>New bathroom</option></select></label>
+            <label>Bathroom name<input id="p-bathroom-name" value="${attr(current.bathroom_name)}" placeholder="Main bathroom" ${locked ? 'disabled' : ''}></label>
+            <label>Measured dimensions<input id="p-room-dimensions" value="${attr(current.room_dimensions)}" placeholder="3,000 x 3,000 mm" ${locked ? 'disabled' : ''}></label>
+            <label>Floor area (sqm)<input id="p-room-sqm" type="number" step="0.1" min="0" value="${current.room_sqm || ''}" ${locked ? 'disabled' : ''}></label>
+            <label class="wide">Client brief<textarea id="p-client-brief" ${locked ? 'disabled' : ''}>${esc(current.client_brief)}</textarea></label>
+            <label class="wide">Measured site findings<textarea id="p-site-findings" ${locked ? 'disabled' : ''}>${esc(current.site_findings)}</textarea></label>
+          </div>
+        </section>
+
+        <section class="form-section" id="proposal-step-2">
+          <div class="section-heading"><span>02</span><div><h3>Approved design media</h3><p>Only real images already attached to the selected CMS design are available.</p></div></div>
+          <div class="form-grid">
+            <label>Bathroom design<select id="p-design" ${locked ? 'disabled' : ''}><option value="">Select a published design</option>${designs.map((design) => `<option value="${design.id}" ${design.id === current?.design_id ? 'selected' : ''}>${esc(design.name)} - ${esc(design.collection || 'collection')}</option>`).join('')}</select></label>
+            <label>3D walkthrough URL<input id="p-video" type="url" value="${attr(current.video_url || selectedDesign?.video_3d_url || '')}" ${locked ? 'disabled' : ''}></label>
+          </div>
+          <div class="media-count"><strong id="media-selected-count">${current.selected_image_urls.length}</strong><span>of 5 design images selected</span></div>
+          <div class="media-grid">
+            ${media.length ? media.map((item) => `<label class="media-choice"><input type="checkbox" name="proposal-image" value="${attr(item.url)}" ${current?.selected_image_urls.includes(item.url) ? 'checked' : ''} ${locked ? 'disabled' : ''}><img src="${attr(item.url)}" alt=""><span>${esc(item.label)}</span></label>`).join('') : '<div class="media-empty">No real design images are attached to this design yet. Add them in Designs before approving the proposal.</div>'}
+          </div>
+        </section>
+
+        <fieldset ${locked ? 'disabled' : ''}>
+          <section class="form-section" id="proposal-step-3">
+            <div class="section-heading"><span>03</span><div><h3>Construction scope</h3><p>The issued version records inclusions and exclusions permanently.</p></div></div>
+            ${arrayRows('scope', current.scope_items, [{ key: 'title', label: 'Scope title' }, { key: 'description', label: 'Included work', textarea: true }], 6)}
+            <label class="standalone-label">Exclusions - one item per line<textarea id="p-exclusions">${esc(current.exclusions.join('\n'))}</textarea></label>
+          </section>
+
+          <section class="form-section" id="proposal-step-4">
+            <div class="section-heading"><span>04</span><div><h3>Materials and finishes</h3><p>Selected CMS materials are copied into the proposal snapshot and remain editable while it is a draft.</p></div></div>
+            ${arrayRows('materials', current.materials, [{ key: 'system', label: 'System' }, { key: 'brand', label: 'Brand / selection' }, { key: 'specification', label: 'Specification', textarea: true }], 8)}
+          </section>
+
+          <section class="form-section" id="proposal-step-5">
+            <div class="section-heading"><span>05</span><div><h3>Programme, quality and warranties</h3><p>These defaults can be adjusted to the measured project before approval.</p></div></div>
+            <h4>Indicative programme</h4>
+            ${arrayRows('timeline', current.timeline, [{ key: 'week', label: 'Week' }, { key: 'title', label: 'Stage' }, { key: 'description', label: 'Work', textarea: true }], 6)}
+            <h4>Quality checks</h4>
+            ${arrayRows('quality', current.quality_items, [{ key: 'title', label: 'Check' }, { key: 'description', label: 'Control', textarea: true }], 6)}
+            <h4>Applicable warranties</h4>
+            ${arrayRows('warranties', current.warranties, [{ key: 'item', label: 'Item' }, { key: 'period', label: 'Period' }, { key: 'basis', label: 'Basis', textarea: true }], 8)}
+          </section>
+
+          <section class="form-section" id="proposal-step-6">
+            <div class="section-heading"><span>06</span><div><h3>Final quotation and terms</h3><p>Enter one final contract value; milestone amounts are calculated automatically.</p></div></div>
+            <div class="form-grid">
+              <label>Final contract value (LKR)<input id="p-contract-value" type="number" min="0" step="1000" value="${current.contract_value_lkr || ''}"></label>
+              <label>Initiation credit already paid (LKR)<input id="p-initiation-credit" type="number" min="0" step="1000" value="${current.initiation_credit_lkr}"></label>
+              <label>Issue date<input id="p-issued-at" type="date" value="${current.issued_at}"></label>
+              <label>Valid through<input id="p-valid-until" type="date" value="${current.valid_until}" readonly></label>
+            </div>
+            <div id="payment-summary" class="payment-summary">
+              ${paymentSummary(payment)}
+            </div>
+            <label class="standalone-label">Internal notes - never shown in the client PDF<textarea id="p-internal-notes">${esc(current.internal_notes)}</textarea></label>
+          </section>
+        </fieldset>
+      </form>
+      <div class="mobile-save-bar">${locked
+        ? '<button id="mobile-download" type="button">Download PDF</button>'
+        : '<button id="mobile-save" type="button">Save draft</button><button id="mobile-approve" type="button">Approve</button>'}</div>`;
+
+    bindEditor(locked);
+  }
+
+  function paymentSummary(payment: ReturnType<typeof calculateProposalPayments>) {
+    return `
+      <div><span>50% commencement allocation</span><strong>${formatLkr(payment.commencementAllocation)}</strong></div>
+      <div class="credit"><span>Less initiation credit</span><strong>-${formatLkr(payment.initiationCredit)}</strong></div>
+      <div><span>Amount due to commence</span><strong>${formatLkr(payment.commencementDue)}</strong></div>
+      <div><span>Waterproofing - 20% before flood test</span><strong>${formatLkr(payment.waterproofing)}</strong></div>
+      <div><span>Tiling - 10%</span><strong>${formatLkr(payment.tiling)}</strong></div>
+      <div><span>Fixtures, mirror and accessories - 10%</span><strong>${formatLkr(payment.fixtures)}</strong></div>
+      <div><span>Final completion - 10%</span><strong>${formatLkr(payment.final)}</strong></div>`;
+  }
+
+  function collectRows<T>(name: string, keys: string[]): T[] {
+    return Array.from(app.querySelectorAll<HTMLElement>(`[data-array="${name}"] .editable-row`)).map((row) => {
+      const result: Record<string, string> = {};
+      keys.forEach((keyName) => {
+        const field = row.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[data-key="${keyName}"]`);
+        result[keyName] = field?.value.trim() || '';
+      });
+      return result as T;
+    }).filter((row) => keys.some((keyName) => Boolean((row as Record<string, unknown>)[keyName])));
+  }
+
+  function value(id: string) {
+    return (document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null)?.value.trim() || '';
+  }
+
+  function readForm() {
+    if (!current) return null;
+    const imageUrls = Array.from(app.querySelectorAll<HTMLInputElement>('input[name="proposal-image"]:checked')).map((input) => input.value);
+    return normaliseProposal({
+      ...current,
+      source_inspection_id: value('p-source') || null,
+      client_name: value('p-client-name'),
+      client_phone: value('p-client-phone'),
+      client_email: value('p-client-email'),
+      property_location: value('p-location'),
+      project_type: (value('p-project-type') || 'renovation') as 'renovation' | 'new',
+      bathroom_name: value('p-bathroom-name') || 'Main bathroom',
+      room_dimensions: value('p-room-dimensions'),
+      room_sqm: value('p-room-sqm') ? Number(value('p-room-sqm')) : null,
+      client_brief: value('p-client-brief'),
+      site_findings: value('p-site-findings'),
+      design_id: value('p-design') || null,
+      video_url: value('p-video'),
+      selected_image_urls: imageUrls,
+      scope_items: collectRows<ProposalScopeItem>('scope', ['title', 'description']),
+      exclusions: value('p-exclusions').split('\n').map((line) => line.trim()).filter(Boolean),
+      materials: collectRows<ProposalMaterial>('materials', ['system', 'brand', 'specification']),
+      timeline: collectRows<ProposalTimelineItem>('timeline', ['week', 'title', 'description']),
+      quality_items: collectRows<ProposalQualityItem>('quality', ['title', 'description']),
+      warranties: collectRows<ProposalWarranty>('warranties', ['item', 'period', 'basis']),
+      contract_value_lkr: Number(value('p-contract-value')) || 0,
+      initiation_credit_lkr: Number(value('p-initiation-credit')) || 0,
+      validity_days: 30,
+      issued_at: value('p-issued-at') || new Date().toISOString().slice(0, 10),
+      valid_until: value('p-valid-until') || addCalendarDays(value('p-issued-at'), 30),
+      commencement_days: 7,
+      internal_notes: value('p-internal-notes'),
+    });
+  }
+
+  function bindEditor(locked: boolean) {
+    document.getElementById('proposal-back')?.addEventListener('click', () => {
+      history.replaceState(null, '', '/admin/proposals');
+      renderList();
+    });
+
+    document.getElementById('p-source')?.addEventListener('change', (event) => {
+      if (!current) return;
+      current = readForm();
+      const inspection = inspections.find((item) => item.id === (event.target as HTMLSelectElement).value);
+      if (current && inspection) {
+        current.source_inspection_id = inspection.id;
+        current.client_name = inspection.name || current.client_name;
+        current.client_phone = inspection.phone || current.client_phone;
+        current.client_email = inspection.email || current.client_email;
+        current.property_location = inspection.location || current.property_location;
+        current.client_brief ||= inspection.notes || '';
+      }
+      renderEditor();
+    });
+
+    document.getElementById('p-design')?.addEventListener('change', (event) => {
+      if (!current) return;
+      current = readForm();
+      const design = designs.find((item) => item.id === (event.target as HTMLSelectElement).value);
+      if (current && design) {
+        current.design_id = design.id;
+        current.design_name = design.name;
+        current.design_collection = design.collection || '';
+        current.video_url = design.video_3d_url || '';
+        current.selected_image_urls = designMedia(design.id).slice(0, 5).map((item) => item.url);
+        const selectedMaterials = materialRowsForDesign(design.id);
+        current.materials = selectedMaterials.length ? selectedMaterials : structuredClone(DEFAULT_MATERIALS);
+      }
+      renderEditor();
+      document.getElementById('proposal-step-2')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    app.querySelectorAll<HTMLInputElement>('input[name="proposal-image"]').forEach((input) => input.addEventListener('change', () => {
+      const checked = Array.from(app.querySelectorAll<HTMLInputElement>('input[name="proposal-image"]:checked'));
+      if (checked.length > 5) {
+        input.checked = false;
+        notify('Choose no more than five design images.', true);
+      }
+      const total = app.querySelectorAll('input[name="proposal-image"]:checked').length;
+      const counter = document.getElementById('media-selected-count');
+      if (counter) counter.textContent = String(total);
+      app.querySelectorAll<HTMLInputElement>('input[name="proposal-image"]:not(:checked)').forEach((option) => option.disabled = total >= 5);
+    }));
+
+    const refreshPayments = () => {
+      const contractValue = Number(value('p-contract-value')) || 0;
+      const credit = Number(value('p-initiation-credit')) || 0;
+      const node = document.getElementById('payment-summary');
+      if (node) node.innerHTML = paymentSummary(calculateProposalPayments(contractValue, credit));
+    };
+    document.getElementById('p-contract-value')?.addEventListener('input', refreshPayments);
+    document.getElementById('p-initiation-credit')?.addEventListener('input', refreshPayments);
+    document.getElementById('p-issued-at')?.addEventListener('change', () => {
+      const valid = document.getElementById('p-valid-until') as HTMLInputElement | null;
+      if (valid) valid.value = addCalendarDays(value('p-issued-at'), 30);
+    });
+
+    if (!locked) {
+      app.querySelectorAll<HTMLElement>('[data-add]').forEach((button) => button.addEventListener('click', () => {
+        if (!current) return;
+        current = readForm();
+        const name = button.dataset.add;
+        if (!current || !name) return;
+        if (name === 'scope') current.scope_items.push({ title: '', description: '' });
+        if (name === 'materials') current.materials.push({ system: '', brand: '', specification: '' });
+        if (name === 'timeline') current.timeline.push({ week: '', title: '', description: '' });
+        if (name === 'quality') current.quality_items.push({ title: '', description: '' });
+        if (name === 'warranties') current.warranties.push({ item: '', period: '', basis: '' });
+        renderEditor();
+      }));
+      app.querySelectorAll<HTMLElement>('[data-remove]').forEach((button) => button.addEventListener('click', () => {
+        if (!current) return;
+        current = readForm();
+        const name = button.dataset.remove;
+        const index = Number(button.dataset.index);
+        if (!current || !name || Number.isNaN(index)) return;
+        if (name === 'scope') current.scope_items.splice(index, 1);
+        if (name === 'materials') current.materials.splice(index, 1);
+        if (name === 'timeline') current.timeline.splice(index, 1);
+        if (name === 'quality') current.quality_items.splice(index, 1);
+        if (name === 'warranties') current.warranties.splice(index, 1);
+        renderEditor();
+      }));
+    }
+
+    const save = () => saveDraft(false);
+    document.getElementById('proposal-save')?.addEventListener('click', save);
+    document.getElementById('mobile-save')?.addEventListener('click', save);
+    document.getElementById('proposal-approve')?.addEventListener('click', approveProposal);
+    document.getElementById('mobile-approve')?.addEventListener('click', approveProposal);
+    document.getElementById('proposal-preview-button')?.addEventListener('click', openPreview);
+    document.getElementById('proposal-download-button')?.addEventListener('click', downloadPdf);
+    document.getElementById('mobile-download')?.addEventListener('click', downloadPdf);
+    document.getElementById('proposal-mark-sent')?.addEventListener('click', () => updateStatus('sent'));
+    document.getElementById('proposal-mark-accepted')?.addEventListener('click', () => updateStatus('accepted'));
+    document.getElementById('proposal-revision')?.addEventListener('click', createRevision);
+  }
+
+  function proposalPayload(proposal: ProposalRecord) {
+    const {
+      id, created_at, updated_at, ...payload
+    } = proposal;
+    if (!payload.proposal_number) delete payload.proposal_number;
+    return payload;
+  }
+
+  async function saveDraft(silent: boolean) {
+    const formValue = readForm();
+    if (!formValue) return null;
+    if (!formValue.client_name) {
+      notify('Enter the client name before saving.', true);
+      document.getElementById('p-client-name')?.focus();
+      return null;
+    }
+    current = formValue;
+    let saved: ProposalRecord | null = null;
+    if (current.id) {
+      const { data, error } = await sb.from('lx_proposals').update(proposalPayload(current)).eq('id', current.id).select('*').single();
+      if (error) {
+        notify(error.message, true);
+        return null;
+      }
+      saved = normaliseProposal(data as Partial<ProposalRecord>);
+    } else {
+      const { data, error } = await sb.from('lx_proposals').insert(proposalPayload(current)).select('*').single();
+      if (error) {
+        notify(error.message, true);
+        return null;
+      }
+      saved = normaliseProposal(data as Partial<ProposalRecord>);
+    }
+    current = saved;
+    const index = proposals.findIndex((proposal) => proposal.id === saved?.id);
+    if (index >= 0) proposals[index] = saved;
+    else proposals.unshift(saved);
+    history.replaceState(null, '', `/admin/proposals?id=${saved.id}`);
+    if (!silent) notify('Draft saved.');
+    renderEditor();
+    return saved;
+  }
+
+  function validateForIssue(proposal: ProposalRecord) {
+    const errors: string[] = [];
+    if (!proposal.client_name) errors.push('client name');
+    if (!proposal.property_location) errors.push('property location');
+    if (!proposal.design_id || !proposal.design_name) errors.push('published bathroom design');
+    if (proposal.selected_image_urls.length !== 5) errors.push('exactly five real design images');
+    if (proposal.contract_value_lkr <= 0) errors.push('final contract value');
+    if (proposal.initiation_credit_lkr > calculateProposalPayments(proposal.contract_value_lkr, proposal.initiation_credit_lkr).commencementAllocation) errors.push('an initiation credit no higher than the 50% commencement allocation');
+    if (!proposal.scope_items.length) errors.push('construction scope');
+    if (!proposal.materials.length) errors.push('materials');
+    return errors;
+  }
+
+  async function approveProposal() {
+    current = readForm();
+    if (!current) return;
+    const errors = validateForIssue(current);
+    if (errors.length) {
+      notify(`Complete ${errors.join(', ')} before approval.`, true);
+      return;
+    }
+    const saved = await saveDraft(true);
+    if (!saved?.id) return;
+    const approvedAt = new Date().toISOString();
+    const { data, error } = await sb.from('lx_proposals').update({ status: 'approved', approved_at: approvedAt }).eq('id', saved.id).select('*').single();
+    if (error) return notify(error.message, true);
+    current = normaliseProposal(data as Partial<ProposalRecord>);
+    proposals = proposals.map((proposal) => proposal.id === current?.id ? current : proposal);
+    notify('Proposal approved and locked.');
+    renderEditor();
+  }
+
+  async function updateStatus(status: 'sent' | 'accepted') {
+    if (!current?.id) return;
+    const timestampKey = status === 'sent' ? 'sent_at' : 'accepted_at';
+    const { data, error } = await sb.from('lx_proposals').update({ status, [timestampKey]: new Date().toISOString() }).eq('id', current.id).select('*').single();
+    if (error) return notify(error.message, true);
+    current = normaliseProposal(data as Partial<ProposalRecord>);
+    proposals = proposals.map((proposal) => proposal.id === current?.id ? current : proposal);
+    notify(`Proposal marked ${status}.`);
+    renderEditor();
+  }
+
+  async function createRevision() {
+    if (!current?.id || !current.proposal_number) return;
+    const revisions = proposals.filter((proposal) => proposal.proposal_number === current?.proposal_number).map((proposal) => proposal.revision);
+    const nextRevision = Math.max(current.revision, ...revisions) + 1;
+    const issuedAt = new Date().toISOString().slice(0, 10);
+    const revision = normaliseProposal({
+      ...current,
+      id: undefined,
+      revision: nextRevision,
+      revision_of: current.id,
+      status: 'draft',
+      issued_at: issuedAt,
+      valid_until: addCalendarDays(issuedAt, 30),
+      approved_at: null,
+      sent_at: null,
+      accepted_at: null,
+      created_at: undefined,
+      updated_at: undefined,
+    });
+    const { data, error } = await sb.from('lx_proposals').insert(proposalPayload(revision)).select('*').single();
+    if (error) return notify(error.message, true);
+    current = normaliseProposal(data as Partial<ProposalRecord>);
+    proposals.unshift(current);
+    history.replaceState(null, '', `/admin/proposals?id=${current.id}`);
+    notify(`Revision R${nextRevision} created.`);
+    renderEditor();
+  }
+
+  function collectionLabel(value: string) {
+    const labels: Record<string, string> = {
+      flora: 'Flora Collection', island: 'Island Collection', heritage: 'Heritage Collection', gems: 'Ceylon Gems Collection',
+      standard: 'Standard Collection', premium: 'Premium Collection', signature: 'Signature Collection',
+    };
+    return labels[value] || value || 'LUXEhome Collection';
+  }
+
+  function safeUrl(value: string) {
+    return attr(value.startsWith('http') || value.startsWith('/') || value.startsWith('data:image/') ? value : '');
+  }
+
+  function pdfHeader(page: number, eyebrow: string, title: string) {
+    return `<header class="pdf-header"><div class="pdf-wordmark"><b>LUXE</b><i>home</i></div><small>${esc(current?.proposal_number || 'DRAFT')} &nbsp;|&nbsp; REVISION R${current?.revision || 0}</small></header>
+      <div class="pdf-heading"><span>${esc(eyebrow)}</span><h2>${esc(title)}</h2></div>
+      <footer><span>LUXEhome &nbsp;|&nbsp; Complete bathroom design and construction &nbsp;|&nbsp; luxehome.lk &nbsp;|&nbsp; 077 450 3744</span><b>${String(page).padStart(2, '0')}</b></footer>`;
+  }
+
+  function pdfPage(page: number, eyebrow: string, title: string, body: string, className = '') {
+    return `<div class="pdf-sheet"><article class="pdf-page ${className}">${pdfHeader(page, eyebrow, title)}<main>${body}</main></article></div>`;
+  }
+
+  function previewImage(url: string, alt: string, className = '') {
+    return url ? `<img class="${className}" src="${safeUrl(url)}" alt="${attr(alt)}" crossorigin="anonymous">` : `<div class="pdf-image-empty ${className}">Real design image not selected</div>`;
+  }
+
+  function renderPdfPages(proposal: ProposalRecord) {
+    current = proposal;
+    const images = [...proposal.selected_image_urls];
+    const payment = calculateProposalPayments(proposal.contract_value_lkr, proposal.initiation_credit_lkr);
+    const projectType = proposal.project_type === 'new' ? 'New bathroom construction' : 'One bathroom renovation';
+    const scope = proposal.scope_items.slice(0, 6);
+    const materials = proposal.materials.slice(0, 8);
+    const timeline = proposal.timeline.slice(0, 6);
+    const quality = proposal.quality_items.slice(0, 6);
+    const warranties = proposal.warranties.slice(0, 8);
+
+    const cover = `<div class="pdf-cover-image">${previewImage(images[0] || '', proposal.design_name, 'cover-image')}<div class="cover-overlay"></div><div class="cover-brand"><div class="pdf-wordmark light"><b>LUXE</b><i>home</i></div><span>${proposal.status === 'draft' ? 'DRAFT PROPOSAL' : 'PROJECT PROPOSAL'}</span></div><div class="cover-title"><small>${esc(proposal.design_name || 'SELECTED DESIGN')} &nbsp;|&nbsp; ${esc(collectionLabel(proposal.design_collection)).toUpperCase()}</small><h1>Bathroom Project Proposal</h1></div></div>
+      <div class="cover-details"><span>PREPARED FOR</span><h2>${esc(proposal.client_name || 'Client name')}</h2><p>${esc(projectType)} &nbsp;|&nbsp; ${esc(proposal.property_location || 'Property location')}</p><div class="cover-rule"></div><div class="cover-meta"><div><b>PROPOSAL</b><span>${esc(proposal.proposal_number || 'Assigned when saved')} / R${proposal.revision}</span></div><div><b>ISSUED</b><span>${formatDate(proposal.issued_at)}</span></div><div><b>VALID THROUGH</b><span>${formatDate(proposal.valid_until)}</span></div><div><b>VALIDITY</b><span>30 calendar days</span></div></div></div>`;
+
+    const summary = `<p class="pdf-lead">A measured, designed and documented ${proposal.project_type} proposal for one bathroom. The final document is based on the completed site visit and approved selections.</p><div class="summary-top"><div class="summary-data">${[
+      ['Client', proposal.client_name], ['Property', proposal.property_location], ['Project', projectType], ['Room', [proposal.room_dimensions, proposal.room_sqm ? `${proposal.room_sqm} sqm` : ''].filter(Boolean).join(' | ')], ['Design', `${proposal.design_name} - ${collectionLabel(proposal.design_collection)}`], ['Proposal', `${proposal.proposal_number || 'Draft'} / R${proposal.revision}`],
+    ].map(([label, value]) => `<div><b>${esc(label)}</b><span>${esc(value || 'To be confirmed')}</span></div>`).join('')}</div>${previewImage(images[1] || images[0] || '', proposal.design_name, 'summary-image')}</div><div class="summary-stats">${[
+      [proposal.room_sqm ? `${proposal.room_sqm} sqm` : 'Measured', 'Room'], ['6 weeks', 'Indicative programme'], ['5 images', 'Approved design views'], ['30 days', 'Proposal validity'],
+    ].map(([value, label]) => `<div><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join('')}</div><div class="pdf-panel"><span>CLIENT BRIEF</span><h3>${esc(proposal.client_brief ? proposal.client_brief.split(/[.!?]/)[0] : 'A complete bathroom, resolved before construction.')}</h3><p>${esc(proposal.client_brief || 'Client requirements and desired outcome are confirmed during the site consultation and recorded here before the proposal is issued.')}</p><div class="sub-panel"><b>SITE BASIS</b><p>${esc(proposal.site_findings || 'Measured site conditions, approved final layout and written material selections govern the construction quotation.')}</p></div></div>`;
+
+    const gallery = `<p class="pdf-lead">Only real, selected LUXEhome design media appears in the client proposal. The issued PDF keeps a fixed snapshot of these approved visuals.</p><div class="gallery-feature">${previewImage(images[0] || '', proposal.design_name, 'gallery-main')}<div class="design-link"><b>DESIGN LINK</b><h3>3D walkthrough</h3><p>${esc(proposal.video_url || 'The approved walkthrough link is recorded with the proposal.')}</p></div></div><div class="gallery-grid">${images.slice(1, 5).map((url, index) => `<figure>${previewImage(url, `${proposal.design_name} view ${index + 2}`)}<figcaption>${String(index + 2).padStart(2, '0')} &nbsp; APPROVED DESIGN VIEW</figcaption></figure>`).join('')}</div>`;
+
+    const scopeBody = `<p class="pdf-lead">The issued proposal shows exactly what is included, what is excluded and which approved revision controls construction.</p><div class="pdf-card-grid">${scope.map((item, index) => `<div class="pdf-card"><span>${String(index + 1).padStart(2, '0')}</span><h3>${esc(item.title)}</h3><p>${esc(item.description)}</p></div>`).join('')}</div><div class="pdf-strip"><b>SAMPLE EXCLUSIONS</b><p>${esc(proposal.exclusions.join(' '))}</p></div>`;
+
+    const materialsBody = `<p class="pdf-lead">Brands and systems are recorded in the issued proposal. Equivalent substitutions require client approval and are documented before procurement.</p><div class="pdf-table materials-table"><div class="table-head"><b>SYSTEM</b><b>PREFERRED BRAND</b><b>PROPOSAL SPECIFICATION</b></div>${materials.map((item) => `<div class="table-row"><strong>${esc(item.system)}</strong><span>${esc(item.brand)}</span><span>${esc(item.specification)}</span></div>`).join('')}</div><div class="pdf-strip sage"><b>SELECTION RECORD</b><p>Final models, colours, quantities and reference images are confirmed before purchase and remain attached to the accepted proposal revision.</p></div>`;
+
+    const timelineBody = `<p class="pdf-lead">The final programme begins from the agreed commencement date and may adjust for approved changes, site conditions or special-order material lead times.</p><div class="timeline-list">${timeline.map((item, index) => `<div><i class="${[0, 2, 5].includes(index) ? 'gold' : ''}"></i><span>${esc(item.week)}</span><h3>${esc(item.title)}</h3><p>${esc(item.description)}</p></div>`).join('')}</div><div class="pdf-strip sage"><b>COMMENCEMENT COMMITMENT</b><p>Procurement and mobilisation begin after the signed agreement and cleared commencement payment. On-site work starts within seven working days, subject to approved selections, site access and the agreed date.</p></div>`;
+
+    const qualityBody = `<p class="pdf-lead">Critical work is checked before it is covered. Evidence and stage updates form part of the project communication record.</p><div class="pdf-card-grid">${quality.map((item, index) => `<div class="pdf-card"><span>${String(index + 1).padStart(2, '0')}</span><h3>${esc(item.title)}</h3><p>${esc(item.description)}</p></div>`).join('')}</div><div class="pdf-strip gold"><b>WATERPROOFING PAYMENT AND TESTING</b><p>The 20% milestone is collected once waterproofing is complete and before the flood test begins. If testing identifies an issue, LUXEhome corrects and retests it without an additional charge. Tiling starts only after the test passes.</p></div>`;
+
+    const warrantyBody = `<p class="pdf-lead">Applicable warranty periods are confirmed against the supplied products and completed construction scope. Manufacturer conditions and the signed project record apply.</p><div class="pdf-table warranty-table"><div class="table-head"><b>ITEM</b><b>PERIOD</b><b>BASIS</b></div>${warranties.map((item) => `<div class="table-row"><strong>${esc(item.item)}</strong><b>${esc(item.period)}</b><span>${esc(item.basis)}</span></div>`).join('')}</div><div class="pdf-panel compact"><span>AT HANDOVER</span><h3>Final inspection, care guidance and a written warranty record.</h3><p>The client receives the final scope record and applicable warranty schedule. Concerns are reported with the project reference, photos and reasonable access for assessment.</p></div><div class="pdf-strip"><p>Not covered: misuse, damage, normal wear, unauthorised third-party alterations, failure to follow care instructions, or matters outside the written construction scope.</p></div>`;
+
+    const paymentRows = [
+      ['Already paid', 'Project initiation deposit', formatLkr(proposal.initiation_credit_lkr)],
+      ['01 / Commencement', '50% allocation less deposit already paid', formatLkr(payment.commencementDue)],
+      ['02 / Waterproofing', '20% before the flood test begins', formatLkr(payment.waterproofing)],
+      ['03 / Tiling', '10% after tiling and grouting', formatLkr(payment.tiling)],
+      ['04 / Fixtures', '10% after fixtures, mirror and accessories', formatLkr(payment.fixtures)],
+      ['05 / Final', '10% when ready for handover', formatLkr(payment.final)],
+    ];
+    const paymentBody = `<p class="pdf-lead">The initiation deposit is part of the project payment when LUXEhome constructs the bathroom. It is not added on top of the agreed contract value.</p><div class="investment"><b>FINAL CONSTRUCTION VALUE</b><strong>${formatLkr(proposal.contract_value_lkr)}</strong><span>One bathroom &nbsp;|&nbsp; Approved written scope</span></div><div class="pdf-table payment-table"><div class="table-head"><b>MILESTONE</b><b>PAYMENT BASIS</b><b>AMOUNT DUE</b></div>${paymentRows.map((row) => `<div class="table-row"><strong>${esc(row[0])}</strong><span>${esc(row[1])}</span><b>${esc(row[2])}</b></div>`).join('')}</div><div class="pdf-strip sage"><b>HOW THE CREDIT WORKS</b><p>The full 50% commencement allocation is ${formatLkr(payment.commencementAllocation)}. Because ${formatLkr(proposal.initiation_credit_lkr)} has already been paid, the additional amount due at construction appointment is ${formatLkr(payment.commencementDue)}. Total further payments after the deposit equal ${formatLkr(payment.furtherPayments)}.</p></div>`;
+
+    const terms = [
+      ['30-day validity', 'This proposal is valid for 30 calendar days from the issue date. Price, availability and programme may require reconfirmation after expiry.'],
+      ['Commencement', 'On-site work starts within seven working days after signed acceptance, cleared commencement payment, approved selections, site access and the agreed date.'],
+      ['Approved scope', 'Only the written scope, materials, fixtures and exclusions in the accepted proposal form the construction appointment.'],
+      ['Variations', 'Any additional or changed work requires written approval and may change the price and programme before that work begins.'],
+      ['Stage payments', 'Milestone payments are due when the stated stage is reached. Overdue payments may pause work and move subsequent dates.'],
+      ['Issued revisions', 'An issued proposal is locked. Corrections create a numbered revision; an accepted proposal is not silently overwritten.'],
+    ];
+    const acceptanceBody = `<p class="pdf-lead">This proposal is valid through ${formatDate(proposal.valid_until)}. Acceptance confirms the approved scope, final value and payment milestones.</p><div class="pdf-card-grid terms-grid">${terms.map((item, index) => `<div class="pdf-card"><span>${String(index + 1).padStart(2, '0')}</span><h3>${esc(item[0])}</h3><p>${esc(item[1])}</p></div>`).join('')}</div><div class="acceptance"><b>CLIENT ACCEPTANCE</b><div><span>Client name and signature</span><span>Acceptance date</span></div></div>`;
+
+    pagesRoot.innerHTML = `<div class="pdf-sheet"><article class="pdf-page cover-page">${cover}</article></div>`
+      + pdfPage(2, '01 / Project summary', 'The complete picture, at a glance.', summary)
+      + pdfPage(3, '02 / Approved design', `${proposal.design_name || 'Selected design'}, adapted to the measured room.`, gallery, 'gallery-page')
+      + pdfPage(4, '03 / Construction scope', 'One accountable team, from strip-out to handover.', scopeBody)
+      + pdfPage(5, '04 / Materials and finishes', 'Specified openly. Approved before purchase.', materialsBody)
+      + pdfPage(6, '05 / Indicative programme', 'Six weeks, sequenced around quality checks.', timelineBody)
+      + pdfPage(7, '06 / Quality control', 'Critical work is checked before it is covered.', qualityBody)
+      + pdfPage(8, '07 / Warranty and aftercare', 'Responsibilities recorded at handover.', warrantyBody)
+      + pdfPage(9, '08 / Final quotation', 'One contract value. Five visible milestones.', paymentBody)
+      + pdfPage(10, '09 / Acceptance', 'Thirty days to decide with the complete picture.', acceptanceBody);
+    previewTitle.textContent = `${proposal.proposal_number || 'Draft proposal'} / R${proposal.revision}`;
+  }
+
+  function openPreview() {
+    const proposal = current?.status === 'draft' ? readForm() : current;
+    if (!proposal) return;
+    current = proposal;
+    renderPdfPages(proposal);
+    preview.hidden = false;
+    document.body.classList.add('preview-open');
+    preview.scrollTo({ top: 0 });
+  }
+
+  function closePreview() {
+    preview.hidden = true;
+    document.body.classList.remove('preview-open');
+  }
+
+  async function imageToDataUrl(source: string) {
+    if (source.startsWith('data:image/')) return source;
+    const response = await fetch(source, { mode: 'cors' });
+    if (!response.ok) throw new Error(`Could not load design image (${response.status}).`);
+    const blob = await response.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error('Could not prepare a design image for the PDF.'));
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function downloadPdf() {
+    if (downloadBusy) return;
+    const proposal = current?.status === 'draft' ? readForm() : current;
+    if (!proposal) return;
+    const errors = validateForIssue(proposal);
+    if (errors.length) {
+      notify(`Complete ${errors.join(', ')} before downloading the final PDF.`, true);
+      return;
+    }
+    downloadBusy = true;
+    const button = document.getElementById('preview-download') as HTMLButtonElement | null;
+    const originalText = button?.textContent || '';
+    try {
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Preparing images...';
+      }
+      const localImages = await Promise.all(proposal.selected_image_urls.map(imageToDataUrl));
+      const captureProposal = normaliseProposal({ ...proposal, selected_image_urls: localImages });
+      renderPdfPages(captureProposal);
+      preview.hidden = false;
+      preview.classList.add('capturing');
+      await document.fonts.ready;
+      await Promise.all(Array.from(pagesRoot.querySelectorAll('img')).map(async (image) => {
+        if (!image.complete) await image.decode();
+        if (!image.naturalWidth) throw new Error('A selected design image could not be rendered.');
+      }));
+
+      const pages = Array.from(pagesRoot.querySelectorAll<HTMLElement>('.pdf-page'));
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+      for (let index = 0; index < pages.length; index += 1) {
+        if (button) button.textContent = `Rendering page ${index + 1} of ${pages.length}...`;
+        const canvas = await html2canvas(pages[index], {
+          backgroundColor: '#F7F3EB',
+          scale: 1.65,
+          useCORS: true,
+          logging: false,
+          width: 794,
+          height: 1123,
+          windowWidth: 794,
+          windowHeight: 1123,
+        });
+        if (index > 0) pdf.addPage('a4', 'portrait');
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+        canvas.width = 1;
+        canvas.height = 1;
+      }
+      const fileName = `${proposal.proposal_number || 'LUXEhome-Proposal'}-R${proposal.revision}.pdf`;
+      pdf.save(fileName);
+      notify('Proposal PDF downloaded.');
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'Could not create the PDF.', true);
+    } finally {
+      preview.classList.remove('capturing');
+      renderPdfPages(proposal);
+      if (button) {
+        button.disabled = false;
+        button.textContent = originalText || 'Download PDF';
+      }
+      downloadBusy = false;
+    }
+  }
+
+  document.getElementById('preview-close')?.addEventListener('click', closePreview);
+  document.getElementById('preview-download')?.addEventListener('click', downloadPdf);
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !preview.hidden) closePreview();
+  });
+
+  loadData();
+</script>
+
+<style>
+  .proposal-app{min-height:400px}.proposal-loading,.module-error,.empty-state{background:#fff;border:1px solid #2b322a18;border-radius:12px;padding:36px;text-align:center;color:#667064}.module-error strong,.empty-state strong{display:block;color:#2b322a;font:500 28px 'Cormorant Garamond',serif}.proposal-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:22px}.proposal-list-head h2,.editor-title h2{font:500 clamp(34px,6vw,52px)/1 'Cormorant Garamond',serif;margin:5px 0 8px}.proposal-list-head p,.editor-title p{margin:0;color:#667064;max-width:680px}.mini-eyebrow{text-transform:uppercase;letter-spacing:.15em!important;font-size:10px;color:#5c6b56!important}.primary-action,.secondary-action,.text-button,.proposal-filters button,.mobile-save-bar button,.preview-actions button{border:0;border-radius:7px;padding:11px 15px;font:600 13px Jost,sans-serif;cursor:pointer}.primary-action,.mobile-save-bar button,.preview-actions button{background:#5c6b56;color:#fff}.secondary-action{background:#fff;color:#2b322a;border:1px solid #2b322a25}.text-button{padding:0;background:none;color:#5c6b56}.proposal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.proposal-stats>div{background:#dfe5db;border-radius:10px;padding:18px}.proposal-stats strong{display:block;font:500 30px 'Cormorant Garamond',serif}.proposal-stats span{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#5c6b56}.proposal-filters{display:flex;gap:5px;overflow:auto;margin:0 0 16px;padding-bottom:2px}.proposal-filters button{background:#fff;color:#667064;white-space:nowrap;border:1px solid #2b322a15}.proposal-filters button.active{background:#253029;color:#fff}.proposal-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.proposal-card{width:100%;text-align:left;background:#fff;border:1px solid #2b322a16;border-radius:11px;padding:20px;color:#2b322a;cursor:pointer}.proposal-card:hover{border-color:#5c6b56}.proposal-card-top,.proposal-card-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px}.proposal-card-top small,.proposal-card-bottom{color:#667064;font-size:11px}.proposal-card>strong{display:block;font:500 27px 'Cormorant Garamond',serif;margin-top:16px}.proposal-card>p{color:#667064;margin:4px 0 18px}.proposal-card-bottom span:first-child{font-weight:600;color:#2b322a}.status{display:inline-flex;padding:5px 9px;border-radius:99px;font-size:9px;text-transform:uppercase;letter-spacing:.1em;background:#ebe7dd;color:#665}.status-approved{background:#e4ce9c;color:#51400e}.status-sent{background:#dce9ef;color:#24566d}.status-accepted{background:#dcebd9;color:#255c2f}.status-expired,.status-declined{background:#eee0dc;color:#7c382a}.editor-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:22px;margin-bottom:20px}.editor-title>div{display:flex;gap:10px;align-items:center}.editor-title small{color:#667064}.editor-actions{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end}.editor-progress{position:sticky;top:0;z-index:8;display:grid;grid-template-columns:repeat(6,1fr);gap:5px;background:#f7f3ebee;backdrop-filter:blur(8px);padding:8px 0 12px;margin-bottom:8px}.editor-progress a{display:flex;gap:7px;align-items:center;padding:9px;border-radius:7px;background:#fff;color:#2b322a;text-decoration:none;font-size:11px}.editor-progress span{color:#c9a24b;font-weight:600}.proposal-form{display:grid;gap:15px}.proposal-form fieldset{display:contents;border:0;padding:0;margin:0}.form-section{scroll-margin-top:90px;background:#fff;border:1px solid #2b322a16;border-radius:12px;padding:clamp(18px,4vw,30px)}.section-heading{display:flex;gap:14px;align-items:flex-start;margin-bottom:24px}.section-heading>span{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:#c9a24b;color:#fff;font-size:11px;font-weight:600}.section-heading h3{font:500 clamp(27px,4vw,38px)/1 'Cormorant Garamond',serif;margin:0 0 6px}.section-heading p{margin:0;color:#667064}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid label,.standalone-label,.editable-row label{display:grid;gap:6px;font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#5c6b56;font-weight:600}.form-grid .wide{grid-column:1/-1}.proposal-form input,.proposal-form select,.proposal-form textarea{width:100%;border:1px solid #2b322a27;border-radius:7px;background:#fbf9f4;color:#2b322a;padding:11px 12px;font:14px/1.45 Jost,sans-serif;text-transform:none;letter-spacing:0}.proposal-form textarea{min-height:96px;resize:vertical}.proposal-form input:focus,.proposal-form select:focus,.proposal-form textarea:focus{outline:2px solid #c9a24b55;border-color:#c9a24b}.proposal-form [disabled]{opacity:.75}.media-count{display:flex;align-items:baseline;gap:7px;margin:22px 0 12px}.media-count strong{font:500 30px 'Cormorant Garamond',serif;color:#5c6b56}.media-count span{color:#667064}.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.media-choice{position:relative;background:#f7f3eb;border:2px solid transparent;border-radius:9px;overflow:hidden;cursor:pointer}.media-choice:has(input:checked){border-color:#c9a24b}.media-choice input{position:absolute;top:9px;right:9px;z-index:2;width:20px;height:20px;accent-color:#5c6b56}.media-choice img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}.media-choice span{display:block;padding:9px 11px;color:#2b322a;font-size:11px;text-transform:capitalize}.media-empty{grid-column:1/-1;background:#f7f3eb;border-radius:8px;padding:22px;color:#667064}.editable-list{display:grid;gap:10px}.editable-row{border:1px solid #2b322a17;border-radius:9px;background:#fbf9f4;padding:14px}.editable-row-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.editable-row-fields label:last-child:nth-child(2),.editable-row-fields label:nth-child(3){grid-column:1/-1}.editable-row textarea{min-height:70px}.remove-row,.add-row{border:0;border-radius:6px;cursor:pointer;font:600 11px Jost,sans-serif}.remove-row{margin-top:8px;background:none;color:#8b4c3b;padding:4px 0}.add-row{justify-self:start;background:#dfe5db;color:#2b322a;padding:9px 12px}.add-row:disabled{opacity:.45}.editable-list>small{color:#8a9187}.standalone-label{margin-top:20px}.form-section h4{font:500 25px 'Cormorant Garamond',serif;margin:28px 0 12px}.payment-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}.payment-summary>div{display:flex;justify-content:space-between;gap:15px;background:#f7f3eb;border-radius:7px;padding:12px}.payment-summary span{color:#667064}.payment-summary .credit{background:#e4ce9c55}.mobile-save-bar{display:none}
+
+  .proposal-preview{position:fixed;inset:0;z-index:10000;background:#252b27;overflow:auto;padding:84px 20px 40px}.preview-toolbar{position:fixed;left:0;right:0;top:0;z-index:2;height:68px;padding:10px clamp(16px,4vw,38px);background:#f7f3eb;display:flex;justify-content:space-between;align-items:center;gap:16px;box-shadow:0 4px 20px #0003}.preview-toolbar span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:#5c6b56}.preview-toolbar strong{font:500 20px 'Cormorant Garamond',serif}.preview-actions{display:flex;gap:7px}.preview-actions .secondary{background:#fff;color:#2b322a;border:1px solid #2b322a25}.proposal-pdf-pages{display:grid;gap:24px;justify-content:center}.pdf-sheet{--preview-scale:.72;width:calc(794px * var(--preview-scale));height:calc(1123px * var(--preview-scale));position:relative;box-shadow:0 15px 45px #0007}.pdf-page{position:absolute;left:0;top:0;width:794px;height:1123px;transform:scale(var(--preview-scale));transform-origin:top left;background:#f7f3eb;color:#2b322a;font-family:Jost,Arial,sans-serif;overflow:hidden;padding:54px}.proposal-preview.capturing{display:block!important;position:fixed;left:-20000px;right:auto;width:900px;overflow:visible;background:#fff;padding:0}.proposal-preview.capturing .preview-toolbar{display:none}.proposal-preview.capturing .proposal-pdf-pages{display:block}.proposal-preview.capturing .pdf-sheet{--preview-scale:1;width:794px;height:1123px;margin:0}.proposal-preview.capturing .pdf-page{transform:none}.pdf-header{height:43px;border-bottom:1px solid #d7d0c3;display:flex;justify-content:space-between;align-items:flex-start}.pdf-header>small{font-size:9px;color:#586057}.pdf-wordmark{font-size:18px}.pdf-wordmark b{letter-spacing:.03em}.pdf-wordmark i{font:italic 21px 'Cormorant Garamond',Georgia,serif}.pdf-wordmark.light{color:#fff}.pdf-heading{margin-top:30px}.pdf-heading span{display:block;color:#5c6b56;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}.pdf-heading h2{font:500 34px/1.1 'Cormorant Garamond',Georgia,serif;margin:14px 0 0}.pdf-page>main{margin-top:20px}.pdf-page footer{position:absolute;left:54px;right:54px;bottom:28px;display:flex;justify-content:space-between;color:#586057;font-size:8px}.pdf-lead{color:#586057;font-size:13px;line-height:1.45;margin:0 0 25px}.pdf-image-empty{display:grid;place-items:center;background:#dfe5db;color:#5c6b56;font-size:11px;text-align:center;padding:15px}.cover-page{padding:0}.pdf-cover-image{height:665px;position:relative;background:#5c6b56}.cover-image{width:100%;height:100%;object-fit:cover}.cover-overlay{position:absolute;inset:0;background:linear-gradient(#25302935,#25302976)}.cover-brand{position:absolute;top:42px;left:54px;right:54px;display:flex;justify-content:space-between;align-items:center;color:#fff}.cover-brand>span{background:#c9a24b;border-radius:99px;padding:8px 13px;font-size:9px;font-weight:600;letter-spacing:.07em}.cover-title{position:absolute;left:54px;right:36px;bottom:50px;color:#fff}.cover-title small{font-size:10px;font-weight:600}.cover-title h1{font:500 48px/1 'Cormorant Garamond',Georgia,serif;margin:13px 0 0}.cover-details{padding:54px}.cover-details>span{font-size:10px;color:#5c6b56;font-weight:600;letter-spacing:.06em}.cover-details h2{font:500 31px 'Cormorant Garamond',Georgia,serif;margin:9px 0 3px}.cover-details p{color:#586057;margin:0}.cover-rule{height:2px;background:#c9a24b;margin:36px 0 30px}.cover-meta{display:grid;grid-template-columns:1.35fr 1fr 1.2fr .9fr;gap:20px}.cover-meta div{display:grid;gap:8px}.cover-meta b{font-size:8px;color:#5c6b56}.cover-meta span{font-size:10px}.summary-top{display:grid;grid-template-columns:1.1fr .9fr;gap:26px}.summary-data>div{display:grid;grid-template-columns:95px 1fr;border-bottom:1px solid #d7d0c3;padding:8px 0}.summary-data b{font-size:9px;color:#5c6b56;text-transform:uppercase}.summary-data span{font-size:11px}.summary-image{width:100%;height:218px;object-fit:cover;border-radius:9px}.summary-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:24px 0}.summary-stats div{background:#dfe5db;border-radius:8px;padding:18px;text-align:center}.summary-stats strong{display:block;font:500 19px 'Cormorant Garamond',Georgia,serif}.summary-stats span{font-size:8px;color:#5c6b56;text-transform:uppercase}.pdf-panel{background:#fbf9f4;border:1px solid #d7d0c3;border-radius:9px;padding:24px}.pdf-panel>span,.pdf-panel.compact>span{font-size:9px;color:#5c6b56;font-weight:600}.pdf-panel h3{font:500 23px 'Cormorant Garamond',Georgia,serif;margin:10px 0}.pdf-panel p{font-size:11px;line-height:1.45;color:#586057}.sub-panel{background:#e4ce9c88;border-radius:7px;margin-top:18px;padding:14px}.sub-panel b{font-size:8px}.sub-panel p{margin:6px 0 0;color:#2b322a}.gallery-feature{display:grid;grid-template-columns:1fr 172px;gap:18px;height:315px}.gallery-main{width:100%;height:315px;object-fit:cover;border-radius:9px}.design-link{background:#5c6b56;color:#fff;border-radius:9px;padding:28px 20px;overflow:hidden}.design-link b{font-size:9px}.design-link h3{font:500 24px 'Cormorant Garamond',Georgia,serif;margin:18px 0 10px}.design-link p{font-size:10px;line-height:1.4;overflow-wrap:anywhere}.gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}.gallery-grid figure{height:196px;margin:0;position:relative;overflow:hidden;border-radius:8px}.gallery-grid img,.gallery-grid .pdf-image-empty{width:100%;height:100%;object-fit:cover}.gallery-grid figcaption{position:absolute;left:10px;bottom:10px;background:#253029c9;color:#fff;border-radius:99px;padding:6px 10px;font-size:8px}.pdf-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.pdf-card{height:165px;background:#fbf9f4;border:1px solid #d7d0c3;border-radius:8px;padding:18px}.pdf-card>span{font-size:9px;color:#c9a24b;font-weight:600}.pdf-card h3{font:500 19px 'Cormorant Garamond',Georgia,serif;margin:10px 0 8px}.pdf-card p{font-size:10px;line-height:1.45;color:#586057;margin:0}.pdf-strip{background:#efe8db;border-radius:8px;padding:16px 18px;margin-top:20px}.pdf-strip.sage{background:#dfe5db}.pdf-strip.gold{background:#e4ce9c}.pdf-strip b{font-size:9px}.pdf-strip p{font-size:10px;line-height:1.45;margin:6px 0 0}.pdf-table{border-radius:8px;overflow:hidden}.table-head,.table-row{display:grid;grid-template-columns:1.05fr 1.2fr 2.25fr;align-items:center;min-height:52px;padding:0 16px;gap:16px}.table-head{background:#5c6b56;color:#fff;min-height:42px;font-size:9px}.table-row{font-size:10px}.table-row:nth-child(odd){background:#fbf9f4}.table-row:nth-child(even){background:#efe8db}.table-row span{color:#586057}.materials-table+.pdf-strip{margin-top:35px}.timeline-list{margin-left:26px;border-left:3px solid #d7d0c3}.timeline-list>div{position:relative;min-height:103px;padding:0 0 14px 42px}.timeline-list i{position:absolute;left:-10px;top:4px;width:17px;height:17px;border-radius:50%;background:#8a9a84}.timeline-list i.gold{background:#c9a24b}.timeline-list span{font-size:9px;font-weight:600;color:#5c6b56;text-transform:uppercase}.timeline-list h3{font:500 20px 'Cormorant Garamond',Georgia,serif;margin:7px 0}.timeline-list p{font-size:10px;color:#586057;margin:0}.warranty-table .table-head,.warranty-table .table-row{grid-template-columns:1.35fr .75fr 1.9fr}.warranty-table .table-row{min-height:45px}.pdf-panel.compact{margin-top:22px;padding:18px}.pdf-panel.compact h3{font-size:20px}.investment{height:132px;border-radius:10px;background:#5c6b56;color:#fff;padding:26px 28px;position:relative;margin-bottom:22px}.investment>b{display:block;font-size:9px;color:#e4ce9c}.investment>strong{display:block;font:500 38px 'Cormorant Garamond',Georgia,serif;margin-top:18px}.investment>span{position:absolute;right:26px;bottom:36px;font-size:9px}.payment-table .table-head,.payment-table .table-row{grid-template-columns:1.2fr 2.1fr 1fr}.payment-table .table-row{min-height:54px}.terms-grid .pdf-card{height:167px}.acceptance{margin-top:22px;background:#5c6b56;color:#fff;border-radius:9px;padding:22px}.acceptance>b{font-size:9px;color:#e4ce9c}.acceptance>div{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:42px}.acceptance span{border-top:1px solid #ffffff88;padding-top:9px;font-size:9px}
+
+  @media(max-width:900px){.editor-head{grid-template-columns:1fr}.editor-actions{justify-content:flex-start}.proposal-list{grid-template-columns:1fr}.media-grid{grid-template-columns:1fr 1fr}.pdf-sheet{--preview-scale:.62}}
+  @media(max-width:760px){.proposal-list-head{display:grid}.proposal-list-head .primary-action{width:100%}.proposal-stats{grid-template-columns:1fr 1fr}.editor-progress{top:64px;grid-template-columns:repeat(3,1fr)}.editor-progress a{justify-content:center}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.editable-row-fields{grid-template-columns:1fr}.editable-row-fields label:last-child:nth-child(2),.editable-row-fields label:nth-child(3){grid-column:auto}.payment-summary{grid-template-columns:1fr}.editor-actions{display:none}.mobile-save-bar{position:sticky;bottom:0;z-index:9;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#f7f3ebf2;backdrop-filter:blur(8px);padding:10px 0 calc(10px + env(safe-area-inset-bottom))}.mobile-save-bar button:only-child{grid-column:1/-1}.preview-toolbar{height:auto;min-height:68px;align-items:flex-start}.preview-actions button{padding:9px 10px}.proposal-preview{padding-inline:8px}.pdf-sheet{--preview-scale:.405}.media-grid{grid-template-columns:1fr}.proposal-card-bottom{display:grid}.proposal-card-bottom span:last-child{font-size:10px}}
+  @media(max-width:390px){.pdf-sheet{--preview-scale:.365}.preview-toolbar strong{font-size:17px}.preview-actions{display:grid}.proposal-stats>div{padding:14px}}
+  :global(body.preview-open){overflow:hidden}
+  .proposal-toast{position:fixed;right:22px;bottom:22px;z-index:11000;max-width:min(390px,calc(100vw - 32px));background:#253029;color:#fff;border-radius:8px;padding:13px 16px;box-shadow:0 15px 40px #0003;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s}.proposal-toast.show{opacity:1;transform:none}.proposal-toast.error{background:#7b372b}
+</style>
