@@ -28,7 +28,13 @@ const {
 const shareImage = absoluteUrl(ogImage) ?? 'https://luxehome.lk/og-bathroom.jpg';
 const shareImageAlt = ogImageAlt ?? title;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+// Cloudflare can still serve slash variants of prerendered pages even when
+// Astro's route policy is `never`. Canonical metadata must therefore normalize
+// the pathname independently so both variants point at the same preferred URL.
+const canonicalPath = Astro.url.pathname === '/'
+  ? '/'
+  : Astro.url.pathname.replace(/\/+$/, '');
+const canonicalURL = new URL(canonicalPath, Astro.site);
 
 /* CMS-driven pages render on demand so published content is live immediately.
    Cloudflare caches each response at the edge for a minute and serves the
