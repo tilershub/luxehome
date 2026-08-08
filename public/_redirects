@@ -55,7 +55,7 @@
 /services/glass-work/ /designs 301
 /services/waterproofing /designs 301
 /services/waterproofing/ /designs 301
-/services/* /designs 301
+/services/* /bathroom-designs 301
 
 # Retired estimator page
 /estimator /pricing-guide 301
