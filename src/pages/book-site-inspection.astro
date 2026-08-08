@@ -2,12 +2,27 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import InspectionBookingForm from '../components/luxe/InspectionBookingForm.astro';
+import { PROJECT_INITIATION_FAQ } from '../lib/luxe-pages';
+
+const faqSchema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: PROJECT_INITIATION_FAQ.map((item) => ({
+    '@type': 'Question',
+    name: item.title,
+    acceptedAnswer: { '@type': 'Answer', text: item.copy },
+  })),
+});
 ---
 
 <LuxeLayout
   title="Start Your Bathroom Project — LKR 50,000 | LUXEhome Sri Lanka"
   description="Start one LUXEhome bathroom for LKR 50,000: site consultation, detailed design, five images, 3D video, materials and a complete construction proposal within seven working days after the visit. Fully credited if LUXEhome builds it."
 >
+  <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={faqSchema}></script>
+  </Fragment>
+
   <section class="inspection-hero">
     <div class="inspection-hero-copy lxr">
       <p class="lx-eyebrow">The practical first step</p>
@@ -97,13 +112,30 @@ import InspectionBookingForm from '../components/luxe/InspectionBookingForm.astr
       </article>
     </div>
   </section>
+
+  <section class="inspection-faq" aria-labelledby="inspection-faq-title">
+    <div class="inspection-section-heading lxr">
+      <p class="lx-eyebrow">Questions before you start</p>
+      <h2 id="inspection-faq-title">Clear answers, before you pay.</h2>
+      <p>These are the same project-initiation terms our team will explain on WhatsApp or during your suitability call.</p>
+    </div>
+    <div class="inspection-faq-grid">
+      {PROJECT_INITIATION_FAQ.map((item, index) => (
+        <details class="lxr" open={index === 0}>
+          <summary>{item.title}</summary>
+          <p>{item.copy}</p>
+        </details>
+      ))}
+    </div>
+  </section>
 </LuxeLayout>
 
 <style>
   .inspection-hero,
   .inspection-process,
   .inspection-booking,
-  .inspection-next { width: min(1120px, calc(100% - 34px)); margin-inline: auto; }
+  .inspection-next,
+  .inspection-faq { width: min(1120px, calc(100% - 34px)); margin-inline: auto; }
 
   .inspection-hero {
     display: grid;
@@ -161,6 +193,16 @@ import InspectionBookingForm from '../components/luxe/InspectionBookingForm.astr
   .inspection-next-grid p { color: color-mix(in srgb, var(--ink) 84%, transparent); font-size: .96rem; }
   .inspection-next-grid small { display: block; margin-top: .8rem; color: color-mix(in srgb, var(--ink) 70%, transparent); font-size: .82rem; }
 
+  .inspection-faq { padding: clamp(2.8rem, 6vw, 5rem) 0 5rem; border-top: 1px solid rgba(43,50,42,.12); }
+  .inspection-faq .inspection-section-heading > p:last-child { max-width: 66ch; margin-top: .65rem; color: color-mix(in srgb, var(--ink) 76%, transparent); }
+  .inspection-faq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; align-items: start; }
+  .inspection-faq details { overflow: hidden; border: 1px solid var(--cream-deep); border-radius: 10px; background: #fff; }
+  .inspection-faq summary { position: relative; padding: 1.15rem 3rem 1.15rem 1.2rem; cursor: pointer; list-style: none; color: var(--ink); font: 600 1.03rem/1.4 var(--lx-serif); }
+  .inspection-faq summary::-webkit-details-marker { display: none; }
+  .inspection-faq summary::after { content: '+'; position: absolute; right: 1.2rem; top: 50%; translate: 0 -50%; color: var(--gold); font: 500 1.4rem/1 var(--lx-sans); }
+  .inspection-faq details[open] summary::after { content: '−'; }
+  .inspection-faq details p { margin: 0; padding: 0 1.2rem 1.2rem; color: color-mix(in srgb, var(--ink) 82%, transparent); font-size: .94rem; line-height: 1.65; }
+
   @media (max-width: 880px) {
     .inspection-hero,
     .inspection-booking { grid-template-columns: 1fr; }
@@ -171,6 +213,7 @@ import InspectionBookingForm from '../components/luxe/InspectionBookingForm.astr
   @media (max-width: 600px) {
     .inspection-hero { padding-top: 2.8rem; }
     .inspection-steps,
-    .inspection-next-grid { grid-template-columns: 1fr; }
+    .inspection-next-grid,
+    .inspection-faq-grid { grid-template-columns: 1fr; }
   }
 </style>
