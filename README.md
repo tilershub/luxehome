@@ -104,7 +104,8 @@ files and deploys no worker at all — every server-rendered route and every
 the failure easy to misread.
 
 Secrets are runtime bindings set on the Worker, not build variables and never
-committed to the repo:
+committed to the repo. `keep_vars: true` in `wrangler.jsonc` prevents a later
+Git-triggered deployment from deleting dashboard-managed secrets:
 
 ```bash
 npx wrangler secret put META_ACCESS_TOKEN   # Meta Conversions API
