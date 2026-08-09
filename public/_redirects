@@ -57,6 +57,10 @@
 /services/waterproofing/ /designs 301
 /services/* /designs 301
 
+# Retired privacy URL
+/privacy /privacy-policy 301
+/privacy/ /privacy-policy 301
+
 # Retired estimator page
 /estimator /pricing-guide 301
 /estimator/ /pricing-guide 301
