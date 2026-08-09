@@ -45,6 +45,11 @@ const bathroomDesignNames = [...new Set(
     </div>
 
     <label>
+      <span>Email address <small>(optional)</small></span>
+      <input type="email" name="email" placeholder="e.g. nuwan@example.com" autocomplete="email" />
+    </label>
+
+    <label>
       <span>Property location <b aria-hidden="true">*</b></span>
       <input type="text" name="location" placeholder="e.g. Nugegoda, Kandy, Galle" autocomplete="address-level2" required />
     </label>
@@ -128,6 +133,7 @@ const bathroomDesignNames = [...new Set(
       <span hidden>Preparing your request…</span>
     </button>
     <p class="ibf-footnote">Have several bathrooms? Start with one and review its complete proposal before deciding on the others.</p>
+    <p class="ibf-privacy">By submitting, you ask LUXEhome to contact you about this project by WhatsApp and, if provided, email. See our <a href="/privacy-policy">Privacy Policy</a>.</p>
   </form>
 </div>
 
@@ -210,6 +216,7 @@ const bathroomDesignNames = [...new Set(
 
       const name = formValue(data, 'name');
       const phone = formValue(data, 'phone');
+      const email = formValue(data, 'email');
       const location = formValue(data, 'location');
       const projectType = formValue(data, 'project_type');
       const preferredDesign = formValue(data, 'preferred_design');
@@ -232,6 +239,7 @@ const bathroomDesignNames = [...new Set(
         construction_credit: '100% credited to the related LUXEhome construction balance',
         payment_status: 'Awaiting appointment confirmation',
       };
+      if (email) details.email = email;
       if (preferredDesign) details.preferred_design = preferredDesign;
       if (approximateSize) details.approximate_size = approximateSize;
       if (preferredDate) details.preferred_date = preferredDate;
@@ -265,6 +273,7 @@ const bathroomDesignNames = [...new Set(
         supabase.from('lx_site_inspections').insert({
           name,
           phone,
+          email: email || null,
           location,
           space_slug: 'bathrooms',
           preferred_date: preferredDate || null,
@@ -303,6 +312,7 @@ const bathroomDesignNames = [...new Set(
         '',
         `Name: ${name}`,
         `Phone: ${phone}`,
+        email ? `Email: ${email}` : '',
         `Location: ${location}`,
         `Project: ${projectType}`,
         `Preferred design: ${preferredDesign || 'Please recommend one'}`,
@@ -354,6 +364,7 @@ const bathroomDesignNames = [...new Set(
   .ibf-wrap label > span small { color: color-mix(in srgb, var(--ink) 48%, transparent); font-weight: 400; }
   .ibf-wrap input[type="text"],
   .ibf-wrap input[type="tel"],
+  .ibf-wrap input[type="email"],
   .ibf-wrap input[type="date"],
   .ibf-wrap select,
   .ibf-wrap textarea {
@@ -427,6 +438,8 @@ const bathroomDesignNames = [...new Set(
   }
   .ibf-submit:disabled { cursor: wait; opacity: .72; }
   .ibf-footnote { text-align: center; color: color-mix(in srgb, var(--ink) 70%, transparent); font-size: .82rem; }
+  .ibf-privacy { margin-top: -.35rem; text-align: center; color: color-mix(in srgb, var(--ink) 58%, transparent); font-size: .76rem; }
+  .ibf-privacy a { color: var(--sage-deep); text-underline-offset: 2px; }
   .ibf-honeypot { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; }
   .ibf-success { min-height: 420px; display: grid; place-content: center; justify-items: center; text-align: center; }
   .ibf-success[hidden] { display: none; }
