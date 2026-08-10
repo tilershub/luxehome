@@ -73,10 +73,15 @@ export const CATALOGUE_DESIGNS: CatalogueDesign[] = [
     'gems',
     'Moonstone',
     'A luminous retreat made for unhurried rituals.',
-    null,
+    2_787_000,
     9,
-    null,
+    3_087_000,
     '/images/designs/pichcha/pichcha-cover-v2.webp',
+    [
+      { label: 'Minimum fit', sqm: 9, newPrice: 2_787_000, renovationPrice: 3_087_000 },
+      { label: 'Recommended fit', sqm: 10, newPrice: 3_007_000, renovationPrice: 3_307_000 },
+      { label: 'Spacious fit', sqm: 12, newPrice: 3_447_000, renovationPrice: 3_747_000 },
+    ],
   ),
 
   design('kitchens', 'standard', 'Rampe', 'Fresh, light and beautifully organised for everyday cooking.'),
