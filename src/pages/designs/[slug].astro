@@ -34,6 +34,7 @@ const collectionLabel = collectionShortLabel(design.collection);
 const priceLabel = design.starting_price_lkr > 0 ? formatLKRM(design.starting_price_lkr) : 'Starting price to be confirmed';
 const newPrice = design.new_starting_price_lkr || design.starting_price_lkr || null;
 const renoPrice = design.renovation_starting_price_lkr ?? null;
+const designSummary = (design.tagline ?? 'a fully documented LUXEhome design').replace(/[.!?]+$/, '');
 
 const inspectionHref = `/book-site-inspection?design=${encodeURIComponent(design.slug)}`;
 
@@ -194,7 +195,7 @@ const productSchema = JSON.stringify({
 
 <LuxeLayout
   title={`${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design | ${priceLabel} | LUXEhome`}
-  description={`${design.name}: ${design.tagline ?? 'a fully documented LUXEhome design'}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then start the LKR 50,000 project initiation for your bathroom.`}
+  description={`${design.name}: ${designSummary}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then start the LKR 50,000 project initiation for your bathroom.`}
   ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
   ogImageAlt={`${design.name} — ${collectionLabel} bathroom design by LUXEhome`}
 >

@@ -9,7 +9,7 @@ import {
   collectionShortLabel,
   normalizeBathroomDesignIdentity,
 } from '../lib/bathroom-taxonomy';
-import { cloudinary, formatLKRM, formatArea, WARRANTY_SCHEDULE, PROJECT_INITIATION } from '../lib/luxe-config';
+import { cloudinary, formatLKRM, formatArea, lkrM, WARRANTY_SCHEDULE, PROJECT_INITIATION } from '../lib/luxe-config';
 
 interface HomeDesign {
   slug: string;
@@ -319,7 +319,7 @@ const projects = (await getProjects())
           <small>New construction</small>
           <h3>Begin with a resolved room.</h3>
           <p>Plan layout, services, finishes and fixtures before construction starts.</p>
-          {newFrom && <strong>Designs from {formatLKRM(newFrom)}</strong>}
+          {newFrom && <strong>Designs from {lkrM(newFrom)}</strong>}
         </div>
         <b aria-hidden="true">↗</b>
       </a>
@@ -329,7 +329,7 @@ const projects = (await getProjects())
           <small>Existing bathroom</small>
           <h3>Replace the room, not the problems.</h3>
           <p>Assess concealed risks, rebuild the wet areas and renew the full experience.</p>
-          {renovationFrom && <strong>Renovations from {formatLKRM(renovationFrom)}</strong>}
+          {renovationFrom && <strong>Renovations from {lkrM(renovationFrom)}</strong>}
         </div>
         <b aria-hidden="true">↗</b>
       </a>
