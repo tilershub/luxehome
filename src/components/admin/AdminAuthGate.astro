@@ -3,8 +3,8 @@
     <div class="wordmark"><strong>LUXE</strong><em>home</em><small>CMS</small></div>
     <p class="eyebrow">Protected administration</p>
     <h1>Sign in by email link.</h1>
-    <p>We’ll send a secure, one-time sign-in link to the authorised administrator.</p>
-    <label>Email<input id="admin-magic-email" type="email" value="wildplus4@gmail.com" readonly /></label>
+    <p>We’ll send a secure, one-time sign-in link to an authorised administrator or editor.</p>
+    <label>Email<input id="admin-magic-email" type="email" autocomplete="email" placeholder="name@example.com" required /></label>
     <button type="submit">Email me a sign-in link</button>
     <p id="admin-magic-status" class="status"></p>
     <a href="/">← Return to the website</a>
@@ -13,16 +13,19 @@
 <script>
   import { createClient } from '@supabase/supabase-js';
   import { LUXE_SUPABASE_KEY as key, LUXE_SUPABASE_URL as url } from '../../lib/luxe-supabase';
-  const gate=document.getElementById('admin-auth-gate'),form=document.getElementById('admin-magic-form'),status=document.getElementById('admin-magic-status');
+  const gate=document.getElementById('admin-auth-gate'),form=document.getElementById('admin-magic-form'),emailInput=document.getElementById('admin-magic-email'),status=document.getElementById('admin-magic-status');
   if(!url||!key){status.textContent='Supabase is not configured.'}
   else{
     const sb=createClient(url,key);
     const {data:{session}}=await sb.auth.getSession();
     if(session) gate.remove();
     else form.addEventListener('submit',async(event)=>{
-      event.preventDefault();const button=form.querySelector('button');button.disabled=true;status.textContent='Sending secure link…';
-      const {error}=await sb.auth.signInWithOtp({email:'wildplus4@gmail.com',options:{emailRedirectTo:location.origin+'/admin/',shouldCreateUser:false}});
-      status.textContent=error?error.message:'Check wildplus4@gmail.com and open the sign-in link on this device.';
+      event.preventDefault();const email=emailInput.value.trim().toLowerCase();const button=form.querySelector('button');
+      if(!email){status.textContent='Enter your authorised email address.';return}
+      button.disabled=true;emailInput.disabled=true;status.textContent='Sending secure link…';
+      const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+'/admin/',shouldCreateUser:true}});
+      status.textContent=error?error.message:`Check ${email} and open the sign-in link on this device.`;
+      emailInput.disabled=false;
       button.disabled=false;
     });
     window.addEventListener('admin-sign-out',async()=>{await sb.auth.signOut();location.assign('/admin')});
