@@ -217,13 +217,18 @@
       main.innerHTML = `
         <div class="login-box">
           <h2>Sign in to LUXEhome admin</h2>
-          <div class="fld"><label>Email</label><input id="li-email" type="email" value="wildplus4@gmail.com" readonly /></div>
+          <div class="fld"><label>Email</label><input id="li-email" type="email" autocomplete="email" placeholder="name@example.com" required /></div>
           <button class="btn-save" id="li-btn" style="width:100%">Email me a sign-in link</button>
           <p id="li-status"></p>
         </div>`;
       document.getElementById('li-btn').addEventListener('click', async () => {
-        const { error } = await sb.auth.signInWithOtp({ email: 'wildplus4@gmail.com', options: { emailRedirectTo: location.origin + '/admin/luxehome', shouldCreateUser: true } });
-        document.getElementById('li-status').textContent = error ? error.message : 'Check your email and open the secure sign-in link.';
+        const email = document.getElementById('li-email').value.trim().toLowerCase();
+        if (!email) {
+          document.getElementById('li-status').textContent = 'Enter your authorised email address.';
+          return;
+        }
+        const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + '/admin/luxehome', shouldCreateUser: true } });
+        document.getElementById('li-status').textContent = error ? error.message : `Check ${email} and open the secure sign-in link.`;
       });
       return false;
     }
