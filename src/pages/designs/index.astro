@@ -14,6 +14,13 @@ const designs = storedDesigns
   .map(normalizeBathroomDesignIdentity)
   .sort((a, b) => a.sort_order - b.sort_order);
 const collections = BATHROOM_COLLECTIONS;
+const firstDesign = collections
+  .flatMap((collection) => designs.filter((design) => design.collection === collection.key))
+  .at(0);
+const cardSizes = '(max-width: 640px) calc(100vw - 34px), (max-width: 900px) calc(50vw - 26px), 542px';
+const cardImage = (url: string, width: number) => cloudinary(url, width, Math.round(width * .75));
+const cardSrcset = (url: string) =>
+  [480, 720, 900].map((width) => `${cardImage(url, width)} ${width}w`).join(', ');
 ---
 
 <LuxeLayout
@@ -22,17 +29,28 @@ const collections = BATHROOM_COLLECTIONS;
   ogImage={designs[0]?.cover_image_url ? cloudinary(designs[0].cover_image_url, 1200) : undefined}
   ogImageAlt="LUXEhome bathroom design collection"
 >
+  {firstDesign?.cover_image_url && (
+    <link
+      slot="head"
+      rel="preload"
+      as="image"
+      href={cardImage(firstDesign.cover_image_url, 720)}
+      imagesrcset={cardSrcset(firstDesign.cover_image_url)}
+      imagesizes={cardSizes}
+      fetchpriority="high"
+    />
+  )}
   <section class="dz-hero">
-    <p class="lx-eyebrow lxr">Published LUXEhome bathroom designs</p>
-    <h1 class="lxr">Choose a bathroom design,<br /><em>not a guess.</em></h1>
-    <p class="dz-intro lxr">
+    <p class="lx-eyebrow">Published LUXEhome bathroom designs</p>
+    <h1>Choose a bathroom design,<br /><em>not a guess.</em></h1>
+    <p class="dz-intro">
       Every published design is fully developed—renders, room-size guidance, new and renovation
       pricing, technical drawings, specified fixtures and warranties.
     </p>
   </section>
 
   <section class="dz-body">
-    <div class="dz-publishing-note lxr">
+    <div class="dz-publishing-note">
       <span>Our publishing standard</span>
       <p>We add designs one by one. A design appears here only when its complete decision file is ready.</p>
     </div>
@@ -51,10 +69,22 @@ const collections = BATHROOM_COLLECTIONS;
             <p class="lx-eyebrow">Level {collection.level}</p>
             <h2 class="dz-col-title lxr">{collection.label}</h2>
             <div class="dz-grid">
-              {group.map((design) => (
-                <a href={`/designs/${design.slug}`} class="dz-card lxr">
+              {group.map((design) => {
+                const isPriority = design.id === firstDesign?.id;
+                return (
+                <a href={`/designs/${design.slug}`} class="dz-card">
                   <div class="dz-card-img">
-                    <img src={cloudinary(design.cover_image_url, 800)} alt={`${design.name} bathroom design`} loading="lazy" width="800" height="600" />
+                    <img
+                      src={cardImage(design.cover_image_url, 720)}
+                      srcset={cardSrcset(design.cover_image_url)}
+                      sizes={cardSizes}
+                      alt={`${design.name} bathroom design`}
+                      loading={isPriority ? 'eager' : 'lazy'}
+                      fetchpriority={isPriority ? 'high' : 'auto'}
+                      decoding="async"
+                      width="720"
+                      height="540"
+                    />
                     <span class="dz-badge">{formatArea(design.min_sqm) ? `Minimum ${formatArea(design.min_sqm)} m²` : 'Custom fit'}</span>
                   </div>
                   <div class="dz-card-body">
@@ -72,7 +102,8 @@ const collections = BATHROOM_COLLECTIONS;
                     <strong>View complete design <span aria-hidden="true">→</span></strong>
                   </div>
                 </a>
-              ))}
+                );
+              })}
             </div>
           </section>
         );
@@ -106,7 +137,7 @@ const collections = BATHROOM_COLLECTIONS;
   }
   .dz-publishing-note span { color: var(--sage-deep); font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
   .dz-publishing-note p { color: color-mix(in srgb, var(--ink) 84%, transparent); font-size: .96rem; }
-  .dz-collection { padding-top: 2.6rem; }
+  .dz-collection { padding-top: 2.6rem; content-visibility: auto; contain-intrinsic-size: auto 720px; }
   .dz-col-title { margin-bottom: 1.1rem; padding-bottom: .55rem; border-bottom: 1px solid var(--cream-deep); color: var(--sage-deep); font-size: clamp(1.7rem, 4vw, 2.3rem); }
   .dz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
   .dz-card {
@@ -147,10 +178,10 @@ const collections = BATHROOM_COLLECTIONS;
     background: var(--sage-deep);
     color: var(--cream);
   }
-  .dz-cta .lx-eyebrow { color: var(--gold-soft); }
+  .dz-cta .lx-eyebrow { color: var(--cream); }
   .dz-cta h2 { margin-top: .3rem; font-size: clamp(2rem, 4.5vw, 3rem); }
-  .dz-cta div > p:last-child:not(.lx-eyebrow) { margin-top: .35rem; color: rgba(247,243,235,.88); font-size: .96rem; }
-  .dz-cta > a { display: inline-flex; align-items: center; min-height: 48px; flex: 0 0 auto; padding: .78rem 1.2rem; border-radius: 999px; background: var(--gold); color: #fff; font-size: .92rem; font-weight: 600; text-decoration: none; }
+  .dz-cta div > p:last-child:not(.lx-eyebrow) { margin-top: .35rem; color: var(--cream); font-size: .96rem; }
+  .dz-cta > a { display: inline-flex; align-items: center; min-height: 48px; flex: 0 0 auto; padding: .78rem 1.2rem; border-radius: 999px; background: var(--gold); color: var(--ink); font-size: .92rem; font-weight: 600; text-decoration: none; }
   @media (max-width: 640px) {
     .dz-publishing-note { grid-template-columns: 1fr; gap: .35rem; }
     .dz-cta { display: block; }
