@@ -48,13 +48,50 @@ export function formatArea(value: number | string | null | undefined): string | 
   return Number.isFinite(n) ? String(n) : String(value);
 }
 
-/** Cloudinary delivery helper: f_auto,q_auto + width on Cloudinary URLs,
-    pass-through for everything else. */
-export function cloudinary(url: string | null | undefined, width?: number): string {
+/** Responsive image delivery helper.
+
+    Cloudinary assets use its automatic format/quality transformation. CMS
+    uploads live in Supabase Storage; the object endpoint returns the original
+    upload (some older `.webp` files are actually 5 MB PNGs) with `no-cache`.
+    Supabase's render endpoint converts those originals to a correctly-sized,
+    long-cached WebP/AVIF response based on the browser's Accept header. */
+export function cloudinary(
+  url: string | null | undefined,
+  width?: number,
+  height?: number,
+): string {
   if (!url) return '';
-  if (!url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
-  const t = width ? `f_auto,q_auto,w_${width}` : 'f_auto,q_auto';
-  return url.replace('/upload/', `/upload/${t}/`);
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    const dimensions = [
+      width ? `w_${width}` : '',
+      height ? `h_${height}` : '',
+      height ? 'c_fill,g_auto' : '',
+    ].filter(Boolean);
+    const t = ['f_auto', 'q_auto', ...dimensions].join(',');
+    return url.replace('/upload/', `/upload/${t}/`);
+  }
+
+  if (width && url.includes('.supabase.co/storage/v1/object/public/')) {
+    try {
+      const transformed = new URL(url);
+      transformed.pathname = transformed.pathname.replace(
+        '/storage/v1/object/public/',
+        '/storage/v1/render/image/public/',
+      );
+      transformed.searchParams.set('width', String(width));
+      if (height) transformed.searchParams.set('height', String(height));
+      transformed.searchParams.set('quality', '72');
+      // A requested height means the UI has a known crop and Supabase can
+      // discard off-screen pixels before transfer. Width-only images retain
+      // their intrinsic aspect ratio instead of decoding thousands of rows.
+      transformed.searchParams.set('resize', height ? 'cover' : 'contain');
+      return transformed.toString();
+    } catch {
+      return url;
+    }
+  }
+
+  return url;
 }
 
 /** Fixture category presets per space (admin dropdown suggestions;

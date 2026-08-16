@@ -3,6 +3,16 @@
    cream/sage/gold palette · Cormorant Garamond + Jost + Noto Sans Sinhala.
    Keeps the site's Meta Pixel, Contact-event tracking, and SEO plumbing. */
 import { WHATSAPP_NUMBER, GA_MEASUREMENT_IDS, absoluteUrl } from '../lib/luxe-config';
+import '@fontsource/cormorant-garamond/latin-400.css';
+import '@fontsource/cormorant-garamond/latin-500.css';
+import '@fontsource/cormorant-garamond/latin-600.css';
+import '@fontsource/cormorant-garamond/latin-400-italic.css';
+import '@fontsource/cormorant-garamond/latin-500-italic.css';
+import '@fontsource/jost/latin-400.css';
+import '@fontsource/jost/latin-500.css';
+import '@fontsource/jost/latin-600.css';
+import '@fontsource/noto-sans-sinhala/sinhala-400.css';
+import '@fontsource/noto-sans-sinhala/sinhala-500.css';
 
 interface Props {
   title?: string;
@@ -94,22 +104,6 @@ Astro.response.headers.set(
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={shareImage} />
     <meta name="twitter:image:alt" content={shareImageAlt} />
-
-    <!-- Fonts: Cormorant Garamond (display) · Jost (body) · Noto Sans Sinhala -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Jost:wght@300;400;500;600&family=Noto+Sans+Sinhala:wght@400;500&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Jost:wght@300;400;500;600&family=Noto+Sans+Sinhala:wght@400;500&display=swap"
-      />
-    </noscript>
 
     <slot name="head" />
 
@@ -284,10 +278,15 @@ Astro.response.headers.set(
             if (en.isIntersecting) { en.target.classList.add('lxr-in'); io.unobserve(en.target); }
           });
         }, { threshold: 0.08 });
-        els.forEach(function (el) {
-          var r = el.getBoundingClientRect();
-          if (r.top < window.innerHeight) el.classList.add('lxr-in');
-          else io.observe(el);
+        // Read all geometry first, then mutate classes. Interleaving reads and
+        // writes forces a synchronous layout on every revealed element.
+        var viewportHeight = window.innerHeight;
+        var measured = Array.prototype.map.call(els, function (el) {
+          return { el: el, visible: el.getBoundingClientRect().top < viewportHeight };
+        });
+        measured.forEach(function (item) {
+          if (item.visible) item.el.classList.add('lxr-in');
+          else io.observe(item.el);
         });
       })();
     </script>
@@ -321,7 +320,7 @@ Astro.response.headers.set(
     --ink:        #2B322A;
     --lx-serif:   'Cormorant Garamond', Georgia, serif;
     --lx-sans:    'Jost', system-ui, sans-serif;
-    --lx-sinhala: 'Noto Sans Sinhala', sans-serif;
+    --lx-sinhala: 'Noto Sans Sinhala', 'Jost', sans-serif;
   }
 
   html.luxe {

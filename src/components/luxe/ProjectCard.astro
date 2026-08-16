@@ -14,7 +14,16 @@ const cover = project.after_image_url || project.before_image_url;
 <a href={`/projects/${project.slug}`} class:list={['lp-card', { 'lp-card--compact': compact }]}>
   <div class="lp-cover">
     {cover
-      ? <img src={cloudinary(cover, 800)} alt={`${project.title} — completed LUXEhome project`} loading="lazy" width="800" height="560" />
+      ? <img
+          src={cloudinary(cover, 720)}
+          srcset={`${cloudinary(cover, 480)} 480w, ${cloudinary(cover, 720)} 720w, ${cloudinary(cover, 900)} 900w`}
+          sizes="(max-width: 900px) calc(100vw - 48px), 560px"
+          alt={`${project.title} — completed LUXEhome project`}
+          loading="lazy"
+          decoding="async"
+          width="800"
+          height="560"
+        />
       : <div class="lp-placeholder"><strong>LUXE</strong><em>home</em></div>}
     <span class="lp-badge">Completed project</span>
   </div>
