@@ -286,14 +286,21 @@ const bathroomDesignNames = [...new Set(
         });
       }
 
+      /* luxeTrack loads fbevents.js before firing. Plain fbq would only queue
+         the conversion when the deferred load has not run yet, and this is
+         the last thing the visitor does before WhatsApp takes over. */
       const metaEventId = crypto.randomUUID();
-      if (typeof (window as any).fbq === 'function') {
-        (window as any).fbq('track', 'Lead', {
-          content_name: 'Bathroom Project Initiation',
-          content_category: projectType,
-          value: 50000,
-          currency: 'LKR',
-        }, { eventID: metaEventId });
+      const leadParams = {
+        content_name: 'Bathroom Project Initiation',
+        content_category: projectType,
+        value: 50000,
+        currency: 'LKR',
+      };
+      const track = (window as any).luxeTrack;
+      if (typeof track === 'function') {
+        track('Lead', leadParams, { eventID: metaEventId });
+      } else if (typeof (window as any).fbq === 'function') {
+        (window as any).fbq('track', 'Lead', leadParams, { eventID: metaEventId });
       }
       fetch('/api/meta-capi', {
         method: 'POST',
