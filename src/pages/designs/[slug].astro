@@ -198,6 +198,17 @@ const productSchema = JSON.stringify({
   description={`${design.name}: ${designSummary}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then start the LKR 50,000 project initiation for your bathroom.`}
   ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
   ogImageAlt={`${design.name} — ${collectionLabel} bathroom design by LUXEhome`}
+  viewContent={{
+    content_name: design.name,
+    content_category: `${collectionLabel} Collection`,
+    content_type: 'product',
+    content_ids: [design.slug],
+    /* Currency without a value reads as an incomplete event in Meta, so a
+       design whose starting price is unpublished sends neither. */
+    ...(design.starting_price_lkr > 0
+      ? { value: design.starting_price_lkr, currency: 'LKR' }
+      : {}),
+  }}
 >
   <Fragment slot="head">
     <script is:inline type="application/ld+json" set:html={productSchema}></script>

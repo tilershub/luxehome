@@ -13,6 +13,17 @@ interface Props {
   ogImageAlt?: string;
   /** Hide site nav/footer chrome (used by /start). */
   bare?: boolean;
+  /* Fires ViewContent for this page. Design pages pass their own catalogue
+     values, so a design published later is tracked without further work.
+     Pages that are not a design or a design listing leave this unset. */
+  viewContent?: {
+    content_name: string;
+    content_category?: string;
+    content_type?: string;
+    content_ids?: string[];
+    value?: number;
+    currency?: string;
+  };
 }
 
 const {
@@ -21,7 +32,16 @@ const {
   ogImage = 'https://luxehome.lk/og-bathroom.jpg',
   ogImageAlt,
   bare = false,
+  viewContent,
 } = Astro.props;
+
+/* An unpublished price arrives as undefined, and Meta reads a literal `null`
+   as a real parameter value, so empty keys are dropped rather than sent. */
+const viewContentParams = viewContent
+  ? Object.fromEntries(
+      Object.entries(viewContent).filter(([, value]) => value !== undefined && value !== null)
+    )
+  : null;
 
 /* A CMS image can arrive as a repo path, and a share with a relative
    og:image renders with no image at all. */
@@ -112,6 +132,18 @@ Astro.response.headers.set(
           var s = b.getElementsByTagName('script')[0];
           s.parentNode.insertBefore(t, s);
         }
+        /* Until fbevents.js arrives, fbq only queues. A conversion fired from
+           a click can therefore be sitting in that queue with nothing to send
+           it, so tracking a named event pulls the script in first, and the
+           first interaction of any kind warms it well before a submit. */
+        f.luxeTrack = function (event, params, options) {
+          loadPixel();
+          if (options) fbq('track', event, params || {}, options);
+          else fbq('track', event, params || {});
+        };
+        ['pointerdown', 'keydown'].forEach(function (type) {
+          b.addEventListener(type, loadPixel, { once: true, passive: true });
+        });
         var idle = f.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };
         f.addEventListener('load', function () { idle(loadPixel); });
         b.addEventListener('click', function (e) {
@@ -128,6 +160,12 @@ Astro.response.headers.set(
       <img height="1" width="1" style="display:none"
         src="https://www.facebook.com/tr?id=1904211696933513&ev=PageView&noscript=1" />
     </noscript>
+
+    {viewContentParams && (
+      <script is:inline define:vars={{ viewContentParams }}>
+        window.luxeTrack('ViewContent', viewContentParams);
+      </script>
+    )}
 
     <!-- Google Analytics 4. window.gtag and dataLayer exist immediately, so an
          event fired before gtag.js arrives is queued rather than dropped — the

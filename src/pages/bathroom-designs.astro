@@ -3,11 +3,23 @@ export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import SpaceDesigns from '../components/luxe/SpaceDesigns.astro';
 import { getDesigns } from '../lib/luxe';
+import { normalizeBathroomDesignIdentity } from '../lib/bathroom-taxonomy';
 const designs = await getDesigns({ spaceSlug: 'bathrooms' });
+/* This listing still renders the stored records, which can carry a retired
+   slug that /designs/[slug] redirects. Audiences have to segment on the
+   canonical slug, so the tracked ids are normalized even though the cards
+   are not. */
+const designIds = designs.map((design) => normalizeBathroomDesignIdentity(design).slug);
 ---
 <LuxeLayout
   ogImage="/spaces/bathroom.webp"
-  ogImageAlt="LUXEhome bathroom designs" title="Sri Lankan Bathroom Designs — LUXEhome">
+  ogImageAlt="LUXEhome bathroom designs" title="Sri Lankan Bathroom Designs — LUXEhome"
+  viewContent={{
+    content_name: 'Design collection',
+    content_category: 'Bathroom designs',
+    content_type: 'product_group',
+    content_ids: designIds,
+  }}>
   <SpaceDesigns
     space="bathrooms"
     designs={designs}

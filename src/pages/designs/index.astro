@@ -21,6 +21,12 @@ const collections = BATHROOM_COLLECTIONS;
   description="Browse fully developed LUXEhome bathroom designs with room-size guidance, new and renovation starting prices, renders, technical drawings, fixtures and warranties."
   ogImage={designs[0]?.cover_image_url ? cloudinary(designs[0].cover_image_url, 1200) : undefined}
   ogImageAlt="LUXEhome bathroom design collection"
+  viewContent={{
+    content_name: 'Design collection',
+    content_category: 'Bathroom designs',
+    content_type: 'product_group',
+    content_ids: designs.map((design) => design.slug),
+  }}
 >
   <section class="dz-hero">
     <p class="lx-eyebrow lxr">Published LUXEhome bathroom designs</p>
