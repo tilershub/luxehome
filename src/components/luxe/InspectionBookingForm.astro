@@ -14,10 +14,10 @@ const bathroomDesignNames = [...new Set(
 <div class="ibf-wrap">
   <div class="ibf-success" id="inspection-success" aria-live="polite" hidden>
     <span aria-hidden="true">✓</span>
-    <h2>Request received.</h2>
+    <h2>Application received.</h2>
     <p>
-      We will confirm the service area and appointment on WhatsApp, then send the
-      LKR 50,000 project initiation payment details. Please do not pay until the booking is confirmed.
+      We will review the project type, location, timing and investment range, then contact you on WhatsApp.
+      Please note that submitting the form does not automatically confirm a site appointment.
     </p>
     <a id="inspection-whatsapp-backup" href="#" target="_blank" rel="noopener noreferrer">
       Continue to WhatsApp
@@ -26,9 +26,9 @@ const bathroomDesignNames = [...new Set(
 
   <form id="inspection-request-form">
     <div class="ibf-heading">
-      <p class="lx-eyebrow">Bathroom project initiation</p>
-      <h2>Start with one bathroom.</h2>
-      <p>You do not need drawings or measurements. Tell us what you know; we will visit, measure and develop the complete proposal.</p>
+      <p class="lx-eyebrow">Complimentary consultation application</p>
+      <h2>Tell us about one bathroom.</h2>
+      <p>You do not need drawings or measurements. A few practical details help us decide whether a site consultation will be useful for both sides.</p>
     </div>
 
     <input class="ibf-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
@@ -78,7 +78,7 @@ const bathroomDesignNames = [...new Set(
     <fieldset>
       <legend>Do you know the bathroom size?</legend>
       <div class="ibf-choice-grid ibf-choice-grid--two">
-        <label><input type="radio" name="size_status" value="Please measure during site visit" checked /><span>No — please measure it</span></label>
+        <label><input type="radio" name="size_status" value="Please measure during approved site assessment" checked /><span>No — please measure it</span></label>
         <label><input type="radio" name="size_status" value="Approximate size provided" /><span>Yes — approximately</span></label>
       </div>
     </fieldset>
@@ -88,51 +88,57 @@ const bathroomDesignNames = [...new Set(
       <input type="text" name="approximate_size" placeholder="e.g. 2.5 m × 2 m, or about 5 m²" />
     </label>
 
-    <div class="ibf-grid">
-      <label>
-        <span>Preferred visit date <small>(optional)</small></span>
-        <input id="inspection-date" type="date" name="preferred_date" />
-      </label>
-      <label>
-        <span>Preferred time <small>(optional)</small></span>
-        <select name="preferred_time">
-          <option value="">Any suitable time</option>
-          <option value="Morning">Morning</option>
-          <option value="Afternoon">Afternoon</option>
-          <option value="Saturday">Saturday</option>
-        </select>
-      </label>
-    </div>
+    <fieldset>
+      <legend>What investment range are you considering for this complete bathroom? <b aria-hidden="true">*</b></legend>
+      <p class="ibf-field-note">Published LUXEhome complete-bathroom guides typically start around LKR 1.5M.</p>
+      <div class="ibf-choice-grid">
+        <label><input type="radio" name="budget_direction" value="Below LKR 1.5M" required /><span>Below LKR 1.5M</span></label>
+        <label><input type="radio" name="budget_direction" value="LKR 1.5M–2M" /><span>LKR 1.5M–2M</span></label>
+        <label><input type="radio" name="budget_direction" value="LKR 2M–3M" /><span>LKR 2M–3M</span></label>
+        <label><input type="radio" name="budget_direction" value="LKR 3M+" /><span>LKR 3M+</span></label>
+        <label><input type="radio" name="budget_direction" value="Not decided — need guidance" /><span>Not decided — need guidance</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>When would you like the project to begin? <b aria-hidden="true">*</b></legend>
+      <div class="ibf-choice-grid ibf-choice-grid--four">
+        <label><input type="radio" name="project_timing" value="Within 1–3 months" required /><span>Within 1–3 months</span></label>
+        <label><input type="radio" name="project_timing" value="Within 3–6 months" /><span>Within 3–6 months</span></label>
+        <label><input type="radio" name="project_timing" value="More than 6 months" /><span>More than 6 months</span></label>
+        <label><input type="radio" name="project_timing" value="Researching for now" /><span>Researching for now</span></label>
+      </div>
+    </fieldset>
 
     <label>
       <span>Anything we should know? <small>(optional)</small></span>
       <textarea name="notes" rows="4" placeholder="Current problems, access, timeline, style preferences or other details"></textarea>
-      <small class="ibf-help">You can attach bathroom photos after WhatsApp opens.</small>
+      <small class="ibf-help">You can attach current bathroom photos and the Reel or design that inspired you after WhatsApp opens.</small>
     </label>
 
     <div class="ibf-fee">
       <div>
-        <span>Project initiation deposit · one bathroom</span>
-        <strong>LKR 50,000</strong>
+        <span>Consultation application</span>
+        <strong>No fee</strong>
       </div>
       <ul>
-        <li>Site consultation, measurements and technical review</li>
-        <li>Detailed design with five images and a 3D walkthrough video</li>
-        <li>One proposal PDF with materials, timeline, quality, warranties and final quotation</li>
-        <li>Delivered within seven working days after the site visit</li>
+        <li>Every application is reviewed before a site appointment is offered</li>
+        <li>Approved complete projects include one detailed site assessment</li>
+        <li>The detailed design and construction proposal is a separate LKR 50,000 stage after consultation</li>
+        <li>The proposal fee is credited in full if LUXEhome builds that bathroom</li>
       </ul>
     </div>
 
     <label class="ibf-consent">
-      <input type="checkbox" name="fee_acknowledgement" required />
-      <span>I understand the LKR 50,000 deposit covers one bathroom. It is credited in full if LUXEhome builds that bathroom, and retained for completed consultation, design and proposal work if I do not proceed.</span>
+      <input type="checkbox" name="process_acknowledgement" required />
+      <span>I understand this is an application for a complimentary consultation, not an automatically confirmed site visit. If I commission the detailed proposal after consultation, it costs LKR 50,000 for one bathroom and is credited in full if LUXEhome builds it.</span>
     </label>
 
     <button class="ibf-submit" id="inspection-submit" type="submit">
-      <span>Start My Bathroom Project</span>
+      <span>Apply for Consultation</span>
       <span hidden>Preparing your request…</span>
     </button>
-    <p class="ibf-footnote">Have several bathrooms? Start with one and review its complete proposal before deciding on the others.</p>
+    <p class="ibf-footnote">Have several bathrooms? Begin the application with the first bathroom you want LUXEhome to assess.</p>
     <p class="ibf-privacy">By submitting, you ask LUXEhome to contact you about this project by WhatsApp and, if provided, email. See our <a href="/privacy-policy">Privacy Policy</a>.</p>
   </form>
 </div>
@@ -151,7 +157,6 @@ const bathroomDesignNames = [...new Set(
   const selectedDesign = document.getElementById('inspection-selected-design') as HTMLElement | null;
   const selectedDesignName = document.getElementById('inspection-selected-design-name') as HTMLElement | null;
   const sizeField = document.getElementById('inspection-size-field') as HTMLElement | null;
-  const dateInput = document.getElementById('inspection-date') as HTMLInputElement | null;
   const backupLink = document.getElementById('inspection-whatsapp-backup') as HTMLAnchorElement | null;
 
   function titleFromSlug(value: string) {
@@ -198,16 +203,6 @@ const bathroomDesignNames = [...new Set(
     });
     updateSizeField();
 
-    if (dateInput) {
-      const dateParts = Object.fromEntries(new Intl.DateTimeFormat('en', {
-        timeZone: 'Asia/Colombo',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }).formatToParts(new Date()).map((part) => [part.type, part.value]));
-      dateInput.min = `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
-    }
-
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       const data = new FormData(form);
@@ -220,10 +215,10 @@ const bathroomDesignNames = [...new Set(
       const location = formValue(data, 'location');
       const projectType = formValue(data, 'project_type');
       const preferredDesign = formValue(data, 'preferred_design');
-      const sizeStatus = formValue(data, 'size_status') || 'Please measure during site visit';
+      const sizeStatus = formValue(data, 'size_status') || 'Please measure during approved site assessment';
       const approximateSize = formValue(data, 'approximate_size');
-      const preferredDate = formValue(data, 'preferred_date');
-      const preferredTime = formValue(data, 'preferred_time');
+      const budgetDirection = formValue(data, 'budget_direction');
+      const projectTiming = formValue(data, 'project_timing');
       const notes = formValue(data, 'notes');
 
       submit.disabled = true;
@@ -233,25 +228,30 @@ const bathroomDesignNames = [...new Set(
       const details: Record<string, string> = {
         project_type: projectType,
         size_status: sizeStatus,
-        initiation_deposit_lkr: '50000',
+        budget_direction: budgetDirection,
+        project_timing: projectTiming,
+        consultation_fee_lkr: '0',
+        consultation_status: 'Application pending suitability review',
+        detailed_proposal_fee_lkr: '50000',
         proposal_scope: 'One bathroom',
-        proposal_delivery: 'Within seven working days after the site visit',
+        proposal_delivery: 'Within seven working days after proposal payment and the completed consultation',
         construction_credit: '100% credited to the related LUXEhome construction balance',
-        payment_status: 'Awaiting appointment confirmation',
+        payment_status: 'No payment requested for consultation application',
       };
       if (email) details.email = email;
       if (preferredDesign) details.preferred_design = preferredDesign;
       if (approximateSize) details.approximate_size = approximateSize;
-      if (preferredDate) details.preferred_date = preferredDate;
-      if (preferredTime) details.preferred_time = preferredTime;
 
       const queueNotes = [
         `Project: ${projectType}`,
+        `Investment range: ${budgetDirection}`,
+        `Desired start: ${projectTiming}`,
         preferredDesign ? `Preferred design: ${preferredDesign}` : 'Preferred design: Please recommend',
         `Measurements: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
-        'Project initiation deposit: LKR 50,000 for one bathroom — payment after booking confirmation',
+        'Consultation: Complimentary, subject to suitability approval; one site assessment included if approved',
+        'Detailed proposal: LKR 50,000 for one bathroom, commissioned only after consultation',
         'Proposal: five design images, materials, timeline, quality, warranties, final quotation and 3D video link',
-        'Delivery: within seven working days after the site visit',
+        'Delivery: within seven working days after proposal payment and completed consultation',
         'Construction credit: 100% credited if LUXEhome builds this bathroom',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
@@ -260,7 +260,7 @@ const bathroomDesignNames = [...new Set(
         const lead: LeadInsert = {
           name,
           phone,
-          service: 'Bathroom Project Initiation',
+          service: 'Bathroom Project Consultation',
           location,
           service_details: details,
           notes: notes || null,
@@ -276,8 +276,8 @@ const bathroomDesignNames = [...new Set(
           email: email || null,
           location,
           space_slug: 'bathrooms',
-          preferred_date: preferredDate || null,
-          preferred_time: preferredTime || null,
+          preferred_date: null,
+          preferred_time: null,
           notes: queueNotes,
           source_url: window.location.href,
           status: 'new',
@@ -291,10 +291,8 @@ const bathroomDesignNames = [...new Set(
          the last thing the visitor does before WhatsApp takes over. */
       const metaEventId = crypto.randomUUID();
       const leadParams = {
-        content_name: 'Bathroom Project Initiation',
+        content_name: 'Bathroom Project Consultation Application',
         content_category: projectType,
-        value: 50000,
-        currency: 'LKR',
       };
       const track = (window as any).luxeTrack;
       if (typeof track === 'function') {
@@ -310,24 +308,25 @@ const bathroomDesignNames = [...new Set(
           event_source_url: window.location.href,
           phone,
           name,
-          service: 'Bathroom Project Initiation',
+          service: 'Bathroom Project Consultation',
         }),
       }).catch(() => {});
 
       const message = [
-        'Bathroom Project Initiation Request — LUXEHOME',
+        'Bathroom Consultation Application — LUXEHOME',
         '',
         `Name: ${name}`,
         `Phone: ${phone}`,
         email ? `Email: ${email}` : '',
         `Location: ${location}`,
         `Project: ${projectType}`,
+        `Investment range: ${budgetDirection}`,
+        `Desired start: ${projectTiming}`,
         `Preferred design: ${preferredDesign || 'Please recommend one'}`,
         `Bathroom size: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
-        preferredDate ? `Preferred date: ${preferredDate}` : '',
-        preferredTime ? `Preferred time: ${preferredTime}` : '',
-        'Project initiation deposit: LKR 50,000 for one bathroom — payment after location and appointment confirmation',
-        'Proposal delivery: within seven working days after the site visit',
+        'Consultation: No fee; site assessment subject to suitability approval',
+        'Detailed proposal after consultation: LKR 50,000 for one bathroom',
+        'Proposal delivery: within seven working days after payment and completed consultation',
         'Construction credit: 100% credited if LUXEhome builds this bathroom',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
@@ -339,10 +338,9 @@ const bathroomDesignNames = [...new Set(
       form.hidden = true;
       success.hidden = false;
       if (typeof (window as any).gtag === 'function') {
-        (window as any).gtag('event', 'lead_form_submit', {
+        (window as any).gtag('event', 'consultation_application_submit', {
           event_category: 'Lead',
-          event_label: 'Bathroom Project Initiation',
-          value: 50000,
+          event_label: 'Bathroom Project Consultation',
         });
       }
     });
@@ -389,8 +387,10 @@ const bathroomDesignNames = [...new Set(
   .ibf-wrap select:focus,
   .ibf-wrap textarea:focus { outline: 2px solid color-mix(in srgb, var(--gold) 55%, transparent); outline-offset: 1px; border-color: var(--gold); }
   .ibf-wrap fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+  .ibf-field-note { margin: -.12rem 0 .55rem; color: color-mix(in srgb, var(--ink) 66%, transparent); font-size: .8rem; line-height: 1.5; }
   .ibf-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
   .ibf-choice-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ibf-choice-grid--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .ibf-choice-grid label {
     display: flex;
     align-items: flex-start;
@@ -459,6 +459,7 @@ const bathroomDesignNames = [...new Set(
     .ibf-grid,
     .ibf-choice-grid,
     .ibf-choice-grid--two,
+    .ibf-choice-grid--four,
     .ibf-fee { grid-template-columns: 1fr; }
     .ibf-fee { gap: .6rem; }
   }

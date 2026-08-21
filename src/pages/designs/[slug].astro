@@ -7,7 +7,7 @@ import KeyHighlights from '../../components/luxe/KeyHighlights.astro';
 import BuildProcess from '../../components/luxe/BuildProcess.astro';
 import SwipeCarouselController from '../../components/luxe/SwipeCarouselController.astro';
 import { getDesignBySlug, getProjects, youtubeEmbed, isYouTubeShort, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PROJECT_INITIATION, formatArea, absoluteUrl } from '../../lib/luxe-config';
+import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PROJECT_CONSULTATION, PROJECT_INITIATION, formatArea, absoluteUrl } from '../../lib/luxe-config';
 import {
   collectionShortLabel,
   LEGACY_BATHROOM_DESIGN_REDIRECTS,
@@ -507,32 +507,36 @@ const productSchema = JSON.stringify({
     </div>
   </section>
 
-  <!-- PROJECT INITIATION -->
+  <!-- CONSULTATION & PAID PROPOSAL -->
   <section id="fees" class="wx-panel-band">
     <div class="wx-section">
-      <p class="wx-kicker">One clear first commitment</p>
-      <h2>Start one bathroom for LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')}.</h2>
-      <p class="wx-body">The initiation deposit covers the site consultation, detailed design and complete construction proposal for one bathroom. The proposal is delivered within seven working days after the site visit.</p>
+      <p class="wx-kicker">A clear path from inspiration to a real room</p>
+      <h2>First, see whether the {design.name} works for your home.</h2>
+      <p class="wx-body">Apply at no charge. Suitable complete-bathroom projects receive a complimentary consultation with one detailed site assessment. The LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')} design and construction proposal is commissioned only after that consultation.</p>
 
       <div class="wx-fee-grid">
         <article class="wx-fee wx-fee--feature">
-          <span class="wx-fee-step">One bathroom<b>100% construction credit</b></span>
+          <span class="wx-fee-step">Approved complete-bathroom projects<b>Application reviewed first</b></span>
+          <strong class="wx-fee-price">{PROJECT_CONSULTATION.price}</strong>
+          <h3>{PROJECT_CONSULTATION.title}</h3>
+          <p>{PROJECT_CONSULTATION.copy}</p>
+          <ul>
+            {PROJECT_CONSULTATION.includes.map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+        <article class="wx-fee">
+          <span class="wx-fee-step">After consultation · one bathroom</span>
           <strong class="wx-fee-price">LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')}</strong>
           <h3>{PROJECT_INITIATION.title}</h3>
           <p>{PROJECT_INITIATION.copy}</p>
           <ul>
             {PROJECT_INITIATION.includes.map((item) => <li>{item}</li>)}
           </ul>
-        </article>
-        <article class="wx-fee">
-          <span class="wx-fee-step">How the credit works</span>
-          <h3>It becomes your construction advance.</h3>
-          <p>{PROJECT_INITIATION.credit} For example, a LKR 2,000,000 contract has LKR 1,950,000 remaining after the deposit already paid.</p>
-          <p>If you do not proceed, the deposit is retained for the consultation, design and proposal work already completed.</p>
+          <p><strong>{PROJECT_INITIATION.credit}</strong> If you do not proceed, you still keep the completed proposal.</p>
           <p>{PROJECT_INITIATION.multipleBathrooms}</p>
         </article>
       </div>
-      <a class="wx-fee-cta" href={inspectionHref}>Start this bathroom project →</a>
+      <a class="wx-fee-cta" href={inspectionHref}>Apply for the complimentary consultation →</a>
     </div>
   </section>
 
@@ -633,16 +637,16 @@ const productSchema = JSON.stringify({
   <section id="book" class="wx-closing">
     <p class="wx-kicker">The practical next step</p>
     <h2>Will the {design.name} work in your bathroom?</h2>
-    <p>We visit, measure and develop the detailed design, material direction and complete construction proposal.</p>
-    <a href={inspectionHref} class="wx-book-btn">Start project · LKR 50,000</a>
-    <small>100% credited toward this bathroom’s LUXEhome construction balance.</small>
+    <p>Apply with your location, timing and investment range. Approved complete projects include one detailed site assessment at no consultation fee.</p>
+    <a href={inspectionHref} class="wx-book-btn">Apply for consultation</a>
+    <small>The optional detailed proposal after consultation is LKR 50,000 and is fully credited if LUXEhome builds.</small>
   </section>
 
   <!-- STICKY BOOK BAR -->
   <div class="wx-bar" id="wx-bar">
     <a href={inspectionHref}>
-      <span>Start {design.name} for my bathroom</span>
-      <strong>LKR 50,000</strong>
+      <span>Apply for {design.name}</span>
+      <strong>No consultation fee</strong>
     </a>
   </div>
   <SwipeCarouselController />

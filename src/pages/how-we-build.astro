@@ -2,7 +2,7 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import KeyHighlights from '../components/luxe/KeyHighlights.astro';
-import { BUILD_STAGES, WHY_LUXEHOME, WARRANTY_SCHEDULE, PROJECT_INITIATION } from '../lib/luxe-config';
+import { BUILD_STAGES, WHY_LUXEHOME, WARRANTY_SCHEDULE } from '../lib/luxe-config';
 
 const highlights = [
   { value: String(BUILD_STAGES.length), title: 'Documented stages', copy: 'From consultation to handover, every project follows the same system.' },
@@ -27,7 +27,7 @@ const highlights = [
       long-term durability, and a luxury finish.
     </p>
     <div class="hb-hero-actions">
-      <a class="lx-btn-wa" href="/book-site-inspection">Start project · LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')}</a>
+      <a class="lx-btn-wa" href="/book-site-inspection">Apply for consultation</a>
       <a class="lx-btn-ghost" href="/designs">Explore bathroom designs</a>
     </div>
   </section>
@@ -82,8 +82,8 @@ const highlights = [
   <section class="hb-cta lxr">
     <p class="hb-kicker">The practical next step</p>
     <h2>Start with the room you actually have.</h2>
-    <p>We visit, measure and develop the detailed design and complete construction proposal for one bathroom.</p>
-    <a class="lx-btn-wa" href="/book-site-inspection">Start project · LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')}</a>
+    <p>Apply at no charge. For suitable complete projects, the consultation includes one detailed site assessment before the paid design-and-proposal stage.</p>
+    <a class="lx-btn-wa" href="/book-site-inspection">Apply for consultation</a>
   </section>
 </LuxeLayout>
 

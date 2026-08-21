@@ -28,7 +28,7 @@ interface Props {
 
 const {
   title = 'LUXEhome — Complete Bathroom Design & Construction, Sri Lanka',
-  description = 'Start one bathroom with a LKR 50,000 initiation deposit for the site visit, detailed design and complete construction proposal. Fully credited if LUXEhome builds it.',
+  description = 'Explore complete LUXEhome bathrooms and apply for a complimentary consultation. The LKR 50,000 detailed proposal is fully credited if LUXEhome builds.',
   ogImage = 'https://luxehome.lk/og-bathroom.jpg',
   ogImageAlt,
   bare = false,
@@ -206,12 +206,16 @@ Astro.response.headers.set(
           <a href="/pricing-guide">Pricing</a>
           <a href="/blog">Journal</a>
           <a href="/about">About</a>
-          <a href="/book-site-inspection">Start project · LKR 50k</a>
+          <a
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a bathroom project.')}`}
+            target="_blank" rel="noopener noreferrer"
+          >WhatsApp</a>
         </nav>
         <a
-          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a project.')}`}
-          class="lx-nav-wa" target="_blank" rel="noopener noreferrer"
-        >WhatsApp Us</a>
+          href="/book-site-inspection"
+          class="lx-nav-wa"
+        >Apply for consultation</a>
+        <a href="/book-site-inspection" class="lx-nav-apply" aria-label="Apply for a complimentary bathroom project consultation">Apply</a>
         <button class="lx-nav-burger" id="lx-burger" aria-label="Open menu" aria-expanded="false">
           <span></span><span></span>
         </button>
@@ -225,7 +229,7 @@ Astro.response.headers.set(
         <a href="/pricing-guide">Pricing</a>
         <a href="/blog">Journal</a>
         <a href="/about">About</a>
-        <a href="/book-site-inspection">Start project · LKR 50k</a>
+        <a href="/book-site-inspection" class="lx-mobile-start">Apply for complimentary consultation</a>
         <a
           href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a project.')}`}
           class="lx-mobile-wa" target="_blank" rel="noopener noreferrer"
@@ -254,7 +258,7 @@ Astro.response.headers.set(
             <a href="/faq">FAQ</a>
             <a href="/about">About</a>
             <a href="/contact">Contact</a>
-            <a href="/book-site-inspection">Start a bathroom project</a>
+            <a href="/book-site-inspection">Apply for a project consultation</a>
           </div>
           <div class="lx-footer-contact">
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">077 450 3744</a>
@@ -410,6 +414,21 @@ Astro.response.headers.set(
     transition: background .2s;
   }
   .lx-nav-wa:hover { background: var(--ink); }
+  .lx-nav-apply {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: .5rem 1rem;
+    border-radius: 999px;
+    background: var(--sage-deep);
+    color: var(--cream);
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
 
   .lx-nav-burger { display: none; background: none; border: none; cursor: pointer; padding: .5rem; }
   .lx-nav-burger span { display: block; width: 24px; height: 2px; background: var(--ink); margin: 5px 0; transition: transform .25s; }
@@ -441,10 +460,12 @@ Astro.response.headers.set(
     border-bottom: 1px solid var(--cream-deep);
   }
   .lx-mobile-wa { color: var(--sage-deep) !important; font-weight: 500; border-bottom: none !important; }
+  .lx-mobile-start { color: var(--sage-deep) !important; font-weight: 600 !important; }
 
   @media (max-width: 1120px) {
     .lx-nav-links, .lx-nav-wa { display: none; }
-    .lx-nav-burger { display: block; margin-left: auto; }
+    .lx-nav-apply { display: inline-flex; margin-left: auto; }
+    .lx-nav-burger { display: block; }
   }
 
   /* ── Footer ── */
@@ -523,7 +544,7 @@ Astro.response.headers.set(
       font-size: 1.0625rem;
       line-height: 1.7;
     }
-    .lx-nav { padding-block: .8rem; }
+    .lx-nav { gap: .75rem; padding-block: .8rem; }
     .lx-wordmark { font-size: 1.35rem; }
     .lx-mobile-menu {
       top: 57px;
