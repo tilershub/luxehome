@@ -70,10 +70,10 @@ const collections = space === 'bathrooms'
     <div>
       <p class="lx-eyebrow">Your {presentation.name.toLowerCase()}, fully resolved</p>
       <h2>{space === 'bathrooms' ? 'We will measure the room.' : 'Which design feels like home?'}</h2>
-      {space === 'bathrooms' && <p>No dimensions are required. The deposit includes the site visit, detailed design and complete proposal.</p>}
+      {space === 'bathrooms' && <p>No dimensions are required. Suitable complete projects include one detailed site assessment in the complimentary consultation.</p>}
     </div>
     {space === 'bathrooms'
-      ? <a href="/book-site-inspection">Start project · LKR 50,000</a>
+      ? <a href="/book-site-inspection">Apply for consultation</a>
       : <a href={waLink(`Hi LUXEhome! I would like help choosing a ${space} design.`)} target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a>}
   </section>
 )}

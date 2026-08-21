@@ -2,7 +2,10 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import InspectionBookingForm from '../components/luxe/InspectionBookingForm.astro';
+import { PROJECT_CONSULTATION, PROJECT_INITIATION } from '../lib/luxe-config';
 import { PROJECT_INITIATION_FAQ } from '../lib/luxe-pages';
+
+const proposalPrice = PROJECT_INITIATION.amount.toLocaleString('en-LK');
 
 const faqSchema = JSON.stringify({
   '@context': 'https://schema.org',
@@ -16,8 +19,8 @@ const faqSchema = JSON.stringify({
 ---
 
 <LuxeLayout
-  title="Start Your Bathroom Project — LKR 50,000 | LUXEhome Sri Lanka"
-  description="Start one LUXEhome bathroom for LKR 50,000: site consultation, detailed design, five images, 3D video, materials and a complete construction proposal within seven working days after the visit. Fully credited if LUXEhome builds it."
+  title="Complimentary Bathroom Project Consultation | LUXEhome Sri Lanka"
+  description="Apply for a complimentary LUXEhome bathroom consultation. Approved complete projects include one site assessment; the optional proposal is LKR 50,000."
 >
   <Fragment slot="head">
     <script is:inline type="application/ld+json" set:html={faqSchema}></script>
@@ -25,69 +28,69 @@ const faqSchema = JSON.stringify({
 
   <section class="inspection-hero">
     <div class="inspection-hero-copy lxr">
-      <p class="lx-eyebrow">The practical first step</p>
-      <h1>Start with one bathroom.<br /><em>See the complete proposal.</em></h1>
+      <p class="lx-eyebrow">Complimentary project consultation</p>
+      <h1>Tell us about one bathroom.<br /><em>Let’s see if we are a fit.</em></h1>
       <p>
-        One initiation deposit starts the site consultation, detailed design and final
-        construction proposal. If LUXEhome builds the bathroom, the full amount is credited to your balance.
+        There is no payment to apply. We review the location, project type, timing and
+        investment range first. Suitable complete-bathroom projects receive one detailed site assessment as part of the consultation.
       </p>
       <div class="inspection-price">
-        <span>Project initiation deposit · one bathroom</span>
-        <strong>LKR 50,000</strong>
-        <small>Pay only after we confirm the location and appointment.</small>
+        <span>Approved project consultation</span>
+        <strong>{PROJECT_CONSULTATION.price}</strong>
+        <small>The LKR {proposalPrice} detailed proposal is commissioned only after the consultation.</small>
       </div>
     </div>
     <div class="inspection-promise lxr">
-      <strong>No bathroom dimensions required</strong>
-      <p>If you know the approximate size, share it. If not, simply choose “please measure it” in the form.</p>
+      <strong>You do not need drawings or measurements</strong>
+      <p>Share photographs and what you know. During an approved site assessment, we document the room, services, drainage, access and design context properly.</p>
     </div>
   </section>
 
   <section class="inspection-process" aria-labelledby="inspection-process-title">
     <div class="inspection-section-heading lxr">
       <p class="lx-eyebrow">How it works</p>
-      <h2 id="inspection-process-title">One clear path from visit to quotation.</h2>
+      <h2 id="inspection-process-title">A useful first step—without a hidden charge.</h2>
     </div>
     <div class="inspection-steps">
       <article class="lxr">
         <span>01</span>
-        <h3>Send the request</h3>
-        <p>Name, WhatsApp number, location and whether it is a renovation or new bathroom. Measurements are optional.</p>
+        <h3>Apply</h3>
+        <p>Share your location, project type, timing, budget direction and preferred design or inspiration.</p>
       </article>
       <article class="lxr">
         <span>02</span>
-        <h3>We confirm the visit</h3>
-        <p>Our team checks the service area and agrees the date and time with you on WhatsApp.</p>
+        <h3>Suitability review</h3>
+        <p>We confirm whether the scope, location, timing and realistic investment fit our complete-project service.</p>
       </article>
       <article class="lxr">
         <span>03</span>
-        <h3>Pay LKR 50,000</h3>
-        <p>The per-bathroom initiation deposit is requested only after the appointment is confirmed.</p>
+        <h3>Consult &amp; assess</h3>
+        <p>For an approved project, we discuss the brief and complete one detailed site assessment at no consultation fee.</p>
       </article>
       <article class="lxr">
         <span>04</span>
-        <h3>We visit and develop</h3>
-        <p>We measure, review site conditions, select materials and create the detailed bathroom design.</p>
+        <h3>Commission the proposal</h3>
+        <p>If you want LUXEhome to resolve the project, commission the detailed proposal for LKR {proposalPrice}.</p>
+      </article>
+      <article class="lxr">
+        <span>05</span>
+        <h3>Review the complete picture</h3>
+        <p>Receive the design, materials, named brands, scope, timeline, warranties and final quotation together.</p>
       </article>
     </div>
-    <p class="inspection-process-note lxr">Within seven working days after the site visit, you receive the complete proposal and final construction quotation.</p>
+    <p class="inspection-process-note lxr">No payment is required for the application or approved consultation. The paid proposal is delivered within seven working days after payment and the completed site consultation.</p>
   </section>
 
   <section class="inspection-booking">
     <div class="inspection-includes lxr">
-      <p class="lx-eyebrow">What LKR 50,000 covers</p>
-      <h2>One complete decision package for one bathroom.</h2>
+      <p class="lx-eyebrow">What the consultation studies</p>
+      <h2>More than the length and width of a room.</h2>
       <ul>
-        <li>Site consultation, measurements and technical review</li>
-        <li>Detailed bathroom design with five presentation images</li>
-        <li>Material and finish selection, with reference images where useful</li>
-        <li>3D walkthrough video link</li>
-        <li>Project timeline, quality commitments and applicable warranties</li>
-        <li>Final construction quotation in one proposal PDF</li>
+        {PROJECT_CONSULTATION.includes.map((item) => <li>{item}</li>)}
       </ul>
       <div class="inspection-note">
-        <strong>100% construction credit</strong>
-        <p>If LUXEhome builds this bathroom, the full LKR 50,000 is recorded as an advance and deducted from the remaining construction balance.</p>
+        <strong>Reserved for suitable complete projects</strong>
+        <p>{PROJECT_CONSULTATION.qualification} A submitted application is not an automatically confirmed site appointment.</p>
       </div>
     </div>
     <InspectionBookingForm />
@@ -96,19 +99,19 @@ const faqSchema = JSON.stringify({
   <section class="inspection-next" aria-labelledby="inspection-next-title">
     <div class="inspection-section-heading lxr">
       <p class="lx-eyebrow">After the proposal</p>
-      <h2 id="inspection-next-title">You decide after seeing the complete picture.</h2>
+      <h2 id="inspection-next-title">Pay for the thinking—not for the first conversation.</h2>
     </div>
     <div class="inspection-next-grid">
       <article class="lxr">
-        <span>If you proceed</span>
-        <h3>Proceed with LUXEhome</h3>
-        <p>The proposal becomes the basis of the construction appointment. On a LKR 2,000,000 contract, your LKR 50,000 initiation deposit is already paid, leaving a LKR 1,950,000 balance.</p>
+        <span>The detailed proposal · LKR {proposalPrice}</span>
+        <h3>A complete decision file</h3>
+        <p>Five 3D presentation images, a walkthrough, selected fixtures and materials, named brands, construction scope, final quotation, timeline, payment plan and applicable warranties.</p>
       </article>
       <article class="lxr">
-        <span>If you have several bathrooms</span>
-        <h3>Begin with one</h3>
-        <p>Review the first bathroom’s complete proposal before deciding on the others. Each additional bathroom proposal has its own LKR 50,000 initiation deposit, credited to its related LUXEhome construction contract.</p>
-        <small>If you do not proceed with construction, the deposit is retained for the consultation, design and proposal work already completed.</small>
+        <span>If LUXEhome builds</span>
+        <h3>100% construction credit</h3>
+        <p>The full LKR {proposalPrice} becomes an advance against the related bathroom construction price—not an extra fee on top of the contract.</p>
+        <small>If you do not proceed, you still keep the completed proposal and the fee covers that professional design, selection, costing and documentation work.</small>
       </article>
     </div>
   </section>
@@ -116,8 +119,8 @@ const faqSchema = JSON.stringify({
   <section class="inspection-faq" aria-labelledby="inspection-faq-title">
     <div class="inspection-section-heading lxr">
       <p class="lx-eyebrow">Questions before you start</p>
-      <h2 id="inspection-faq-title">Clear answers, before you pay.</h2>
-      <p>These are the same project-initiation terms our team will explain on WhatsApp or during your suitability call.</p>
+      <h2 id="inspection-faq-title">Clear answers, before you apply.</h2>
+      <p>These are the same consultation and proposal terms our team will explain during the suitability review.</p>
     </div>
     <div class="inspection-faq-grid">
       {PROJECT_INITIATION_FAQ.map((item, index) => (
@@ -162,7 +165,7 @@ const faqSchema = JSON.stringify({
   .inspection-next { padding: clamp(2.8rem, 6vw, 4.7rem) 0; border-top: 1px solid rgba(43,50,42,.12); }
   .inspection-section-heading { margin-bottom: 1.4rem; }
   .inspection-section-heading h2 { margin-top: .3rem; font-size: clamp(2.2rem, 5vw, 3.5rem); }
-  .inspection-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
+  .inspection-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem; }
   .inspection-steps article { padding: 1.2rem; border-top: 2px solid var(--sage); background: rgba(255,255,255,.65); }
   .inspection-steps span { color: var(--gold); font: 600 1rem var(--lx-serif); }
   .inspection-steps h3 { margin: .55rem 0 .4rem; font-size: 1.25rem; }

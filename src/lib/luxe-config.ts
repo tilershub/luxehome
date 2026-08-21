@@ -142,20 +142,38 @@ export const STANDARD_DRAWINGS = [
   { kind: 'electrical',     label: 'Electrical Layout',       tag: 'Points & lighting',  image: '/images/drawings/electrical.webp' },
 ] as const;
 
-/** The single paid start to a LUXEhome bathroom project. It covers one
-    bathroom proposal and becomes an advance against construction when the
-    client appoints LUXEhome to build that bathroom. */
+/** The low-risk first step. The physical visit is reserved for suitable
+    complete-bathroom projects so the team can offer it without turning the
+    website into an unqualified free-inspection booking service. */
+export const PROJECT_CONSULTATION = {
+  title: 'Complimentary project consultation',
+  copy: 'For suitable complete bathroom projects, the consultation includes one site visit and a detailed review of the room, services, drainage, access, house style, requirements and budget direction.',
+  price: 'No consultation fee',
+  qualification: 'Applications are reviewed for project type, location, timing and realistic investment before a site appointment is confirmed.',
+  includes: [
+    'Project requirements and preferred design direction',
+    'Bathroom measurements, doors, windows and existing layout',
+    'Water supply, drainage, wastewater and site-condition review',
+    'House style, access, construction constraints and budget direction',
+    'A clear explanation of the next design-and-proposal stage',
+  ],
+} as const;
+
+/** The paid decision file commissioned after the complimentary consultation.
+    It becomes an advance against construction when the client appoints
+    LUXEhome to build that bathroom. */
 export const PROJECT_INITIATION = {
   amount: 50_000,
-  title: 'Bathroom project initiation deposit',
-  copy: 'One site consultation, a detailed bathroom design and a complete construction proposal for one bathroom.',
+  title: 'Detailed bathroom design & construction proposal',
+  copy: 'After the complimentary consultation, commission the complete design and construction proposal for one bathroom.',
   credit: '100% credited toward the LUXEhome construction balance for that bathroom.',
-  delivery: 'The complete proposal is delivered within seven working days after the site visit.',
+  delivery: 'The complete proposal is delivered within seven working days after proposal payment and the completed site consultation.',
   includes: [
-    'Site consultation, measurements and technical review',
     'Detailed bathroom design with five presentation images',
     'Material and finish selection, with reference images where useful',
-    'Project timeline, quality commitments and applicable warranties',
+    'Selected fixtures, accessories, materials and named brands',
+    'Complete construction scope, timeline and payment stages',
+    'Quality commitments and applicable warranties',
     'Final construction quotation in one proposal PDF',
     '3D walkthrough video link',
   ],
