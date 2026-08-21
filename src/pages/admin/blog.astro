@@ -116,6 +116,7 @@
 
   <script>
     import { createClient } from '@supabase/supabase-js';
+    import { sendAdminSignInLink } from '../../lib/luxe-admin-sign-in';
 
     const SB_URL  = import.meta.env.PUBLIC_SUPABASE_URL;
     const SB_KEY  = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -171,7 +172,7 @@
       const {data:{session}}=await sb.auth.getSession();
       if(!session){
         mainEl.innerHTML=`<div class="empty-state"><div class="ei">✉️</div><h3>Sign in by email link</h3><p>Use an authorised administrator or editor email.</p><input id="magic-email" type="email" autocomplete="email" placeholder="name@example.com" required><button id="magic-link" class="btn-primary">Email me a sign-in link</button><p id="magic-status"></p></div>`;
-        g('magic-link').addEventListener('click',async()=>{const email=gv('magic-email').toLowerCase();if(!email){g('magic-status').textContent='Enter your authorised email address.';return}const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+'/admin/blog',shouldCreateUser:true}});g('magic-status').textContent=error?error.message:`Check ${email} and open the secure sign-in link.`});
+        g('magic-link').addEventListener('click',async()=>{const email=gv('magic-email').toLowerCase();if(!email){g('magic-status').textContent='Enter your authorised email address.';return}const error=await sendAdminSignInLink(sb,email,location.origin+'/admin/blog');g('magic-status').textContent=error?error.message:`Check ${email} and open the secure sign-in link.`});
         return;
       }
       newBtn.addEventListener('click', ()=>goEditor(null));
