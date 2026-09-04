@@ -2,7 +2,7 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { getDesigns, getProjects } from '../lib/luxe';
-import { formatLKRM, cloudinary, BRAND_STRIP, PLANNER } from '../lib/luxe-config';
+import { formatLKRM, imageUrl, BRAND_STRIP, PLANNER } from '../lib/luxe-config';
 import {
   collectionShortLabel,
   normalizeBathroomDesignIdentity,
@@ -63,8 +63,8 @@ const FAQ = [
 
     {heroProject ? (
       <div class="st-slider lxr" id="st-slider" style="--pos: 50%">
-        <img class="st-after" src={cloudinary(heroProject.after_image_url!, 1000)} alt="After" width="1000" height="670" />
-        <div class="st-before-clip"><img src={cloudinary(heroProject.before_image_url!, 1000)} alt="Before" width="1000" height="670" /></div>
+        <img class="st-after" src={imageUrl(heroProject.after_image_url!, 1000, 670)} alt="After" width="1000" height="670" />
+        <div class="st-before-clip"><img src={imageUrl(heroProject.before_image_url!, 1000, 670)} alt="Before" width="1000" height="670" /></div>
         <div class="st-handle" aria-hidden="true"><span></span></div>
         <span class="st-lb st-lb--b">Before</span>
         <span class="st-lb st-lb--a">After</span>
@@ -84,7 +84,7 @@ const FAQ = [
         {featured.map((d) => (
           <a href={`/designs/${d.slug}`} class="st-design lxr">
             <div class="st-design-img">
-              <img src={cloudinary(d.cover_image_url!, 600)} alt={d.name} loading="lazy" width="600" height="430" />
+              <img src={imageUrl(d.cover_image_url!, 600, 430)} alt={d.name} loading="lazy" width="600" height="430" />
             </div>
             <div class="st-design-body">
               <p class="lx-eyebrow">{collectionShortLabel(d.collection)}</p>

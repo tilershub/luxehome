@@ -9,7 +9,7 @@ import {
   normalizeBathroomDesignIdentity,
 } from '../lib/bathroom-taxonomy';
 import {
-  cloudinary,
+  imageUrl,
   formatLKRM,
   formatArea,
   lkrM,
@@ -126,7 +126,7 @@ const projects = (await getProjects())
 <LuxeLayout
   title="Luxury Bathroom Design & Construction in Sri Lanka — LUXEhome"
   description="Explore complete LUXEhome bathrooms and apply for a complimentary consultation. The LKR 50,000 detailed proposal is fully credited if LUXEhome builds."
-  ogImage={heroCover ? cloudinary(heroCover, 1200) : undefined}
+  ogImage={heroCover ? imageUrl(heroCover, 1200) : undefined}
   ogImageAlt={heroDesign ? `${heroDesign.name} bathroom by LUXEhome` : undefined}
   viewContent={{
     content_name: 'LUXEhome complete bathroom service',
@@ -138,7 +138,7 @@ const projects = (await getProjects())
     {heroCover ? (
       <img
         class="spa-hero-image"
-        src={cloudinary(heroCover, 1800)}
+        src={imageUrl(heroCover, 1800, 1125)}
         alt={`${heroDesign?.name ?? 'LUXEhome'} modern bathroom interior`}
         width="1800"
         height="1125"
@@ -226,7 +226,7 @@ const projects = (await getProjects())
         <a class="spa-design-card lxr" href={`/designs/${design.slug}`} aria-label={`Explore the ${design.name} bathroom design`}>
           <div class="spa-design-media">
             <img
-              src={cloudinary(design.cover, 760)}
+              src={imageUrl(design.cover, 760, 608)}
               alt={`${design.name} bathroom design`}
               loading="lazy"
               width="760"
@@ -458,7 +458,7 @@ const projects = (await getProjects())
   {heroCover && (
     <section class="spa-final" aria-labelledby="spa-final-title">
       <img
-        src={cloudinary(heroCover, 1600)}
+        src={imageUrl(heroCover, 1600, 1000)}
         alt={`${heroDesign?.name ?? 'Published LUXEhome'} bathroom design`}
         width="1600"
         height="1000"

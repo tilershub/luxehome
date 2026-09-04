@@ -3,7 +3,7 @@ export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import { getProjectBySlug, youtubeEmbed, isYouTubeShort, type ProjectFull } from '../../lib/luxe';
-import { cloudinary, absoluteUrl } from '../../lib/luxe-config';
+import { imageUrl, absoluteUrl } from '../../lib/luxe-config';
 
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);
@@ -26,7 +26,7 @@ const videoSchema = (primaryVideo && project.after_image_url) ? JSON.stringify({
   '@type': 'VideoObject',
   name: `${project.title} — completed bathroom walkthrough`,
   description: `A walkthrough of the completed ${project.title} bathroom by LUXEhome${project.location ? `, ${project.location}` : ''}.`,
-  thumbnailUrl: [absoluteUrl(cloudinary(project.after_image_url, 1200))],
+  thumbnailUrl: [absoluteUrl(imageUrl(project.after_image_url, 1200))],
   uploadDate: project.created_at ?? undefined,
   embedUrl: primaryVideo,
   publisher: { '@type': 'Organization', name: 'LUXEhome', url: 'https://luxehome.lk' },
@@ -50,7 +50,7 @@ const reviewSchema = project.rating ? JSON.stringify({
 <LuxeLayout
   title={`${project.title} — Project Story | LUXEhome`}
   description={`${project.title}${project.location ? `, ${project.location}` : ''} — the full LUXEhome project story: before and after, the week-by-week journey, what we found on site and how we fixed it.`}
-  ogImage={project.after_image_url ? cloudinary(project.after_image_url, 1200) : undefined}
+  ogImage={project.after_image_url ? imageUrl(project.after_image_url, 1200) : undefined}
   ogImageAlt={`${project.title} — completed LUXEhome bathroom${project.location ? `, ${project.location}` : ''}`}
 >
   <Fragment slot="head">
@@ -76,9 +76,9 @@ const reviewSchema = project.rating ? JSON.stringify({
   {hasSlider ? (
     <section class="ps-slider-wrap lxr">
       <div class="ps-slider" id="ba-slider" style={`--pos: 50%`}>
-        <img class="ps-after" src={cloudinary(project.after_image_url!, 1200)} alt={`${project.title} — after`} width="1200" height="800" />
+        <img class="ps-after" src={imageUrl(project.after_image_url!, 1200, 800)} alt={`${project.title} — after`} width="1200" height="800" />
         <div class="ps-before-clip">
-          <img class="ps-before" src={cloudinary(project.before_image_url!, 1200)} alt={`${project.title} — before`} width="1200" height="800" />
+          <img class="ps-before" src={imageUrl(project.before_image_url!, 1200, 800)} alt={`${project.title} — before`} width="1200" height="800" />
         </div>
         <div class="ps-handle" aria-hidden="true"><span></span></div>
         <span class="ps-label ps-label--before">Before</span>
@@ -88,7 +88,7 @@ const reviewSchema = project.rating ? JSON.stringify({
     </section>
   ) : project.after_image_url && (
     <section class="ps-slider-wrap lxr">
-      <img class="ps-single" src={cloudinary(project.after_image_url, 1200)} alt={project.title} width="1200" height="800" />
+      <img class="ps-single" src={imageUrl(project.after_image_url, 1200, 800)} alt={project.title} width="1200" height="800" />
     </section>
   )}
 
@@ -136,7 +136,7 @@ const reviewSchema = project.rating ? JSON.stringify({
           <VideoCard
             title={`${project.title} — Episode 01`}
             embedUrl={episode1}
-            coverImage={cloudinary(project.before_image_url || projectVideoCover, 700)}
+            coverImage={imageUrl(project.before_image_url || projectVideoCover, 700)}
             portrait={isYouTubeShort(project.episode_1_url)}
             eyebrow="Old space to 3D design"
             description="Tap to watch episode one in its original vertical format."
@@ -146,7 +146,7 @@ const reviewSchema = project.rating ? JSON.stringify({
           <VideoCard
             title={`${project.title} — Episode 02`}
             embedUrl={episode2}
-            coverImage={cloudinary(project.after_image_url || projectVideoCover, 700)}
+            coverImage={imageUrl(project.after_image_url || projectVideoCover, 700)}
             portrait={isYouTubeShort(project.episode_2_url)}
             eyebrow="Completed bathroom tour"
             description="Tap to watch the final reveal in its original vertical format."
@@ -173,7 +173,7 @@ const reviewSchema = project.rating ? JSON.stringify({
           <VideoCard
             title={`${project.title} — Project Walkthrough`}
             embedUrl={video}
-            coverImage={cloudinary(projectVideoCover, 700)}
+            coverImage={imageUrl(projectVideoCover, 700)}
             portrait={isYouTubeShort(project.video_url)}
             eyebrow="Project walkthrough"
             description="Tap to watch the vertical project walkthrough."
@@ -183,7 +183,7 @@ const reviewSchema = project.rating ? JSON.stringify({
       {project.gallery.length > 0 && (
         <div class="ps-gallery">
           {project.gallery.map((g, i) => (
-            <img class="lxr" src={cloudinary(g.image_url, 600)} alt={`${project.title} — photo ${i + 1}`} loading="lazy" width="600" height="450" />
+            <img class="lxr" src={imageUrl(g.image_url, 600, 450)} alt={`${project.title} — photo ${i + 1}`} loading="lazy" width="600" height="450" />
           ))}
         </div>
       )}
@@ -212,7 +212,7 @@ const reviewSchema = project.rating ? JSON.stringify({
             {(j.image_urls ?? []).length > 0 && (
               <div class="ps-j-photos">
                 {(j.image_urls ?? []).map((url, i) => (
-                  <img src={cloudinary(url, 500)} alt={`${project.title} — ${j.stage}, photo ${i + 1}`} loading="lazy" width="500" height="375" />
+                  <img src={imageUrl(url, 500, 375)} alt={`${project.title} — ${j.stage}, photo ${i + 1}`} loading="lazy" width="500" height="375" />
                 ))}
               </div>
             )}
@@ -231,7 +231,7 @@ const reviewSchema = project.rating ? JSON.stringify({
           <div class="ps-crew-card">
             <div class="ps-crew-photo">
               {c.photo_url
-                ? <img src={cloudinary(c.photo_url, 200)} alt={c.name} loading="lazy" width="200" height="200" />
+                ? <img src={imageUrl(c.photo_url, 200, 200)} alt={c.name} loading="lazy" width="200" height="200" />
                 : <span>{c.name.charAt(0)}</span>}
             </div>
             <div>
@@ -256,7 +256,7 @@ const reviewSchema = project.rating ? JSON.stringify({
         {project.review_by && <cite>— {project.review_by}</cite>}
         {project.review_screenshot_url && (
           <figure class="ps-review-proof">
-            <img src={cloudinary(project.review_screenshot_url, 700)} alt={`Google review by ${project.review_by ?? 'the client'}`} loading="lazy" width="700" height="400" />
+            <img src={imageUrl(project.review_screenshot_url, 700, 400)} alt={`Google review by ${project.review_by ?? 'the client'}`} loading="lazy" width="700" height="400" />
             <figcaption>Verified Google review</figcaption>
           </figure>
         )}

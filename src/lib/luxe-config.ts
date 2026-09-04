@@ -48,13 +48,33 @@ export function formatArea(value: number | string | null | undefined): string | 
   return Number.isFinite(n) ? String(n) : String(value);
 }
 
-/** Cloudinary delivery helper: f_auto,q_auto + width on Cloudinary URLs,
-    pass-through for everything else. */
-export function cloudinary(url: string | null | undefined, width?: number): string {
+/* Image delivery through Cloudflare's transformation endpoint.
+
+   CMS images are stored once, at up to 2200px, so every page used to download
+   the full original however small it rendered — the previous helper only
+   rewrote Cloudinary URLs and silently passed Supabase Storage through
+   untouched, which is every image the CMS produces. Asking for a width here
+   is what actually makes that width apply.
+
+   The URL stays relative so it resolves on any host the site is served from.
+   `height` is for slots that crop to a fixed box: without it the source keeps
+   its own aspect ratio and CSS does the cropping, which can hand `object-fit`
+   too few pixels to fill a taller frame. */
+export function imageUrl(
+  url: string | null | undefined,
+  width?: number,
+  height?: number,
+): string {
   if (!url) return '';
-  if (!url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
-  const t = width ? `f_auto,q_auto,w_${width}` : 'f_auto,q_auto';
-  return url.replace('/upload/', `/upload/${t}/`);
+  // No width means the caller wants the original untouched.
+  if (!width) return url;
+  // Already transformed, or a source Cloudflare cannot fetch (data:/blob:
+  // previews in the admin, bare filenames).
+  if (url.includes('/cdn-cgi/image/') || !/^(https?:\/\/|\/)/i.test(url)) return url;
+  const fit = height ? `,height=${height},fit=cover` : ',fit=scale-down';
+  const options = `width=${width},quality=80,format=auto${fit}`;
+  // A leading slash would produce a double slash after the options segment.
+  return `/cdn-cgi/image/${options}/${url.replace(/^\//, '')}`;
 }
 
 /** Fixture category presets per space (admin dropdown suggestions;

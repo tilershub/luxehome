@@ -5,7 +5,7 @@ export const prerender = false;
 
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getPublishedPosts, readingTime, excerptOf, formatPostDate } from '../../lib/luxe-blog';
-import { cloudinary } from '../../lib/luxe-config';
+import { imageUrl } from '../../lib/luxe-config';
 
 const posts = await getPublishedPosts();
 const categories = [...new Set(posts.map((post) => post.category).filter(Boolean))] as string[];
@@ -58,7 +58,7 @@ const [featured, ...rest] = filtered;
       <a class="journal-featured-card" href={`/blog/${featured.slug}`}>
         <div class="journal-featured-art">
           {featured.cover_image
-            ? <img src={cloudinary(featured.cover_image, 1000)} alt="" width="1000" height="640" fetchpriority="high" />
+            ? <img src={imageUrl(featured.cover_image, 1000, 640)} alt="" width="1000" height="640" fetchpriority="high" />
             : <span aria-hidden="true">Journal</span>}
         </div>
         <div class="journal-featured-body">
@@ -81,7 +81,7 @@ const [featured, ...rest] = filtered;
           <a class="journal-card lxr" href={`/blog/${post.slug}`}>
             <div class="journal-card-art">
               {post.cover_image
-                ? <img src={cloudinary(post.cover_image, 700)} alt="" loading="lazy" width="700" height="480" />
+                ? <img src={imageUrl(post.cover_image, 700, 480)} alt="" loading="lazy" width="700" height="480" />
                 : <span aria-hidden="true">{post.category ?? 'Journal'}</span>}
             </div>
             <div class="journal-card-body">
