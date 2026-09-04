@@ -7,7 +7,7 @@ export const prerender = false;
 import { marked } from 'marked';
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getPublishedPost, getPublishedPosts, readingTime, excerptOf, formatPostDate } from '../../lib/luxe-blog';
-import { cloudinary } from '../../lib/luxe-config';
+import { imageUrl } from '../../lib/luxe-config';
 
 const { slug } = Astro.params;
 const post = slug ? await getPublishedPost(slug) : null;
@@ -61,7 +61,7 @@ const jsonLd = JSON.stringify({
 
     {post.cover_image && (
       <figure class="post-cover">
-        <img src={cloudinary(post.cover_image, 1400)} alt="" width="1400" height="800" fetchpriority="high" />
+        <img src={imageUrl(post.cover_image, 1400, 800)} alt="" width="1400" height="800" fetchpriority="high" />
       </figure>
     )}
 
@@ -91,7 +91,7 @@ const jsonLd = JSON.stringify({
           <a class="post-related-card lxr" href={`/blog/${item.slug}`}>
             <div class="post-related-art">
               {item.cover_image
-                ? <img src={cloudinary(item.cover_image, 600)} alt="" loading="lazy" width="600" height="400" />
+                ? <img src={imageUrl(item.cover_image, 600, 400)} alt="" loading="lazy" width="600" height="400" />
                 : <span aria-hidden="true">{item.category ?? 'Journal'}</span>}
             </div>
             <div class="post-related-body">

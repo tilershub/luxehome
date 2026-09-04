@@ -2,7 +2,7 @@
 export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getDesigns } from '../../lib/luxe';
-import { formatLKRM, cloudinary , formatArea } from '../../lib/luxe-config';
+import { formatLKRM, imageUrl , formatArea } from '../../lib/luxe-config';
 import {
   BATHROOM_COLLECTIONS,
   normalizeBathroomDesignIdentity,
@@ -19,7 +19,7 @@ const collections = BATHROOM_COLLECTIONS;
 <LuxeLayout
   title="Bathroom Designs — Complete Design Files | LUXEhome"
   description="Browse fully developed LUXEhome bathroom designs with room-size guidance, new and renovation starting prices, renders, technical drawings, fixtures and warranties."
-  ogImage={designs[0]?.cover_image_url ? cloudinary(designs[0].cover_image_url, 1200) : undefined}
+  ogImage={designs[0]?.cover_image_url ? imageUrl(designs[0].cover_image_url, 1200) : undefined}
   ogImageAlt="LUXEhome bathroom design collection"
   viewContent={{
     content_name: 'Design collection',
@@ -60,7 +60,7 @@ const collections = BATHROOM_COLLECTIONS;
               {group.map((design) => (
                 <a href={`/designs/${design.slug}`} class="dz-card lxr">
                   <div class="dz-card-img">
-                    <img src={cloudinary(design.cover_image_url, 800)} alt={`${design.name} bathroom design`} loading="lazy" width="800" height="600" />
+                    <img src={imageUrl(design.cover_image_url, 800, 600)} alt={`${design.name} bathroom design`} loading="lazy" width="800" height="600" />
                     <span class="dz-badge">{formatArea(design.min_sqm) ? `Minimum ${formatArea(design.min_sqm)} m²` : 'Custom fit'}</span>
                   </div>
                   <div class="dz-card-body">

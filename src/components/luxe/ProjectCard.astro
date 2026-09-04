@@ -1,6 +1,6 @@
 ---
 import type { LuxeProject } from '../../lib/luxe';
-import { cloudinary } from '../../lib/luxe-config';
+import { imageUrl } from '../../lib/luxe-config';
 
 interface Props {
   project: LuxeProject;
@@ -14,7 +14,7 @@ const cover = project.after_image_url || project.before_image_url;
 <a href={`/projects/${project.slug}`} class:list={['lp-card', { 'lp-card--compact': compact }]}>
   <div class="lp-cover">
     {cover
-      ? <img src={cloudinary(cover, 800)} alt={`${project.title} — completed LUXEhome project`} loading="lazy" width="800" height="560" />
+      ? <img src={imageUrl(cover, 800, 560)} alt={`${project.title} — completed LUXEhome project`} loading="lazy" width="800" height="560" />
       : <div class="lp-placeholder"><strong>LUXE</strong><em>home</em></div>}
     <span class="lp-badge">Completed project</span>
   </div>

@@ -73,6 +73,22 @@ Astro.response.headers.set(
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#F7F3EB" />
     <script>document.documentElement.classList.add('js');</script>
+
+    <!-- Images are requested through Cloudflare's transformation endpoint. If a
+         transform cannot be served — the product disabled, or a source origin
+         not yet allowed — fall the element back to the original file once so a
+         misconfiguration costs bandwidth rather than every picture on the page.
+         Registered here so it is listening before any <img> below can fail. -->
+    <script is:inline>
+      document.addEventListener('error', function (e) {
+        var img = e.target;
+        if (!img || img.tagName !== 'IMG' || img.dataset.originalSrc) return;
+        var m = /\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(img.src || '');
+        if (!m) return;
+        img.dataset.originalSrc = '1';
+        img.src = /^https?:\/\//i.test(m[1]) ? m[1] : '/' + m[1];
+      }, true);
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />

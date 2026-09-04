@@ -7,7 +7,7 @@ import KeyHighlights from '../../components/luxe/KeyHighlights.astro';
 import BuildProcess from '../../components/luxe/BuildProcess.astro';
 import SwipeCarouselController from '../../components/luxe/SwipeCarouselController.astro';
 import { getDesignBySlug, getProjects, youtubeEmbed, isYouTubeShort, type DesignFull } from '../../lib/luxe';
-import { formatLKRM, lkrM, cloudinary, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PROJECT_CONSULTATION, PROJECT_INITIATION, formatArea, absoluteUrl } from '../../lib/luxe-config';
+import { formatLKRM, lkrM, imageUrl, FIXTURE_CATEGORIES, WARRANTY_SCHEDULE, STANDARD_DRAWINGS, PROJECT_CONSULTATION, PROJECT_INITIATION, formatArea, absoluteUrl } from '../../lib/luxe-config';
 import {
   collectionShortLabel,
   LEGACY_BATHROOM_DESIGN_REDIRECTS,
@@ -167,7 +167,7 @@ const videoSchema = (video3d && design.cover_image_url) ? JSON.stringify({
   '@type': 'VideoObject',
   name: `${design.name} — 3D bathroom walkthrough`,
   description: `A vertical 3D walkthrough of the ${design.name} ${collectionLabel} bathroom by LUXEhome: vanity, water closet, shower and the complete room.`,
-  thumbnailUrl: [absoluteUrl(cloudinary(design.cover_image_url, 1200))],
+  thumbnailUrl: [absoluteUrl(imageUrl(design.cover_image_url, 1200))],
   uploadDate: design.created_at ?? undefined,
   // contentUrl must be a media file. While the video is hosted on YouTube,
   // embedUrl alone is correct; self-hosting an MP4 would add contentUrl.
@@ -181,7 +181,7 @@ const productSchema = JSON.stringify({
   '@type': 'Product',
   name: `${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design`,
   description: design.tagline ?? design.description ?? '',
-  ...(design.cover_image_url ? { image: cloudinary(design.cover_image_url, 1200) } : {}),
+  ...(design.cover_image_url ? { image: imageUrl(design.cover_image_url, 1200) } : {}),
   brand: { '@type': 'Brand', name: 'LUXEhome' },
   ...(design.starting_price_lkr > 0 ? { offers: {
     '@type': 'Offer',
@@ -196,7 +196,7 @@ const productSchema = JSON.stringify({
 <LuxeLayout
   title={`${design.name} — ${collectionLabel} ${design.space?.name ?? ''} Design | ${priceLabel} | LUXEhome`}
   description={`${design.name}: ${designSummary}. ${priceLabel}. Walk through the renders, fixtures, drawings and pricing, then start the LKR 50,000 project initiation for your bathroom.`}
-  ogImage={design.cover_image_url ? cloudinary(design.cover_image_url, 1200) : undefined}
+  ogImage={design.cover_image_url ? imageUrl(design.cover_image_url, 1200) : undefined}
   ogImageAlt={`${design.name} — ${collectionLabel} bathroom design by LUXEhome`}
   viewContent={{
     content_name: design.name,
@@ -218,7 +218,7 @@ const productSchema = JSON.stringify({
   <!-- HERO · THE DOORWAY -->
   <header class="wx-hero" id="wx-hero">
     <div class="wx-hero-media" id="wx-hero-media">
-      <img src={cloudinary(design.cover_image_url, 1600)} alt={`${design.name} — the view from the doorway`} width="1600" height="1000" fetchpriority="high" />
+      <img src={imageUrl(design.cover_image_url, 1600, 1000)} alt={`${design.name} — the view from the doorway`} width="1600" height="1000" fetchpriority="high" />
     </div>
     <div class="wx-hero-shade" aria-hidden="true"></div>
     <div class="wx-hero-copy">
@@ -255,7 +255,7 @@ const productSchema = JSON.stringify({
       <div class="wx-name-grid">
         <div class="wx-name-flower">
           {design.inspiration_image_url
-            ? <img src={cloudinary(design.inspiration_image_url, 420)} alt={`The ${design.name} flower — the inspiration behind this design`} loading="lazy" width="420" height="420" />
+            ? <img src={imageUrl(design.inspiration_image_url, 420, 420)} alt={`The ${design.name} flower — the inspiration behind this design`} loading="lazy" width="420" height="420" />
             : <span aria-hidden="true">{design.name.charAt(0)}</span>}
         </div>
         <div>
@@ -285,7 +285,7 @@ const productSchema = JSON.stringify({
       >
         {steps.map((step) => (
           <div class="wx-step" data-swipe-slide>
-            <img src={cloudinary(step.image, 1600)} alt={`${design.name} — ${step.title}`} loading="lazy" width="1600" height="1000" />
+            <img src={imageUrl(step.image, 1600, 1000)} alt={`${design.name} — ${step.title}`} loading="lazy" width="1600" height="1000" />
             <div class="wx-step-shade" aria-hidden="true"></div>
             <div class="wx-step-copy">
               <div>
@@ -342,7 +342,7 @@ const productSchema = JSON.stringify({
               >
                 <div class:list={['wxf-card-media', { 'is-room-image': usesRoomImage }]}>
                   <img
-                    src={cloudinary(cardImage, 900)}
+                    src={imageUrl(cardImage, 900, 1125)}
                     alt={f.image_alt || (usesRoomImage
                       ? `${f.name} in the ${design.name} bathroom design`
                       : `${f.brand ? `${f.brand} ` : ''}${f.name}`)}
@@ -464,7 +464,7 @@ const productSchema = JSON.stringify({
           {materialsWithPhotos.map((m) => (
             <figure class="wx-mat">
               <div class="wx-mat-img">
-                <img src={cloudinary(m.image_url!, 700)} alt={`${m.brand}${m.item ? ` — ${m.item}` : ''}`} loading="lazy" width="700" height="875" />
+                <img src={imageUrl(m.image_url!, 700, 875)} alt={`${m.brand}${m.item ? ` — ${m.item}` : ''}`} loading="lazy" width="700" height="875" />
               </div>
               <figcaption>
                 <span>{m.brand}</span>
@@ -552,7 +552,7 @@ const productSchema = JSON.stringify({
         <VideoCard
           title={`${design.name} 3D Walkthrough`}
           embedUrl={video3d}
-          coverImage={cloudinary(design.cover_image_url, 700)}
+          coverImage={imageUrl(design.cover_image_url, 700)}
           portrait={isYouTubeShort(design.video_3d_url)}
           eyebrow="3D walkthrough"
           description="Tap to watch the complete vertical walkthrough."
