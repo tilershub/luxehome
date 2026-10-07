@@ -207,6 +207,7 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
   const { data: project } = await c.from('lx_projects')
     .select('*, design:lx_designs(slug,name,collection)')
     .eq('slug', slug)
+    .eq('published', true)
     .maybeSingle();
   if (!project) return null;
 
