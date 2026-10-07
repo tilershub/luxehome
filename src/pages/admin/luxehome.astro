@@ -143,6 +143,7 @@
 
   <script>
     import { createClient } from '@supabase/supabase-js';
+    import { sendAdminSignInLink } from '../../lib/luxe-admin-sign-in';
     import { FIXTURE_CATEGORIES, DEFAULT_MATERIALS, DEFAULT_JOURNEY_STAGES, COMPLETENESS_CHECKS } from '../../lib/luxe-config';
 
     const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
@@ -227,7 +228,7 @@
           document.getElementById('li-status').textContent = 'Enter your authorised email address.';
           return;
         }
-        const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + '/admin/luxehome', shouldCreateUser: true } });
+        const error = await sendAdminSignInLink(sb, email, location.origin + '/admin/luxehome');
         document.getElementById('li-status').textContent = error ? error.message : `Check ${email} and open the secure sign-in link.`;
       });
       return false;

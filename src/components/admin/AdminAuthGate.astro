@@ -13,6 +13,7 @@
 <script>
   import { createClient } from '@supabase/supabase-js';
   import { LUXE_SUPABASE_KEY as key, LUXE_SUPABASE_URL as url } from '../../lib/luxe-supabase';
+  import { sendAdminSignInLink } from '../../lib/luxe-admin-sign-in';
   const gate=document.getElementById('admin-auth-gate'),form=document.getElementById('admin-magic-form'),emailInput=document.getElementById('admin-magic-email'),status=document.getElementById('admin-magic-status');
   if(!url||!key){status.textContent='Supabase is not configured.'}
   else{
@@ -23,7 +24,7 @@
       event.preventDefault();const email=emailInput.value.trim().toLowerCase();const button=form.querySelector('button');
       if(!email){status.textContent='Enter your authorised email address.';return}
       button.disabled=true;emailInput.disabled=true;status.textContent='Sending secure link…';
-      const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+'/admin/',shouldCreateUser:true}});
+      const error=await sendAdminSignInLink(sb,email,location.origin+'/admin/');
       status.textContent=error?error.message:`Check ${email} and open the sign-in link on this device.`;
       emailInput.disabled=false;
       button.disabled=false;
