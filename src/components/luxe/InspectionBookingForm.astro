@@ -1,14 +1,4 @@
 ---
-import { getDesigns } from '../../lib/luxe';
-import { normalizeBathroomDesignIdentity } from '../../lib/bathroom-taxonomy';
-
-const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
-const bathroomDesignNames = [...new Set(
-  storedDesigns
-    .filter((design) => design.cover_image_url)
-    .map(normalizeBathroomDesignIdentity)
-    .map((design) => design.name),
-)];
 ---
 
 <div class="ibf-wrap">
@@ -63,18 +53,6 @@ const bathroomDesignNames = [...new Set(
       </div>
     </fieldset>
 
-    <label>
-      <span>Preferred LUXEhome design <small>(optional)</small></span>
-      <input id="inspection-design" type="text" name="preferred_design" list="inspection-designs" placeholder="Choose a design or leave this blank" />
-      <datalist id="inspection-designs">
-        {bathroomDesignNames.map((name) => <option value={name}></option>)}
-      </datalist>
-    </label>
-    <div class="ibf-selected-design" id="inspection-selected-design" hidden>
-      <span>Selected from the design page</span>
-      <strong id="inspection-selected-design-name"></strong>
-    </div>
-
     <fieldset>
       <legend>Do you know the bathroom size?</legend>
       <div class="ibf-choice-grid ibf-choice-grid--two">
@@ -90,7 +68,7 @@ const bathroomDesignNames = [...new Set(
 
     <fieldset>
       <legend>What investment range are you considering for this complete bathroom? <b aria-hidden="true">*</b></legend>
-      <p class="ibf-field-note">Published LUXEhome complete-bathroom guides typically start around LKR 1.5M.</p>
+      <p class="ibf-field-note">BathSpace complete renovations typically begin around LKR 1.5M, depending on the room and approved scope.</p>
       <div class="ibf-choice-grid">
         <label><input type="radio" name="budget_direction" value="Below LKR 1.5M" required /><span>Below LKR 1.5M</span></label>
         <label><input type="radio" name="budget_direction" value="LKR 1.5M–2M" /><span>LKR 1.5M–2M</span></label>
@@ -113,7 +91,7 @@ const bathroomDesignNames = [...new Set(
     <label>
       <span>Anything we should know? <small>(optional)</small></span>
       <textarea name="notes" rows="4" placeholder="Current problems, access, timeline, style preferences or other details"></textarea>
-      <small class="ibf-help">You can attach current bathroom photos and the Reel or design that inspired you after WhatsApp opens.</small>
+      <small class="ibf-help">You can attach current bathroom photos and the Reel, project or bathroom style that inspired you after WhatsApp opens.</small>
     </label>
 
     <div class="ibf-fee">
@@ -125,7 +103,7 @@ const bathroomDesignNames = [...new Set(
         <li>Every application is reviewed before a site appointment is offered</li>
         <li>Approved complete projects include one detailed site assessment</li>
         <li>The detailed design and construction proposal is a separate LKR 50,000 stage after consultation</li>
-        <li>The proposal fee is credited in full if LUXEhome builds that bathroom</li>
+        <li>The proposal fee is credited in full if BathSpace by LUXEhome builds that bathroom</li>
       </ul>
     </div>
 
@@ -138,8 +116,8 @@ const bathroomDesignNames = [...new Set(
       <span>Apply for Consultation</span>
       <span hidden>Preparing your request…</span>
     </button>
-    <p class="ibf-footnote">Have several bathrooms? Begin the application with the first bathroom you want LUXEhome to assess.</p>
-    <p class="ibf-privacy">By submitting, you ask LUXEhome to contact you about this project by WhatsApp and, if provided, email. See our <a href="/privacy-policy">Privacy Policy</a>.</p>
+    <p class="ibf-footnote">Have several bathrooms? Begin the application with the first bathroom you want BathSpace to assess.</p>
+    <p class="ibf-privacy">By submitting, you ask BathSpace by LUXEhome to contact you about this project by WhatsApp and, if provided, email. See our <a href="/privacy-policy">Privacy Policy</a>.</p>
   </form>
 </div>
 
@@ -153,17 +131,8 @@ const bathroomDesignNames = [...new Set(
   const form = document.getElementById('inspection-request-form') as HTMLFormElement | null;
   const success = document.getElementById('inspection-success') as HTMLElement | null;
   const submit = document.getElementById('inspection-submit') as HTMLButtonElement | null;
-  const designInput = document.getElementById('inspection-design') as HTMLInputElement | null;
-  const selectedDesign = document.getElementById('inspection-selected-design') as HTMLElement | null;
-  const selectedDesignName = document.getElementById('inspection-selected-design-name') as HTMLElement | null;
   const sizeField = document.getElementById('inspection-size-field') as HTMLElement | null;
   const backupLink = document.getElementById('inspection-whatsapp-backup') as HTMLAnchorElement | null;
-
-  function titleFromSlug(value: string) {
-    return value
-      .replace(/[-_]+/g, ' ')
-      .replace(/\b\w/g, (letter) => letter.toUpperCase());
-  }
 
   function formValue(data: FormData, key: string) {
     return data.get(key)?.toString().trim() ?? '';
@@ -177,15 +146,8 @@ const bathroomDesignNames = [...new Set(
 
   if (form) {
     const params = new URLSearchParams(window.location.search);
-    const design = params.get('design');
     const project = params.get('project');
-
-    if (design && designInput && selectedDesign && selectedDesignName) {
-      const designName = titleFromSlug(design);
-      designInput.value = designName;
-      selectedDesignName.textContent = designName;
-      selectedDesign.hidden = false;
-    }
+    const sourceProject = params.get('source_project') || '';
 
     const projectValues: Record<string, string> = {
       renovation: 'Bathroom renovation',
@@ -214,7 +176,6 @@ const bathroomDesignNames = [...new Set(
       const email = formValue(data, 'email');
       const location = formValue(data, 'location');
       const projectType = formValue(data, 'project_type');
-      const preferredDesign = formValue(data, 'preferred_design');
       const sizeStatus = formValue(data, 'size_status') || 'Please measure during approved site assessment';
       const approximateSize = formValue(data, 'approximate_size');
       const budgetDirection = formValue(data, 'budget_direction');
@@ -235,24 +196,24 @@ const bathroomDesignNames = [...new Set(
         detailed_proposal_fee_lkr: '50000',
         proposal_scope: 'One bathroom',
         proposal_delivery: 'Within seven working days after proposal payment and the completed consultation',
-        construction_credit: '100% credited to the related LUXEhome construction balance',
+        construction_credit: '100% credited to the related BathSpace construction balance',
         payment_status: 'No payment requested for consultation application',
       };
+      if (sourceProject) details.source_project = sourceProject;
       if (email) details.email = email;
-      if (preferredDesign) details.preferred_design = preferredDesign;
       if (approximateSize) details.approximate_size = approximateSize;
 
       const queueNotes = [
         `Project: ${projectType}`,
         `Investment range: ${budgetDirection}`,
         `Desired start: ${projectTiming}`,
-        preferredDesign ? `Preferred design: ${preferredDesign}` : 'Preferred design: Please recommend',
+        sourceProject ? `Source project: ${sourceProject}` : '',
         `Measurements: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
         'Consultation: Complimentary, subject to suitability approval; one site assessment included if approved',
         'Detailed proposal: LKR 50,000 for one bathroom, commissioned only after consultation',
         'Proposal: five design images, materials, timeline, quality, warranties, final quotation and 3D video link',
         'Delivery: within seven working days after proposal payment and completed consultation',
-        'Construction credit: 100% credited if LUXEhome builds this bathroom',
+        'Construction credit: 100% credited if BathSpace by LUXEhome builds this bathroom',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
 
@@ -313,7 +274,7 @@ const bathroomDesignNames = [...new Set(
       }).catch(() => {});
 
       const message = [
-        'Bathroom Consultation Application — LUXEHOME',
+        'Bathroom Consultation Application — BATHSPACE BY LUXEHOME',
         '',
         `Name: ${name}`,
         `Phone: ${phone}`,
@@ -322,12 +283,12 @@ const bathroomDesignNames = [...new Set(
         `Project: ${projectType}`,
         `Investment range: ${budgetDirection}`,
         `Desired start: ${projectTiming}`,
-        `Preferred design: ${preferredDesign || 'Please recommend one'}`,
+        sourceProject ? `Source project: ${sourceProject}` : '',
         `Bathroom size: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
         'Consultation: No fee; site assessment subject to suitability approval',
         'Detailed proposal after consultation: LKR 50,000 for one bathroom',
         'Proposal delivery: within seven working days after payment and completed consultation',
-        'Construction credit: 100% credited if LUXEhome builds this bathroom',
+        'Construction credit: 100% credited if BathSpace by LUXEhome builds this bathroom',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
       const whatsappUrl = `https://wa.me/94774503744?text=${encodeURIComponent(message)}`;
@@ -404,16 +365,6 @@ const bathroomDesignNames = [...new Set(
   }
   .ibf-choice-grid input { flex: 0 0 auto; margin-top: .12rem; accent-color: var(--sage-deep); }
   .ibf-choice-grid label > span { margin: 0; font-size: .9rem; font-weight: 400; line-height: 1.45; }
-  .ibf-selected-design {
-    margin-top: -.35rem;
-    padding: .65rem .8rem;
-    border-left: 3px solid var(--gold);
-    background: var(--sage-mist);
-  }
-  .ibf-selected-design span,
-  .ibf-selected-design strong { display: block; }
-  .ibf-selected-design span { color: var(--sage-deep); font-size: .78rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
-  .ibf-selected-design strong { margin-top: .15rem; font: 600 1.05rem var(--lx-serif); }
   .ibf-help { display: block; margin-top: .35rem; color: color-mix(in srgb, var(--ink) 70%, transparent); font-size: .82rem; }
   .ibf-fee {
     display: grid;
