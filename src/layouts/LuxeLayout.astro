@@ -1,5 +1,5 @@
 ---
-/* LUXEhome catalogue layout — the new brand system:
+/* BathSpace by LUXEhome public layout — project-led bathroom brand system:
    cream/sage/gold palette · Cormorant Garamond + Jost + Noto Sans Sinhala.
    Keeps the site's Meta Pixel, Contact-event tracking, and SEO plumbing. */
 import { WHATSAPP_NUMBER, GA_MEASUREMENT_IDS, absoluteUrl } from '../lib/luxe-config';
@@ -27,8 +27,8 @@ interface Props {
 }
 
 const {
-  title = 'LUXEhome — Complete Bathroom Design & Construction, Sri Lanka',
-  description = 'Explore complete LUXEhome bathrooms and apply for a complimentary consultation. The LKR 50,000 detailed proposal is fully credited if LUXEhome builds.',
+  title = 'BathSpace by LUXEhome — Complete Bathroom Renovation, Sri Lanka',
+  description = 'BathSpace by LUXEhome designs, renovates and delivers complete bathrooms in Sri Lanka through one accountable project team.',
   ogImage = 'https://luxehome.lk/og-bathroom.jpg',
   ogImageAlt,
   bare = false,
@@ -99,7 +99,7 @@ Astro.response.headers.set(
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:site_name" content="LUXEhome" />
+    <meta property="og:site_name" content="BathSpace by LUXEhome" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={shareImage} />
     <meta property="og:image:secure_url" content={shareImage} />
@@ -213,16 +213,15 @@ Astro.response.headers.set(
   <body class="luxe-body">
     {!bare && (
       <header class="lx-nav">
-        <a href="/" class="lx-wordmark" aria-label="LUXEhome — Home"><strong>LUXE</strong><em>home</em></a>
+        <a href="/" class="lx-wordmark" aria-label="BathSpace by LUXEhome — Home"><strong>Bath</strong><em>Space</em><small>by LUXEhome</small></a>
         <nav class="lx-nav-links" aria-label="Main">
           <a href="/">Home</a>
           <a href="/projects">Projects</a>
-          <a href="/designs">Bathrooms</a>
           <a href="/how-it-works">How it works</a>
           <a href="/pricing-guide">Pricing</a>
           <a href="/about">About</a>
           <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a bathroom project.')}`}
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi BathSpace! I would like to talk about a bathroom renovation project.')}`}
             target="_blank" rel="noopener noreferrer"
           >WhatsApp</a>
         </nav>
@@ -238,14 +237,13 @@ Astro.response.headers.set(
       <div class="lx-mobile-menu" id="lx-mobile-menu" hidden>
         <a href="/">Home</a>
         <a href="/projects">Completed projects</a>
-        <a href="/designs">Bathroom designs</a>
         <a href="/how-it-works">How it works</a>
         <a href="/how-we-build">How we build</a>
         <a href="/pricing-guide">Pricing</a>
         <a href="/about">About</a>
         <a href="/book-site-inspection" class="lx-mobile-start">Apply for complimentary consultation</a>
         <a
-          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi LUXEhome! I would like to talk about a project.')}`}
+          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi BathSpace! I would like to talk about a bathroom project.')}`}
           class="lx-mobile-wa" target="_blank" rel="noopener noreferrer"
         >WhatsApp Us</a>
       </div>
@@ -258,10 +256,9 @@ Astro.response.headers.set(
     {!bare && (
       <footer class="lx-footer">
         <div class="lx-footer-inner">
-          <a href="/" class="lx-wordmark lx-wordmark--footer"><strong>LUXE</strong><em>home</em></a>
-          <p class="lx-footer-tag">Complete bathroom design &amp; construction · Sri Lanka<br />A sister brand of TILERSHUB</p>
+          <a href="/" class="lx-wordmark lx-wordmark--footer"><strong>Bath</strong><em>Space</em><small>by LUXEhome</small></a>
+          <p class="lx-footer-tag">Complete bathroom renovation &amp; construction · Sri Lanka<br />BathSpace is the bathroom brand of LUXEhome (Pvt) Ltd.</p>
           <div class="lx-footer-links">
-            <a href="/designs">Bathroom designs</a>
             <a href="/projects">Projects</a>
             <a href="/blog">Journal</a>
             <a href="/how-it-works">How it works</a>
@@ -390,6 +387,7 @@ Astro.response.headers.set(
   }
   .lx-wordmark strong { font-weight: 600; }
   .lx-wordmark em { font-family: var(--lx-serif); font-style: italic; color: var(--sage-deep); font-size: 1.15em; }
+  .lx-wordmark small { display: block; margin-top: -.28rem; font-size: .48em; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 62%, transparent); }
 
   /* ── Nav ── */
   .lx-nav {
@@ -492,6 +490,7 @@ Astro.response.headers.set(
   .lx-footer-inner { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.2rem; }
   .lx-wordmark--footer { color: var(--cream); }
   .lx-wordmark--footer em { color: var(--gold-soft); }
+  .lx-wordmark--footer small { color: color-mix(in srgb, var(--cream) 70%, transparent); }
   .lx-footer-tag { font-size: .95rem; color: color-mix(in srgb, var(--cream) 82%, transparent); }
   .lx-footer-links { display: flex; gap: 1.4rem; flex-wrap: wrap; }
   .lx-footer-links a {
