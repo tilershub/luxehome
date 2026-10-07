@@ -1,19 +1,27 @@
 ---
 export const prerender = false;
 const slug = Astro.params.slug ?? '';
-const avissawellaLegacy = new Set([
-  'sigiriya',
-  'sigiriya-bathroom',
-  'manel',
-  'kuttam-pokuna',
-  'idda',
-]);
-if (avissawellaLegacy.has(slug)) {
-  return Astro.redirect('/projects/avissawella-bathroom-renovation', 301);
-}
-const kotteLegacy = new Set(['nelum', 'bentota']);
-if (kotteLegacy.has(slug)) {
-  return Astro.redirect('/projects/kotte-bathroom-renovation', 301);
-}
-return Astro.redirect('/projects', 301);
+
+const projectRedirects: Record<string, string> = {
+  // Avissawella residence — two completed bathrooms
+  'sigiriya': '/projects/avissawella-bathroom-renovation',
+  'sigiriya-bathroom': '/projects/avissawella-bathroom-renovation',
+  'manel': '/projects/avissawella-bathroom-renovation',
+  'kuttam-pokuna': '/projects/avissawella-bathroom-renovation',
+  'idda': '/projects/avissawella-bathroom-renovation',
+
+  // Matugama
+  'bentota': '/projects/matugama-bathroom-renovation',
+  'nelum': '/projects/matugama-bathroom-renovation',
+
+  // Kegalle
+  'mirissa': '/projects/kegalle-bathroom-renovation',
+  'orchid': '/projects/kegalle-bathroom-renovation',
+
+  // Kotte
+  'yapahuwa': '/projects/kotte-bathroom-renovation',
+  'binara': '/projects/kotte-bathroom-renovation',
+};
+
+return Astro.redirect(projectRedirects[slug] ?? '/projects', 301);
 ---
