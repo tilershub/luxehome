@@ -186,7 +186,7 @@ export const PROJECT_INITIATION = {
   amount: 50_000,
   title: 'Detailed bathroom design & construction proposal',
   copy: 'After the complimentary consultation, commission the complete design and construction proposal for one bathroom.',
-  credit: '100% credited toward the LUXEhome construction balance for that bathroom.',
+  credit: '100% credited toward the BathSpace construction balance for that bathroom.',
   delivery: 'The complete proposal is delivered within seven working days after proposal payment and the completed site consultation.',
   includes: [
     'Detailed bathroom design with five presentation images',
@@ -289,7 +289,7 @@ export const WHY_LUXEHOME = [
 /** LUXEhome's workmanship promise is kept separate from third-party product
     and supplier warranties. These labels are the public single source of truth. */
 export const WARRANTY_SCHEDULE: Array<{ item: string; period: string }> = [
-  { item: 'LUXEhome workmanship',    period: '24 months' },
+  { item: 'BathSpace by LUXEhome workmanship', period: '24 months' },
   { item: 'Handover snag review',    period: '30 days' },
   { item: 'Product warranties',      period: 'Manufacturer terms' },
   { item: 'Supplier-backed systems', period: 'Written per project' },
