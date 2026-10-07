@@ -6,22 +6,22 @@ import { getProjects } from '../../lib/luxe';
 import { waLink, imageUrl } from '../../lib/luxe-config';
 
 const projects = (await getProjects())
-  .filter((project) => project.after_image_url)
+  .filter((project) => project.published && project.after_image_url)
   .sort((a, b) => Number(b.featured) - Number(a.featured));
 ---
 
 <LuxeLayout
-  title="Completed Bathroom Project Stories — LUXEhome"
+  title="Completed Bathroom Renovation Projects — BathSpace by LUXEhome"
   ogImage={projects[0]?.after_image_url ? imageUrl(projects[0].after_image_url, 1200) : undefined}
-  ogImageAlt="Completed LUXEhome bathroom projects in Sri Lanka"
-  description="Real LUXEhome bathroom projects documented from inquiry and design through construction, problem-solving, the team and final handover."
+  ogImageAlt="Completed BathSpace bathroom renovation projects in Sri Lanka"
+  description="Real BathSpace by LUXEhome bathroom renovations documented from the client brief through construction, technical testing and final handover."
 >
   <section class="pj-hero">
-    <p class="lx-eyebrow lxr">Real bathrooms · Complete stories</p>
+    <p class="lx-eyebrow lxr">BathSpace by LUXEhome · Real completed bathrooms</p>
     <h1 class="lxr">From first inquiry<br /><em>to final handover.</em></h1>
     <p class="pj-intro lxr">
-      Every published project shows the design, the existing conditions, what we discovered,
-      how we solved it, the construction journey and the team responsible.
+      See the real bathrooms behind BathSpace: what the client needed, what we changed,
+      how the hidden work was handled, what the project cost and how it was handed over.
     </p>
   </section>
 
@@ -30,8 +30,8 @@ const projects = (await getProjects())
       <div class="pj-empty lxr">
         <h2>Real project stories are being documented.</h2>
         <p>
-          Our completed-project library is being published with the full record—not only final photographs.
-          Each case study will include the brief, construction stages, testing, materials, problem-solving and handover.
+          We are converting our completed bathroom archive into real case studies—not design collections.
+          Each case study will show the brief, construction stages, testing, materials, investment and handover.
         </p>
         <div class="pj-empty-actions">
           <a href="/book-site-inspection" class="lx-btn-wa">Apply for a complimentary consultation</a>
