@@ -16,9 +16,7 @@ const episode2 = youtubeEmbed(project.episode_2_url);
 const hasSlider = !!(project.before_image_url && project.after_image_url);
 const projectVideoCover = project.after_image_url || project.before_image_url;
 
-const inspectionHref = project.design
-  ? `/book-site-inspection?design=${encodeURIComponent(project.design.slug)}&source_project=${encodeURIComponent(project.slug)}`
-  : `/book-site-inspection?source_project=${encodeURIComponent(project.slug)}`;
+const inspectionHref = `/book-site-inspection?source_project=${encodeURIComponent(project.slug)}`;
 
 const primaryVideo = video || episode2 || episode1;
 const videoSchema = (primaryVideo && project.after_image_url) ? JSON.stringify({
@@ -68,7 +66,6 @@ const reviewSchema = project.rating ? JSON.stringify({
       {project.area_label && <span> · {project.area_label}</span>}
       {project.duration_label && <span> · {project.duration_label}</span>}
       {project.completed_label && <span> · Completed {project.completed_label}</span>}
-      {project.design && <span> · Built on the <a href={`/designs/${project.design.slug}`}>{project.design.name}</a> design</span>}
     </p>
   </section>
 
@@ -104,12 +101,6 @@ const reviewSchema = project.rating ? JSON.stringify({
           </div>
         )}
         <div class="ps-brief-facts">
-          {project.design && (
-            <a class="ps-brief-fact" href={`/designs/${project.design.slug}`}>
-              <span>Chosen design</span>
-              <strong>{project.design.name} →</strong>
-            </a>
-          )}
           {project.estimate_label && (
             <div class="ps-brief-fact">
               <span>Approved estimate</span>
@@ -274,7 +265,6 @@ const reviewSchema = project.rating ? JSON.stringify({
     </p>
     <div class="ps-closing-btns">
       <a href={inspectionHref} class="lx-btn-wa">Apply for complimentary consultation</a>
-      {project.design && <a href={`/designs/${project.design.slug}`} class="lx-btn-ghost">See the {project.design.name} design</a>}
     </div>
     <small>No payment to apply. The LKR 50,000 proposal is commissioned only after consultation and is credited in full if LUXEhome builds that bathroom.</small>
   </section>
