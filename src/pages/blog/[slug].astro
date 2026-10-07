@@ -32,13 +32,13 @@ const jsonLd = JSON.stringify({
   datePublished: post.pub_date,
   dateModified: post.updated_at,
   ...(post.cover_image ? { image: post.cover_image } : {}),
-  publisher: { '@type': 'Organization', name: 'LUXEhome', url: 'https://luxehome.lk' },
+  publisher: { '@type': 'Organization', name: 'BathSpace by LUXEhome', url: 'https://luxehome.lk' },
   mainEntityOfPage: canonical.href,
 });
 ---
 
 <LuxeLayout
-  title={post.meta_title || `${post.title} — LUXEhome Journal`}
+  title={post.meta_title || `${post.title} — BathSpace by LUXEhome`}
   description={description}
   ogImage={ogImage}
 >

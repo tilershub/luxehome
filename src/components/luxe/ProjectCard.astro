@@ -14,8 +14,8 @@ const cover = project.after_image_url || project.before_image_url;
 <a href={`/projects/${project.slug}`} class:list={['lp-card', { 'lp-card--compact': compact }]}>
   <div class="lp-cover">
     {cover
-      ? <img src={imageUrl(cover, 800, 560)} alt={`${project.title} — completed LUXEhome project`} loading="lazy" width="800" height="560" />
-      : <div class="lp-placeholder"><strong>LUXE</strong><em>home</em></div>}
+      ? <img src={imageUrl(cover, 800, 560)} alt={`${project.title} — completed BathSpace project`} loading="lazy" width="800" height="560" />
+      : <div class="lp-placeholder"><strong>Bath</strong><em>Space</em><small>by LUXEhome</small></div>}
     <span class="lp-badge">Completed project</span>
   </div>
   <div class="lp-body">
@@ -23,7 +23,6 @@ const cover = project.after_image_url || project.before_image_url;
     <p class="lp-meta">
       {[project.location, project.area_label, project.duration_label].filter(Boolean).join(' · ')}
     </p>
-    {project.design && <p class="lp-design">Built from the {project.design.name} design</p>}
     <span class="lp-link">View complete project story <b aria-hidden="true">→</b></span>
   </div>
 </a>
@@ -60,6 +59,7 @@ const cover = project.after_image_url || project.before_image_url;
   }
   .lp-placeholder { height: 100%; display: grid; place-content: center; color: var(--sage-deep); }
   .lp-placeholder em { font-family: var(--lx-serif); }
+  .lp-placeholder small { display: block; text-align: center; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
   .lp-body { display: flex; flex-direction: column; flex: 1; padding: 1.1rem 1.2rem 1.25rem; }
   .lp-body h3 { font-size: 1.45rem; margin: 0; }
   .lp-meta { margin-top: .3rem; color: color-mix(in srgb, var(--ink) 74%, transparent); font-size: .88rem; }

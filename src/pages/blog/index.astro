@@ -19,13 +19,13 @@ const [featured, ...rest] = filtered;
 ---
 
 <LuxeLayout
-  title="Ideas & Advice — The LUXEhome Journal"
-  description="Practical design, materials, quotation and construction guidance from the LUXEhome team in Sri Lanka — written for homeowners planning real projects."
+  title="Bathroom Ideas & Advice — BathSpace by LUXEhome"
+  description="Practical bathroom renovation, materials, waterproofing, quotation and construction guidance from BathSpace by LUXEhome."
   ogImage={featured?.cover_image || undefined}
-  ogImageAlt="The LUXEhome Journal"
+  ogImageAlt="The BathSpace bathroom renovation journal"
 >
   <section class="journal-hero">
-    <p class="lx-eyebrow lxr">The LUXEhome journal</p>
+    <p class="lx-eyebrow lxr">The BathSpace journal</p>
     <h1 class="lxr">Better decisions make better homes.</h1>
     <p class="lxr">Clear advice about design, materials, quotations and construction — written for homeowners.</p>
     {categories.length > 0 && (
@@ -48,7 +48,7 @@ const [featured, ...rest] = filtered;
       <p>In the meantime, the design collections show how we document a complete project.</p>
       <div class="journal-empty-actions">
         {activeCategory && <a class="lx-btn-ghost" href="/blog">View all articles</a>}
-        <a class="lx-btn-wa" href="/designs">Explore bathroom designs</a>
+        <a class="lx-btn-wa" href="/projects">See completed projects</a>
       </div>
     </section>
   )}

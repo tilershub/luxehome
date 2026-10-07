@@ -1,12 +1,10 @@
-/* Sitemap for everything rendered on demand from the CMS. The static
-   sitemap-index only covers prerendered pages, so designs, projects and
-   journal articles are listed here and referenced from robots.txt. */
+/* Sitemap for public CMS-driven content. Retired design-collection routes
+   redirect to real projects and must not be advertised to search engines. */
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { getPublishedPosts } from '../lib/luxe-blog';
-import { getDesigns, getProjects } from '../lib/luxe';
-import { normalizeBathroomDesignIdentity } from '../lib/bathroom-taxonomy';
+import { getProjects } from '../lib/luxe';
 
 const SITE = 'https://luxehome.lk';
 
@@ -14,24 +12,16 @@ const entry = (path: string, lastmod?: string | null) =>
   `<url><loc>${SITE}${path}</loc>${lastmod ? `<lastmod>${new Date(lastmod).toISOString()}</lastmod>` : ''}</url>`;
 
 export const GET: APIRoute = async () => {
-  const [posts, designs, projects] = await Promise.all([
+  const [posts, projects] = await Promise.all([
     getPublishedPosts(),
-    getDesigns({ spaceSlug: 'bathrooms' }),
     getProjects(),
   ]);
 
-  // The regular Astro sitemap already owns all fixed routes. This sitemap is
-  // only for CMS-driven detail pages that Astro cannot discover at build time.
-  // Normalize legacy bathroom records before publishing them so Google sees
-  // only the current destination URL, never a URL that immediately redirects.
+  // The regular Astro sitemap already owns fixed routes. This sitemap lists
+  // only real, published project case studies and published journal articles.
   const dynamicEntries: Array<{ path: string; lastmod?: string | null }> = [
-    ...designs
-      .filter((design) => design.cover_image_url)
-      .map((design) => ({
-        path: `/designs/${normalizeBathroomDesignIdentity(design).slug}`,
-      })),
     ...projects
-      .filter((project) => project.after_image_url)
+      .filter((project) => project.published && project.after_image_url)
       .map((project) => ({ path: `/projects/${project.slug}` })),
     ...posts
       .filter((post) => post.include_in_sitemap)

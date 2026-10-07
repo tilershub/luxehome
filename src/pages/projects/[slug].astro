@@ -8,7 +8,7 @@ import { imageUrl, absoluteUrl } from '../../lib/luxe-config';
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);
 const project: ProjectFull | null = storedProject;
-if (!project) return Astro.redirect('/projects');
+if (!project || !project.published) return Astro.redirect('/projects');
 
 const video = youtubeEmbed(project.video_url);
 const episode1 = youtubeEmbed(project.episode_1_url);
@@ -16,20 +16,18 @@ const episode2 = youtubeEmbed(project.episode_2_url);
 const hasSlider = !!(project.before_image_url && project.after_image_url);
 const projectVideoCover = project.after_image_url || project.before_image_url;
 
-const inspectionHref = project.design
-  ? `/book-site-inspection?design=${encodeURIComponent(project.design.slug)}&source_project=${encodeURIComponent(project.slug)}`
-  : `/book-site-inspection?source_project=${encodeURIComponent(project.slug)}`;
+const inspectionHref = `/book-site-inspection?source_project=${encodeURIComponent(project.slug)}`;
 
 const primaryVideo = video || episode2 || episode1;
 const videoSchema = (primaryVideo && project.after_image_url) ? JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'VideoObject',
   name: `${project.title} — completed bathroom walkthrough`,
-  description: `A walkthrough of the completed ${project.title} bathroom by LUXEhome${project.location ? `, ${project.location}` : ''}.`,
+  description: `A walkthrough of the completed ${project.title} bathroom by BathSpace by LUXEhome${project.location ? `, ${project.location}` : ''}.`,
   thumbnailUrl: [absoluteUrl(imageUrl(project.after_image_url, 1200))],
   uploadDate: project.created_at ?? undefined,
   embedUrl: primaryVideo,
-  publisher: { '@type': 'Organization', name: 'LUXEhome', url: 'https://luxehome.lk' },
+  publisher: { '@type': 'Organization', name: 'BathSpace by LUXEhome', url: 'https://luxehome.lk' },
   regionsAllowed: 'LK',
 }) : null;
 
@@ -38,7 +36,7 @@ const reviewSchema = project.rating ? JSON.stringify({
   '@type': 'Review',
   itemReviewed: {
     '@type': 'LocalBusiness',
-    name: 'LUXEhome',
+    name: 'BathSpace by LUXEhome',
     image: 'https://luxehome.lk/og-bathroom.jpg',
   },
   reviewRating: { '@type': 'Rating', ratingValue: project.rating, bestRating: 5 },
@@ -48,10 +46,10 @@ const reviewSchema = project.rating ? JSON.stringify({
 ---
 
 <LuxeLayout
-  title={`${project.title} — Project Story | LUXEhome`}
-  description={`${project.title}${project.location ? `, ${project.location}` : ''} — the full LUXEhome project story: before and after, the week-by-week journey, what we found on site and how we fixed it.`}
+  title={`${project.title} — BathSpace Project Story | LUXEhome`}
+  description={`${project.title}${project.location ? `, ${project.location}` : ''} — a real BathSpace bathroom project with scope, construction journey, testing, investment and handover.`}
   ogImage={project.after_image_url ? imageUrl(project.after_image_url, 1200) : undefined}
-  ogImageAlt={`${project.title} — completed LUXEhome bathroom${project.location ? `, ${project.location}` : ''}`}
+  ogImageAlt={`${project.title} — completed BathSpace bathroom${project.location ? `, ${project.location}` : ''}`}
 >
   <Fragment slot="head">
     {reviewSchema && <script is:inline type="application/ld+json" set:html={reviewSchema}></script>}
@@ -68,7 +66,6 @@ const reviewSchema = project.rating ? JSON.stringify({
       {project.area_label && <span> · {project.area_label}</span>}
       {project.duration_label && <span> · {project.duration_label}</span>}
       {project.completed_label && <span> · Completed {project.completed_label}</span>}
-      {project.design && <span> · Built on the <a href={`/designs/${project.design.slug}`}>{project.design.name}</a> design</span>}
     </p>
   </section>
 
@@ -104,15 +101,9 @@ const reviewSchema = project.rating ? JSON.stringify({
           </div>
         )}
         <div class="ps-brief-facts">
-          {project.design && (
-            <a class="ps-brief-fact" href={`/designs/${project.design.slug}`}>
-              <span>Chosen design</span>
-              <strong>{project.design.name} →</strong>
-            </a>
-          )}
           {project.estimate_label && (
             <div class="ps-brief-fact">
-              <span>Approved estimate</span>
+              <span>Project investment</span>
               <strong>{project.estimate_label}</strong>
             </div>
           )}
@@ -274,9 +265,9 @@ const reviewSchema = project.rating ? JSON.stringify({
     </p>
     <div class="ps-closing-btns">
       <a href={inspectionHref} class="lx-btn-wa">Apply for complimentary consultation</a>
-      {project.design && <a href={`/designs/${project.design.slug}`} class="lx-btn-ghost">See the {project.design.name} design</a>}
+      <a href="/projects" class="lx-btn-ghost">See more completed projects</a>
     </div>
-    <small>No payment to apply. The LKR 50,000 proposal is commissioned only after consultation and is credited in full if LUXEhome builds that bathroom.</small>
+    <small>No payment to apply. The LKR 50,000 proposal is commissioned only after consultation and is credited in full if BathSpace by LUXEhome builds that bathroom.</small>
   </section>
 </LuxeLayout>
 

@@ -171,7 +171,7 @@ export const PROJECT_CONSULTATION = {
   price: 'No consultation fee',
   qualification: 'Applications are reviewed for project type, location, timing and realistic investment before a site appointment is confirmed.',
   includes: [
-    'Project requirements and preferred design direction',
+    'Project requirements, functional priorities and preferred style direction',
     'Bathroom measurements, doors, windows and existing layout',
     'Water supply, drainage, wastewater and site-condition review',
     'House style, access, construction constraints and budget direction',
@@ -186,7 +186,7 @@ export const PROJECT_INITIATION = {
   amount: 50_000,
   title: 'Detailed bathroom design & construction proposal',
   copy: 'After the complimentary consultation, commission the complete design and construction proposal for one bathroom.',
-  credit: '100% credited toward the LUXEhome construction balance for that bathroom.',
+  credit: '100% credited toward the BathSpace construction balance for that bathroom.',
   delivery: 'The complete proposal is delivered within seven working days after proposal payment and the completed site consultation.',
   includes: [
     'Detailed bathroom design with five presentation images',
@@ -200,7 +200,7 @@ export const PROJECT_INITIATION = {
   multipleBathrooms: 'For multiple bathrooms, begin with one. Review its complete proposal before deciding whether to initiate the remaining bathrooms.',
 } as const;
 
-/** "Built the LUXEhome Way" — the construction system every bathroom follows.
+/** The BathSpace construction system every bathroom follows.
     The dedicated page renders these in full; the BuildProcess highlight on the
     home and design pages renders just the titles, so the two cannot drift. */
 export const BUILD_STAGES: Array<{
@@ -289,7 +289,7 @@ export const WHY_LUXEHOME = [
 /** LUXEhome's workmanship promise is kept separate from third-party product
     and supplier warranties. These labels are the public single source of truth. */
 export const WARRANTY_SCHEDULE: Array<{ item: string; period: string }> = [
-  { item: 'LUXEhome workmanship',    period: '24 months' },
+  { item: 'BathSpace by LUXEhome workmanship', period: '24 months' },
   { item: 'Handover snag review',    period: '30 days' },
   { item: 'Product warranties',      period: 'Manufacturer terms' },
   { item: 'Supplier-backed systems', period: 'Written per project' },
