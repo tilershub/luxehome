@@ -14,7 +14,7 @@ const cover = project.after_image_url || project.before_image_url;
 <a href={`/projects/${project.slug}`} class:list={['lp-card', { 'lp-card--compact': compact }]}>
   <div class="lp-cover">
     {cover
-      ? <img src={imageUrl(cover, 800, 560)} alt={`${project.title} — completed BathSpace project`} loading="lazy" width="800" height="560" />
+      ? <img src={imageUrl(cover, 800)} alt={`${project.title} — completed BathSpace project`} loading="lazy" width="800" height="560" />
       : <div class="lp-placeholder"><strong>Bath</strong><em>Space</em><small>by LUXEhome</small></div>}
     <span class="lp-badge">Completed project</span>
   </div>
@@ -69,4 +69,11 @@ const cover = project.after_image_url || project.before_image_url;
   .lp-card:hover .lp-link b { transform: translateX(4px); }
   .lp-card--compact .lp-cover { aspect-ratio: 4 / 3; }
   .lp-card--compact .lp-body h3 { font-size: 1.25rem; }
+</style>
+
+<style>
+  @media (max-width: 720px) {
+    .lp-cover { aspect-ratio: 4 / 3; }
+    .lp-cover img { object-position: center; }
+  }
 </style>
