@@ -73,9 +73,9 @@ const reviewSchema = project.rating ? JSON.stringify({
   {hasSlider ? (
     <section class="ps-slider-wrap lxr">
       <div class="ps-slider" id="ba-slider" style={`--pos: 50%`}>
-        <img class="ps-after" src={imageUrl(project.after_image_url!, 1200, 800)} alt={`${project.title} — after`} width="1200" height="800" />
+        <img class="ps-after" src={imageUrl(project.after_image_url!, 1200)} alt={`${project.title} — after`} width="1200" height="800" />
         <div class="ps-before-clip">
-          <img class="ps-before" src={imageUrl(project.before_image_url!, 1200, 800)} alt={`${project.title} — before`} width="1200" height="800" />
+          <img class="ps-before" src={imageUrl(project.before_image_url!, 1200)} alt={`${project.title} — before`} width="1200" height="800" />
         </div>
         <div class="ps-handle" aria-hidden="true"><span></span></div>
         <span class="ps-label ps-label--before">Before</span>
@@ -85,7 +85,7 @@ const reviewSchema = project.rating ? JSON.stringify({
     </section>
   ) : project.after_image_url && (
     <section class="ps-slider-wrap lxr">
-      <img class="ps-single" src={imageUrl(project.after_image_url, 1200, 800)} alt={project.title} width="1200" height="800" />
+      <img class="ps-single" src={imageUrl(project.after_image_url, 1200)} alt={project.title} width="1200" height="800" />
     </section>
   )}
 
@@ -174,7 +174,7 @@ const reviewSchema = project.rating ? JSON.stringify({
       {project.gallery.length > 0 && (
         <div class="ps-gallery">
           {project.gallery.map((g, i) => (
-            <img class="lxr" src={imageUrl(g.image_url, 600, 450)} alt={`${project.title} — photo ${i + 1}`} loading="lazy" width="600" height="450" />
+            <img class="lxr" src={imageUrl(g.image_url, 900)} alt={`${project.title} — photo ${i + 1}`} loading="lazy" width="600" height="450" />
           ))}
         </div>
       )}
@@ -203,7 +203,7 @@ const reviewSchema = project.rating ? JSON.stringify({
             {(j.image_urls ?? []).length > 0 && (
               <div class="ps-j-photos">
                 {(j.image_urls ?? []).map((url, i) => (
-                  <img src={imageUrl(url, 500, 375)} alt={`${project.title} — ${j.stage}, photo ${i + 1}`} loading="lazy" width="500" height="375" />
+                  <img src={imageUrl(url, 800)} alt={`${project.title} — ${j.stage}, photo ${i + 1}`} loading="lazy" width="500" height="375" />
                 ))}
               </div>
             )}
@@ -247,7 +247,7 @@ const reviewSchema = project.rating ? JSON.stringify({
         {project.review_by && <cite>— {project.review_by}</cite>}
         {project.review_screenshot_url && (
           <figure class="ps-review-proof">
-            <img src={imageUrl(project.review_screenshot_url, 700, 400)} alt={`Google review by ${project.review_by ?? 'the client'}`} loading="lazy" width="700" height="400" />
+            <img src={imageUrl(project.review_screenshot_url, 700)} alt={`Google review by ${project.review_by ?? 'the client'}`} loading="lazy" width="700" height="400" />
             <figcaption>Verified Google review</figcaption>
           </figure>
         )}
@@ -307,7 +307,7 @@ const reviewSchema = project.rating ? JSON.stringify({
     aspect-ratio: 3 / 2;
     border-radius: 8px;
     overflow: hidden;
-    touch-action: none;
+    touch-action: pan-y;
     cursor: ew-resize;
     background: var(--sage-mist);
     user-select: none;
@@ -353,7 +353,7 @@ const reviewSchema = project.rating ? JSON.stringify({
   .ps-label--before { left: 1rem; }
   .ps-label--after  { right: 1rem; }
   .ps-slider-hint { text-align: center; font-size: .84rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 70%, transparent); margin-top: .6rem; }
-  .ps-single { width: 100%; border-radius: 8px; display: block; }
+  .ps-single { width: 100%; height: auto; border-radius: 8px; display: block; object-fit: contain; }
 
   .ps-section { max-width: 900px; margin: 0 auto; padding: 2.2rem clamp(1.2rem, 5vw, 4rem); }
   .ps-section h2 { font-size: clamp(1.7rem, 4vw, 2.3rem); margin-bottom: 1rem; }
@@ -451,12 +451,80 @@ const reviewSchema = project.rating ? JSON.stringify({
   .ps-closing small { display: block; margin-top: .8rem; color: color-mix(in srgb, var(--ink) 70%, transparent); font-size: .82rem; }
 
   @media (max-width: 720px) {
-    .ps-gallery { grid-template-columns: repeat(2, 1fr); }
+    .ps-hero { padding: 2.2rem 1rem 1.1rem; }
+
+    .ps-slider-wrap {
+      width: 100%;
+      padding: 0 1rem;
+    }
+    .ps-slider {
+      aspect-ratio: 4 / 5;
+      border-radius: 10px;
+      background: var(--sage-mist);
+    }
+    .ps-slider img {
+      object-fit: contain;
+      object-position: center;
+      background: var(--sage-mist);
+    }
+    .ps-single {
+      width: 100%;
+      height: auto;
+      max-height: none;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+    .ps-label {
+      bottom: .65rem;
+      font-size: .68rem;
+      padding: .28rem .6rem;
+    }
+    .ps-label--before { left: .65rem; }
+    .ps-label--after { right: .65rem; }
+
+    .ps-section {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .ps-gallery {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .ps-gallery img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: auto;
+      object-fit: contain;
+      border-radius: 10px;
+      background: var(--sage-mist);
+    }
     .ps-brief { grid-template-columns: 1fr; }
-    .ps-j-photos img { width: calc(50% - .3rem); }
+
+    .ps-j-photos {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .8rem;
+    }
+    .ps-j-photos img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      background: var(--sage-mist);
+    }
+
+    .ps-review-proof {
+      width: 100%;
+      max-width: none;
+    }
+    .ps-review-proof img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
   }
   @media (max-width: 480px) {
-    .ps-gallery { grid-template-columns: 1fr; }
     .ps-closing-btns { flex-direction: column; align-items: stretch; }
   }
 </style>
