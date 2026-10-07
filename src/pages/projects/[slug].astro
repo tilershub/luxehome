@@ -8,7 +8,7 @@ import { imageUrl, absoluteUrl } from '../../lib/luxe-config';
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);
 const project: ProjectFull | null = storedProject;
-if (!project) return Astro.redirect('/projects');
+if (!project || !project.published) return Astro.redirect('/projects');
 
 const video = youtubeEmbed(project.video_url);
 const episode1 = youtubeEmbed(project.episode_1_url);
