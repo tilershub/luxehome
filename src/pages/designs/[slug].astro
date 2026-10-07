@@ -11,5 +11,9 @@ const avissawellaLegacy = new Set([
 if (avissawellaLegacy.has(slug)) {
   return Astro.redirect('/projects/avissawella-bathroom-renovation', 301);
 }
+const kotteLegacy = new Set(['nelum', 'bentota']);
+if (kotteLegacy.has(slug)) {
+  return Astro.redirect('/projects/kotte-bathroom-renovation', 301);
+}
 return Astro.redirect('/projects', 301);
 ---
