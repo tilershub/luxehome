@@ -1,4 +1,17 @@
 ---
-export const prerender = false;
-return Astro.redirect('/book-site-inspection', 301);
+export const prerender = true;
 ---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex,follow" />
+    <meta http-equiv="refresh" content="0;url=/book-site-inspection" />
+    <link rel="canonical" href="https://luxehome.lk/book-site-inspection" />
+    <title>Start Your Bathroom Project — LUXEhome</title>
+    <script is:inline>window.location.replace('/book-site-inspection');</script>
+  </head>
+  <body>
+    <p>This page has moved to <a href="/book-site-inspection">LUXEhome project consultation</a>.</p>
+  </body>
+</html>
