@@ -188,12 +188,13 @@ export async function getDesignBySlug(slug: string): Promise<DesignFull | null> 
   };
 }
 
-export async function getProjects(opts: { featured?: boolean; designId?: string } = {}): Promise<LuxeProject[]> {
+export async function getProjects(opts: { featured?: boolean; designId?: string; includeUnpublished?: boolean } = {}): Promise<LuxeProject[]> {
   const c = sb();
   if (!c) return [];
   let q = c.from('lx_projects')
     .select('*, design:lx_designs(slug,name,collection)')
     .order('created_at', { ascending: false });
+  if (!opts.includeUnpublished) q = q.eq('published', true);
   if (opts.featured) q = q.eq('featured', true);
   if (opts.designId) q = q.eq('design_id', opts.designId);
   const { data } = await q;
