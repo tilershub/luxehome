@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 // Prerendered routes must exist as files in dist/.
 const staticRoutes = [
-  '/about', '/design-recommendation', '/whole-home-planner', '/thank-you',
+  '/about', '/thank-you',
   '/admin', '/admin/cms', '/admin/cms/designs', '/admin/cms/projects',
   '/admin/cms/blog', '/admin/cms/pages', '/admin/cms/products', '/admin/cms/categories',
   '/admin/cms/inspections', '/admin/cms/team', '/admin/cms/media', '/admin/cms/settings',
@@ -20,7 +20,7 @@ const ssrRoutes = [
   '/', '/designs', '/designs/[slug]', '/projects', '/projects/[slug]',
   '/bathroom-designs', '/kitchen-designs', '/staircase-designs', '/floor-designs',
   '/shop', '/shop/[slug]', '/blog', '/blog/[slug]', '/[page]',
-  '/team', '/contact', '/book-site-inspection', '/start', '/how-we-build',
+  '/team', '/contact', '/book-site-inspection', '/start', '/design-recommendation', '/whole-home-planner', '/how-we-build',
   '/content-sitemap.xml', '/api/meta-capi',
 ];
 
