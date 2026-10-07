@@ -266,13 +266,17 @@ const reviewSchema = project.rating ? JSON.stringify({
 
   <!-- Closing CTA -->
   <section class="ps-closing lxr">
-    <h2>Want a result like this?</h2>
-    <p>Start with one bathroom. We will visit, measure and develop the detailed design, materials and complete construction proposal.</p>
+    <h2>Planning a bathroom renovation?</h2>
+    <p>
+      Start with a complimentary project consultation. For suitable complete-bathroom projects,
+      one detailed site assessment is included before you decide whether to commission the
+      LKR 50,000 design and construction proposal.
+    </p>
     <div class="ps-closing-btns">
-      <a href={inspectionHref} class="lx-btn-wa">Start Project · LKR 50,000</a>
+      <a href={inspectionHref} class="lx-btn-wa">Apply for complimentary consultation</a>
       {project.design && <a href={`/designs/${project.design.slug}`} class="lx-btn-ghost">See the {project.design.name} design</a>}
     </div>
-    <small>The full initiation deposit is credited if LUXEhome builds that bathroom.</small>
+    <small>No payment to apply. The LKR 50,000 proposal is commissioned only after consultation and is credited in full if LUXEhome builds that bathroom.</small>
   </section>
 </LuxeLayout>
 
