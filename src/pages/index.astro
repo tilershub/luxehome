@@ -124,8 +124,8 @@ const projects = (await getProjects())
 ---
 
 <LuxeLayout
-  title="Luxury Bathroom Design & Construction in Sri Lanka — LUXEhome"
-  description="Explore complete LUXEhome bathrooms and apply for a complimentary consultation. The LKR 50,000 detailed proposal is fully credited if LUXEhome builds."
+  title="Complete Bathroom Renovation in Sri Lanka — LUXEhome"
+  description="Complete bathroom renovation and construction in Sri Lanka through one accountable LUXEhome team. Apply for a complimentary project consultation."
   ogImage={heroCover ? imageUrl(heroCover, 1200) : undefined}
   ogImageAlt={heroDesign ? `${heroDesign.name} bathroom by LUXEhome` : undefined}
   viewContent={{
@@ -151,20 +151,23 @@ const projects = (await getProjects())
 
     <div class="spa-hero-inner">
       <div class="spa-hero-copy">
-        <p class="spa-eyebrow spa-eyebrow--light lxr">Complete bathroom design &amp; construction · Sri Lanka</p>
+        <p class="spa-eyebrow spa-eyebrow--light lxr">Complete bathroom renovation &amp; construction · Sri Lanka</p>
         <h1 id="spa-hero-title" class="lxr">
-          The bathroom you imagined,
-          <em>designed for your home.</em>
+          Complete bathroom renovation.
+          <em>One accountable team.</em>
         </h1>
         <p class="spa-hero-lead lxr">
-          Choose a published LUXEhome design or share the one that inspired you.
-          We adapt it to your room and deliver the complete bathroom through one accountable team.
+          Design, plumbing, waterproofing, tiling, fixtures, finishing and handover—
+          planned and managed as one complete bathroom project.
         </p>
         <div class="spa-hero-actions lxr">
           <a class="spa-button spa-button--light" href="/book-site-inspection">Apply for a complimentary consultation</a>
-          <a class="spa-button spa-button--glass" href="#bathroom-collections">Explore bathroom designs</a>
+          <a class="spa-button spa-button--glass" href="/projects">See completed projects</a>
         </div>
-        <p class="spa-hero-note lxr">No payment to apply · Site assessment included for approved complete-bathroom projects</p>
+        <p class="spa-hero-note lxr">
+          {renovationFrom ? `Complete renovations from ${lkrM(renovationFrom)} · ` : ''}
+          No payment to apply · Site assessment included for approved projects
+        </p>
       </div>
     </div>
 
@@ -182,19 +185,21 @@ const projects = (await getProjects())
 
   <section class="spa-intro" id="spa-introduction" aria-labelledby="spa-intro-title">
     <div class="spa-intro-title lxr">
-      <p class="spa-eyebrow">The LUXEhome approach</p>
-      <h2 id="spa-intro-title">A beautiful image is only the beginning.</h2>
+      <p class="spa-eyebrow">Why complete-project management matters</p>
+      <h2 id="spa-intro-title">Beautiful is visible. Accountability is the value.</h2>
     </div>
     <div class="spa-intro-copy lxr">
       <p>
-        The bathroom in a Reel has to work with your actual room, doors, windows,
-        plumbing, drainage, wastewater routes, access, house style and investment range.
+        A complete bathroom renovation is not only tiles and fittings. Hidden plumbing,
+        drainage, electrical work, waterproofing, levels, sequencing and specialist trades
+        all have to work together.
       </p>
       <p>
-        LUXEhome studies those conditions, resolves the design and coordinates the
-        specialists, materials, construction, testing and handover as one service.
+        LUXEhome takes responsibility for that coordination—from the first site assessment
+        to testing, finishing and documented handover—so the homeowner is not left managing
+        several disconnected contractors.
       </p>
-      <a href="/how-we-build">See how a LUXEhome bathroom is built <span aria-hidden="true">→</span></a>
+      <a href="/projects">See how complete projects are delivered <span aria-hidden="true">→</span></a>
     </div>
   </section>
 
@@ -396,7 +401,7 @@ const projects = (await getProjects())
       <header class="spa-section-head lxr">
         <div>
           <p class="spa-eyebrow">Completed by LUXEhome</p>
-          <h2 id="spa-projects-title">Design made real.</h2>
+          <h2 id="spa-projects-title">Real bathrooms. Real delivery.</h2>
         </div>
         <a href="/projects">Explore completed projects <span aria-hidden="true">→</span></a>
       </header>
