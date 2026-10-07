@@ -1,14 +1,4 @@
 ---
-import { getDesigns } from '../../lib/luxe';
-import { normalizeBathroomDesignIdentity } from '../../lib/bathroom-taxonomy';
-
-const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
-const bathroomDesignNames = [...new Set(
-  storedDesigns
-    .filter((design) => design.cover_image_url)
-    .map(normalizeBathroomDesignIdentity)
-    .map((design) => design.name),
-)];
 ---
 
 <div class="ibf-wrap">
@@ -64,16 +54,10 @@ const bathroomDesignNames = [...new Set(
     </fieldset>
 
     <label>
-      <span>Preferred LUXEhome design <small>(optional)</small></span>
-      <input id="inspection-design" type="text" name="preferred_design" list="inspection-designs" placeholder="Choose a design or leave this blank" />
-      <datalist id="inspection-designs">
-        {bathroomDesignNames.map((name) => <option value={name}></option>)}
-      </datalist>
+      <span>Project or inspiration reference <small>(optional)</small></span>
+      <input id="inspection-inspiration" type="text" name="inspiration_reference" placeholder="e.g. Nawala project, a Reel, or the style you like" />
+      <small class="ibf-help">You can also send screenshots, links or inspiration images after WhatsApp opens.</small>
     </label>
-    <div class="ibf-selected-design" id="inspection-selected-design" hidden>
-      <span>Selected from the design page</span>
-      <strong id="inspection-selected-design-name"></strong>
-    </div>
 
     <fieldset>
       <legend>Do you know the bathroom size?</legend>
@@ -113,7 +97,7 @@ const bathroomDesignNames = [...new Set(
     <label>
       <span>Anything we should know? <small>(optional)</small></span>
       <textarea name="notes" rows="4" placeholder="Current problems, access, timeline, style preferences or other details"></textarea>
-      <small class="ibf-help">You can attach current bathroom photos and the Reel or design that inspired you after WhatsApp opens.</small>
+      <small class="ibf-help">You can attach current bathroom photos, a Reel, a completed LUXEhome project or any inspiration after WhatsApp opens.</small>
     </label>
 
     <div class="ibf-fee">
@@ -153,17 +137,8 @@ const bathroomDesignNames = [...new Set(
   const form = document.getElementById('inspection-request-form') as HTMLFormElement | null;
   const success = document.getElementById('inspection-success') as HTMLElement | null;
   const submit = document.getElementById('inspection-submit') as HTMLButtonElement | null;
-  const designInput = document.getElementById('inspection-design') as HTMLInputElement | null;
-  const selectedDesign = document.getElementById('inspection-selected-design') as HTMLElement | null;
-  const selectedDesignName = document.getElementById('inspection-selected-design-name') as HTMLElement | null;
   const sizeField = document.getElementById('inspection-size-field') as HTMLElement | null;
   const backupLink = document.getElementById('inspection-whatsapp-backup') as HTMLAnchorElement | null;
-
-  function titleFromSlug(value: string) {
-    return value
-      .replace(/[-_]+/g, ' ')
-      .replace(/\b\w/g, (letter) => letter.toUpperCase());
-  }
 
   function formValue(data: FormData, key: string) {
     return data.get(key)?.toString().trim() ?? '';
@@ -177,15 +152,8 @@ const bathroomDesignNames = [...new Set(
 
   if (form) {
     const params = new URLSearchParams(window.location.search);
-    const design = params.get('design');
+    const sourceProject = params.get('source_project')?.trim() ?? '';
     const project = params.get('project');
-
-    if (design && designInput && selectedDesign && selectedDesignName) {
-      const designName = titleFromSlug(design);
-      designInput.value = designName;
-      selectedDesignName.textContent = designName;
-      selectedDesign.hidden = false;
-    }
 
     const projectValues: Record<string, string> = {
       renovation: 'Bathroom renovation',
@@ -214,7 +182,7 @@ const bathroomDesignNames = [...new Set(
       const email = formValue(data, 'email');
       const location = formValue(data, 'location');
       const projectType = formValue(data, 'project_type');
-      const preferredDesign = formValue(data, 'preferred_design');
+      const inspirationReference = formValue(data, 'inspiration_reference');
       const sizeStatus = formValue(data, 'size_status') || 'Please measure during approved site assessment';
       const approximateSize = formValue(data, 'approximate_size');
       const budgetDirection = formValue(data, 'budget_direction');
@@ -239,14 +207,16 @@ const bathroomDesignNames = [...new Set(
         payment_status: 'No payment requested for consultation application',
       };
       if (email) details.email = email;
-      if (preferredDesign) details.preferred_design = preferredDesign;
+      if (inspirationReference) details.inspiration_reference = inspirationReference;
+      if (sourceProject) details.source_project = sourceProject;
       if (approximateSize) details.approximate_size = approximateSize;
 
       const queueNotes = [
         `Project: ${projectType}`,
         `Investment range: ${budgetDirection}`,
         `Desired start: ${projectTiming}`,
-        preferredDesign ? `Preferred design: ${preferredDesign}` : 'Preferred design: Please recommend',
+        inspirationReference ? `Inspiration/reference: ${inspirationReference}` : '',
+        sourceProject ? `Source project: ${sourceProject}` : '',
         `Measurements: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
         'Consultation: Complimentary, subject to suitability approval; one site assessment included if approved',
         'Detailed proposal: LKR 50,000 for one bathroom, commissioned only after consultation',
@@ -322,7 +292,8 @@ const bathroomDesignNames = [...new Set(
         `Project: ${projectType}`,
         `Investment range: ${budgetDirection}`,
         `Desired start: ${projectTiming}`,
-        `Preferred design: ${preferredDesign || 'Please recommend one'}`,
+        inspirationReference ? `Inspiration/reference: ${inspirationReference}` : '',
+        sourceProject ? `Source project: ${sourceProject}` : '',
         `Bathroom size: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
         'Consultation: No fee; site assessment subject to suitability approval',
         'Detailed proposal after consultation: LKR 50,000 for one bathroom',
