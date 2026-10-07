@@ -28,8 +28,15 @@ const projects = (await getProjects())
   <section class="pj-body">
     {projects.length === 0 ? (
       <div class="pj-empty lxr">
-        <p>Complete project stories are being prepared. We publish them one by one when the full inquiry-to-handover record and real completed photographs are ready.</p>
-        <a href={waLink('Hi LUXEhome! Can you share photos of your recent completed bathroom projects?')} class="lx-btn-wa" target="_blank" rel="noopener noreferrer">Ask for recent work</a>
+        <h2>Real project stories are being documented.</h2>
+        <p>
+          Our completed-project library is being published with the full record—not only final photographs.
+          Each case study will include the brief, construction stages, testing, materials, problem-solving and handover.
+        </p>
+        <div class="pj-empty-actions">
+          <a href="/book-site-inspection" class="lx-btn-wa">Apply for a complimentary consultation</a>
+          <a href={waLink('Hi LUXEhome! I am planning a complete bathroom renovation. Can I share my bathroom photos with you?')} class="lx-btn-ghost" target="_blank" rel="noopener noreferrer">Send bathroom photos</a>
+        </div>
       </div>
     ) : (
       <div class="pj-grid">
@@ -46,7 +53,9 @@ const projects = (await getProjects())
   .pj-intro { max-width: 62ch; font: 500 clamp(1.05rem, 2.4vw, 1.25rem)/1.5 var(--lx-serif); }
   .pj-body { max-width: 1100px; margin: 0 auto; padding: 1.5rem clamp(1.2rem, 5vw, 4rem) 4rem; }
   .pj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-  .pj-empty { display: grid; place-items: center; gap: 1.2rem; padding: 4rem 1rem; text-align: center; }
-  .pj-empty p { max-width: 58ch; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+  .pj-empty { display: grid; place-items: center; gap: 1rem; padding: 4rem 1rem; text-align: center; }
+  .pj-empty h2 { font-size: clamp(2rem, 5vw, 3.1rem); }
+  .pj-empty p { max-width: 62ch; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+  .pj-empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; margin-top: .4rem; }
   @media (max-width: 720px) { .pj-grid { grid-template-columns: 1fr; } }
 </style>
