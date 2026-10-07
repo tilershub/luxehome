@@ -23,7 +23,6 @@ const cover = project.after_image_url || project.before_image_url;
     <p class="lp-meta">
       {[project.location, project.area_label, project.duration_label].filter(Boolean).join(' · ')}
     </p>
-    {project.design && <p class="lp-design">Built from the {project.design.name} design</p>}
     <span class="lp-link">View complete project story <b aria-hidden="true">→</b></span>
   </div>
 </a>
