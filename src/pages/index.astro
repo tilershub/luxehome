@@ -2,75 +2,28 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import ProjectCard from '../components/luxe/ProjectCard.astro';
-import { getDesigns, getProjects } from '../lib/luxe';
-import {
-  BATHROOM_COLLECTIONS,
-  collectionShortLabel,
-  normalizeBathroomDesignIdentity,
-} from '../lib/bathroom-taxonomy';
+import { getProjects } from '../lib/luxe';
 import {
   imageUrl,
-  formatLKRM,
-  formatArea,
-  lkrM,
   WARRANTY_SCHEDULE,
   PROJECT_CONSULTATION,
   PROJECT_INITIATION,
 } from '../lib/luxe-config';
 
-interface HomeDesign {
-  slug: string;
-  name: string;
-  collection: string;
-  tagline: string;
-  minSqm: number | null;
-  newPrice: number | null;
-  renovationPrice: number | null;
-  cover: string;
-}
+const projects = (await getProjects())
+  .filter((project) => project.after_image_url)
+  .sort((a, b) => Number(b.featured) - Number(a.featured))
+  .slice(0, 4);
 
-const storedDesigns = await getDesigns({ spaceSlug: 'bathrooms' });
-const designs: HomeDesign[] = storedDesigns
-  .filter((item) => item.cover_image_url)
-  .map(normalizeBathroomDesignIdentity)
-  .map((item) => ({
-    slug: item.slug,
-    name: item.name,
-    collection: item.collection,
-    tagline: item.tagline || 'A complete, documented LUXEhome bathroom.',
-    minSqm: item.min_sqm,
-    newPrice: item.new_starting_price_lkr || item.starting_price_lkr || null,
-    renovationPrice: item.renovation_starting_price_lkr || null,
-    cover: item.cover_image_url!,
-  }));
-
-const collectionGroups = BATHROOM_COLLECTIONS.map((collection) => ({
-  ...collection,
-  // The homepage introduces one strong direction from each collection. The
-  // full catalogue remains on /designs and individual campaigns land on the
-  // exact design page, keeping this page focused and materially lighter.
-  designs: designs.filter((design) => design.collection === collection.key).slice(0, 1),
-})).filter((collection) => collection.designs.length > 0);
-const featuredDesigns = collectionGroups.flatMap((collection) =>
-  collection.designs.map((design) => ({ ...design, collectionInfo: collection }))
-);
-
-const newPrices = designs.flatMap((design) => design.newPrice ? [design.newPrice] : []);
-const renovationPrices = designs.flatMap((design) => design.renovationPrice ? [design.renovationPrice] : []);
-const newFrom = newPrices.length ? Math.min(...newPrices) : null;
-const renovationFrom = renovationPrices.length ? Math.min(...renovationPrices) : null;
-const moonstoneDesign = designs.find((design) => design.slug === 'moonstone');
-const heroDesign = moonstoneDesign?.cover
-  ? moonstoneDesign
-  : designs.find((design) => design.cover) ?? null;
-const heroCover = heroDesign?.cover ?? null;
+const heroProject = projects[0] ?? null;
+const heroCover = heroProject?.after_image_url ?? null;
 const initiationPrice = PROJECT_INITIATION.amount.toLocaleString('en-LK');
 
 const spaFacts = [
-  { value: newFrom ? lkrM(newFrom) : 'Published', label: 'Complete bathroom starting guide' },
-  { value: 'No fee', label: 'Approved project consultation' },
-  { value: '01', label: 'Accountable project team' },
-  { value: WARRANTY_SCHEDULE[0].period, label: 'Workmanship warranty' },
+  { value: 'LKR 1.5M+', label: 'Typical complete-bathroom investment range' },
+  { value: 'No fee', label: 'Consultation for suitable complete projects' },
+  { value: 'One team', label: 'Planning through final handover' },
+  { value: '100%', label: 'Proposal fee credited if LUXEhome builds' },
 ];
 
 const journey = [
@@ -117,17 +70,13 @@ const trustPoints = [
   { title: 'A documented handover', copy: 'The approved scope, selections, payment stages and applicable warranties remain clear.' },
 ];
 
-const projects = (await getProjects())
-  .filter((project) => project.after_image_url)
-  .sort((a, b) => Number(b.featured) - Number(a.featured))
-  .slice(0, 2);
 ---
 
 <LuxeLayout
   title="Complete Bathroom Renovation in Sri Lanka — LUXEhome"
   description="Complete bathroom renovation and construction in Sri Lanka through one accountable LUXEhome team. Apply for a complimentary project consultation."
   ogImage={heroCover ? imageUrl(heroCover, 1200) : undefined}
-  ogImageAlt={heroDesign ? `${heroDesign.name} bathroom by LUXEhome` : undefined}
+  ogImageAlt={heroProject ? `${heroProject.title} — completed bathroom by LUXEhome` : undefined}
   viewContent={{
     content_name: 'LUXEhome complete bathroom service',
     content_category: 'Bathroom design and construction',
@@ -139,7 +88,7 @@ const projects = (await getProjects())
       <img
         class="spa-hero-image"
         src={imageUrl(heroCover, 1800, 1125)}
-        alt={`${heroDesign?.name ?? 'LUXEhome'} modern bathroom interior`}
+        alt={heroProject ? `${heroProject.title} — completed LUXEhome bathroom` : 'Completed LUXEhome bathroom renovation'}
         width="1800"
         height="1125"
         fetchpriority="high"
@@ -157,24 +106,25 @@ const projects = (await getProjects())
           <em>One accountable team.</em>
         </h1>
         <p class="spa-hero-lead lxr">
-          Design, plumbing, waterproofing, tiling, fixtures, finishing and handover—
-          planned and managed as one complete bathroom project.
+          LUXEhome plans and manages the entire bathroom—design, demolition, plumbing,
+          electrical, waterproofing, tiling, fixtures, finishing and handover—so you deal
+          with one accountable company instead of coordinating separate contractors.
         </p>
         <div class="spa-hero-actions lxr">
           <a class="spa-button spa-button--light" href="/book-site-inspection">Apply for a complimentary consultation</a>
           <a class="spa-button spa-button--glass" href="/projects">See completed projects</a>
         </div>
         <p class="spa-hero-note lxr">
-          {renovationFrom ? `Complete renovations from ${lkrM(renovationFrom)} · ` : ''}
-          No payment to apply · Site assessment included for approved projects
+          Complete bathroom projects typically from LKR 1.5M · No payment to apply ·
+          Site assessment included for approved projects
         </p>
       </div>
     </div>
 
-    {heroDesign && (
-      <a class="spa-hero-caption lxr" href={`/designs/${heroDesign.slug}`}>
-        <span>{heroDesign.name}</span>
-        <small>{collectionShortLabel(heroDesign.collection)} Collection</small>
+    {heroProject && (
+      <a class="spa-hero-caption lxr" href={`/projects/${heroProject.slug}`}>
+        <span>{heroProject.title}</span>
+        <small>{heroProject.location || 'Completed project'}</small>
       </a>
     )}
     <a class="spa-scroll-cue" href="#spa-introduction">
@@ -214,67 +164,22 @@ const projects = (await getProjects())
     </ul>
   </section>
 
-  <section class="spa-designs" id="bathroom-collections" aria-labelledby="bathroom-collections-title">
-    <header class="spa-section-head lxr">
-      <div>
-        <p class="spa-eyebrow">Start with a design direction</p>
-        <h2 id="bathroom-collections-title">Choose the feeling. We resolve the room.</h2>
+  {projects.length > 0 && (
+    <section class="spa-projects" aria-labelledby="spa-projects-title">
+      <header class="spa-section-head lxr">
+        <div>
+          <p class="spa-eyebrow">Completed project case studies</p>
+          <h2 id="spa-projects-title">See what we actually built.</h2>
+        </div>
+        <a href="/projects">Explore completed projects <span aria-hidden="true">→</span></a>
+      </header>
+      <div class="spa-project-grid">
+        {projects.map((project) => <ProjectCard project={project} />)}
       </div>
-      <p>
-        These are documented bathroom concepts with published starting guides—not
-        isolated inspiration images. Explore the exact design, scope, fixtures and room-size guidance.
-      </p>
-    </header>
+    </section>
+  )}
 
-    <div class="spa-design-grid">
-      {featuredDesigns.map((design) => (
-        <a class="spa-design-card lxr" href={`/designs/${design.slug}`} aria-label={`Explore the ${design.name} bathroom design`}>
-          <div class="spa-design-media">
-            <img
-              src={imageUrl(design.cover, 760, 608)}
-              alt={`${design.name} bathroom design`}
-              loading="lazy"
-              width="760"
-              height="608"
-            />
-            <span class="spa-design-level">Level {design.collectionInfo.level} · {design.collectionInfo.note}</span>
-          </div>
-          <div class="spa-design-info">
-            <div class="spa-design-title">
-              <div>
-                <small>{collectionShortLabel(design.collection)} Collection</small>
-                <h3>{design.name}</h3>
-              </div>
-              <span aria-hidden="true">↗</span>
-            </div>
-            <p>{design.tagline}</p>
-            <dl>
-              <div>
-                <dt>Room</dt>
-                <dd>{formatArea(design.minSqm) ? `From ${formatArea(design.minSqm)} m²` : 'Custom fit'}</dd>
-              </div>
-              {design.newPrice && (
-                <div>
-                  <dt>New bathroom</dt>
-                  <dd>{formatLKRM(design.newPrice)}</dd>
-                </div>
-              )}
-              {design.renovationPrice && (
-                <div>
-                  <dt>Renovation</dt>
-                  <dd>{formatLKRM(design.renovationPrice)}</dd>
-                </div>
-              )}
-            </dl>
-          </div>
-        </a>
-      ))}
-    </div>
-    <div class="spa-designs-more lxr">
-      <a href="/designs">Explore every published bathroom design <span aria-hidden="true">→</span></a>
-      <p>Campaign visitors can enter through the exact design page they saw in a Reel.</p>
-    </div>
-  </section>
+
 
   <section class="spa-scope" aria-labelledby="spa-scope-title">
     <header class="spa-section-head lxr">
@@ -373,7 +278,7 @@ const projects = (await getProjects())
           <small>New construction</small>
           <h3>Begin with a resolved room.</h3>
           <p>Plan layout, services, finishes and fixtures before construction starts.</p>
-          {newFrom && <strong>Designs from {lkrM(newFrom)}</strong>}
+          <strong>Planned and quoted for the actual room</strong>
         </div>
         <b aria-hidden="true">↗</b>
       </a>
@@ -383,33 +288,17 @@ const projects = (await getProjects())
           <small>Existing bathroom</small>
           <h3>Replace the room, not the problems.</h3>
           <p>Assess concealed risks, rebuild the wet areas and renew the full experience.</p>
-          {renovationFrom && <strong>Renovations from {lkrM(renovationFrom)}</strong>}
+          <strong>Typical complete renovations from around LKR 1.5M</strong>
         </div>
         <b aria-hidden="true">↗</b>
       </a>
     </div>
-    {(newFrom || renovationFrom) && (
-      <p class="spa-price-note lxr">
-        Starting prices reflect the minimum room and listed design specification.
-        Your final quotation is prepared in the paid proposal after the complimentary consultation and site assessment.
-      </p>
-    )}
+    <p class="spa-price-note lxr">
+      Investment depends on room size, demolition, concealed services, site conditions,
+      tile and fixture selections, access and the approved scope. Your final construction
+      quotation is prepared in the detailed proposal after consultation and site assessment.
+    </p>
   </section>
-
-  {projects.length > 0 && (
-    <section class="spa-projects" aria-labelledby="spa-projects-title">
-      <header class="spa-section-head lxr">
-        <div>
-          <p class="spa-eyebrow">Completed by LUXEhome</p>
-          <h2 id="spa-projects-title">Real bathrooms. Real delivery.</h2>
-        </div>
-        <a href="/projects">Explore completed projects <span aria-hidden="true">→</span></a>
-      </header>
-      <div class="spa-project-grid">
-        {projects.map((project) => <ProjectCard project={project} />)}
-      </div>
-    </section>
-  )}
 
   <section class="spa-assurance" aria-labelledby="spa-assurance-title">
     <header class="spa-section-head lxr">
@@ -464,19 +353,19 @@ const projects = (await getProjects())
     <section class="spa-final" aria-labelledby="spa-final-title">
       <img
         src={imageUrl(heroCover, 1600, 1000)}
-        alt={`${heroDesign?.name ?? 'Published LUXEhome'} bathroom design`}
+        alt={heroProject ? `${heroProject.title} — completed LUXEhome bathroom` : 'Completed LUXEhome bathroom renovation'}
         width="1600"
         height="1000"
         loading="lazy"
       />
       <span class="spa-final-shade" aria-hidden="true"></span>
       <div class="spa-final-copy lxr">
-        <p class="spa-eyebrow spa-eyebrow--light">Bring us the design that inspired you</p>
-        <h2 id="spa-final-title">Could it work in your home?</h2>
+        <p class="spa-eyebrow spa-eyebrow--light">Planning your bathroom?</p>
+        <h2 id="spa-final-title">Start with the actual room.</h2>
         <p>Apply with your location, project type, timing and investment range. If the project is a suitable fit, the complimentary consultation includes one detailed site assessment.</p>
         <div>
           <a class="spa-button spa-button--light" href="/book-site-inspection">Apply for consultation</a>
-          <a class="spa-final-link" href="/designs">Browse all designs</a>
+          <a class="spa-final-link" href="/projects">See completed projects</a>
         </div>
       </div>
     </section>
