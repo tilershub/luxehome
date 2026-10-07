@@ -171,7 +171,7 @@ export const PROJECT_CONSULTATION = {
   price: 'No consultation fee',
   qualification: 'Applications are reviewed for project type, location, timing and realistic investment before a site appointment is confirmed.',
   includes: [
-    'Project requirements and preferred design direction',
+    'Project requirements, functional priorities and preferred style direction',
     'Bathroom measurements, doors, windows and existing layout',
     'Water supply, drainage, wastewater and site-condition review',
     'House style, access, construction constraints and budget direction',
@@ -200,7 +200,7 @@ export const PROJECT_INITIATION = {
   multipleBathrooms: 'For multiple bathrooms, begin with one. Review its complete proposal before deciding whether to initiate the remaining bathrooms.',
 } as const;
 
-/** "Built the LUXEhome Way" — the construction system every bathroom follows.
+/** The BathSpace construction system every bathroom follows.
     The dedicated page renders these in full; the BuildProcess highlight on the
     home and design pages renders just the titles, so the two cannot drift. */
 export const BUILD_STAGES: Array<{
