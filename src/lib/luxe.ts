@@ -96,6 +96,7 @@ export interface LuxeProject {
   episode_1_url: string | null; episode_2_url: string | null;
   rating: number | null; review_text: string | null; review_by: string | null;
   review_screenshot_url?: string | null;
+  project_status?: 'completed' | 'in_progress' | 'proposed';
   featured: boolean;
   created_at?: string;
   design?: Pick<Design, 'slug' | 'name' | 'collection'> | null;
