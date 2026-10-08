@@ -18,9 +18,12 @@ const projects = allProjects
     || Number(b.featured) - Number(a.featured)
     || Number(Boolean(b.after_image_url)) - Number(Boolean(a.after_image_url))
   );
-const featuredProjects = projects.slice(0, 4);
-// The main hero must use an actual completed bathroom photograph, never a placeholder.
-const heroProject = projects.find((project) => project.after_image_url) ?? null;
+// Lead with completed bathrooms that already have authentic photography.
+// Text-only case studies remain available in /projects, but do not displace
+// photo-backed project proof on this conversion-critical homepage.
+const photographedProjects = projects.filter((project) => Boolean(project.after_image_url));
+const featuredProjects = photographedProjects.slice(0, 4);
+const heroProject = photographedProjects[0] ?? null;
 const heroCover = heroProject?.after_image_url ?? null;
 const initiationPrice = PROJECT_INITIATION.amount.toLocaleString('en-LK');
 
