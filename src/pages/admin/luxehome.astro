@@ -334,6 +334,7 @@
             <div class="row-sub">${esc(p.location ?? '')}${p.rating ? ` · ${'★'.repeat(p.rating)}` : ''}</div>
           </div>
           <div class="row-right">
+            <span class="pill pill-file">${esc((p.project_status ?? 'completed').replaceAll('_', ' '))}</span>
             <span class="pill ${p.published ? 'pill-pub' : 'pill-draft'}">${p.published ? 'Published' : 'Draft'}</span>
           </div>
         </div>`).join('');
@@ -703,7 +704,8 @@
       p = p || {
         title: '', slug: '', location: '', design_id: null, duration_label: '',
         project_ref: '', area_label: '', episode_1_url: '', episode_2_url: '',
-        completed_label: '', story: '', before_image_url: '', after_image_url: '',
+        completed_label: '', project_status: 'proposed', client_requirements: '', estimate_label: '',
+        story: '', before_image_url: '', after_image_url: '',
         video_url: '', rating: null, review_text: '', review_by: '',
         featured: false, published: false,
       };
@@ -733,7 +735,14 @@
             </select></div>
             <div class="fld"><label>Duration label</label><input id="p-duration" value="${esc(p.duration_label)}" placeholder="4 weeks" /></div>
           </div>
-          <div class="fld"><label>Completed label</label><input id="p-completed" value="${esc(p.completed_label)}" placeholder="March 2026" /></div>
+          <div class="fld-row">
+            <div class="fld"><label>Project stage *</label><select id="p-status">
+              <option value="proposed" ${(p.project_status ?? 'completed') === 'proposed' ? 'selected' : ''}>Proposed — not started</option>
+              <option value="in_progress" ${(p.project_status ?? 'completed') === 'in_progress' ? 'selected' : ''}>Ongoing renovation</option>
+              <option value="completed" ${(p.project_status ?? 'completed') === 'completed' ? 'selected' : ''}>Completed and handed over</option>
+            </select></div>
+            <div class="fld"><label>Completion / progress label</label><input id="p-completed" value="${esc(p.completed_label)}" placeholder="e.g. September 2026 or Bathroom 1 complete" /></div>
+          </div>
           <div class="fld-row">
             <div class="fld"><label>Project reference</label><input id="p-ref" value="${esc(p.project_ref)}" placeholder="LX-2026-001" /></div>
             <div class="fld"><label>Area label</label><input id="p-area" value="${esc(p.area_label)}" placeholder="Main family bathroom" /></div>
@@ -748,7 +757,9 @@
             <div class="fld"><label>Episode 02 — completed tour</label><input id="p-episode2" value="${esc(p.episode_2_url)}" /></div>
           </div>
           ${mediaField('p-gallery', 'Gallery images (one URL per line)', gallery.map((g) => g.image_url).join('\n'), 'projects/gallery', true)}
-          <div class="fld"><label>Story — written about the family</label><textarea id="p-story" style="min-height:130px">${esc(p.story)}</textarea></div>
+          <div class="fld"><label>Client brief / project requirements</label><textarea id="p-requirements" style="min-height:85px">${esc(p.client_requirements)}</textarea></div>
+          <div class="fld"><label>Actual contract / historical investment label</label><input id="p-investment" value="${esc(p.estimate_label)}" placeholder="e.g. Historical project value · LKR 1.9M" /></div>
+          <div class="fld"><label>Project story — facts and work actually completed</label><textarea id="p-story" style="min-height:130px">${esc(p.story)}</textarea></div>
 
           <div class="fld"><label>The journey</label></div>
           <div class="sub-rows" id="journey-rows">
@@ -828,6 +839,7 @@
         p.title = gv('p-title'); p.location = gv('p-location');
         p.design_id = gv('p-design') || null;
         p.duration_label = gv('p-duration'); p.completed_label = gv('p-completed');
+        p.project_status = gv('p-status'); p.client_requirements = gv('p-requirements'); p.estimate_label = gv('p-investment');
         p.project_ref = gv('p-ref'); p.area_label = gv('p-area');
         p.before_image_url = gv('p-before'); p.after_image_url = gv('p-after');
         p.video_url = gv('p-video'); p.story = gv('p-story');
@@ -860,6 +872,9 @@
           design_id: p.design_id, duration_label: p.duration_label || null,
           project_ref: p.project_ref || null, area_label: p.area_label || null,
           completed_label: p.completed_label || null, story: p.story || null,
+          project_status: p.project_status || 'proposed',
+          client_requirements: p.client_requirements || null,
+          estimate_label: p.estimate_label || null,
           before_image_url: p.before_image_url || null, after_image_url: p.after_image_url || null,
           video_url: p.video_url || null, rating: rating || null,
           episode_1_url: p.episode_1_url || null, episode_2_url: p.episode_2_url || null,
