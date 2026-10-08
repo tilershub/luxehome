@@ -71,6 +71,19 @@ const reviewSchema = project.rating ? JSON.stringify({
     </p>
   </section>
 
+  {/* Keep unfinished photo archives transparent rather than implying we have
+      images of a finished bathroom that have not actually been uploaded. */}
+  {!project.after_image_url && !project.before_image_url && project.gallery.length === 0 && !project.journey.some((stage) => (stage.image_urls ?? []).length > 0) && (
+    <section class="ps-photo-note lxr" aria-label="Project photo archive status">
+      <strong>{ongoing ? 'Project photographs coming soon' : 'Completed-project photographs being added'}</strong>
+      <p>
+        {ongoing
+          ? 'This renovation is underway. We will add genuine site photographs as the work progresses and final images only after handover.'
+          : 'This is a documented bathroom project. Its original photographs are being prepared for the public gallery; the recorded project details are available below.'}
+      </p>
+    </section>
+  )}
+
   <!-- Before / after -->
   {hasSlider ? (
     <section class="ps-slider-wrap lxr">
@@ -301,6 +314,17 @@ const reviewSchema = project.rating ? JSON.stringify({
   .ps-hero h1 { font-size: clamp(2.2rem, 5.5vw, 3.6rem); margin: .5rem 0 .6rem; }
   .ps-meta { font-size: .92rem; color: color-mix(in srgb, var(--ink) 68%, transparent); }
   .ps-meta a { color: var(--sage-deep); font-weight: 500; }
+  .ps-photo-note {
+    width: min(1020px, calc(100% - 2rem));
+    margin: 0 auto 1.5rem;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid var(--cream-deep);
+    border-left: 3px solid var(--sage-deep);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .ps-photo-note strong { display: block; font-weight: 600; }
+  .ps-photo-note p { margin-top: .3rem; font-size: .92rem; color: color-mix(in srgb, var(--ink) 72%, transparent); }
 
   /* Before/after drag slider */
   .ps-slider-wrap { max-width: 1100px; margin: 0 auto; padding: 0 clamp(1.2rem, 5vw, 4rem); }
