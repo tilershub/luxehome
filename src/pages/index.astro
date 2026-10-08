@@ -23,6 +23,7 @@ const projects = allProjects
 // photo-backed project proof on this conversion-critical homepage.
 const photographedProjects = projects.filter((project) => Boolean(project.after_image_url));
 const featuredProjects = photographedProjects.slice(0, 4);
+const nawalaLatest = projects.find((project) => project.slug === 'nawala-complete-bathroom-renovation' && !project.after_image_url) ?? null;
 const heroProject = photographedProjects[0] ?? null;
 const heroCover = heroProject?.after_image_url ?? null;
 const initiationPrice = PROJECT_INITIATION.amount.toLocaleString('en-LK');
@@ -181,6 +182,16 @@ const trustPoints = [
           show verified work, project investment and handover details, with original site photographs added as available.
         </p>
       </header>
+      {nawalaLatest && (
+        <a class="spa-project-proof lxr" href={`/projects/${nawalaLatest.slug}`}>
+          <div>
+            <span>Latest completed · Nawala · September 2026</span>
+            <strong>Airbnb bathroom renovation — LKR 1.881M</strong>
+            <p>Rocell tiles, Swiss bathware and concealed plumbing, with a recorded two-day waterproofing flood test and final handover. Real project photographs are being prepared.</p>
+          </div>
+          <b>Read the verified case study <span aria-hidden="true">→</span></b>
+        </a>
+      )}
       <div class="spa-project-grid">
         {featuredProjects.map((project) => <ProjectCard project={project} />)}
       </div>
@@ -832,6 +843,50 @@ const trustPoints = [
 
   .spa-projects { border-top: 1px solid #D8D4CA; }
   .spa-projects .spa-section-head { width: auto; }
+  .spa-project-proof {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 1.5rem;
+    padding: 1.35rem clamp(1rem, 3vw, 1.8rem);
+    background: #fff;
+    border: 1px solid var(--cream-deep);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .spa-project-proof div { flex: 1; }
+  .spa-project-proof div > span {
+    display: block;
+    color: var(--sage-deep);
+    font: 600 .75rem var(--lx-sans);
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+  .spa-project-proof strong {
+    display: block;
+    margin-top: .3rem;
+    font: 600 clamp(1.3rem, 2.6vw, 1.75rem) var(--lx-serif);
+  }
+  .spa-project-proof p {
+    max-width: 75ch;
+    margin-top: .35rem;
+    font-size: .88rem;
+    line-height: 1.55;
+  }
+  .spa-project-proof b {
+    flex: 0 0 auto;
+    color: var(--sage-deep);
+    font: 600 .8rem var(--lx-sans);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  @media(max-width:720px) {
+    .spa-project-proof { display: block; }
+    .spa-project-proof b { display: inline-block; margin-top: .8rem; }
+  }
   .spa-project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 
   /* Brands and warranty answer the trust questions before the final CTA */
