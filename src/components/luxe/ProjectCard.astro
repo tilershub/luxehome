@@ -9,21 +9,25 @@ interface Props {
 
 const { project, compact = false } = Astro.props;
 const cover = project.after_image_url || project.before_image_url;
+const status = project.project_status ?? 'completed';
+const badge = status === 'in_progress' ? 'In progress' : status === 'proposed' ? 'Proposed only' : 'Completed project';
+const imageDescription = status === 'completed' ? 'completed bathroom' : 'bathroom project';
 ---
 
 <a href={`/projects/${project.slug}`} class:list={['lp-card', { 'lp-card--compact': compact }]}>
   <div class="lp-cover">
     {cover
-      ? <img src={imageUrl(cover, 800)} alt={`${project.title} — completed BathSpace project`} loading="lazy" width="800" height="560" />
-      : <div class="lp-placeholder"><strong>Bath</strong><em>Space</em><small>by LUXEhome</small></div>}
-    <span class="lp-badge">Completed project</span>
+      ? <img src={imageUrl(cover, 800)} alt={`${project.title} — ${imageDescription} by BathSpace`} loading="lazy" width="800" height="560" />
+      : <div class="lp-placeholder"><strong>Bath<em>Space</em></strong><small>Project photographs being prepared</small></div>}
+    <span class="lp-badge">{badge}</span>
   </div>
   <div class="lp-body">
     <h3>{project.title}</h3>
     <p class="lp-meta">
       {[project.location, project.area_label, project.duration_label].filter(Boolean).join(' · ')}
     </p>
-    <span class="lp-link">View complete project story <b aria-hidden="true">→</b></span>
+    {!cover && project.client_requirements && <p class="lp-summary">{project.client_requirements}</p>}
+    <span class="lp-link">{status === 'completed' ? 'View project story' : 'View project progress'} <b aria-hidden="true">→</b></span>
   </div>
 </a>
 
@@ -57,9 +61,10 @@ const cover = project.after_image_url || project.before_image_url;
     letter-spacing: .1em;
     text-transform: uppercase;
   }
-  .lp-placeholder { height: 100%; display: grid; place-content: center; color: var(--sage-deep); }
+  .lp-placeholder { height: 100%; display: grid; place-content: center; gap: .5rem; padding: 1rem; text-align: center; color: var(--sage-deep); }
   .lp-placeholder em { font-family: var(--lx-serif); }
   .lp-placeholder small { display: block; text-align: center; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
+  .lp-summary { font-size: .87rem; margin-top: .65rem; color: color-mix(in srgb, var(--ink) 76%, transparent); line-height: 1.5; }
   .lp-body { display: flex; flex-direction: column; flex: 1; padding: 1.1rem 1.2rem 1.25rem; }
   .lp-body h3 { font-size: 1.45rem; margin: 0; }
   .lp-meta { margin-top: .3rem; color: color-mix(in srgb, var(--ink) 74%, transparent); font-size: .88rem; }
