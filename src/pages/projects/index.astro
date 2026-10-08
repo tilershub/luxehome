@@ -5,44 +5,77 @@ import ProjectCard from '../../components/luxe/ProjectCard.astro';
 import { getProjects } from '../../lib/luxe';
 import { waLink, imageUrl } from '../../lib/luxe-config';
 
-const projects = (await getProjects())
-  .filter((project) => project.published && project.after_image_url)
-  .sort((a, b) => Number(b.featured) - Number(a.featured));
+const projects = (await getProjects()).filter((project) => project.published);
+const completed = projects
+  .filter((project) => (project.project_status ?? 'completed') === 'completed')
+  .sort((a, b) =>
+    Number(b.slug === 'nawala-complete-bathroom-renovation') - Number(a.slug === 'nawala-complete-bathroom-renovation')
+    || Number(b.featured) - Number(a.featured)
+  );
+const ongoing = projects
+  .filter((project) => project.project_status === 'in_progress')
+  .sort((a, b) => Number(b.slug === 'gampaha-returning-client-two-bathrooms') - Number(a.slug === 'gampaha-returning-client-two-bathrooms'));
+const photoCover = completed.find((project) => project.after_image_url)?.after_image_url;
 ---
 
 <LuxeLayout
-  title="Completed Bathroom Renovation Projects — BathSpace by LUXEhome"
-  ogImage={projects[0]?.after_image_url ? imageUrl(projects[0].after_image_url, 1200) : undefined}
-  ogImageAlt="Completed BathSpace bathroom renovation projects in Sri Lanka"
-  description="Real BathSpace by LUXEhome bathroom renovations documented from the client brief through construction, technical testing and final handover."
+  title="Bathroom Renovation Projects — BathSpace by LUXEhome"
+  ogImage={photoCover ? imageUrl(photoCover, 1200) : undefined}
+  ogImageAlt="Real BathSpace completed bathroom renovations in Sri Lanka"
+  description="Explore real completed BathSpace bathroom renovations and construction projects currently underway, clearly identified by stage, scope and investment."
 >
   <section class="pj-hero">
-    <p class="lx-eyebrow lxr">BathSpace by LUXEhome · Real completed bathrooms</p>
-    <h1 class="lxr">From first inquiry<br /><em>to final handover.</em></h1>
+    <p class="lx-eyebrow lxr">BathSpace by LUXEhome · Real project portfolio</p>
+    <h1 class="lxr">Built with care.<br /><em>Shown with clarity.</em></h1>
     <p class="pj-intro lxr">
-      See the real bathrooms behind BathSpace: what the client needed, what we changed,
-      how the hidden work was handled, what the project cost and how it was handed over.
+      See our completed bathrooms and current renovation work—real locations,
+      actual project stages, construction responsibilities and recorded investments.
+      Ongoing work is never presented as completed.
     </p>
   </section>
 
-  <section class="pj-body">
-    {projects.length === 0 ? (
-      <div class="pj-empty lxr">
-        <h2>Real project stories are being documented.</h2>
-        <p>
-          We are converting our completed bathroom archive into real case studies—not design collections.
-          Each case study will show the brief, construction stages, testing, materials, investment and handover.
-        </p>
-        <div class="pj-empty-actions">
-          <a href="/book-site-inspection" class="lx-btn-wa">Apply for a complimentary consultation</a>
-          <a href={waLink('Hi BathSpace! I am planning a complete bathroom renovation. Can I share my bathroom photos with you?')} class="lx-btn-ghost" target="_blank" rel="noopener noreferrer">Send bathroom photos</a>
-        </div>
+  <section class="pj-body" aria-labelledby="pj-completed-title">
+    <header class="pj-heading lxr">
+      <div>
+        <p class="lx-eyebrow">Delivered bathrooms</p>
+        <h2 id="pj-completed-title">Completed Projects</h2>
+      </div>
+      <p>Real renovation case studies, with handover details, technical work and original project investment where documented. More site photographs are being added from our archive.</p>
+    </header>
+    {completed.length > 0 ? (
+      <div class="pj-grid">
+        {completed.map((project) => <ProjectCard project={project} />)}
       </div>
     ) : (
-      <div class="pj-grid">
-        {projects.map((project) => <ProjectCard project={project} />)}
+      <div class="pj-empty lxr">
+        <p>Project stories are being prepared using verified handover and site records.</p>
+        <a href="/book-site-inspection" class="lx-btn-wa">Apply for a complimentary consultation</a>
       </div>
     )}
+  </section>
+
+  {ongoing.length > 0 && (
+    <section class="pj-body pj-body--ongoing" aria-labelledby="pj-ongoing-title">
+      <header class="pj-heading lxr">
+        <div>
+          <p class="lx-eyebrow">Work happening now</p>
+          <h2 id="pj-ongoing-title">Ongoing Renovations</h2>
+        </div>
+        <p>Follow live project stories without confusing site progress with a finished bathroom. Final tests, completion dates and handover photographs are added only once verified.</p>
+      </header>
+      <div class="pj-grid">
+        {ongoing.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </section>
+  )}
+
+  <section class="pj-note" aria-label="How BathSpace presents proposed work">
+    <h2>Proposals are not completed projects.</h2>
+    <p>We keep unstarted villa and new-bathroom proposals in our internal planning archive. They only move into the public project portfolio when there is actual construction progress to share.</p>
+    <div class="pj-note-actions">
+      <a href="/book-site-inspection" class="lx-btn-wa">Apply for a complimentary consultation</a>
+      <a href={waLink('Hi BathSpace! I am considering a complete bathroom renovation and would like to share some photographs.')} class="lx-btn-ghost" target="_blank" rel="noopener noreferrer">Send bathroom photos</a>
+    </div>
   </section>
 </LuxeLayout>
 
@@ -50,12 +83,23 @@ const projects = (await getProjects())
   .pj-hero { max-width: 1100px; margin: 0 auto; padding: clamp(3.2rem, 8vw, 6.5rem) clamp(1.2rem, 5vw, 4rem) 1.4rem; }
   .pj-hero h1 { margin: .6rem 0 1rem; font-size: clamp(3.1rem, 7vw, 5.2rem); }
   .pj-hero h1 em { color: var(--sage-deep); }
-  .pj-intro { max-width: 62ch; font: 500 clamp(1.05rem, 2.4vw, 1.25rem)/1.5 var(--lx-serif); }
-  .pj-body { max-width: 1100px; margin: 0 auto; padding: 1.5rem clamp(1.2rem, 5vw, 4rem) 4rem; }
-  .pj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-  .pj-empty { display: grid; place-items: center; gap: 1rem; padding: 4rem 1rem; text-align: center; }
-  .pj-empty h2 { font-size: clamp(2rem, 5vw, 3.1rem); }
-  .pj-empty p { max-width: 62ch; color: color-mix(in srgb, var(--ink) 70%, transparent); }
-  .pj-empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; margin-top: .4rem; }
-  @media (max-width: 720px) { .pj-grid { grid-template-columns: 1fr; } }
+  .pj-intro { max-width: 67ch; font: 500 clamp(1.05rem, 2.4vw, 1.25rem)/1.5 var(--lx-serif); }
+  .pj-body { max-width: 1100px; margin: 0 auto; padding: 2rem clamp(1.2rem, 5vw, 4rem) 4rem; }
+  .pj-body--ongoing { border-top: 1px solid var(--cream-deep); padding-top: 3rem; }
+  .pj-heading { display: flex; justify-content: space-between; align-items: end; gap: 1.6rem; margin-bottom: 1.4rem; }
+  .pj-heading h2 { font-size: clamp(2.1rem, 4vw, 3.2rem); }
+  .pj-heading > p { max-width: 46ch; font-size: .94rem; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+  .pj-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .pj-empty { display: grid; place-items: center; gap: 1rem; padding: 3rem 1rem; text-align: center; }
+  .pj-note { max-width: 1010px; margin: 1rem auto 4rem; padding: 2rem clamp(1.2rem, 4vw, 3rem); background: var(--sage-mist); border-radius: 12px; }
+  .pj-note h2 { font-size: clamp(1.65rem, 3vw, 2.3rem); }
+  .pj-note p { margin: .6rem 0 1.3rem; max-width: 70ch; }
+  .pj-note-actions { display: flex; gap: .8rem; flex-wrap: wrap; }
+  @media(max-width:720px) {
+    .pj-grid { grid-template-columns: 1fr; }
+    .pj-heading { display: block; }
+    .pj-heading > p { margin-top: .7rem; }
+    .pj-note { margin: 0 1rem 3rem; }
+    .pj-note-actions { flex-direction: column; align-items: stretch; }
+  }
 </style>
