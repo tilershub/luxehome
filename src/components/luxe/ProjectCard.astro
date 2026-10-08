@@ -10,7 +10,10 @@ interface Props {
 const { project, compact = false } = Astro.props;
 const cover = project.after_image_url || project.before_image_url;
 const status = project.project_status ?? 'completed';
-const badge = status === 'in_progress' ? 'In progress' : status === 'proposed' ? 'Proposed only' : 'Completed project';
+const returningClient = project.slug === 'gampaha-returning-client-two-bathrooms';
+const badge = returningClient && status === 'in_progress'
+  ? '1 completed · 1 ongoing'
+  : status === 'in_progress' ? 'In progress' : status === 'proposed' ? 'Proposed only' : 'Completed project';
 const imageDescription = status === 'completed' ? 'completed bathroom' : 'bathroom project';
 ---
 
