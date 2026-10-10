@@ -114,6 +114,7 @@ export interface ProjectSpecification {
   catalog_item_id: string | null;
   catalog_item?: {
     image_url: string | null;
+    slug: string | null;
     for_sale: boolean | null;
     sale_price_lkr: number | null;
     sale_unit: string | null;
@@ -238,7 +239,7 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
     c.from('lx_project_journey').select('*').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_crew').select('name,role,photo_url,tilershub_verified,sort_order').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_specifications')
-      .select('id,section,category,item_name,brand,model_code,specification,sort_order,image_url,catalog_item_id,catalog_item:lx_fixture_library(image_url,for_sale,sale_price_lkr,sale_unit,sale_availability)')
+      .select('id,section,category,item_name,brand,model_code,specification,sort_order,image_url,catalog_item_id,catalog_item:lx_fixture_library(image_url,slug,for_sale,sale_price_lkr,sale_unit,sale_availability)')
       .eq('project_id', project.id).order('sort_order'),
   ]);
 
