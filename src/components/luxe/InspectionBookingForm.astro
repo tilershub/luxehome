@@ -70,11 +70,9 @@
       <legend>What investment range are you considering for this complete bathroom? <b aria-hidden="true">*</b></legend>
       <p class="ibf-field-note">BathSpace complete renovations typically begin around LKR 1.5M, depending on the room and approved scope.</p>
       <div class="ibf-choice-grid">
-        <label><input type="radio" name="budget_direction" value="Below LKR 1.5M" required /><span>Below LKR 1.5M</span></label>
-        <label><input type="radio" name="budget_direction" value="LKR 1.5M–2M" /><span>LKR 1.5M–2M</span></label>
+        <label><input type="radio" name="budget_direction" value="LKR 1.5M–2M" required /><span>LKR 1.5M–2M</span></label>
         <label><input type="radio" name="budget_direction" value="LKR 2M–3M" /><span>LKR 2M–3M</span></label>
-        <label><input type="radio" name="budget_direction" value="LKR 3M+" /><span>LKR 3M+</span></label>
-        <label><input type="radio" name="budget_direction" value="Not decided — need guidance" /><span>Not decided — need guidance</span></label>
+        <label><input type="radio" name="budget_direction" value="LKR 3M+" /><span>Above LKR 3M</span></label>
       </div>
     </fieldset>
 
@@ -179,6 +177,11 @@
       const sizeStatus = formValue(data, 'size_status') || 'Please measure during approved site assessment';
       const approximateSize = formValue(data, 'approximate_size');
       const budgetDirection = formValue(data, 'budget_direction');
+      // Only the published budget tiers may enter the consultation pipeline.
+      if (!['LKR 1.5M–2M', 'LKR 2M–3M', 'LKR 3M+'].includes(budgetDirection)) {
+        form.querySelector<HTMLInputElement>('input[name="budget_direction"]')?.focus();
+        return;
+      }
       const projectTiming = formValue(data, 'project_timing');
       const notes = formValue(data, 'notes');
 
