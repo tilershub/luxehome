@@ -239,9 +239,11 @@ const reviewSchema = project.rating ? JSON.stringify({
                   {item.catalog_item?.for_sale && Number(item.catalog_item.sale_price_lkr) > 0 && (
                     <div class="ps-spec-sale">
                       <span>Current individual price: LKR {new Intl.NumberFormat('en-LK').format(Number(item.catalog_item.sale_price_lkr))} / {item.catalog_item.sale_unit || 'item'}</span>
-                      {item.catalog_item.sale_availability !== 'out_of_stock'
-                        ? <a href={waLink(`Hi BathSpace! I saw the ${item.item_name} listed in your ${project.title} project. Please confirm purchase options and current availability.`)} target="_blank" rel="noopener noreferrer">Enquire to purchase →</a>
-                        : <small>Currently unavailable</small>}
+                      {item.catalog_item.slug
+                        ? <a href={`/shop/${item.catalog_item.slug}`}>See current product options & prices →</a>
+                        : item.catalog_item.sale_availability !== 'out_of_stock'
+                          ? <a href={waLink(`Hi BathSpace! I saw the ${item.item_name} in your ${project.title} renovation. Can I buy this fixture?`)} target="_blank" rel="noopener noreferrer">Enquire about this product →</a>
+                          : <small>Currently unavailable</small>}
                     </div>
                   )}
                 </article>
@@ -250,7 +252,7 @@ const reviewSchema = project.rating ? JSON.stringify({
           </details>
         );
       })}
-      <p class="ps-spec-disclaimer">Specifications reflect the materials selected for this particular project. Brands, models, tile sizes and construction systems may vary by bathroom, site conditions and availability.</p>
+      <p class="ps-spec-disclaimer">Materials shown were used in this completed bathroom. Current shop availability, variants and prices may differ from the original project contract and will be confirmed before an order is accepted.</p>
     </section>
   )}
 
