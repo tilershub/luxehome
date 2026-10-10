@@ -1,18 +1,5 @@
 ---
-import LuxeLayout from '../layouts/LuxeLayout.astro';
+/** Direct visits should not imply a successful submission. The actual
+    consultation form confirms saved leads inline after a database write. */
+return Astro.redirect('/book-site-inspection',302);
 ---
-<LuxeLayout
-  title="Thank you — BathSpace by LUXEhome"
-  description="Your BathSpace bathroom enquiry has been received."
->
-  <section class="thanks">
-    <p class="lx-eyebrow">Bathroom enquiry received</p>
-    <h1>Thank you. We’ll make the next step clear.</h1>
-    <p>Keep your property location and a few current bathroom photographs ready. Measurements are optional—we can take them during an approved site assessment.</p>
-    <div>
-      <a class="lx-btn-wa" href="/book-site-inspection">Apply for complimentary consultation</a>
-      <a class="lx-btn-ghost" href="/projects">See completed projects</a>
-    </div>
-  </section>
-</LuxeLayout>
-<style>.thanks{width:min(900px,calc(100% - 34px));margin:auto;padding:clamp(4rem,10vw,8rem) 0}.thanks h1{font-size:clamp(3.5rem,8vw,5.8rem);margin:.7rem 0 1.3rem}.thanks>p:not(.lx-eyebrow){font:500 1.35rem/1.45 var(--lx-serif);max-width:700px}.thanks>div{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}</style>
