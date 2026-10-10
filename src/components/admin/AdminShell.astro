@@ -2,7 +2,7 @@
 import AdminAuthGate from './AdminAuthGate.astro';
 interface Props { title:string; active?:string; }
 const {title,active='dashboard'}=Astro.props;
-const nav=[['dashboard','Dashboard','/admin'],['proposals','Project Proposals','/admin/proposals'],['designs','Designs','/admin/cms/designs'],['projects','Projects','/admin/cms/projects'],['blog','Blog Articles','/admin/cms/blog'],['pages','Website Pages','/admin/cms/pages'],['products','Products','/admin/cms/products'],['categories','Categories','/admin/cms/categories'],['inspections','Project Initiations','/admin/cms/inspections'],['team','Team','/admin/cms/team'],['media','Media Library','/admin/cms/media'],['settings','Global Settings','/admin/cms/settings']];
+const nav=[['dashboard','Dashboard','/admin'],['proposals','Project Proposals','/admin/proposals'],['designs','Designs','/admin/cms/designs'],['projects','Projects','/admin/cms/projects'],['fixture-library','Fixture Library','/admin/cms/fixture-library'],['blog','Blog Articles','/admin/cms/blog'],['pages','Website Pages','/admin/cms/pages'],['products','Products','/admin/cms/products'],['categories','Categories','/admin/cms/categories'],['inspections','Project Initiations','/admin/cms/inspections'],['team','Team','/admin/cms/team'],['media','Media Library','/admin/cms/media'],['settings','Global Settings','/admin/cms/settings']];
 ---
 <!doctype html>
 <html lang="en">
@@ -10,14 +10,14 @@ const nav=[['dashboard','Dashboard','/admin'],['proposals','Project Proposals','
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>{title} | LUXEhome CMS</title>
+    <title>{title} | BathSpace CMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Jost:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
   <body>
     <AdminAuthGate />
-    <div class="cms"><aside><a class="brand" href="/admin"><strong>LUXE</strong><em>home</em><small>CMS</small></a><button id="cms-menu">Menu</button><nav id="cms-nav">{nav.map(([key,label,href])=><a class:list={{active:key===active}} href={href}>{label}</a>)}</nav><a class="public" href="/">← Public website</a><button class="signout" id="admin-signout">Sign out</button></aside><main><header><div><span>LUXEhome CMS</span><h1>{title}</h1></div><slot name="action" /></header><slot /></main></div>
+    <div class="cms"><aside><a class="brand" href="/admin"><strong>Bath</strong><em>Space</em><small>by LUXEhome · CMS</small></a><button id="cms-menu">Menu</button><nav id="cms-nav">{nav.map(([key,label,href])=><a class:list={{active:key===active}} href={href}>{label}</a>)}</nav><a class="public" href="/">← Public website</a><button class="signout" id="admin-signout">Sign out</button></aside><main><header><div><span>BathSpace by LUXEhome · CMS</span><h1>{title}</h1></div><slot name="action" /></header><slot /></main></div>
     <script is:inline>document.getElementById('cms-menu')?.addEventListener('click',()=>document.getElementById('cms-nav')?.classList.toggle('open'));document.getElementById('admin-signout')?.addEventListener('click',()=>window.dispatchEvent(new Event('admin-sign-out')));</script>
   </body>
 </html>
