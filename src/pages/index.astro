@@ -83,7 +83,7 @@ const trustPoints = [
 <LuxeLayout
   title="BathSpace by LUXEhome — Complete Bathroom Renovation in Sri Lanka"
   description="BathSpace designs, renovates and delivers complete bathrooms in Sri Lanka through one accountable team—from planning and demolition to testing and handover."
-  ogImage={heroCover ? imageUrl(heroCover, 1200) : undefined}
+  ogImage={heroCover || undefined}
   ogImageAlt={heroProject ? `${heroProject.title} — BathSpace by LUXEhome` : undefined}
   viewContent={{
     content_name: 'BathSpace complete bathroom renovation service',
@@ -95,7 +95,7 @@ const trustPoints = [
     {heroCover ? (
       <img
         class="spa-hero-image"
-        src={imageUrl(heroCover, 1800, 1125)}
+        src={heroCover}
         alt={`${heroProject?.title ?? 'BathSpace'} completed bathroom`}
         width="1800"
         height="1125"
@@ -370,7 +370,7 @@ const trustPoints = [
   {heroCover && (
     <section class="spa-final" aria-labelledby="spa-final-title">
       <img
-        src={imageUrl(heroCover, 1600, 1000)}
+        src={heroCover}
         alt={`${heroProject?.title ?? 'BathSpace'} completed bathroom`}
         width="1600"
         height="1000"

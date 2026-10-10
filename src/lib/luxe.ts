@@ -114,6 +114,7 @@ export interface ProjectSpecification {
   catalog_item_id: string | null;
   catalog_item?: {
     image_url: string | null;
+    slug: string | null;
     for_sale: boolean | null;
     sale_price_lkr: number | null;
     sale_unit: string | null;
@@ -238,7 +239,7 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
     c.from('lx_project_journey').select('*').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_crew').select('name,role,photo_url,tilershub_verified,sort_order').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_specifications')
-      .select('id,section,category,item_name,brand,model_code,specification,sort_order,image_url,catalog_item_id,catalog_item:lx_fixture_library(image_url,for_sale,sale_price_lkr,sale_unit,sale_availability)')
+      .select('id,section,category,item_name,brand,model_code,specification,sort_order,image_url,catalog_item_id,catalog_item:lx_fixture_library(image_url,slug,for_sale,sale_price_lkr,sale_unit,sale_availability)')
       .eq('project_id', project.id).order('sort_order'),
   ]);
 
@@ -253,13 +254,27 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
 
 export interface ShopFixture {
   id: string;
+  slug: string | null;
+  sku: string | null;
   section: 'construction' | 'finishes';
   category: string;
   item_name: string;
   brand: string | null;
   model_code: string | null;
   specification: string | null;
+  description: string | null;
   image_url: string;
+  gallery_urls: string[];
+  width_mm: number | null;
+  height_mm: number | null;
+  depth_mm: number | null;
+  tile_length_mm: number | null;
+  tile_width_mm: number | null;
+  coverage_sqm_per_box: number | null;
+  pieces_per_box: number | null;
+  product_type: string;
+  delivery_class: string;
+  warranty_terms: string | null;
   sale_price_lkr: number;
   sale_unit: string;
   sale_availability: 'in_stock' | 'made_to_order' | 'out_of_stock';
@@ -272,7 +287,7 @@ export async function getShopFixtures(): Promise<ShopFixture[]> {
   const c = sb();
   if (!c) return [];
   const { data, error } = await c.from('lx_fixture_library')
-    .select('id,section,category,item_name,brand,model_code,specification,image_url,sale_price_lkr,sale_unit,sale_availability,sale_notes')
+    .select('id,slug,sku,section,category,item_name,brand,model_code,specification,description,image_url,gallery_urls,width_mm,height_mm,depth_mm,tile_length_mm,tile_width_mm,coverage_sqm_per_box,pieces_per_box,product_type,delivery_class,warranty_terms,sale_price_lkr,sale_unit,sale_availability,sale_notes')
     .eq('active', true)
     .eq('for_sale', true)
     .gt('sale_price_lkr', 0)
@@ -286,11 +301,42 @@ export async function getShopFixtures(): Promise<ShopFixture[]> {
   return (data ?? []).filter((item) => Boolean(item.image_url)) as ShopFixture[];
 }
 
+export interface ShopVariant {
+  id: string;
+  product_id: string;
+  label: string;
+  sku: string | null;
+  size_label: string | null;
+  finish_label: string | null;
+  price_lkr: number;
+  stock_quantity: number | null;
+  availability: 'in_stock' | 'made_to_order' | 'out_of_stock';
+  active: boolean;
+}
+export async function getShopFixtureBySlug(slug: string): Promise<{product:ShopFixture;variants:ShopVariant[]} | null> {
+  const products = await getShopFixtures();
+  const product = products.find((item) => item.slug === slug);
+  if (!product) return null;
+  const c = sb();
+  if (!c) return null;
+  const {data,error} = await c.from('lx_shop_variants')
+    .select('id,product_id,label,sku,size_label,finish_label,price_lkr,stock_quantity,availability,active')
+    .eq('product_id', product.id)
+    .eq('active',true)
+    .order('sort_order');
+  if (error) {
+    console.error('Could not load fixture variations:',error.message);
+    return {product,variants:[]};
+  }
+  return {product, variants:(data??[]) as ShopVariant[]};
+}
+
 export async function getTeam(opts: { permanentOnly?: boolean } = {}): Promise<TeamMember[]> {
   const c = sb();
   if (!c) return [];
   let q = c.from('lx_team_members')
     .select('name,role,bio,photo_url,permanent,tilershub_verified,sort_order')
+    .eq('published',true)
     .order('sort_order');
   if (opts.permanentOnly) q = q.eq('permanent', true);
   const { data } = await q;

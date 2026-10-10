@@ -1,4 +1,175 @@
 ---
 export const prerender = false;
-return Astro.redirect('/', 301);
+import LuxeLayout from '../../layouts/LuxeLayout.astro';
+import {getShopFixtureBySlug} from '../../lib/luxe';
+import {imageUrl,waLink} from '../../lib/luxe-config';
+
+const slug=Astro.params.slug || '';
+const record=await getShopFixtureBySlug(slug);
+if(!record) return Astro.redirect('/shop',302);
+const {product,variants}=record;
+const photos=[...new Set([product.image_url,...(product.gallery_urls||[])].filter(Boolean))];
+const money=(n:number)=>new Intl.NumberFormat('en-LK',{maximumFractionDigits:0}).format(Number(n));
+const custom=product.product_type==='made_to_measure';
+const unavailable=product.sale_availability==='out_of_stock' && variants.every(v=>v.availability==='out_of_stock'||v.stock_quantity===0);
+const itemData={
+  id:product.id,slug:product.slug,name:product.item_name,image:product.image_url,
+  sale_unit:product.sale_unit,price:Number(product.sale_price_lkr),
+  available:product.sale_availability,product_type:product.product_type
+};
 ---
+<LuxeLayout title={`${product.item_name} | BathSpace Shop`}
+ description={product.description||product.specification||`Buy ${product.item_name} from BathSpace by LUXEhome — check specifications and current prices.`}
+ ogImage={product.image_url}>
+ <Fragment slot="head">
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    '@context':'https://schema.org',
+    '@type':'Product',
+    name:product.item_name,
+    description:product.description||product.specification||product.item_name,
+    image:photos,
+    ...(product.brand?{brand:{'@type':'Brand',name:product.brand}}:{}),
+    ...(product.sku?{sku:product.sku}:{}),
+    offers:{
+      '@type':'Offer',
+      url:`https://luxehome.lk/shop/${product.slug}`,
+      priceCurrency:'LKR',
+      price:Number(product.sale_price_lkr).toFixed(2),
+      availability:product.sale_availability==='out_of_stock'?'https://schema.org/OutOfStock':product.sale_availability==='in_stock'?'https://schema.org/InStock':'https://schema.org/PreOrder'
+    }
+  })}></script>
+ </Fragment>
+ <main class="bd-product">
+  <nav class="bd-crumb"><a href="/shop">BathSpace Shop</a> / {product.category} / {product.item_name}</nav>
+  <div class="bd-product-grid">
+   <div class="bd-product-gallery">
+    <div class="bd-main-photo"><img id="bd-photo" src={photos[0]} alt={product.item_name} fetchpriority="high" width="900" height="900" /></div>
+    {photos.length>1 && <div class="bd-thumbs">{photos.map((url,i)=><button type="button" data-image={url} aria-label={`View product photo ${i+1}`} aria-pressed={i===0?'true':'false'}><img src={imageUrl(url,140)} alt="" loading="lazy" width="120" height="120"/></button>)}</div>}
+   </div>
+   <div class="bd-product-buy">
+    <p class="lx-eyebrow">{product.category} · {product.section==='construction'?'Construction material':'Bathroom finish'}</p>
+    <h1>{product.item_name}</h1>
+    <p class="bd-model">{[product.brand,product.model_code&&`Model ${product.model_code}`,product.sku&&`SKU ${product.sku}`].filter(Boolean).join(' · ')}</p>
+    <p class="bd-price" id="bd-display-price">LKR {money(product.sale_price_lkr)} <small>/ {product.sale_unit||'item'}</small></p>
+    <p class="bd-stock">{unavailable?'Currently unavailable':product.sale_availability==='in_stock'?'In stock':'Made to order / subject to confirmation'}</p>
+    {(product.description||product.specification)&&<p class="bd-description">{product.description||product.specification}</p>}
+    {variants.length>0 && <label class="bd-select">Choose size / finish
+      <select id="bd-variant" data-variants={JSON.stringify(variants)}>
+       <option value="">Choose an option</option>
+       {variants.map(v=><option value={v.id} disabled={v.availability==='out_of_stock'||v.stock_quantity===0}>{v.label}{v.availability==='out_of_stock'||v.stock_quantity===0?' · Unavailable':` · LKR ${money(v.price_lkr)}`}</option>)}
+      </select>
+    </label>}
+    {product.product_type==='tile'&&product.coverage_sqm_per_box&&product.sale_unit==='box'&&<div class="bd-calc">
+      <strong>Tile quantity calculator</strong>
+      <label>Floor / wall area (m²) <input id="bd-area" type="number" min="0.1" step="0.1" placeholder="e.g. 12.5"/></label>
+      <p id="bd-boxes">Coverage: {product.coverage_sqm_per_box} m² per box. Allow extra for cutting and site conditions.</p>
+    </div>}
+    <div class="bd-qty"><label for="bd-quantity">Quantity</label><input type="number" id="bd-quantity" min="1" max="100" step="1" value="1"/></div>
+    {(!custom&&!unavailable)&&<button type="button" id="bd-add" class="bd-add" data-product={JSON.stringify(itemData)} disabled={variants.length>0}>Add to cart</button>}
+    {custom&&<a class="bd-add" href={waLink(`Hi BathSpace, I would like a custom size quotation for ${product.item_name}. Can we discuss the measurements and finishes?`)} target="_blank" rel="noopener noreferrer">Request custom-size quotation</a>}
+    {unavailable&&<p>Please contact us for restocking or an alternative product.</p>}
+    <p class="bd-message" id="bd-message" aria-live="polite"></p>
+    <a class="bd-view-cart" href="/cart">View basket →</a>
+    <p class="bd-small">Final availability, delivery, customization and installation requirements are confirmed before payment. Product photographs are for the listed item; check the exact variant before ordering.</p>
+   </div>
+  </div>
+  <div class="bd-info">
+   <h2>Product specifications</h2>
+   <dl>
+     {product.brand&&<><dt>Brand</dt><dd>{product.brand}</dd></>}
+     {product.model_code&&<><dt>Model</dt><dd>{product.model_code}</dd></>}
+     {product.width_mm&&<><dt>Width</dt><dd>{product.width_mm} mm</dd></>}
+     {product.height_mm&&<><dt>Height</dt><dd>{product.height_mm} mm</dd></>}
+     {product.depth_mm&&<><dt>Depth</dt><dd>{product.depth_mm} mm</dd></>}
+     {product.tile_length_mm&&<><dt>Tile length</dt><dd>{product.tile_length_mm} mm</dd></>}
+     {product.tile_width_mm&&<><dt>Tile width</dt><dd>{product.tile_width_mm} mm</dd></>}
+     {product.coverage_sqm_per_box&&<><dt>Box coverage</dt><dd>{product.coverage_sqm_per_box} m²</dd></>}
+     {product.pieces_per_box&&<><dt>Pieces per box</dt><dd>{product.pieces_per_box}</dd></>}
+     <dt>Sale unit</dt><dd>{product.sale_unit||'item'}</dd>
+     {product.warranty_terms&&<><dt>Warranty</dt><dd>{product.warranty_terms}</dd></>}
+   </dl>
+   {product.specification&&<p>{product.specification}</p>}
+   <p><a href="/projects">See real completed BathSpace bathrooms →</a></p>
+  </div>
+ </main>
+</LuxeLayout>
+<script>
+ const photo=document.getElementById('bd-photo') as HTMLImageElement|null;
+ document.querySelectorAll<HTMLButtonElement>('[data-image]').forEach(button=>button.addEventListener('click',()=>{
+  if(photo)photo.src=button.dataset.image||photo.src;
+  document.querySelectorAll('[data-image]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+ }));
+ const select=document.getElementById('bd-variant') as HTMLSelectElement|null;
+ const variants=select?JSON.parse(select.dataset.variants||'[]') as Array<{id:string,label:string,price_lkr:number,availability:string,stock_quantity:number|null,sku:string|null}>:[];
+ const add=document.getElementById('bd-add') as HTMLButtonElement|null;
+ const message=document.getElementById('bd-message') as HTMLElement|null;
+ const quantity=document.getElementById('bd-quantity') as HTMLInputElement|null;
+ const displayPrice=document.getElementById('bd-display-price') as HTMLElement|null;
+ const area=document.getElementById('bd-area') as HTMLInputElement|null;
+ const coverage=Number(document.querySelector('.bd-calc #bd-boxes')?.textContent?.match(/Coverage: ([\d.]+)/)?.[1]||0);
+ select?.addEventListener('change',()=>{
+   const found=variants.find(x=>x.id===select.value);
+   if(add)add.disabled=!found||found.availability==='out_of_stock'||found.stock_quantity===0;
+   if(found&&displayPrice)displayPrice.textContent='LKR '+new Intl.NumberFormat('en-LK').format(found.price_lkr);
+ });
+ area?.addEventListener('input',()=>{
+  const needed=Number(area.value);
+  const packs=needed>0&&coverage>0?Math.ceil(needed*1.1/coverage):0;
+  const line=document.getElementById('bd-boxes');
+  if(line)line.textContent=packs>0?`Estimate with 10% wastage: ${packs} box(es) for ${needed} m². Confirm exact coverage and site wastage before purchase.`:`Coverage: ${coverage} m² per box.`;
+  if(packs&&quantity)quantity.value=String(Math.min(100,packs));
+ });
+ add?.addEventListener('click',()=>{
+  const p=JSON.parse(add.dataset.product||'{}') as {id:string;slug:string;name:string;price:number;image:string;sale_unit:string};
+  const v=select?variants.find(x=>x.id===select.value):undefined;
+  if(select&&!v)return;
+  const qty=Number(quantity?.value||0);
+  if(!Number.isInteger(qty)||qty<1||qty>100){if(message)message.textContent='Choose a quantity between 1 and 100.';return}
+  try{
+   const key='bathspace-cart-v1';
+   const list=JSON.parse(localStorage.getItem(key)||'[]') as Array<{id:string;variant_id:string|null;quantity:number;price:number;name:string;image:string;unit:string;slug:string;selection:string}>;
+   const variantId=v?.id||null;
+   const found=list.find(item=>item.id===p.id&&item.variant_id===variantId);
+   if(found)found.quantity=Math.min(100,found.quantity+qty);
+   else list.push({id:p.id,variant_id:variantId,quantity:qty,price:Number(v?.price_lkr||p.price),name:p.name,image:p.image,unit:p.sale_unit||'item',slug:p.slug,selection:v?.label||''});
+   localStorage.setItem(key,JSON.stringify(list));
+   if(message)message.textContent=`Added ${qty} item(s) to your basket. Review the basket to continue.`;
+   if(typeof (window as any).gtag==='function'){
+     (window as any).gtag('event','add_to_cart',{currency:'LKR',value:Number(v?.price_lkr||p.price)*qty,
+       items:[{item_id:v?.sku||v?.id||p.id,item_name:p.name,quantity:qty,price:Number(v?.price_lkr||p.price)}]});
+   }
+  }catch{if(message)message.textContent='Unable to save your basket on this device. Please try WhatsApp.'}
+ });
+</script>
+<style>
+ .bd-product{width:min(1180px,calc(100% - 32px));margin:auto;padding:2rem 0 5rem;color:var(--ink)}
+ .bd-crumb{font-size:.8rem;margin:0 0 2rem;color:var(--sage-deep)} .bd-crumb a{color:inherit}
+ .bd-product-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(1.4rem,4vw,4rem)}
+ .bd-main-photo{aspect-ratio:4/5;max-height:650px;background:var(--sage-mist);border-radius:12px;overflow:hidden}
+ .bd-main-photo img{width:100%;height:100%;object-fit:contain}
+ .bd-thumbs{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem}
+ .bd-thumbs button{width:74px;height:74px;padding:0;border:2px solid transparent;border-radius:7px;overflow:hidden;background:#fff}
+ .bd-thumbs button[aria-pressed=true]{border-color:var(--sage-deep)}
+ .bd-thumbs img{width:100%;height:100%;object-fit:contain}
+ .bd-product-buy h1{font-family:var(--lx-serif);font-size:clamp(2.4rem,5vw,4rem);line-height:1.08;font-weight:500}
+ .bd-model{font-size:.86rem;color:var(--sage-deep);margin-top:.7rem}
+ .bd-price{font-size:1.7rem;font-weight:650;margin-top:1rem}
+ .bd-price small{font-size:.85rem;color:var(--sage-deep);font-weight:400}
+ .bd-stock,.bd-small{font-size:.83rem;color:var(--sage-deep);line-height:1.5;margin-top:.6rem}
+ .bd-description{font-size:1rem;line-height:1.6;margin:1.2rem 0}
+ .bd-select,.bd-qty,.bd-calc label{display:grid;gap:.35rem;font-size:.88rem;font-weight:600;margin:1rem 0}
+ .bd-select select,.bd-qty input,.bd-calc input{width:100%;min-height:48px;border:1px solid #adb4aa;border-radius:6px;background:#fff;padding:.6rem;font:inherit;color:var(--ink)}
+ .bd-qty input{max-width:120px}
+ .bd-calc{background:#fff;border:1px solid var(--cream-deep);padding:1rem;border-radius:8px}
+ .bd-calc p{font-size:.8rem}
+ .bd-add{display:block;width:100%;text-align:center;border:0;border-radius:8px;background:var(--sage-deep);color:white;font:600 .96rem var(--lx-sans);padding:1rem;text-decoration:none;cursor:pointer}
+ .bd-add:disabled{opacity:.55;cursor:not-allowed}
+ .bd-message{min-height:1.3rem;color:var(--sage-deep);font-size:.84rem;margin:.6rem 0}
+ .bd-view-cart{display:inline-block;margin:.6rem 0 1rem;color:var(--sage-deep);font-weight:650}
+ .bd-info{max-width:780px;margin:3rem auto;border-top:1px solid var(--cream-deep);padding-top:2rem}
+ .bd-info h2{font-family:var(--lx-serif);font-size:2.5rem}
+ .bd-info dl{display:grid;grid-template-columns:1fr 2fr}
+ .bd-info dt,.bd-info dd{padding:.8rem;border-bottom:1px solid var(--cream-deep);margin:0;font-size:.93rem}
+ .bd-info dt{font-weight:600}
+ @media(max-width:720px){.bd-product-grid{grid-template-columns:1fr}.bd-product{padding-top:1rem}.bd-main-photo{aspect-ratio:4/5;max-height:none}}
+</style>

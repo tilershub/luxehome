@@ -4,7 +4,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { getPublishedPosts } from '../lib/luxe-blog';
-import { getProjects } from '../lib/luxe';
+import { getProjects, getShopFixtures } from '../lib/luxe';
 
 const SITE = 'https://luxehome.lk';
 
@@ -12,9 +12,10 @@ const entry = (path: string, lastmod?: string | null) =>
   `<url><loc>${SITE}${path}</loc>${lastmod ? `<lastmod>${new Date(lastmod).toISOString()}</lastmod>` : ''}</url>`;
 
 export const GET: APIRoute = async () => {
-  const [posts, projects] = await Promise.all([
+  const [posts, projects, products] = await Promise.all([
     getPublishedPosts(),
     getProjects(),
+    getShopFixtures(),
   ]);
 
   // The regular Astro sitemap already owns fixed routes. This sitemap lists
@@ -26,6 +27,9 @@ export const GET: APIRoute = async () => {
     ...posts
       .filter((post) => post.include_in_sitemap)
       .map((post) => ({ path: `/blog/${post.slug}`, lastmod: post.updated_at })),
+    ...products
+      .filter((product) => Boolean(product.slug))
+      .map((product) => ({ path: `/shop/${product.slug}` })),
   ];
 
   const seen = new Set<string>();

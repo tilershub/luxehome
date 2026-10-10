@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 // Prerendered routes must exist as files in dist/.
 const staticRoutes = [
-  '/about', '/thank-you',
+  '/about', '/thank-you', '/cart',
   '/admin', '/admin/cms', '/admin/cms/designs', '/admin/cms/projects',
   '/admin/cms/blog', '/admin/cms/pages', '/admin/cms/products', '/admin/cms/categories',
   '/admin/cms/inspections', '/admin/cms/team', '/admin/cms/media', '/admin/cms/settings',

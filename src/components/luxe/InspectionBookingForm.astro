@@ -110,6 +110,7 @@
       <span>I understand this is an application for a complimentary consultation, not an automatically confirmed site visit. If I commission the detailed proposal after consultation, it costs LKR 50,000 for one bathroom and is credited in full if BathSpace by LUXEhome builds it.</span>
     </label>
 
+    <p id="inspection-error" class="ibf-error" role="alert" hidden></p>
     <button class="ibf-submit" id="inspection-submit" type="submit">
       <span>Apply for Consultation</span>
       <span hidden>Preparing your request…</span>
@@ -121,7 +122,6 @@
 
 <script>
   import { createClient } from '@supabase/supabase-js';
-  import type { LeadInsert } from '../../lib/supabase';
   import { LUXE_SUPABASE_KEY, LUXE_SUPABASE_URL } from '../../lib/luxe-supabase';
 
   const supabase = createClient(LUXE_SUPABASE_URL, LUXE_SUPABASE_KEY);
@@ -131,6 +131,7 @@
   const submit = document.getElementById('inspection-submit') as HTMLButtonElement | null;
   const sizeField = document.getElementById('inspection-size-field') as HTMLElement | null;
   const backupLink = document.getElementById('inspection-whatsapp-backup') as HTMLAnchorElement | null;
+  const errorNotice = document.getElementById('inspection-error') as HTMLElement | null;
 
   function formValue(data: FormData, key: string) {
     return data.get(key)?.toString().trim() ?? '';
@@ -163,7 +164,7 @@
     });
     updateSizeField();
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const data = new FormData(form);
       if (formValue(data, 'website')) return;
@@ -183,6 +184,7 @@
         return;
       }
       const projectTiming = formValue(data, 'project_timing');
+      if(errorNotice){errorNotice.hidden=true;errorNotice.textContent='';}
       const notes = formValue(data, 'notes');
 
       submit.disabled = true;
@@ -220,21 +222,12 @@
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
 
-      if (supabase) {
-        const lead: LeadInsert = {
-          name,
-          phone,
-          service: 'Bathroom Project Consultation',
-          location,
-          service_details: details,
-          notes: notes || null,
-          source_url: window.location.href,
-        };
-
-        supabase.from('leads').insert(lead).then(({ error }) => {
-          if (error) console.warn('[LUXEHOME] Lead save failed:', error.message);
-        });
-        supabase.from('lx_site_inspections').insert({
+      // Only one authoritative record. Do not claim success or fire Lead events
+      // until the database has confirmed that the application was accepted.
+      const metaEventId = crypto.randomUUID();
+      const attribution = new URLSearchParams(window.location.search);
+      try {
+        const { error } = await supabase.from('lx_site_inspections').insert({
           name,
           phone,
           email: email || null,
@@ -245,15 +238,31 @@
           notes: queueNotes,
           source_url: window.location.href,
           status: 'new',
-        }).then(({ error }) => {
-          if (error) console.warn('[LUXEHOME] Inspection queue save failed:', error.message);
+          meta_event_id: metaEventId,
+          fbclid: attribution.get('fbclid') || null,
+          utm_source: attribution.get('utm_source') || null,
+          utm_medium: attribution.get('utm_medium') || null,
+          utm_campaign: attribution.get('utm_campaign') || null,
+          utm_content: attribution.get('utm_content') || null,
+          utm_term: attribution.get('utm_term') || null,
         });
+        if(error) throw error;
+      } catch (error) {
+        console.error('[BathSpace] Consultation submission failed:', error);
+        if(errorNotice){
+          errorNotice.textContent='We could not save your application. Please check your connection and try again, or contact us through WhatsApp. No consultation is confirmed yet.';
+          errorNotice.hidden=false;
+          errorNotice.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+        submit.disabled=false;
+        submit.children[1]?.setAttribute('hidden','');
+        submit.children[0]?.removeAttribute('hidden');
+        return;
       }
 
       /* luxeTrack loads fbevents.js before firing. Plain fbq would only queue
          the conversion when the deferred load has not run yet, and this is
          the last thing the visitor does before WhatsApp takes over. */
-      const metaEventId = crypto.randomUUID();
       const leadParams = {
         content_name: 'Bathroom Project Consultation Application',
         content_category: projectType,
@@ -297,7 +306,8 @@
       const whatsappUrl = `https://wa.me/94774503744?text=${encodeURIComponent(message)}`;
 
       if (backupLink) backupLink.href = whatsappUrl;
-      window.open(whatsappUrl, '_blank', 'noopener');
+      // Popups can be blocked after an asynchronous save; the visible
+      // success link is the reliable way to continue to WhatsApp.
 
       form.hidden = true;
       success.hidden = false;
@@ -319,6 +329,7 @@
     background: #fff;
     box-shadow: 0 18px 50px rgba(43,50,42,.08);
   }
+  .ibf-error { background: #fff2ee; border: 1px solid #bd6047; color: #833c30; padding: .85rem 1rem; border-radius: 8px; line-height: 1.45; }
   .ibf-wrap form,
   .ibf-success { padding: clamp(1.35rem, 4vw, 2.4rem); }
   .ibf-heading { padding-bottom: 1.25rem; border-bottom: 1px solid var(--cream-deep); }
