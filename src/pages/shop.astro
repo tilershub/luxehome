@@ -1,4 +1,145 @@
 ---
 export const prerender = false;
-return Astro.redirect('/', 301);
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+import { getShopFixtures } from '../lib/luxe';
+import { imageUrl, waLink } from '../lib/luxe-config';
+
+const products = await getShopFixtures();
+const categories = [...new Set(products.map((product) => product.category))].sort();
+const price = (n: number) => new Intl.NumberFormat('en-LK', { maximumFractionDigits: 0 }).format(Number(n));
+const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to_order' ? 'Made to order' : 'Check availability';
 ---
+
+<LuxeLayout
+  title="Bathroom Fixtures, Mirrors, Vanities & Materials | BathSpace Shop"
+  description="Explore BathSpace's selected bathroom fixtures, taps, showers, mirrors, vanities, lighting and finishing materials. View fixed listed prices and enquire about availability."
+>
+  <section class="bs-shop-hero">
+    <p class="lx-eyebrow">BathSpace by LUXEhome · Product selections</p>
+    <h1>Bathroom essentials, thoughtfully selected.</h1>
+    <p>Fixtures, brassware, mirrors, custom cabinetry, lighting and finishing materials—from the same specialist team behind our complete bathroom renovations.</p>
+    <div class="bs-shop-hero-links">
+      <a href="/projects">Explore completed bathrooms <span aria-hidden="true">→</span></a>
+      <a href="/book-site-inspection">Planning a complete renovation? <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <section class="bs-shop-main" aria-labelledby="bs-products-title">
+    <div class="bs-shop-title">
+      <div>
+        <p class="lx-eyebrow">Selected products</p>
+        <h2 id="bs-products-title">The BathSpace catalogue</h2>
+      </div>
+      {products.length > 0 && <span>{products.length} available selection{products.length === 1 ? '' : 's'}</span>}
+    </div>
+    {products.length > 0 ? (
+      <>
+        {categories.length > 1 && (
+          <label class="bs-shop-filter">Filter by category
+            <select id="bs-shop-filter">
+              <option value="">All categories</option>
+              {categories.map((category) => <option value={category}>{category}</option>)}
+            </select>
+          </label>
+        )}
+        <div class="bs-shop-grid" id="bs-shop-grid">
+          {products.map((product) => (
+            <article class="bs-shop-card" data-category={product.category}>
+              <div class="bs-shop-photo">
+                <img
+                  src={imageUrl(product.image_url, 700)}
+                  alt={`${product.brand ? product.brand + ' ' : ''}${product.item_name}`}
+                  loading="lazy" decoding="async" width="700" height="600"
+                />
+              </div>
+              <div class="bs-shop-info">
+                <p class="bs-shop-category">{product.category}</p>
+                <h3>{product.item_name}</h3>
+                {(product.brand || product.model_code) && (
+                  <p class="bs-shop-brand">{[product.brand, product.model_code && `Model ${product.model_code}`].filter(Boolean).join(' · ')}</p>
+                )}
+                {product.specification && <p class="bs-shop-description">{product.specification}</p>}
+                <div class="bs-shop-price-row">
+                  <div class="bs-shop-price">
+                    <small>Listed selling price</small>
+                    <strong>LKR {price(product.sale_price_lkr)}</strong>
+                    <span>/ {product.sale_unit || 'item'}</span>
+                  </div>
+                  <span class="bs-shop-availability">{statusName(product.sale_availability)}</span>
+                </div>
+                {product.sale_notes && <p class="bs-shop-notes">{product.sale_notes}</p>}
+                <a class="bs-shop-inquiry"
+                  href={waLink(`Hi BathSpace! I would like to enquire about ${product.item_name}${product.brand ? ' (' + product.brand + ')' : ''}${product.model_code ? ' model ' + product.model_code : ''}. Listed price: LKR ${price(product.sale_price_lkr)} per ${product.sale_unit || 'item'}. Please confirm availability, delivery and installation options.`)}
+                  target="_blank" rel="noopener noreferrer">
+                  Enquire on WhatsApp <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </>
+    ) : (
+      <div class="bs-shop-empty">
+        <h3>Our product catalogue is being prepared.</h3>
+        <p>We can help source bathroom taps, showers, fittings, tiles, vanity cupboards, mirrors, lighting and other finishing products. Individual catalogue items will appear here as soon as their images and selling prices are confirmed.</p>
+        <a href={waLink('Hi BathSpace! I am looking for bathroom fixtures or finishing materials. Can you help with product selections and pricing?')} target="_blank" rel="noopener noreferrer">Ask about product availability →</a>
+      </div>
+    )}
+    <p class="bs-shop-footnote">Listed prices apply to individual products as shown. Availability, delivery, installation and any project-specific customization are confirmed separately before ordering. Historical renovation costs are not current retail prices.</p>
+  </section>
+</LuxeLayout>
+
+<script>
+  const filter = document.getElementById('bs-shop-filter') as HTMLSelectElement | null;
+  filter?.addEventListener('change', () => {
+    document.querySelectorAll<HTMLElement>('#bs-shop-grid [data-category]').forEach((card) => {
+      card.hidden = Boolean(filter.value && card.dataset.category !== filter.value);
+    });
+  });
+</script>
+
+<style>
+  .bs-shop-hero { max-width: 1120px; margin: 0 auto; padding: clamp(2.5rem,6vw,5rem) clamp(1.1rem,4vw,2.4rem) 2rem; }
+  .bs-shop-hero h1 { font-family: var(--lx-serif); font-weight: 500; font-size: clamp(2.6rem,5.6vw,4.8rem); line-height: 1.05; max-width: 16ch; margin: .4rem 0 1rem; }
+  .bs-shop-hero p:not(.lx-eyebrow) { max-width: 64ch; line-height: 1.65; color: color-mix(in srgb,var(--ink) 77%,transparent); }
+  .bs-shop-hero-links { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-top: 1.5rem; }
+  .bs-shop-hero-links a { color: var(--sage-deep); font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 3px; }
+  .bs-shop-main { max-width: 1200px; margin: 0 auto; padding: 1.1rem clamp(1.1rem,4vw,2.4rem) 5rem; }
+  .bs-shop-title { display: flex; justify-content: space-between; gap: 1.4rem; align-items: end; margin-bottom: 1.4rem; }
+  .bs-shop-title h2 { font-family: var(--lx-serif); font-size: clamp(1.9rem,4vw,2.7rem); font-weight: 500; }
+  .bs-shop-title>span { color: var(--sage-deep); font-size: .84rem; }
+  .bs-shop-filter { display: flex; align-items: center; gap: 12px; font-size: .84rem; font-weight: 600; margin-bottom: 1.4rem; }
+  .bs-shop-filter select { max-width: 300px; width: 100%; padding: .75rem; border: 1px solid var(--cream-deep); border-radius: 7px; background: #fff; color: var(--ink); font: inherit; }
+  .bs-shop-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1.3rem; align-items: stretch; }
+  .bs-shop-card { background: #fff; border: 1px solid var(--cream-deep); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+  .bs-shop-card[hidden] { display: none; }
+  .bs-shop-photo { aspect-ratio: 5 / 4; background: var(--sage-mist); }
+  .bs-shop-photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .bs-shop-info { display: flex; flex: 1; flex-direction: column; padding: 1.25rem; min-width: 0; }
+  .bs-shop-category { text-transform: uppercase; color: var(--sage-deep); font-size: .7rem; font-weight: 650; letter-spacing: .09em; }
+  .bs-shop-info h3 { font-family: var(--lx-serif); font-size: 1.55rem; line-height: 1.18; font-weight: 550; margin: .4rem 0 .45rem; }
+  .bs-shop-brand { font-weight: 600; font-size: .86rem; }
+  .bs-shop-description { line-height: 1.55; color: color-mix(in srgb,var(--ink) 72%,transparent); font-size: .85rem; margin-top: .5rem; }
+  .bs-shop-price-row { display: flex; justify-content: space-between; align-items: end; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 1.4rem; }
+  .bs-shop-price { display: flex; flex-direction: column; gap: 1px; }
+  .bs-shop-price small { color: color-mix(in srgb,var(--ink) 65%,transparent); font-size: .73rem; }
+  .bs-shop-price strong { font-weight: 650; font-size: 1.2rem; }
+  .bs-shop-price span { color: color-mix(in srgb,var(--ink) 65%,transparent); font-size: .75rem; }
+  .bs-shop-availability { padding: .3rem .5rem; border-radius: 5px; background: var(--sage-mist); color: var(--sage-deep); font-size: .7rem; }
+  .bs-shop-notes { font-size: .78rem; line-height: 1.5; color: color-mix(in srgb,var(--ink) 70%,transparent); margin-top: .65rem; }
+  .bs-shop-inquiry { display: block; text-align: center; padding: .85rem; margin-top: 1rem; border-radius: 7px; text-decoration: none; font-size: .85rem; font-weight: 600; background: var(--sage-deep); color: white; }
+  .bs-shop-inquiry:hover,.bs-shop-inquiry:focus-visible { filter: brightness(.89); }
+  .bs-shop-empty { padding: clamp(1.5rem,5vw,3rem); border: 1px solid var(--cream-deep); border-radius: 12px; background: #fff; }
+  .bs-shop-empty h3 { font-family: var(--lx-serif); font-weight: 550; font-size: 2rem; }
+  .bs-shop-empty p { max-width: 65ch; line-height: 1.6; margin: 1rem 0; }
+  .bs-shop-empty a { color: var(--sage-deep); font-weight: 650; }
+  .bs-shop-footnote { color: color-mix(in srgb,var(--ink) 68%,transparent); line-height: 1.6; font-size: .8rem; margin-top: 2rem; max-width: 85ch; }
+  @media (max-width: 900px) { .bs-shop-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+  @media (max-width: 610px) {
+    .bs-shop-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .bs-shop-title { align-items: flex-start; }
+    .bs-shop-filter { flex-direction: column; align-items: stretch; gap: .4rem; }
+    .bs-shop-filter select { max-width: none; }
+    .bs-shop-info { padding: 1.1rem; }
+  }
+</style>
