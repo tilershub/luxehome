@@ -11,7 +11,7 @@ export default defineConfig({
   trailingSlash: 'never',
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/admin'),
+      filter: (page) => !page.includes('/admin') && !['/cart','/thank-you','/start','/designs','/whole-home-planner','/design-recommendation'].some((path) => page.endsWith(path)),
     }),
   ],
 });
