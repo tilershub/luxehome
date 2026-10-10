@@ -9,7 +9,7 @@ const { module }=Astro.props as {module:CmsModule};
   import {LUXE_SUPABASE_KEY as key,LUXE_SUPABASE_URL as url} from '../../lib/luxe-supabase';
   import {FIXTURE_CATEGORIES,MATERIAL_CATEGORIES} from '../../lib/luxe-config';
   const root=document.getElementById('manager'),modal=document.getElementById('cms-modal'),cfg=JSON.parse(root.dataset.module);
-  let sb,rows=[],lookups={spaces:[],designs:[],fixtures:[]};
+  let sb,rows=[],lookups={spaces:[],designs:[],catalogue:[]};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const choiceLabel=v=>String(v??'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
   const toast=m=>{const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)};
@@ -17,8 +17,22 @@ const { module }=Astro.props as {module:CmsModule};
   async function auth(){if(!url||!key){root.innerHTML='<p>Supabase is not configured.</p>';return false}sb||=createClient(url,key);const {data:{session}}=await sb.auth.getSession();if(session)return true;location.assign('/admin');return false}
   async function load(){
     if(!(await auth()))return;
-    const relationNames=[...new Set(cfg.fields.filter(f=>f.type==='relation').map(f=>f.relation))];
-    await Promise.all(relationNames.map(async name=>{const table=name==='spaces'?'lx_spaces':'lx_designs',label='name',columns=name==='spaces'?'id,name,slug':'id,name';const {data}=await sb.from(table).select(columns).order(label);lookups[name]=data||[]}));
+    const allFields=[...cfg.fields,...(cfg.children||[]).flatMap(child=>child.fields)];
+    const relationNames=[...new Set(allFields.filter(f=>f.type==='relation').map(f=>f.relation))];
+    await Promise.all(relationNames.map(async name=>{
+      if(name==='catalogue'){
+        const {data,error}=await sb.from('lx_fixture_library')
+          .select('id,section,category,item_name,brand,model_code,specification,image_url,active')
+          .order('item_name');
+        if(error)toast('Fixture library unavailable: '+error.message);
+        lookups.catalogue=(data||[]).map(item=>({...item,name:[item.item_name,item.brand,item.model_code].filter(Boolean).join(' · ')}));
+      }else{
+        const table=name==='spaces'?'lx_spaces':'lx_designs';
+        const columns=name==='spaces'?'id,name,slug':'id,name';
+        const {data}=await sb.from(table).select(columns).order('name');
+        lookups[name]=data||[];
+      }
+    }));
     const {data,error}=await sb.from(cfg.table).select('*').order(cfg.titleKey);
     if(error)return root.innerHTML=`<div class="panel"><h2>Module unavailable</h2><p>${esc(error.message)}</p></div>`;
     rows=data||[];
@@ -269,8 +283,22 @@ const { module }=Astro.props as {module:CmsModule};
     if(fresh&&def.fields.some(field=>field.key==='sort_order'))row.sort_order=group.items.length;
     if(fresh&&def.table==='lx_design_fixtures'){row.quantity=1;row.included=true}
     const fields=def.table==='lx_design_fixtures'?def.fields.map(f=>f.key==='category'?{...f,options:FIXTURE_CATEGORIES[(lookups.spaces.find(s=>s.id===parent.space_id)||{}).slug]||[]}:f):def.fields;
-    modal.innerHTML=`<div class="modal-backdrop"><form id="child-editor" class="modal-card"><div class="formhead"><h2>${fresh?'Add':'Edit'} ${esc(def.label)}</h2><button type="button" id="child-close">Close</button></div><div class="fields one">${fields.map(f=>field(f,row[f.key],'child_')).join('')}</div><div class="actions"><button class="save">Save row</button>${fresh?'':`<button type="button" id="child-delete" class="delete">Delete</button>`}</div></form></div>`;
+    const libraryEditor=def.table==='lx_project_specifications';
+    modal.innerHTML=`<div class="modal-backdrop"><form id="child-editor" class="modal-card"><div class="formhead"><h2>${fresh?'Add':'Edit'} ${esc(def.label)}</h2><button type="button" id="child-close">Close</button></div><div class="fields one">${fields.map(f=>field(f,row[f.key],'child_')).join('')}</div>${libraryEditor?'<p class="catalogue-help">Select a saved product to fill the fields, then adjust only what was actually installed in this project. <a href="/admin/cms/fixture-library" target="_blank" rel="noopener">Manage fixture library</a></p>':''}<div class="actions"><button class="save">Save row</button>${fresh?'':`<button type="button" id="child-delete" class="delete">Delete</button>`}</div></form></div>`;
     const form=document.getElementById('child-editor');document.getElementById('child-close').onclick=()=>modal.innerHTML='';
+    if(libraryEditor){
+      const selector=form.elements.child_catalog_item_id;
+      const applyCatalogue=()=>{
+        const item=lookups.catalogue.find(i=>i.id===selector.value);
+        if(!item)return;
+        for(const key of ['section','category','item_name','brand','model_code','specification','image_url']){
+          const input=form.elements['child_'+key];
+          if(input)input.value=item[key]??'';
+        }
+        showPreview(form,'child_image_url',item.image_url||'');
+      };
+      selector?.addEventListener('change',applyCatalogue);
+    }
     bindImageUploads(form,cfg.slug);
     if(def.table==='lx_project_specifications'){
       const catalogPicker=form.querySelector('[data-catalog-picker]');
