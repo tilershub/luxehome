@@ -35,6 +35,15 @@ const designChildren:CmsChild[]=[
   {label:'Questions & answers',table:'lx_design_faq',foreignKey:'design_id',titleKey:'question',fields:[{key:'question',label:'Question',required:true},{key:'answer',label:'Answer',type:'textarea',required:true},{key:'sort_order',label:'Sort order',type:'number'}]},
 ];
 const projectChildren:CmsChild[]=[
+  {label:'Construction materials & finishing specifications',table:'lx_project_specifications',foreignKey:'project_id',titleKey:'item_name',fields:[
+    {key:'section',label:'Specification section',type:'select',options:['construction','finishes'],required:true},
+    {key:'category',label:'Category (e.g. Waterproofing, WC, Tiles)',required:true},
+    {key:'item_name',label:'Material, fixture or product',required:true},
+    {key:'brand',label:'Brand / manufacturer'},
+    {key:'model_code',label:'Model / product code'},
+    {key:'specification',label:'Material / finish / size / application',type:'textarea'},
+    {key:'sort_order',label:'Display order',type:'number'},
+  ]},
   {label:'Gallery',table:'lx_project_gallery',foreignKey:'project_id',titleKey:'image_url',fields:[{key:'image_url',label:'Photo',type:'image',required:true},{key:'sort_order',label:'Sort order',type:'number'}]},
   {label:'Journey',table:'lx_project_journey',foreignKey:'project_id',titleKey:'stage',fields:[{key:'stage',label:'Stage',required:true},{key:'date_label',label:'When'},{key:'note',label:'Note',type:'textarea'},{key:'issue',label:'Issue found',type:'textarea'},{key:'fix',label:'How it was fixed',type:'textarea'},{key:'image_urls',label:'Diary photos',type:'images'},{key:'sort_order',label:'Sort order',type:'number'}]},
   {label:'Project crew',table:'lx_project_crew',foreignKey:'project_id',titleKey:'name',fields:[{key:'name',label:'Name',required:true},{key:'role',label:'Role'},{key:'photo_url',label:'Photo',type:'image'},{key:'tilershub_verified',label:'TILERSHUB verified',type:'checkbox'},{key:'sort_order',label:'Sort order',type:'number'}]},
