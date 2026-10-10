@@ -15,7 +15,8 @@ const ongoing = status === 'in_progress';
 const video = youtubeEmbed(project.video_url);
 const episode1 = youtubeEmbed(project.episode_1_url);
 const episode2 = youtubeEmbed(project.episode_2_url);
-const hasSlider = !ongoing && !!(project.before_image_url && project.after_image_url);
+// Finished photographs stay together; the original bathroom is shown separately below.
+const heroImages = [...new Set([project.after_image_url,...project.gallery.map((photo)=>photo.image_url)].filter((url): url is string=>Boolean(url)))];
 const projectVideoCover = project.after_image_url || project.before_image_url;
 
 const inspectionHref = `/book-site-inspection?source_project=${encodeURIComponent(project.slug)}`;
@@ -84,23 +85,42 @@ const reviewSchema = project.rating ? JSON.stringify({
     </section>
   )}
 
-  <!-- Before / after -->
-  {hasSlider ? (
-    <section class="ps-slider-wrap lxr">
-      <div class="ps-slider" id="ba-slider" style={`--pos: 50%`}>
-        <img class="ps-after" src={imageUrl(project.after_image_url!, 1200)} alt={`${project.title} — after`} width="1200" height="800" />
-        <div class="ps-before-clip">
-          <img class="ps-before" src={imageUrl(project.before_image_url!, 1200)} alt={`${project.title} — before`} width="1200" height="800" />
+  <!-- Swipeable finished bathroom gallery; never mix the old bathroom into the finished images. -->
+  {heroImages.length > 0 && (
+    <section class="ps-carousel-wrap lxr" aria-label={ongoing ? 'Renovation progress photographs' : 'Finished bathroom photographs'}>
+      <div class="ps-carousel" id="project-photo-carousel">
+        <div class="ps-carousel-track" tabindex="0" aria-roledescription="carousel" aria-label="Swipe or use arrow keys to explore the bathroom photographs">
+          {heroImages.map((url, i) => (
+            <figure class="ps-carousel-slide">
+              <img src={imageUrl(url, 1200)}
+                srcset={`${imageUrl(url, 480)} 480w, ${imageUrl(url, 800)} 800w, ${imageUrl(url, 1200)} 1200w`}
+                sizes="(max-width: 720px) calc(100vw - 32px), 1000px"
+                alt={`${project.title} — ${ongoing ? 'progress' : 'finished bathroom'} photo ${i + 1}`}
+                loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
+                width="1200" height="900" />
+            </figure>
+          ))}
         </div>
-        <div class="ps-handle" aria-hidden="true"><span></span></div>
-        <span class="ps-label ps-label--before">Before</span>
-        <span class="ps-label ps-label--after">After</span>
+        {heroImages.length > 1 && (
+          <>
+            <button type="button" class="ps-carousel-arrow ps-carousel-arrow--prev" data-carousel-prev aria-label="Previous bathroom photo">‹</button>
+            <button type="button" class="ps-carousel-arrow ps-carousel-arrow--next" data-carousel-next aria-label="Next bathroom photo">›</button>
+          </>
+        )}
       </div>
-      <p class="ps-slider-hint">Drag to compare</p>
-    </section>
-  ) : project.after_image_url && (
-    <section class="ps-slider-wrap lxr">
-      <img class="ps-single" src={imageUrl(project.after_image_url, 1200)} alt={ongoing ? `${project.title} — site progress` : `${project.title} — finished bathroom`} width="1200" height="800" />
+      {heroImages.length > 1 && (
+        <nav class="ps-carousel-nav" aria-label="Project photo navigation">
+          <span class="ps-carousel-counter" aria-live="polite" data-carousel-counter>1 / {heroImages.length}</span>
+          <div class="ps-carousel-dots">
+            {heroImages.map((_, i) => (
+              <button type="button" data-carousel-dot={i} class:list={{'is-active':i===0}}
+                aria-label={`Go to bathroom photo ${i+1}`}
+                aria-current={i===0 ? 'true' : undefined}></button>
+            ))}
+          </div>
+          <span class="ps-carousel-tip">Swipe to explore</span>
+        </nav>
+      )}
     </section>
   )}
 
@@ -170,6 +190,15 @@ const reviewSchema = project.rating ? JSON.stringify({
     </section>
   )}
 
+  {project.before_image_url && (
+    <section class="ps-section ps-original-photo">
+      <h2 class="lxr">Before the renovation</h2>
+      <p class="ps-original-intro">The original bathroom before BathSpace started work.</p>
+      <img src={imageUrl(project.before_image_url, 900)}
+        alt={`${project.title} before renovation`} loading="lazy" width="900" height="675" />
+    </section>
+  )}
+
   <!-- Specification records: actual products, not a generic package promise. -->
   {project.specifications.length > 0 && (
     <section class="ps-section ps-specifications" aria-labelledby="ps-spec-title">
@@ -196,6 +225,10 @@ const reviewSchema = project.rating ? JSON.stringify({
             <div class="ps-spec-grid">
               {items.map((item) => (
                 <article class="ps-spec-item">
+                  {(item.image_url || item.catalog_item?.image_url) && (
+                    <img class="ps-spec-photo" src={imageUrl(item.image_url || item.catalog_item?.image_url, 440)}
+                      alt={`${item.item_name} — product reference photograph`} loading="lazy" width="440" height="330" />
+                  )}
                   <p class="ps-spec-category">{item.category}</p>
                   <h3>{item.item_name}</h3>
                   {(item.brand || item.model_code) && (
@@ -214,8 +247,8 @@ const reviewSchema = project.rating ? JSON.stringify({
     </section>
   )}
 
-  <!-- Video + gallery -->
-  {((video && projectVideoCover) || project.gallery.length > 0) && (
+  <!-- Optional walkthrough video; photographs appear in the swipe gallery above. -->
+  {(video && projectVideoCover) && (
     <section class="ps-section">
       <h2 class="lxr">{ongoing ? 'Progress photographs' : 'Inside the build'}</h2>
       {video && projectVideoCover && (
@@ -228,13 +261,6 @@ const reviewSchema = project.rating ? JSON.stringify({
             eyebrow="Project walkthrough"
             description="Tap to watch the vertical project walkthrough."
           />
-        </div>
-      )}
-      {project.gallery.length > 0 && (
-        <div class="ps-gallery">
-          {project.gallery.map((g, i) => (
-            <img class="lxr" src={imageUrl(g.image_url, 900)} alt={`${project.title} — photo ${i + 1}`} loading="lazy" width="600" height="450" />
-          ))}
         </div>
       )}
     </section>
@@ -296,18 +322,21 @@ const reviewSchema = project.rating ? JSON.stringify({
   )}
 
   <!-- Review -->
-  {project.rating && (
+  {(project.rating || project.review_text || project.review_screenshot_url) && (
     <section class="ps-section">
+      <h2 class="lxr">What our client said</h2>
       <div class="ps-review lxr">
-        <div class="ps-stars" aria-label={`${project.rating} out of 5 stars`}>
-          {'★'.repeat(project.rating)}{'☆'.repeat(5 - project.rating)}
-        </div>
+        {project.rating && (
+          <div class="ps-stars" aria-label={`${project.rating} out of 5 stars`}>
+            {'★'.repeat(project.rating)}{'☆'.repeat(5 - project.rating)}
+          </div>
+        )}
         {project.review_text && <blockquote>“{project.review_text}”</blockquote>}
         {project.review_by && <cite>— {project.review_by}</cite>}
         {project.review_screenshot_url && (
           <figure class="ps-review-proof">
             <img src={imageUrl(project.review_screenshot_url, 700)} alt={`Google review by ${project.review_by ?? 'the client'}`} loading="lazy" width="700" height="400" />
-            <figcaption>Verified Google review</figcaption>
+            <figcaption>Screenshot of the client's Google review</figcaption>
           </figure>
         )}
       </div>
@@ -332,24 +361,46 @@ const reviewSchema = project.rating ? JSON.stringify({
 
 <script is:inline>
 (function () {
-  var slider = document.getElementById('ba-slider');
-  if (!slider) return;
-  var dragging = false;
-  function setPos(clientX) {
-    var rect = slider.getBoundingClientRect();
-    var pct = Math.max(2, Math.min(98, ((clientX - rect.left) / rect.width) * 100));
-    slider.style.setProperty('--pos', pct + '%');
+  var carousel = document.getElementById('project-photo-carousel');
+  if (!carousel) return;
+  var track = carousel.querySelector('.ps-carousel-track');
+  var slides = [...track.querySelectorAll('.ps-carousel-slide')];
+  var dots = [...document.querySelectorAll('[data-carousel-dot]')];
+  var counter = document.querySelector('[data-carousel-counter]');
+  var prev = carousel.querySelector('[data-carousel-prev]');
+  var next = carousel.querySelector('[data-carousel-next]');
+  var current = 0;
+
+  function goTo(index) {
+    var target = Math.max(0, Math.min(slides.length - 1, index));
+    track.scrollTo({left: slides[target].offsetLeft - slides[0].offsetLeft, behavior: 'smooth'});
   }
-  slider.addEventListener('pointerdown', function (e) {
-    dragging = true;
-    slider.setPointerCapture(e.pointerId);
-    setPos(e.clientX);
+  function update() {
+    var width = track.clientWidth || 1;
+    current = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / width)));
+    dots.forEach(function(dot,i){
+      dot.classList.toggle('is-active', i === current);
+      if (i === current) dot.setAttribute('aria-current','true');
+      else dot.removeAttribute('aria-current');
+    });
+    if (counter) counter.textContent = (current + 1) + ' / ' + slides.length;
+    if (prev) prev.disabled = current === 0;
+    if (next) next.disabled = current === slides.length - 1;
+  }
+  var frame = 0;
+  track.addEventListener('scroll', function(){
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(update);
+  }, {passive: true});
+  track.addEventListener('keydown',function(e){
+    if(e.key === 'ArrowRight') {e.preventDefault();goTo(current + 1)}
+    if(e.key === 'ArrowLeft') {e.preventDefault();goTo(current - 1)}
   });
-  slider.addEventListener('pointermove', function (e) {
-    if (dragging) setPos(e.clientX);
-  });
-  slider.addEventListener('pointerup',    function () { dragging = false; });
-  slider.addEventListener('pointercancel', function () { dragging = false; });
+  dots.forEach(function(dot,i){dot.addEventListener('click',function(){goTo(i)})});
+  if(prev)prev.addEventListener('click',function(){goTo(current - 1)});
+  if(next)next.addEventListener('click',function(){goTo(current + 1)});
+  window.addEventListener('resize',update,{passive:true});
+  update();
 })();
 </script>
 
@@ -424,6 +475,61 @@ const reviewSchema = project.rating ? JSON.stringify({
   .ps-label--after  { right: 1rem; }
   .ps-slider-hint { text-align: center; font-size: .84rem; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 70%, transparent); margin-top: .6rem; }
   .ps-single { width: 100%; height: auto; border-radius: 8px; display: block; object-fit: contain; }
+
+  /* Swipe-first gallery: original proportions preserved with contain, not cropped. */
+  .ps-carousel-wrap { max-width: 1100px; padding: 0 clamp(1.2rem, 5vw, 4rem); margin: 0 auto 1.4rem; }
+  .ps-carousel { position: relative; }
+  .ps-carousel-track {
+    display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; border-radius: 12px; background: var(--sage-mist);
+  }
+  .ps-carousel-track::-webkit-scrollbar { display: none; }
+  .ps-carousel-slide {
+    flex: 0 0 100%; width: 100%; aspect-ratio: 3 / 2; scroll-snap-align: start;
+    display: flex; justify-content: center; align-items: center;
+    margin: 0; background: var(--sage-mist);
+  }
+  .ps-carousel-slide img {
+    display: block; width: 100%; height: 100%; object-fit: contain; object-position: center;
+  }
+  .ps-carousel-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+    width: 44px; height: 44px; border: 0; border-radius: 50%;
+    background: rgba(255,255,255,.94); color: var(--ink);
+    box-shadow: 0 2px 15px rgba(0,0,0,.14);
+    display: grid; place-items: center; cursor: pointer; font-size: 1.7rem;
+  }
+  .ps-carousel-arrow--prev { left: 12px; }
+  .ps-carousel-arrow--next { right: 12px; }
+  .ps-carousel-arrow:disabled { opacity: .35; cursor: default; }
+  .ps-carousel-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px; padding-top: 13px; min-height: 40px;
+  }
+  .ps-carousel-counter { font-size: .84rem; font-weight: 600; white-space: nowrap; }
+  .ps-carousel-dots { display: flex; gap: 7px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .ps-carousel-dots button {
+    width: 10px; height: 10px; padding: 0; border: 0; background: #b8bdb5;
+    border-radius: 50%; cursor: pointer; transition: background .15s ease, transform .15s ease;
+  }
+  .ps-carousel-dots button.is-active { background: var(--sage-deep); transform: scale(1.3); }
+  .ps-carousel-tip { font-size: .8rem; color: color-mix(in srgb, var(--ink) 70%, transparent); white-space: nowrap; }
+  .ps-carousel-track:focus-visible, .ps-carousel-dots button:focus-visible, .ps-carousel-arrow:focus-visible {
+    outline: 3px solid var(--sage-deep); outline-offset: 2px;
+  }
+  .ps-original-photo img { display: block; width: 100%; height: auto; border-radius: 10px; max-height: 560px; object-fit: contain; background: var(--sage-mist); }
+  .ps-original-intro { margin-bottom: 1rem; color: color-mix(in srgb,var(--ink) 75%,transparent); font-size: .9rem; }
+  .ps-spec-photo { display: block; width: 100%; height: 170px; object-fit: contain; background: var(--sage-mist); border-radius: 7px; margin-bottom: .85rem; }
+  @media (max-width: 720px) {
+    .ps-carousel-wrap { padding: 0 1rem; }
+    .ps-carousel-slide { aspect-ratio: 4 / 5; }
+    .ps-carousel-arrow { display: none; }
+    .ps-carousel-nav { gap: 8px; }
+    .ps-carousel-tip { display: none; }
+    .ps-carousel-dots button { width: 9px; height: 9px; }
+    .ps-spec-photo { height: 210px; }
+  }
 
   .ps-section { max-width: 900px; margin: 0 auto; padding: 2.2rem clamp(1.2rem, 5vw, 4rem); }
   .ps-section h2 { font-size: clamp(1.7rem, 4vw, 2.3rem); margin-bottom: 1rem; }
