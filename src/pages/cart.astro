@@ -1,0 +1,94 @@
+---
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+---
+<LuxeLayout title="Your Basket | BathSpace Shop"
+ description="Review product selections from the BathSpace fixture and materials catalogue before requesting confirmation of price and delivery.">
+<main class="bs-basket">
+  <p class="lx-eyebrow">BathSpace Shop</p>
+  <h1>Your product basket</h1>
+  <p class="bs-intro">Review your products, sizes and quantities. We’ll confirm availability, exact pricing, delivery and installation requirements before an order is finalized.</p>
+  <section class="bs-basket-layout">
+    <div class="bs-basket-items">
+      <div id="basket-empty" hidden><h2>No products in your basket yet.</h2><p>Browse the BathSpace catalogue and select the fixtures you need.</p><a href="/shop">Browse products →</a></div>
+      <div id="basket-items" aria-live="polite"></div>
+    </div>
+    <aside class="bs-basket-summary">
+      <h2>Selection summary</h2>
+      <div class="bs-basket-total"><span>Indicative item subtotal</span><strong id="basket-total">LKR 0</strong></div>
+      <p>Delivery, installation and custom work are not included unless separately stated. All amounts are confirmed against current stock and pricing before purchase.</p>
+      <a id="basket-send" class="bs-basket-send" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true">Send product request on WhatsApp</a>
+      <p id="basket-error" role="alert" hidden></p>
+      <small>Online card payment is not yet active. Sending a request does not mean an order has been accepted or paid.</small>
+    </aside>
+  </section>
+  <a class="bs-continue" href="/shop">← Continue shopping</a>
+</main>
+</LuxeLayout>
+<script>
+type Line={id:string;variant_id:string|null;quantity:number;price:number;name:string;image:string;unit:string;slug:string;selection:string};
+const key='bathspace-cart-v1';
+const root=document.getElementById('basket-items')!;
+const empty=document.getElementById('basket-empty')!;
+const total=document.getElementById('basket-total')!;
+const send=document.getElementById('basket-send') as HTMLAnchorElement;
+const err=document.getElementById('basket-error')!;
+const money=(n:number)=>'LKR '+new Intl.NumberFormat('en-LK',{maximumFractionDigits:0}).format(n);
+let items:Line[]=[];
+try{
+ const raw=JSON.parse(localStorage.getItem(key)||'[]') as Line[];
+ if(Array.isArray(raw))items=raw.filter(x=>x&&typeof x.id==='string'&&Number.isInteger(x.quantity)&&x.quantity>0&&x.quantity<=100&&Number.isFinite(x.price)&&x.price>0).slice(0,40);
+}catch{}
+function render(){
+ root.replaceChildren();
+ empty.hidden=items.length>0;
+ send.setAttribute('aria-disabled',String(!items.length));
+ const sum=items.reduce((acc,item)=>acc+item.price*item.quantity,0);
+ total.textContent=money(sum);
+ items.forEach((item,index)=>{
+   const row=document.createElement('article');row.className='bs-line';
+   const photo=document.createElement('img');photo.src=item.image;photo.alt=item.name;photo.loading='lazy';photo.width=100;photo.height=100;
+   const info=document.createElement('div');info.className='bs-line-info';
+   const title=document.createElement('a');title.textContent=item.name;title.href='/shop/'+encodeURIComponent(item.slug||'');
+   info.append(title);
+   if(item.selection){const label=document.createElement('p');label.textContent=item.selection;info.append(label)}
+   const price=document.createElement('span');price.textContent=money(item.price)+' / '+item.unit;info.append(price);
+   const controls=document.createElement('div');controls.className='bs-line-controls';
+   const qty=document.createElement('input');qty.type='number';qty.min='1';qty.max='100';qty.value=String(item.quantity);qty.setAttribute('aria-label','Quantity for '+item.name);
+   qty.addEventListener('change',()=>{const value=Number(qty.value);if(!Number.isInteger(value)||value<1||value>100){qty.value=String(item.quantity);return}item.quantity=value;save()});
+   const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.addEventListener('click',()=>{items.splice(index,1);save()});
+   controls.append(qty,remove);info.append(controls);row.append(photo,info);root.append(row);
+ });
+ if(items.length){
+   const lines=items.map(x=>`• ${x.name}${x.selection?' ('+x.selection+')':''} — ${x.quantity} ${x.unit} × ${money(x.price)}`);
+   const msg=['Hi BathSpace! I would like to request these bathroom products:','',...lines,'',`Indicative items subtotal: ${money(sum)}`,'','Please confirm current retail prices, stock, delivery charges, delivery timeframe, and payment options. I understand this is an enquiry, not a paid order.'].join('\n');
+   send.href='https://wa.me/94774503744?text='+encodeURIComponent(msg);
+ }else send.removeAttribute('href');
+}
+function save(){try{localStorage.setItem(key,JSON.stringify(items))}catch{err.textContent='Your basket could not be saved on this device.';err.hidden=false}render()}
+send.addEventListener('click',e=>{if(!items.length){e.preventDefault();return}if(typeof (window as any).gtag==='function')(window as any).gtag('event','shop_order_enquiry',{currency:'LKR',value:items.reduce((a,x)=>a+x.price*x.quantity,0),items:items.length})});
+render();
+</script>
+<style>
+.bs-basket{width:min(1100px,calc(100% - 34px));margin:auto;padding:clamp(2rem,6vw,4.5rem) 0 6rem}
+.bs-basket h1{font-family:var(--lx-serif);font-size:clamp(2.8rem,6vw,4.8rem);line-height:1.05;font-weight:500}
+.bs-intro{max-width:68ch;line-height:1.6;color:color-mix(in srgb,var(--ink) 75%,transparent);margin:.7rem 0 2rem}
+.bs-basket-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(290px,1fr);gap:1.2rem;align-items:start}
+.bs-basket-items,.bs-basket-summary{background:#fff;border:1px solid var(--cream-deep);border-radius:12px;padding:clamp(1rem,3vw,1.6rem)}
+.bs-line{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--cream-deep)}
+.bs-line:last-child{border-bottom:0}
+.bs-line img{width:90px;height:90px;object-fit:contain;border-radius:7px;background:var(--sage-mist)}
+.bs-line-info{min-width:0;flex:1}
+.bs-line-info>a{display:block;font:600 1.12rem var(--lx-serif);color:var(--ink);text-decoration:none}
+.bs-line-info p,.bs-line-info span{font-size:.84rem;color:var(--sage-deep)}
+.bs-line-controls{display:flex;align-items:center;gap:1rem;margin-top:.8rem}
+.bs-line-controls input{width:75px;min-height:44px;border:1px solid var(--cream-deep);padding:.45rem;border-radius:5px;font:inherit}
+.bs-line-controls button{background:none;border:0;text-decoration:underline;color:var(--sage-deep);font:inherit;cursor:pointer}
+.bs-basket-summary h2{font:500 2rem var(--lx-serif)}
+.bs-basket-total{display:flex;justify-content:space-between;gap:.6rem;border-bottom:1px solid var(--cream-deep);margin:1rem 0;padding-bottom:1rem}
+.bs-basket-total strong{font-size:1.2rem;white-space:nowrap}
+.bs-basket-summary p,.bs-basket-summary small{font-size:.83rem;line-height:1.5;color:color-mix(in srgb,var(--ink) 70%,transparent)}
+.bs-basket-send{display:block;margin:1rem 0;padding:1rem;background:var(--sage-deep);border-radius:8px;color:white;text-align:center;text-decoration:none;font-weight:650}
+.bs-basket-send[aria-disabled=true]{opacity:.5;cursor:not-allowed}
+.bs-continue{display:inline-block;margin-top:1.3rem;color:var(--sage-deep);font-weight:600}
+@media(max-width:760px){.bs-basket-layout{grid-template-columns:1fr}.bs-basket-total{flex-wrap:wrap}}
+</style>
