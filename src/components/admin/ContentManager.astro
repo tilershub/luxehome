@@ -96,9 +96,32 @@ const { module }=Astro.props as {module:CmsModule};
   async function renderChildren(parent){
     const holder=document.getElementById('children');
     const groups=await Promise.all(cfg.children.map(async def=>{const {data,error}=await sb.from(def.table).select('*').eq(def.foreignKey,parent.id).order('sort_order',{ascending:true});return {def,items:data||[],error}}));
-    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Project content</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${['lx_design_fixtures','lx_design_materials'].includes(group.def.table)?`<button class="seed" data-checklist-seed="${index}">Complete checklist</button>`:''}${group.def.table==='lx_project_specifications'? `<button type="button" data-catalog-bulk="${index}">+ Select saved products</button>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(group.def.table==='lx_design_drawings'?choiceLabel(item[group.def.titleKey]):item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
+    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Project content</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${['lx_design_fixtures','lx_design_materials'].includes(group.def.table)?`<button class="seed" data-checklist-seed="${index}">Complete checklist</button>`:''}${group.def.table==='lx_project_specifications'? `<button type="button" data-catalog-bulk="${index}">+ Select saved products</button>`:''}${group.def.table==='lx_project_gallery'?`<label class="upload-button">+ Upload finished photos<input type="file" accept="image/*" multiple data-gallery-bulk="${index}" /></label>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(group.def.table==='lx_design_drawings'?choiceLabel(item[group.def.titleKey]):item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
     holder.querySelectorAll('[data-child-new]').forEach(button=>button.onclick=()=>childEditor(groups[Number(button.dataset.childNew)],null,parent));
     holder.querySelectorAll('[data-catalog-bulk]').forEach(button=>button.onclick=()=>bulkAddFixtureLibrary(parent,groups[Number(button.dataset.catalogBulk)]));
+    holder.querySelectorAll('[data-gallery-bulk]').forEach(input=>input.addEventListener('change', async()=>{
+      const files=[...(input.files||[])];
+      if(!files.length)return;
+      const group=groups[Number(input.dataset.galleryBulk)];
+      input.disabled=true;
+      const uploaded=[];
+      for(let i=0;i<files.length;i++){
+        toast('Uploading finished bathroom photo '+(i+1)+' / '+files.length);
+        try{
+          const {url}=await uploadImage(files[i],'projects/finished');
+          uploaded.push(url);
+        }catch(error){toast(error.message||'A photo could not be uploaded')}
+      }
+      if(uploaded.length){
+        const next=Math.max(-1,...group.items.map(item=>Number(item.sort_order)||0))+1;
+        const records=uploaded.map((url,i)=>({project_id:parent.id,image_url:url,sort_order:next+i}));
+        const {error}=await sb.from('lx_project_gallery').insert(records);
+        if(error)toast('Photos uploaded but could not be linked: '+error.message);
+        else{toast(uploaded.length+' finished bathroom photos added');await renderChildren(parent)}
+      }
+      input.disabled=false;input.value='';
+    }));
+
     holder.querySelectorAll('[data-checklist-seed]').forEach(button=>button.onclick=()=>seedDesignChecklist(parent,groups[Number(button.dataset.checklistSeed)]));
     holder.querySelectorAll('[data-child-id]').forEach(el=>{const group=groups[Number(el.dataset.childGroup)];el.onclick=()=>childEditor(group,group.items.find(item=>String(item.id)===el.dataset.childId),parent)});
   }
@@ -275,11 +298,6 @@ const { module }=Astro.props as {module:CmsModule};
   }
   async function childEditor(group,source,parent){
     const fresh=!source,def=group.def,row=source||{};
-    if(def.table==='lx_project_specifications'){
-      const {data,error}=await sb.from('lx_fixture_library').select('id,section,category,item_name,brand,model_code,specification,image_url').eq('active',true).order('category').order('item_name');
-      if(error)return toast(error.message);
-      lookups.fixtures=data||[];
-    }
     if(fresh&&def.fields.some(field=>field.key==='sort_order'))row.sort_order=group.items.length;
     if(fresh&&def.table==='lx_design_fixtures'){row.quantity=1;row.included=true}
     const fields=def.table==='lx_design_fixtures'?def.fields.map(f=>f.key==='category'?{...f,options:FIXTURE_CATEGORIES[(lookups.spaces.find(s=>s.id===parent.space_id)||{}).slug]||[]}:f):def.fields;
@@ -300,21 +318,6 @@ const { module }=Astro.props as {module:CmsModule};
       selector?.addEventListener('change',applyCatalogue);
     }
     bindImageUploads(form,cfg.slug);
-    if(def.table==='lx_project_specifications'){
-      const catalogPicker=form.querySelector('[data-catalog-picker]');
-      catalogPicker?.addEventListener('change',()=>{
-        const selected=lookups.fixtures.find(item=>item.id===catalogPicker.value);
-        if(!selected)return;
-        for(const key of ['section','category','item_name','brand','model_code','specification','image_url']){
-          const control=form.elements['child_'+key];
-          if(!control)continue;
-          control.value=selected[key]??'';
-        }
-        const image=form.querySelector('[data-image-preview="child_image_url"]');
-        if(image&&selected.image_url)showPreview(form,'child_image_url',selected.image_url);
-        toast('Saved fixture copied. Review and save this project item.');
-      });
-    }
     form.onsubmit=async e=>{e.preventDefault();const payload={...values(form,fields,'child_'),[def.foreignKey]:parent.id};const query=fresh?sb.from(def.table).insert(payload):sb.from(def.table).update(payload).eq('id',row.id);const {error}=await query;if(error)return toast(error.message);modal.innerHTML='';toast('Row saved');renderChildren(parent)};
     document.getElementById('child-delete')?.addEventListener('click',async()=>{if(!confirm('Delete this row?'))return;const {error}=await sb.from(def.table).delete().eq('id',row.id);if(error)return toast(error.message);modal.innerHTML='';renderChildren(parent)});
   }
