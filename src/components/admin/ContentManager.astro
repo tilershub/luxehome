@@ -9,7 +9,7 @@ const { module }=Astro.props as {module:CmsModule};
   import {LUXE_SUPABASE_KEY as key,LUXE_SUPABASE_URL as url} from '../../lib/luxe-supabase';
   import {FIXTURE_CATEGORIES,MATERIAL_CATEGORIES} from '../../lib/luxe-config';
   const root=document.getElementById('manager'),modal=document.getElementById('cms-modal'),cfg=JSON.parse(root.dataset.module);
-  let sb,rows=[],lookups={spaces:[],designs:[]};
+  let sb,rows=[],lookups={spaces:[],designs:[],fixtures:[]};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const choiceLabel=v=>String(v??'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
   const toast=m=>{const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)};
@@ -36,12 +36,17 @@ const { module }=Astro.props as {module:CmsModule};
     if(f.type==='select')return `<label>${esc(f.label)}<select name="${name}">${(f.options||[]).map(o=>`<option value="${esc(o)}" ${o===v?'selected':''}>${esc(choiceLabel(o))}</option>`).join('')}</select></label>`;
     if(f.type==='datalist'){const id=`options-${name}`;return `<label>${esc(f.label)}<input name="${name}" list="${id}" value="${esc(v)}" ${f.required?'required':''}><datalist id="${id}">${(f.options||[]).map(o=>`<option value="${esc(o)}"></option>`).join('')}</datalist><small class="field-help">Choose a suggestion or type your own category.</small></label>`}
     if(f.type==='image')return `<div class="image-field"><label>${esc(f.label)}<input name="${name}" type="url" value="${esc(v)}" placeholder="https://…"></label><span class="image-tools"><label class="upload-button">Upload photo<input type="file" accept="image/*" data-image-upload="${name}"></label>${v?`<img data-image-preview="${name}" src="${esc(v)}" alt="Preview">`:`<span data-image-preview="${name}" class="image-preview-empty">No image selected</span>`}</span><small class="field-help">Choose from your camera roll or take a photo — converted to WebP automatically.</small></div>`;
+    if(f.type==='catalogue'){
+      const options=lookups.fixtures||[];
+      return `<label>Saved fixture / material<select name="${name}" data-catalog-picker><option value="">Custom / enter a new item</option>${options.map(o=>`<option value="${esc(o.id)}" ${o.id===v?'selected':''}>${esc([o.category,o.brand,o.item_name,o.model_code].filter(Boolean).join(' · '))}</option>`).join('')}</select><small class="field-help">Choose a saved item to copy its description, brand, model and image. You can then customize the selected project's copy.</small></label>`;
+    }
     if(f.type==='relation'){const options=lookups[f.relation]||[];return `<label>${esc(f.label)}<select name="${name}" ${f.required?'required':''}><option value="">Not selected</option>${options.map(o=>`<option value="${o.id}" ${o.id===v?'selected':''}>${esc(o.name)}</option>`).join('')}</select></label>`}
     return `<label>${esc(f.label)}<input name="${name}" type="${f.type||'text'}" value="${esc(v)}" ${f.type==='number'?`step="${esc(f.step||'1')}"`:''} ${f.required?'required':''}></label>`;
   }
   function values(form,fields,prefix=''){const data={};fields.forEach(f=>{const el=form.elements[prefix+f.key];if(f.type==='checkbox')data[f.key]=el.checked;else if(f.type==='number')data[f.key]=el.value===''?null:Number(el.value);else if(f.type==='lines'||f.type==='images')data[f.key]=el.value.split('\n').map(x=>x.trim()).filter(Boolean);else data[f.key]=el.value||null});return data}
   async function edit(source){
     const fresh=!source,row=source||{};
+    if(fresh && cfg.slug==='fixture-library')row.active=true;
     root.innerHTML=`<form id="editor" class="panel"><div class="formhead"><div><p class="eyebrow">${fresh?'Create':'Edit'} record</p><h2>${fresh?'New '+esc(cfg.label):esc(row[cfg.titleKey])}</h2></div><button type="button" id="back">Back to list</button></div>${cfg.slug==='media'?'<label class="media-upload">Upload image<input id="media-file" type="file" accept="image/*"></label>':''}<div class="fields">${cfg.fields.map(f=>field(f,row[f.key])).join('')}</div><div class="actions"><button class="save">Save</button>${fresh?'':`<button type="button" class="delete" id="delete">Delete</button>`}</div></form><div id="children"></div>`;
     const editor=document.getElementById('editor');document.getElementById('back').onclick=list;
     const nameInput=editor.elements.name,titleInput=editor.elements.title,slugInput=editor.elements.slug;
@@ -66,7 +71,7 @@ const { module }=Astro.props as {module:CmsModule};
   async function renderChildren(parent){
     const holder=document.getElementById('children');
     const groups=await Promise.all(cfg.children.map(async def=>{const {data,error}=await sb.from(def.table).select('*').eq(def.foreignKey,parent.id).order('sort_order',{ascending:true});return {def,items:data||[],error}}));
-    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Design file section</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${['lx_design_fixtures','lx_design_materials'].includes(group.def.table)?`<button class="seed" data-checklist-seed="${index}">Complete checklist</button>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(group.def.table==='lx_design_drawings'?choiceLabel(item[group.def.titleKey]):item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
+    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Project content</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${['lx_design_fixtures','lx_design_materials'].includes(group.def.table)?`<button class="seed" data-checklist-seed="${index}">Complete checklist</button>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(group.def.table==='lx_design_drawings'?choiceLabel(item[group.def.titleKey]):item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
     holder.querySelectorAll('[data-child-new]').forEach(button=>button.onclick=()=>childEditor(groups[Number(button.dataset.childNew)],null,parent));
     holder.querySelectorAll('[data-checklist-seed]').forEach(button=>button.onclick=()=>seedDesignChecklist(parent,groups[Number(button.dataset.checklistSeed)]));
     holder.querySelectorAll('[data-child-id]').forEach(el=>{const group=groups[Number(el.dataset.childGroup)];el.onclick=()=>childEditor(group,group.items.find(item=>String(item.id)===el.dataset.childId),parent)});
@@ -169,14 +174,34 @@ const { module }=Astro.props as {module:CmsModule};
       e.target.disabled=false;e.target.value='';
     }));
   }
-  function childEditor(group,source,parent){
+  async function childEditor(group,source,parent){
     const fresh=!source,def=group.def,row=source||{};
+    if(def.table==='lx_project_specifications'){
+      const {data,error}=await sb.from('lx_fixture_library').select('id,section,category,item_name,brand,model_code,specification,image_url').eq('active',true).order('category').order('item_name');
+      if(error)return toast(error.message);
+      lookups.fixtures=data||[];
+    }
     if(fresh&&def.fields.some(field=>field.key==='sort_order'))row.sort_order=group.items.length;
     if(fresh&&def.table==='lx_design_fixtures'){row.quantity=1;row.included=true}
     const fields=def.table==='lx_design_fixtures'?def.fields.map(f=>f.key==='category'?{...f,options:FIXTURE_CATEGORIES[(lookups.spaces.find(s=>s.id===parent.space_id)||{}).slug]||[]}:f):def.fields;
     modal.innerHTML=`<div class="modal-backdrop"><form id="child-editor" class="modal-card"><div class="formhead"><h2>${fresh?'Add':'Edit'} ${esc(def.label)}</h2><button type="button" id="child-close">Close</button></div><div class="fields one">${fields.map(f=>field(f,row[f.key],'child_')).join('')}</div><div class="actions"><button class="save">Save row</button>${fresh?'':`<button type="button" id="child-delete" class="delete">Delete</button>`}</div></form></div>`;
     const form=document.getElementById('child-editor');document.getElementById('child-close').onclick=()=>modal.innerHTML='';
     bindImageUploads(form,cfg.slug);
+    if(def.table==='lx_project_specifications'){
+      const catalogPicker=form.querySelector('[data-catalog-picker]');
+      catalogPicker?.addEventListener('change',()=>{
+        const selected=lookups.fixtures.find(item=>item.id===catalogPicker.value);
+        if(!selected)return;
+        for(const key of ['section','category','item_name','brand','model_code','specification','image_url']){
+          const control=form.elements['child_'+key];
+          if(!control)continue;
+          control.value=selected[key]??'';
+        }
+        const image=form.querySelector('[data-image-preview="child_image_url"]');
+        if(image&&selected.image_url)showPreview(form,'child_image_url',selected.image_url);
+        toast('Saved fixture copied. Review and save this project item.');
+      });
+    }
     form.onsubmit=async e=>{e.preventDefault();const payload={...values(form,fields,'child_'),[def.foreignKey]:parent.id};const query=fresh?sb.from(def.table).insert(payload):sb.from(def.table).update(payload).eq('id',row.id);const {error}=await query;if(error)return toast(error.message);modal.innerHTML='';toast('Row saved');renderChildren(parent)};
     document.getElementById('child-delete')?.addEventListener('click',async()=>{if(!confirm('Delete this row?'))return;const {error}=await sb.from(def.table).delete().eq('id',row.id);if(error)return toast(error.message);modal.innerHTML='';renderChildren(parent)});
   }
