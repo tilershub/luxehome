@@ -170,6 +170,50 @@ const reviewSchema = project.rating ? JSON.stringify({
     </section>
   )}
 
+  <!-- Specification records: actual products, not a generic package promise. -->
+  {project.specifications.length > 0 && (
+    <section class="ps-section ps-specifications" aria-labelledby="ps-spec-title">
+      <p class="lx-eyebrow lxr">What went into this bathroom</p>
+      <h2 class="lxr" id="ps-spec-title">Materials, fixtures &amp; finishes</h2>
+      <p class="ps-spec-intro lxr">
+        A record of the systems behind the walls and the finishes you can see.
+        Every project has its own selections and specifications.
+      </p>
+      {([
+        { key: 'finishes', title: 'Finishes, fixtures & fittings', summary: 'Tiles, bathware, brassware, lighting, vanity and other visible details' },
+        { key: 'construction', title: 'Construction & installation materials', summary: 'Plumbing, electrical, waterproofing, tile fixing and civil materials' },
+      ] as const).map((section) => {
+        const items = project.specifications.filter((item) => item.section === section.key);
+        return items.length > 0 && (
+          <details class="ps-spec-section" open={section.key === 'finishes'}>
+            <summary class="ps-spec-summary">
+              <span class="ps-spec-heading">
+                <strong>{section.title}</strong>
+                <small>{section.summary}</small>
+              </span>
+              <span class="ps-spec-toggle" aria-hidden="true">+</span>
+            </summary>
+            <div class="ps-spec-grid">
+              {items.map((item) => (
+                <article class="ps-spec-item">
+                  <p class="ps-spec-category">{item.category}</p>
+                  <h3>{item.item_name}</h3>
+                  {(item.brand || item.model_code) && (
+                    <p class="ps-spec-brand">
+                      {[item.brand, item.model_code && `Model: ${item.model_code}`].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+                  {item.specification && <p class="ps-spec-note">{item.specification}</p>}
+                </article>
+              ))}
+            </div>
+          </details>
+        );
+      })}
+      <p class="ps-spec-disclaimer">Specifications reflect the materials selected for this particular project. Brands, models, tile sizes and construction systems may vary by bathroom, site conditions and availability.</p>
+    </section>
+  )}
+
   <!-- Video + gallery -->
   {((video && projectVideoCover) || project.gallery.length > 0) && (
     <section class="ps-section">
@@ -412,6 +456,45 @@ const reviewSchema = project.rating ? JSON.stringify({
   @media (max-width: 700px) { .ps-video-cards { grid-template-columns: minmax(0, 300px); } }
   .ps-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
   .ps-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; display: block; }
+
+  /* Actual project specifications — responsive, readable without large tables */
+  .ps-specifications { max-width: 1100px; }
+  .ps-spec-intro { max-width: 65ch; color: color-mix(in srgb, var(--ink) 75%, transparent); margin-bottom: 1.1rem; }
+  .ps-spec-section {
+    border: 1px solid var(--cream-deep); border-radius: 10px;
+    overflow: hidden; background: #fff; margin: 0 0 .85rem;
+  }
+  .ps-spec-summary {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.15rem 1.25rem; cursor: pointer; list-style: none; gap: .9rem;
+  }
+  .ps-spec-summary::-webkit-details-marker { display: none; }
+  .ps-spec-heading { display: grid; gap: .2rem; }
+  .ps-spec-heading strong { font-family: var(--lx-serif); font-size: clamp(1.12rem, 2.2vw, 1.45rem); }
+  .ps-spec-heading small { font-size: .85rem; color: color-mix(in srgb, var(--ink) 68%, transparent); line-height: 1.45; }
+  .ps-spec-toggle {
+    border-radius: 50%; background: var(--sage-mist); color: var(--sage-deep);
+    flex: 0 0 32px; width: 32px; height: 32px; display: grid; place-items: center;
+    font-size: 1.25rem; font-weight: 500;
+  }
+  .ps-spec-section[open] .ps-spec-toggle { transform: rotate(45deg); }
+  .ps-spec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--cream-deep); }
+  .ps-spec-item { padding: 1.2rem 1.3rem; min-width: 0; border-bottom: 1px solid var(--cream-deep); }
+  .ps-spec-item:nth-child(odd) { border-right: 1px solid var(--cream-deep); }
+  .ps-spec-item:last-child, .ps-spec-item:nth-last-child(2):nth-child(odd) { border-bottom: 0; }
+  .ps-spec-category { color: var(--sage-deep); font-size: .69rem; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .4rem; }
+  .ps-spec-item h3 { font-family: var(--lx-serif); font-size: 1.15rem; line-height: 1.35; margin: 0 0 .35rem; }
+  .ps-spec-brand { font-size: .92rem; font-weight: 600; margin-bottom: .25rem; }
+  .ps-spec-note { font-size: .85rem; line-height: 1.55; color: color-mix(in srgb, var(--ink) 72%, transparent); }
+  .ps-spec-disclaimer { font-size: .81rem; max-width: 75ch; line-height: 1.55; margin-top: .85rem; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+  @media (max-width: 720px) {
+    .ps-spec-summary { padding: .95rem 1rem; }
+    .ps-spec-grid { grid-template-columns: 1fr; }
+    .ps-spec-item { padding: 1rem; }
+    .ps-spec-item:nth-child(odd) { border-right: 0; }
+    .ps-spec-item:nth-last-child(2):nth-child(odd) { border-bottom: 1px solid var(--cream-deep); }
+    .ps-spec-item:last-child { border-bottom: 0; }
+  }
 
   /* Journey */
   .ps-journey-intro { color: color-mix(in srgb, var(--ink) 68%, transparent); margin: -0.4rem 0 1.6rem; }
