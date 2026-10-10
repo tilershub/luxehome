@@ -31,7 +31,18 @@ const { module }=Astro.props as {module:CmsModule};
     const name=prefix+f.key;
     if(f.type==='checkbox')return `<label class="check"><input name="${name}" type="checkbox" ${v?'checked':''}> ${esc(f.label)}</label>`;
     if(f.type==='textarea')return `<label>${esc(f.label)}<textarea name="${name}" ${f.required?'required':''}>${esc(v)}</textarea></label>`;
-    if(f.type==='images'){const list=Array.isArray(v)?v:(v?String(v).split('\n').filter(Boolean):[]);return `<div class="image-field"><label>${esc(f.label)}<textarea name="${name}" placeholder="One image URL per line">${esc(list.join('\n'))}</textarea></label><span class="image-tools"><label class="upload-button">Add photos<input type="file" accept="image/*" multiple data-images-upload="${name}"></label><span class="image-preview-empty" data-images-count="${name}">${list.length} image(s)</span></span><small class="field-help">Pick several photos at once from your camera roll — each is converted to WebP.</small></div>`}
+    if(f.type==='images'){
+      const list=Array.isArray(v)?v:(v?String(v).split('\n').filter(Boolean):[]);
+      return `<div class="image-field">
+        <label>${esc(f.label)}<textarea name="${name}" placeholder="One photo URL per line">${esc(list.join('\n'))}</textarea></label>
+        <span class="image-tools"><label class="upload-button">Add stage photos
+          <input type="file" accept="image/*" multiple data-images-upload="${name}"></label>
+          <span class="image-preview-empty" data-images-count="${name}">${list.length} image(s)</span>
+        </span>
+        <div class="cms-photo-thumbs" data-photo-thumbnails="${name}"></div>
+        <small class="field-help">Select several images from your phone. Images are converted to WebP and you can remove individual photos below.</small>
+      </div>`;
+    }
     if(f.type==='lines')return `<label>${esc(f.label)}<textarea name="${name}" placeholder="One item per line">${esc(Array.isArray(v)?v.join('\n'):v)}</textarea></label>`;
     if(f.type==='select')return `<label>${esc(f.label)}<select name="${name}">${(f.options||[]).map(o=>`<option value="${esc(o)}" ${o===v?'selected':''}>${esc(choiceLabel(o))}</option>`).join('')}</select></label>`;
     if(f.type==='datalist'){const id=`options-${name}`;return `<label>${esc(f.label)}<input name="${name}" list="${id}" value="${esc(v)}" ${f.required?'required':''}><datalist id="${id}">${(f.options||[]).map(o=>`<option value="${esc(o)}"></option>`).join('')}</datalist><small class="field-help">Choose a suggestion or type your own category.</small></label>`}
@@ -188,6 +199,31 @@ const { module }=Astro.props as {module:CmsModule};
     const img=document.createElement('img');img.dataset.imagePreview=key;img.src=url;img.alt='Preview';
     old.replaceWith(img);
   }
+  function bindGalleryPreviews(form){
+    form.querySelectorAll('[data-photo-thumbnails]').forEach(preview=>{
+      const name=preview.dataset.photoThumbnails;
+      const textarea=form.elements[name];
+      if(!textarea)return;
+      function update(){
+        const urls=textarea.value.split('\n').map(x=>x.trim()).filter(Boolean);
+        preview.innerHTML=urls.map((url,i)=>`<div class="cms-photo-thumb">
+          <img src="${esc(url)}" alt="Progress photo ${i+1}" loading="lazy">
+          <button type="button" data-remove-stage-photo="${i}" aria-label="Remove progress photo ${i+1}">×</button>
+        </div>`).join('');
+        const count=form.querySelector(`[data-images-count="${name}"]`);
+        if(count)count.textContent=`${urls.length} image(s)`;
+      }
+      textarea.addEventListener('input',update);
+      preview.addEventListener('click',e=>{
+        const button=e.target.closest('[data-remove-stage-photo]');
+        if(!button)return;
+        const urls=textarea.value.split('\n').map(x=>x.trim()).filter(Boolean);
+        urls.splice(Number(button.dataset.removeStagePhoto),1);
+        textarea.value=urls.join('\n');update();
+      });
+      update();
+    });
+  }
   function bindImageUploads(form,folder='uploads'){
     form.querySelectorAll('[data-image-upload]').forEach(input=>input.addEventListener('change',async e=>{
       const file=e.target.files?.[0];if(!file)return;
@@ -200,6 +236,7 @@ const { module }=Astro.props as {module:CmsModule};
       }catch(err){toast(err.message||'Upload failed')}
       finally{e.target.disabled=false;e.target.value=''}
     }));
+    bindGalleryPreviews(form);
     // Multi-image fields (galleries, diary photos) append one URL per line.
     form.querySelectorAll('[data-images-upload]').forEach(input=>input.addEventListener('change',async e=>{
       const files=[...(e.target.files||[])];if(!files.length)return;
@@ -214,6 +251,7 @@ const { module }=Astro.props as {module:CmsModule};
       if(urls.length){
         const existing=target.value.split('\n').map(s=>s.trim()).filter(Boolean);
         target.value=[...existing,...urls].join('\n');
+        target.dispatchEvent(new Event('input',{bubbles:true}));
         const count=form.querySelector(`[data-images-count="${e.target.dataset.imagesUpload}"]`);
         if(count)count.textContent=`${existing.length+urls.length} image(s)`;
         toast(`Added ${urls.length} image(s)`);
@@ -255,6 +293,10 @@ const { module }=Astro.props as {module:CmsModule};
   load();
 </script>
 <style is:global>
+  #cms-modal .cms-photo-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin:10px 0;}
+  #cms-modal .cms-photo-thumb{position:relative;border-radius:8px;overflow:hidden;background:#f2f1ee;}
+  #cms-modal .cms-photo-thumb img{width:100%;height:95px;object-fit:contain;display:block;}
+  #cms-modal .cms-photo-thumb button{position:absolute;right:2px;top:2px;width:27px;min-height:27px;height:27px;padding:0;border-radius:50%;background:#253029dd;color:white;}
   #cms-modal .bulk-items{display:grid;gap:8px;max-height:min(54vh,480px);overflow:auto;padding:6px 2px;}
   #cms-modal .bulk-item{display:flex;align-items:center;gap:12px;border:1px solid #dadfd7;border-radius:9px;padding:9px;cursor:pointer;}
   #cms-modal .bulk-item[hidden]{display:none;}
