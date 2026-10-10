@@ -1,4 +1,4 @@
-export interface CmsField { key:string; label:string; type?:'text'|'textarea'|'number'|'checkbox'|'date'|'select'|'datalist'|'image'|'images'|'lines'|'relation'|'catalogue'; options?:string[]; required?:boolean; relation?:'spaces'|'designs';
+export interface CmsField { key:string; label:string; type?:'text'|'textarea'|'number'|'checkbox'|'date'|'select'|'datalist'|'image'|'images'|'lines'|'relation'|'catalogue'; options?:string[]; required?:boolean; relation?:'spaces'|'designs'|'catalogue';
   /** Number inputs default to whole numbers. Set step:'any' for measurements
       that are genuinely fractional, such as a 3.5 m² minimum area. */
   step?:string; }
@@ -37,12 +37,14 @@ const designChildren:CmsChild[]=[
 const projectChildren:CmsChild[]=[
   {label:'Construction materials & finishing specifications',table:'lx_project_specifications',foreignKey:'project_id',titleKey:'item_name',fields:[
     {key:'catalog_item_id',label:'Choose saved fixture / material',type:'catalogue'},
+    {key:'catalog_item_id',label:'Choose existing fixture or material',type:'relation',relation:'catalogue'},
     {key:'section',label:'Specification section',type:'select',options:['construction','finishes'],required:true},
     {key:'category',label:'Category (e.g. Waterproofing, WC, Tiles)',required:true},
     {key:'item_name',label:'Material, fixture or product',required:true},
     {key:'brand',label:'Brand / manufacturer'},
     {key:'model_code',label:'Model / product code'},
     {key:'specification',label:'Material / finish / size / application',type:'textarea'},
+    {key:'image_url',label:'Fixture / material image (project-specific)',type:'image'},
     {key:'image_url',label:'Fixture / material photo',type:'image'},
     {key:'sort_order',label:'Display order',type:'number'},
   ]},
@@ -52,6 +54,16 @@ const projectChildren:CmsChild[]=[
 ];
 
 export const CMS_MODULES:CmsModule[]=[
+  {slug:'fixture-library',label:'Fixture & Material Library',table:'lx_fixture_library',titleKey:'item_name',fields:[
+    {key:'section',label:'Type',type:'select',options:['finishes','construction'],required:true},
+    {key:'category',label:'Category (WC, Shower, Plumbing, Tiles…)',required:true},
+    {key:'item_name',label:'Fixture / material name',required:true},
+    {key:'brand',label:'Brand'},
+    {key:'model_code',label:'Model / code'},
+    {key:'specification',label:'Description, size or finish',type:'textarea'},
+    {key:'image_url',label:'Product / fixture photo',type:'image'},
+    {key:'active',label:'Available to select',type:'checkbox'},
+  ]},
   {slug:'designs',label:'Designs',table:'lx_designs',titleKey:'name',statusKey:'published',fields:[{key:'name',label:'Design name',required:true},{key:'slug',label:'URL slug',required:true},{key:'space_id',label:'Space',type:'relation',relation:'spaces',required:true},{key:'collection',label:'Collection',type:'select',options:[...ALL_COLLECTION_KEYS]},{key:'tagline',label:'Tagline'},{key:'description',label:'Description',type:'textarea'},{key:'starting_price_lkr',label:'Card price / lowest starting price LKR',type:'number',required:true},{key:'new_starting_price_lkr',label:'New bathroom starting price LKR',type:'number'},{key:'renovation_starting_price_lkr',label:'Renovation starting price LKR',type:'number'},{key:'min_sqm',label:'Minimum m² — decimals allowed, e.g. 3.5',type:'number',step:'any'},{key:'cover_image_url',label:'Cover / doorway image',type:'image'},{key:'inspiration_image_url',label:'Name inspiration image',type:'image'},{key:'name_heading',label:'Name section heading (e.g. “Inspired by the calm of Bentota.”)'},{key:'name_story',label:'Name story',type:'textarea'},{key:'video_3d_url',label:'3D walkthrough YouTube URL'},{key:'video_work_url',label:'Built-work YouTube URL'},{key:'workflow_text',label:'Workflow introduction',type:'textarea'},{key:'highlights',label:'Card highlights',type:'lines'},{key:'featured',label:'Featured',type:'checkbox'},{key:'published',label:'Published — complete decision file only',type:'checkbox'},{key:'sort_order',label:'Sort order',type:'number'}],children:designChildren},
   {slug:'projects',label:'Projects',table:'lx_projects',titleKey:'title',statusKey:'published',fields:[{key:'title',label:'Project title',required:true},{key:'slug',label:'URL slug',required:true},{key:'project_ref',label:'Project reference'},{key:'location',label:'Location'},{key:'area_label',label:'Area / room'},{key:'design_id',label:'Design used',type:'relation',relation:'designs'},{key:'duration_label',label:'Duration'},{key:'completed_label',label:'Completed'},{key:'story',label:'Family story',type:'textarea'},{key:'client_requirements',label:'Client requirements — what the family asked for',type:'textarea'},{key:'estimate_label',label:'Estimate / fixed quotation label (e.g. "LKR 2.37M fixed quotation")'},{key:'before_image_url',label:'Before photo',type:'image'},{key:'after_image_url',label:'After photo',type:'image'},{key:'video_url',label:'Project video URL'},{key:'episode_1_url',label:'Episode 01 URL'},{key:'episode_2_url',label:'Episode 02 URL'},{key:'rating',label:'Rating 1–5',type:'number'},{key:'review_text',label:'Review',type:'textarea'},{key:'review_by',label:'Review by'},{key:'review_screenshot_url',label:'Google review screenshot',type:'image'},{key:'featured',label:'Featured',type:'checkbox'},{key:'published',label:'Published',type:'checkbox'}],children:projectChildren},
   {slug:'fixture-library',label:'Fixture & Material Library',table:'lx_fixture_library',titleKey:'item_name',fields:[
