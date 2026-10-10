@@ -336,6 +336,7 @@ export async function getTeam(opts: { permanentOnly?: boolean } = {}): Promise<T
   if (!c) return [];
   let q = c.from('lx_team_members')
     .select('name,role,bio,photo_url,permanent,tilershub_verified,sort_order')
+    .eq('published',true)
     .order('sort_order');
   if (opts.permanentOnly) q = q.eq('permanent', true);
   const { data } = await q;
