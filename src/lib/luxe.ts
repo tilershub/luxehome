@@ -110,6 +110,9 @@ export interface ProjectSpecification {
   brand: string | null;
   model_code: string | null;
   specification: string | null;
+  image_url: string | null;
+  catalog_item_id: string | null;
+  catalog_item?: { image_url: string | null } | null;
   sort_order: number;
 }
 
@@ -229,7 +232,7 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
     c.from('lx_project_journey').select('*').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_crew').select('name,role,photo_url,tilershub_verified,sort_order').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_specifications')
-      .select('id,section,category,item_name,brand,model_code,specification,sort_order')
+      .select('id,section,category,item_name,brand,model_code,specification,sort_order,image_url,catalog_item_id,catalog_item:lx_fixture_library(image_url)')
       .eq('project_id', project.id).order('sort_order'),
   ]);
 
