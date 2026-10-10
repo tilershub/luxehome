@@ -77,7 +77,7 @@ export const CMS_MODULES:CmsModule[]=[
     {key:'active',label:'Available for projects',type:'checkbox'},
     {key:'for_sale',label:'Offer for individual sale in BathSpace Shop',type:'checkbox'},
     {key:'sale_price_lkr',label:'Fixed selling price (LKR)',type:'number',step:'any'},
-    {key:'sale_unit',label:'Price unit',type:'select',options:['item','set','m²','pair','metre']},
+    {key:'sale_unit',label:'Price unit',type:'select',options:['item','set','box','m²','pair','metre']},
     {key:'sale_availability',label:'Sale availability',type:'select',options:['in_stock','made_to_order','out_of_stock']},
     {key:'sale_notes',label:'Sales notes / inclusions (e.g. installation excluded)',type:'textarea'},
   ],children:[{label:'Product variations (size, finish & stock)',table:'lx_shop_variants',foreignKey:'product_id',titleKey:'label',fields:[
