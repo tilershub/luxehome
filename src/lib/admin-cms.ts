@@ -1,4 +1,4 @@
-export interface CmsField { key:string; label:string; type?:'text'|'textarea'|'number'|'checkbox'|'date'|'select'|'datalist'|'image'|'images'|'lines'|'relation'|'catalogue'; options?:string[]; required?:boolean; relation?:'spaces'|'designs'|'catalogue';
+export interface CmsField { key:string; label:string; type?:'text'|'textarea'|'number'|'checkbox'|'date'|'select'|'datalist'|'image'|'images'|'lines'|'relation'|'catalog'|'catalogue'; options?:string[]; required?:boolean; relation?:'spaces'|'designs'|'catalogue';
   /** Number inputs default to whole numbers. Set step:'any' for measurements
       that are genuinely fractional, such as a 3.5 m² minimum area. */
   step?:string; }
@@ -35,7 +35,7 @@ const designChildren:CmsChild[]=[
   {label:'Questions & answers',table:'lx_design_faq',foreignKey:'design_id',titleKey:'question',fields:[{key:'question',label:'Question',required:true},{key:'answer',label:'Answer',type:'textarea',required:true},{key:'sort_order',label:'Sort order',type:'number'}]},
 ];
 const projectChildren:CmsChild[]=[
-  {label:'Construction materials & finishing specifications',table:'lx_project_specifications',foreignKey:'project_id',titleKey:'item_name',fields:[
+  {label:'Construction materials & finishing specifications',table:'lx_project_specifications',foreignKey:'project_id',titleKey:'item_name',fields:[{key:'catalog_item_id',label:'Reuse an existing fixture / material',type:'catalog'},
     {key:'catalog_item_id',label:'Choose saved fixture / material',type:'catalogue'},
     {key:'catalog_item_id',label:'Choose existing fixture or material',type:'relation',relation:'catalogue'},
     {key:'section',label:'Specification section',type:'select',options:['construction','finishes'],required:true},
@@ -54,6 +54,16 @@ const projectChildren:CmsChild[]=[
 ];
 
 export const CMS_MODULES:CmsModule[]=[
+  {slug:'fixture-library',label:'Fixtures & Materials Library',table:'lx_fixture_library',titleKey:'item_name',fields:[
+    {key:'section',label:'Section',type:'select',options:['finishes','construction'],required:true},
+    {key:'category',label:'Category',required:true},
+    {key:'item_name',label:'Fixture or material name',required:true},
+    {key:'brand',label:'Brand / manufacturer'},
+    {key:'model_code',label:'Model / item code'},
+    {key:'specification',label:'Specifications and finish',type:'textarea'},
+    {key:'image_url',label:'Reusable product photo',type:'image'},
+    {key:'active',label:'Available for selection',type:'checkbox'},
+  ]},
   {slug:'fixture-library',label:'Fixture & Material Library',table:'lx_fixture_library',titleKey:'item_name',fields:[
     {key:'section',label:'Type',type:'select',options:['finishes','construction'],required:true},
     {key:'category',label:'Category (WC, Shower, Plumbing, Tiles…)',required:true},
