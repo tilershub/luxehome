@@ -21,6 +21,24 @@ const itemData={
 <LuxeLayout title={`${product.item_name} | BathSpace Shop`}
  description={product.description||product.specification||`Buy ${product.item_name} from BathSpace by LUXEhome — check specifications and current prices.`}
  ogImage={product.image_url}>
+ <Fragment slot="head">
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    '@context':'https://schema.org',
+    '@type':'Product',
+    name:product.item_name,
+    description:product.description||product.specification||product.item_name,
+    image:photos,
+    ...(product.brand?{brand:{'@type':'Brand',name:product.brand}}:{}),
+    ...(product.sku?{sku:product.sku}:{}),
+    offers:{
+      '@type':'Offer',
+      url:`https://luxehome.lk/shop/${product.slug}`,
+      priceCurrency:'LKR',
+      price:Number(product.sale_price_lkr).toFixed(2),
+      availability:product.sale_availability==='out_of_stock'?'https://schema.org/OutOfStock':product.sale_availability==='in_stock'?'https://schema.org/InStock':'https://schema.org/PreOrder'
+    }
+  })}></script>
+ </Fragment>
  <main class="bd-product">
   <nav class="bd-crumb"><a href="/shop">BathSpace Shop</a> / {product.category} / {product.item_name}</nav>
   <div class="bd-product-grid">
