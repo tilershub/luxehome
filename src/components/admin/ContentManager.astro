@@ -100,6 +100,8 @@ const { module }=Astro.props as {module:CmsModule};
       if(cfg.slug==='fixture-library' && payload.for_sale){
         if(!(Number(payload.sale_price_lkr)>0))return toast('Set a positive fixed selling price.');
         if(!payload.image_url)return toast('Upload the real fixture or product image first.');
+        if(!payload.slug || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(String(payload.slug)))
+          return toast('Set a unique, lowercase product URL slug (e.g. swiss-na300-basin).');
       }
       let query=fresh?sb.from(cfg.table).insert(payload).select().single():sb.from(cfg.table).update(payload).eq('id',row.id).select().single();const {data,error}=await query;if(error)return toast(error.message);toast('Saved');await load();const saved=rows.find(item=>String(item.id)===String(data.id));if(saved)edit(saved)};
     document.getElementById('delete')?.addEventListener('click',async()=>{if(!confirm('Delete this record?'))return;const {error}=await sb.from(cfg.table).delete().eq('id',row.id);if(error)return toast(error.message);toast('Deleted');load()});
