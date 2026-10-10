@@ -314,6 +314,7 @@ const { module }=Astro.props as {module:CmsModule};
     const fresh=!source,def=group.def,row=source||{};
     if(fresh&&def.fields.some(field=>field.key==='sort_order'))row.sort_order=group.items.length;
     if(fresh&&def.table==='lx_design_fixtures'){row.quantity=1;row.included=true}
+    if(fresh&&def.table==='lx_shop_variants'){row.availability='made_to_order';row.active=true}
     const fields=def.table==='lx_design_fixtures'?def.fields.map(f=>f.key==='category'?{...f,options:FIXTURE_CATEGORIES[(lookups.spaces.find(s=>s.id===parent.space_id)||{}).slug]||[]}:f):def.fields;
     const libraryEditor=def.table==='lx_project_specifications';
     modal.innerHTML=`<div class="modal-backdrop"><form id="child-editor" class="modal-card"><div class="formhead"><h2>${fresh?'Add':'Edit'} ${esc(def.label)}</h2><button type="button" id="child-close">Close</button></div><div class="fields one">${fields.map(f=>field(f,row[f.key],'child_')).join('')}</div>${libraryEditor?'<p class="catalogue-help">Select a saved product to fill the fields, then adjust only what was actually installed in this project. <a href="/admin/cms/fixture-library" target="_blank" rel="noopener">Manage fixture library</a></p>':''}<div class="actions"><button class="save">Save row</button>${fresh?'':`<button type="button" id="child-delete" class="delete">Delete</button>`}</div></form></div>`;
