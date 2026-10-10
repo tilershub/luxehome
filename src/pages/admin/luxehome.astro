@@ -761,7 +761,8 @@
           <div class="fld"><label>Actual contract / historical investment label</label><input id="p-investment" value="${esc(p.estimate_label)}" placeholder="e.g. Historical project value · LKR 1.9M" /></div>
           <div class="fld"><label>Project story — facts and work actually completed</label><textarea id="p-story" style="min-height:130px">${esc(p.story)}</textarea></div>
 
-          <div class="fld"><label>The journey</label></div>
+          <p style="margin:1rem 0;font-size:.9rem"><a href="/admin/cms/projects" target="_blank" rel="noopener">Manage reusable project fixtures, individual product images and detailed project specifications in the modern CMS ↗</a></p>
+          <div class="fld"><label>The journey — attach construction-stage photos</label></div>
           <div class="sub-rows" id="journey-rows">
             ${journey.map((j, i) => `
               <div class="sub-row" data-i="${i}">
@@ -773,6 +774,10 @@
                 <textarea data-f="note" placeholder="Note">${esc(j.note ?? '')}</textarea>
                 <input data-f="issue" placeholder="Optional — the issue we found" value="${esc(j.issue ?? '')}" style="border-color:rgba(201,162,75,.4)" />
                 <input data-f="fix" placeholder="Optional — how we fixed it" value="${esc(j.fix ?? '')}" style="border-color:rgba(201,162,75,.4)" />
+                <div class="fld"><label>Construction-stage photos (one URL per line)</label>
+                  <textarea data-f="image_urls" placeholder="Stage photo URLs">${esc((j.image_urls ?? []).join('\n'))}</textarea>
+                  <label class="upload-label">Upload progress photos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" data-stage-upload="${i}" /></label>
+                </div>
               </div>`).join('')}
           </div>
           <button class="add-row-btn" id="add-journey">+ Add stage</button>
@@ -799,6 +804,7 @@
             <div class="fld"><label>Review text</label><textarea id="p-review">${esc(p.review_text)}</textarea></div>
             <div class="fld"><label>Review by</label><input id="p-reviewby" value="${esc(p.review_by)}" /></div>
           </div>
+          ${mediaField('p-review-proof', 'Client Google review screenshot', p.review_screenshot_url, 'projects/reviews')}
           <label class="chk"><input type="checkbox" id="p-featured" ${p.featured ? 'checked' : ''} /> ★ Featured</label>
           <label class="chk"><input type="checkbox" id="p-published" ${p.published ? 'checked' : ''} /> Published</label>
 
@@ -816,6 +822,21 @@
           });
         });
         bindMediaUploads();
+        main.querySelectorAll('[data-stage-upload]').forEach((input) => input.addEventListener('change', async () => {
+          const files = [...(input.files || [])];
+          const target = input.closest('.sub-row')?.querySelector('[data-f="image_urls"]');
+          if (!target || !files.length) return;
+          input.disabled = true;
+          const urls = [];
+          for (const file of files) {
+            try { urls.push(await uploadMedia(file, 'projects/progress')); }
+            catch (error) { toast(error.message || 'Upload failed'); }
+          }
+          if (urls.length) target.value = [target.value.trim(), ...urls].filter(Boolean).join('\n');
+          input.disabled = false;
+          input.value = '';
+          if (urls.length) toast(`${urls.length} stage photo(s) uploaded`);
+        }));
         document.getElementById('add-journey').addEventListener('click', () => { collect(); journey.push({ stage: '', date_label: '', note: '', issue: '', fix: '' }); render(); });
         document.getElementById('add-crew').addEventListener('click', () => { collect(); crew.push({ name: '', role: '', photo_url: '', tilershub_verified: false }); render(); });
         main.querySelectorAll('.sub-del').forEach((btn) => btn.addEventListener('click', () => {
@@ -845,6 +866,7 @@
         p.video_url = gv('p-video'); p.story = gv('p-story');
         p.episode_1_url = gv('p-episode1'); p.episode_2_url = gv('p-episode2');
         p.review_text = gv('p-review'); p.review_by = gv('p-reviewby');
+        p.review_screenshot_url = gv('p-review-proof');
         p.featured = gc('p-featured'); p.published = gc('p-published');
         gallery = gv('p-gallery').split('\n').map((s) => s.trim()).filter(Boolean).map((u, i) => ({ image_url: u, sort_order: i }));
         journey = [...document.querySelectorAll('#journey-rows .sub-row')].map((row, i) => ({
@@ -853,6 +875,7 @@
           note: row.querySelector('[data-f="note"]').value.trim() || null,
           issue: row.querySelector('[data-f="issue"]').value.trim() || null,
           fix: row.querySelector('[data-f="fix"]').value.trim() || null,
+          image_urls: (row.querySelector('[data-f="image_urls"]')?.value || '').split('\n').map((s)=>s.trim()).filter(Boolean),
           sort_order: i,
         }));
         crew = [...document.querySelectorAll('#crew-rows .sub-row')].map((row, i) => ({
@@ -879,6 +902,7 @@
           video_url: p.video_url || null, rating: rating || null,
           episode_1_url: p.episode_1_url || null, episode_2_url: p.episode_2_url || null,
           review_text: p.review_text || null, review_by: p.review_by || null,
+          review_screenshot_url: p.review_screenshot_url || null,
           featured: p.featured, published: p.published,
         };
         let projectId = p.id;
