@@ -102,6 +102,17 @@ export interface LuxeProject {
   design?: Pick<Design, 'slug' | 'name' | 'collection'> | null;
 }
 
+export interface ProjectSpecification {
+  id: string;
+  section: 'construction' | 'finishes';
+  category: string;
+  item_name: string;
+  brand: string | null;
+  model_code: string | null;
+  specification: string | null;
+  sort_order: number;
+}
+
 export interface ProjectGalleryImage { image_url: string; sort_order: number; }
 export interface ProjectJourneyStage {
   stage: string; date_label: string | null; note: string | null;
@@ -114,6 +125,7 @@ export interface ProjectCrewMember {
 }
 
 export interface ProjectFull extends LuxeProject {
+  specifications: ProjectSpecification[];
   gallery: ProjectGalleryImage[];
   journey: ProjectJourneyStage[];
   crew: ProjectCrewMember[];
@@ -210,16 +222,20 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
     .maybeSingle();
   if (!project) return null;
 
-  const [gallery, journey, crew] = await Promise.all([
+  const [gallery, journey, crew, specifications] = await Promise.all([
     c.from('lx_project_gallery').select('image_url,sort_order').eq('project_id', project.id).order('sort_order'),
     // Select all fields so deployments remain compatible while the additive
     // diary-photo column migration is being rolled out.
     c.from('lx_project_journey').select('*').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_crew').select('name,role,photo_url,tilershub_verified,sort_order').eq('project_id', project.id).order('sort_order'),
+    c.from('lx_project_specifications')
+      .select('id,section,category,item_name,brand,model_code,specification,sort_order')
+      .eq('project_id', project.id).order('sort_order'),
   ]);
 
   return {
     ...(project as LuxeProject),
+    specifications: (specifications.data ?? []) as ProjectSpecification[],
     gallery: gallery.data ?? [],
     journey: journey.data ?? [],
     crew: crew.data ?? [],
