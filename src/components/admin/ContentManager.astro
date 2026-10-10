@@ -71,11 +71,58 @@ const { module }=Astro.props as {module:CmsModule};
   async function renderChildren(parent){
     const holder=document.getElementById('children');
     const groups=await Promise.all(cfg.children.map(async def=>{const {data,error}=await sb.from(def.table).select('*').eq(def.foreignKey,parent.id).order('sort_order',{ascending:true});return {def,items:data||[],error}}));
-    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Project content</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${['lx_design_fixtures','lx_design_materials'].includes(group.def.table)?`<button class="seed" data-checklist-seed="${index}">Complete checklist</button>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(group.def.table==='lx_design_drawings'?choiceLabel(item[group.def.titleKey]):item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
+    holder.innerHTML=groups.map((group,index)=>`<section class="child panel"><div class="child-head"><div><p class="eyebrow">Project content</p><h3>${esc(group.def.label)}</h3></div><div class="child-actions">${['lx_design_fixtures','lx_design_materials'].includes(group.def.table)?`<button class="seed" data-checklist-seed="${index}">Complete checklist</button>`:''}${group.def.table==='lx_project_specifications'? `<button type="button" data-catalog-bulk="${index}">+ Select saved products</button>`:''}<button data-child-new="${index}">+ Add row</button></div></div>${group.error?`<p>${esc(group.error.message)}</p>`:(group.items.length?group.items.map(item=>`<article data-child-group="${index}" data-child-id="${item.id}"><span>${esc(group.def.table==='lx_design_drawings'?choiceLabel(item[group.def.titleKey]):item[group.def.titleKey]||'Row')}</span><button>Edit</button></article>`).join(''):'<p class="empty">No rows yet.</p>')}</section>`).join('');
     holder.querySelectorAll('[data-child-new]').forEach(button=>button.onclick=()=>childEditor(groups[Number(button.dataset.childNew)],null,parent));
+    holder.querySelectorAll('[data-catalog-bulk]').forEach(button=>button.onclick=()=>bulkAddFixtureLibrary(parent,groups[Number(button.dataset.catalogBulk)]));
     holder.querySelectorAll('[data-checklist-seed]').forEach(button=>button.onclick=()=>seedDesignChecklist(parent,groups[Number(button.dataset.checklistSeed)]));
     holder.querySelectorAll('[data-child-id]').forEach(el=>{const group=groups[Number(el.dataset.childGroup)];el.onclick=()=>childEditor(group,group.items.find(item=>String(item.id)===el.dataset.childId),parent)});
   }
+  async function bulkAddFixtureLibrary(parent,group){
+    const {data,error}=await sb.from('lx_fixture_library')
+      .select('id,section,category,item_name,brand,model_code,specification,image_url')
+      .eq('active',true).order('category').order('item_name');
+    if(error)return toast(error.message);
+    const existing=new Set(group.items.map(item=>item.catalog_item_id).filter(Boolean));
+    const available=(data||[]).filter(item=>!existing.has(item.id));
+    if(!available.length)return toast('Every available saved product has been added to this project.');
+    modal.innerHTML=`<div class="modal-backdrop"><form id="catalog-bulk" class="modal-card">
+      <div class="formhead"><h2>Choose saved fixtures & materials</h2><button type="button" id="bulk-close">Close</button></div>
+      <p>Select several saved items. Their image and specification will be reused automatically. You can change details afterwards for this bathroom.</p>
+      <label class="bulk-search">Filter products<input type="search" id="bulk-filter" placeholder="Search brand, WC, basin, tile…" /></label>
+      <div class="bulk-items">${available.map(item=>`<label class="bulk-item" data-filter="${esc([item.category,item.brand,item.item_name,item.model_code].filter(Boolean).join(' ').toLowerCase())}">
+        <input type="checkbox" value="${esc(item.id)}" />
+        ${item.image_url?`<img src="${esc(item.image_url)}" alt="" loading="lazy">`:'<span class="bulk-empty-photo">No image</span>'}
+        <span><strong>${esc(item.item_name)}</strong><small>${esc([item.brand,item.model_code,item.category].filter(Boolean).join(' · '))}</small></span>
+      </label>`).join('')}</div>
+      <div class="actions"><button type="submit" class="save">Add selected to project</button></div>
+    </form></div>`;
+    document.getElementById('bulk-close').onclick=()=>modal.innerHTML='';
+    document.getElementById('bulk-filter').oninput=e=>{
+      const term=e.target.value.toLowerCase().trim();
+      modal.querySelectorAll('.bulk-item').forEach(el=>el.hidden=!el.dataset.filter.includes(term));
+    };
+    document.getElementById('catalog-bulk').onsubmit=async e=>{
+      e.preventDefault();
+      const chosen=[...modal.querySelectorAll('.bulk-item input:checked')].map(el=>el.value);
+      if(!chosen.length)return toast('Choose at least one fixture or material.');
+      const selected=available.filter(item=>chosen.includes(item.id));
+      const start=Math.max(-1,...group.items.map(item=>item.sort_order||0))+1;
+      const records=selected.map((item,i)=>({
+        project_id:parent.id,catalog_item_id:item.id,section:item.section,
+        category:item.category,item_name:item.item_name,brand:item.brand,
+        model_code:item.model_code,specification:item.specification,image_url:item.image_url,
+        sort_order:start+i,
+      }));
+      const button=modal.querySelector('button[type="submit"]');
+      button.disabled=true;
+      const {error:saveError}=await sb.from('lx_project_specifications').insert(records);
+      if(saveError){button.disabled=false;return toast(saveError.message)}
+      modal.innerHTML='';
+      toast(`${records.length} saved items added to this bathroom`);
+      renderChildren(parent);
+    };
+  }
+
   async function seedDesignChecklist(parent,group){
     const space=lookups.spaces.find(s=>s.id===parent.space_id);
     if(!space)return toast('Select a design space first');
@@ -208,6 +255,15 @@ const { module }=Astro.props as {module:CmsModule};
   load();
 </script>
 <style is:global>
+  #cms-modal .bulk-items{display:grid;gap:8px;max-height:min(54vh,480px);overflow:auto;padding:6px 2px;}
+  #cms-modal .bulk-item{display:flex;align-items:center;gap:12px;border:1px solid #dadfd7;border-radius:9px;padding:9px;cursor:pointer;}
+  #cms-modal .bulk-item[hidden]{display:none;}
+  #cms-modal .bulk-item input{width:19px;height:19px;flex-shrink:0;}
+  #cms-modal .bulk-item img,#cms-modal .bulk-empty-photo{width:62px;height:62px;flex-shrink:0;object-fit:contain;background:#f5f5f0;border-radius:7px;}
+  #cms-modal .bulk-empty-photo{display:grid;place-items:center;color:#777;font-size:10px;}
+  #cms-modal .bulk-item span:last-child{display:grid;gap:4px;min-width:0;line-height:1.3;}
+  #cms-modal .bulk-item small{color:#687267;}
+  #cms-modal .bulk-search{display:grid;gap:5px;margin:10px 0;}
   #manager{width:100%;max-width:1180px}
   #manager .toolbar{display:flex;gap:10px;margin-bottom:16px}
   #manager .toolbar input{flex:1;min-width:0}
