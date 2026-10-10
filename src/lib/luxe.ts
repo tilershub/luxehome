@@ -112,7 +112,13 @@ export interface ProjectSpecification {
   specification: string | null;
   image_url: string | null;
   catalog_item_id: string | null;
-  catalog_item?: { image_url: string | null } | null;
+  catalog_item?: {
+    image_url: string | null;
+    for_sale: boolean | null;
+    sale_price_lkr: number | null;
+    sale_unit: string | null;
+    sale_availability: string | null;
+  } | null;
   sort_order: number;
 }
 
@@ -232,7 +238,7 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
     c.from('lx_project_journey').select('*').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_crew').select('name,role,photo_url,tilershub_verified,sort_order').eq('project_id', project.id).order('sort_order'),
     c.from('lx_project_specifications')
-      .select('id,section,category,item_name,brand,model_code,specification,sort_order,image_url,catalog_item_id,catalog_item:lx_fixture_library(image_url)')
+      .select('id,section,category,item_name,brand,model_code,specification,sort_order,image_url,catalog_item_id,catalog_item:lx_fixture_library(image_url,for_sale,sale_price_lkr,sale_unit,sale_availability)')
       .eq('project_id', project.id).order('sort_order'),
   ]);
 
@@ -243,6 +249,41 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
     journey: journey.data ?? [],
     crew: crew.data ?? [],
   };
+}
+
+export interface ShopFixture {
+  id: string;
+  section: 'construction' | 'finishes';
+  category: string;
+  item_name: string;
+  brand: string | null;
+  model_code: string | null;
+  specification: string | null;
+  image_url: string;
+  sale_price_lkr: number;
+  sale_unit: string;
+  sale_availability: 'in_stock' | 'made_to_order' | 'out_of_stock';
+  sale_notes: string | null;
+}
+
+/** One catalogue for bathroom specifications and retail products.
+    Public shop results require a real photo, fixed positive price and editor opt-in. */
+export async function getShopFixtures(): Promise<ShopFixture[]> {
+  const c = sb();
+  if (!c) return [];
+  const { data, error } = await c.from('lx_fixture_library')
+    .select('id,section,category,item_name,brand,model_code,specification,image_url,sale_price_lkr,sale_unit,sale_availability,sale_notes')
+    .eq('active', true)
+    .eq('for_sale', true)
+    .gt('sale_price_lkr', 0)
+    .not('image_url', 'is', null)
+    .order('category')
+    .order('item_name');
+  if (error) {
+    console.error('Unable to retrieve BathSpace sellable fixtures:', error.message);
+    return [];
+  }
+  return (data ?? []).filter((item) => Boolean(item.image_url)) as ShopFixture[];
 }
 
 export async function getTeam(opts: { permanentOnly?: boolean } = {}): Promise<TeamMember[]> {
