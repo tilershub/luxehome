@@ -27,7 +27,7 @@ const videoSchema = (primaryVideo && project.after_image_url) ? JSON.stringify({
   '@type': 'VideoObject',
   name: `${project.title} — ${ongoing ? 'renovation progress' : 'completed bathroom walkthrough'}`,
   description: `A walkthrough of the ${ongoing ? 'ongoing' : 'completed'} ${project.title} bathroom by BathSpace by LUXEhome${project.location ? `, ${project.location}` : ''}.`,
-  thumbnailUrl: [absoluteUrl(imageUrl(project.after_image_url, 1200))],
+  thumbnailUrl: [absoluteUrl(project.after_image_url)],
   uploadDate: project.created_at ?? undefined,
   embedUrl: primaryVideo,
   publisher: { '@type': 'Organization', name: 'BathSpace by LUXEhome', url: 'https://luxehome.lk' },
@@ -51,7 +51,7 @@ const reviewSchema = project.rating ? JSON.stringify({
 <LuxeLayout
   title={`${project.title} — BathSpace Project Story | LUXEhome`}
   description={`${project.title}${project.location ? `, ${project.location}` : ''} — a real BathSpace ${ongoing ? 'ongoing renovation' : 'completed bathroom renovation'} with clear scope, project stage and investment.`}
-  ogImage={project.after_image_url ? imageUrl(project.after_image_url, 1200) : undefined}
+  ogImage={project.after_image_url || undefined}
   ogImageAlt={`${project.title} — ${ongoing ? 'renovation progress' : 'completed BathSpace bathroom'}${project.location ? `, ${project.location}` : ''}`}
 >
   <Fragment slot="head">
@@ -92,8 +92,7 @@ const reviewSchema = project.rating ? JSON.stringify({
         <div class="ps-carousel-track" tabindex="0" aria-roledescription="carousel" aria-label="Swipe or use arrow keys to explore the bathroom photographs">
           {heroImages.map((url, i) => (
             <figure class="ps-carousel-slide">
-              <img src={imageUrl(url, 1200)}
-                srcset={`${imageUrl(url, 480)} 480w, ${imageUrl(url, 800)} 800w, ${imageUrl(url, 1200)} 1200w`}
+              <img src={url}
                 sizes="(max-width: 720px) calc(100vw - 32px), 1000px"
                 alt={`${project.title} — ${ongoing ? 'progress' : 'finished bathroom'} photo ${i + 1}`}
                 loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
