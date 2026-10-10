@@ -71,7 +71,12 @@ const { module }=Astro.props as {module:CmsModule};
   function values(form,fields,prefix=''){const data={};fields.forEach(f=>{const el=form.elements[prefix+f.key];if(f.type==='checkbox')data[f.key]=el.checked;else if(f.type==='number')data[f.key]=el.value===''?null:Number(el.value);else if(f.type==='lines'||f.type==='images')data[f.key]=el.value.split('\n').map(x=>x.trim()).filter(Boolean);else data[f.key]=el.value||null});return data}
   async function edit(source){
     const fresh=!source,row=source||{};
-    if(fresh && cfg.slug==='fixture-library')row.active=true;
+    if(fresh && cfg.slug==='fixture-library'){
+      row.active=true;
+      row.for_sale=false;
+      row.sale_unit='item';
+      row.sale_availability='made_to_order';
+    }
     root.innerHTML=`<form id="editor" class="panel"><div class="formhead"><div><p class="eyebrow">${fresh?'Create':'Edit'} record</p><h2>${fresh?'New '+esc(cfg.label):esc(row[cfg.titleKey])}</h2></div><button type="button" id="back">Back to list</button></div>${cfg.slug==='media'?'<label class="media-upload">Upload image<input id="media-file" type="file" accept="image/*"></label>':''}<div class="fields">${cfg.fields.map(f=>field(f,row[f.key])).join('')}</div><div class="actions"><button class="save">Save</button>${fresh?'':`<button type="button" class="delete" id="delete">Delete</button>`}</div></form><div id="children"></div>`;
     const editor=document.getElementById('editor');document.getElementById('back').onclick=list;
     const nameInput=editor.elements.name,titleInput=editor.elements.title,slugInput=editor.elements.slug;
@@ -89,7 +94,14 @@ const { module }=Astro.props as {module:CmsModule};
       }catch(err){toast(err.message||'Upload failed')}
       finally{e.target.disabled=false;e.target.value=''}
     });
-    editor.onsubmit=async e=>{e.preventDefault();const payload=values(editor,cfg.fields);let query=fresh?sb.from(cfg.table).insert(payload).select().single():sb.from(cfg.table).update(payload).eq('id',row.id).select().single();const {data,error}=await query;if(error)return toast(error.message);toast('Saved');await load();const saved=rows.find(item=>String(item.id)===String(data.id));if(saved)edit(saved)};
+    editor.onsubmit=async e=>{
+      e.preventDefault();
+      const payload=values(editor,cfg.fields);
+      if(cfg.slug==='fixture-library' && payload.for_sale){
+        if(!(Number(payload.sale_price_lkr)>0))return toast('Set a positive fixed selling price.');
+        if(!payload.image_url)return toast('Upload the real fixture or product image first.');
+      }
+      let query=fresh?sb.from(cfg.table).insert(payload).select().single():sb.from(cfg.table).update(payload).eq('id',row.id).select().single();const {data,error}=await query;if(error)return toast(error.message);toast('Saved');await load();const saved=rows.find(item=>String(item.id)===String(data.id));if(saved)edit(saved)};
     document.getElementById('delete')?.addEventListener('click',async()=>{if(!confirm('Delete this record?'))return;const {error}=await sb.from(cfg.table).delete().eq('id',row.id);if(error)return toast(error.message);toast('Deleted');load()});
     if(!fresh&&cfg.children?.length)await renderChildren(row);
   }

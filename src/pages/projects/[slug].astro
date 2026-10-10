@@ -3,7 +3,7 @@ export const prerender = false;
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import { getProjectBySlug, youtubeEmbed, isYouTubeShort, type ProjectFull } from '../../lib/luxe';
-import { imageUrl, absoluteUrl } from '../../lib/luxe-config';
+import { imageUrl, absoluteUrl, waLink } from '../../lib/luxe-config';
 
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);
@@ -237,6 +237,14 @@ const reviewSchema = project.rating ? JSON.stringify({
                     </p>
                   )}
                   {item.specification && <p class="ps-spec-note">{item.specification}</p>}
+                  {item.catalog_item?.for_sale && Number(item.catalog_item.sale_price_lkr) > 0 && (
+                    <div class="ps-spec-sale">
+                      <span>Current individual price: LKR {new Intl.NumberFormat('en-LK').format(Number(item.catalog_item.sale_price_lkr))} / {item.catalog_item.sale_unit || 'item'}</span>
+                      {item.catalog_item.sale_availability !== 'out_of_stock'
+                        ? <a href={waLink(`Hi BathSpace! I saw the ${item.item_name} listed in your ${project.title} project. Please confirm purchase options and current availability.`)} target="_blank" rel="noopener noreferrer">Enquire to purchase →</a>
+                        : <small>Currently unavailable</small>}
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
@@ -301,7 +309,9 @@ const reviewSchema = project.rating ? JSON.stringify({
   <!-- Crew -->
   {project.crew.length > 0 && (
     <section class="ps-section">
-      <h2 class="lxr">The team that built this</h2>
+      <p class="lx-eyebrow lxr">The people behind the work</p>
+      <h2 class="lxr">People Behind This Bathroom</h2>
+      <p class="ps-crew-intro lxr">From design and site supervision to skilled trades, specialist suppliers and finishing partners—these are the people who helped deliver this project.</p>
       <div class="ps-crew lxr">
         {project.crew.map((c) => (
           <div class="ps-crew-card">
@@ -634,12 +644,18 @@ const reviewSchema = project.rating ? JSON.stringify({
   .ps-callout p:last-child { margin-bottom: 0; }
   .ps-callout strong { font-weight: 600; color: var(--ink); }
 
+  .ps-spec-sale { display: grid; gap: .35rem; border-top: 1px solid var(--cream-deep); margin-top: .8rem; padding-top: .65rem; font-size: .83rem; }
+  .ps-spec-sale span { font-weight: 600; color: var(--ink); }
+  .ps-spec-sale a { color: var(--sage-deep); font-weight: 650; text-decoration: underline; text-underline-offset: 2px; }
+  .ps-spec-sale small { font-size: .78rem; color: color-mix(in srgb,var(--ink) 68%,transparent); }
+  .ps-crew-intro { max-width: 65ch; line-height: 1.6; color: color-mix(in srgb,var(--ink) 74%,transparent); margin-bottom: 1.5rem; }
+
   /* Crew */
   .ps-crew { display: flex; flex-wrap: wrap; gap: 1rem; }
   .ps-crew-card {
-    display: flex; align-items: center; gap: .9rem;
-    background: #fff; border: 1px solid var(--cream-deep); border-radius: 999px;
-    padding: .5rem 1.3rem .5rem .5rem;
+    display: flex; align-items: center; gap: .9rem; min-width: min(100%,250px); max-width: 100%;
+    background: #fff; border: 1px solid var(--cream-deep); border-radius: 12px;
+    padding: .7rem 1rem .7rem .7rem; flex: 1 1 265px;
   }
   .ps-crew-photo {
     width: 52px; height: 52px; border-radius: 50%; overflow: hidden;
