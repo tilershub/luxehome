@@ -86,6 +86,10 @@ Astro.response.headers.set(
         var m = /\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(img.src || '');
         if (!m) return;
         img.dataset.originalSrc = '1';
+        // A failed Cloudflare resize can remain selected via srcset even after
+        // changing img.src. Remove it first, then use the real stored image.
+        img.removeAttribute('srcset');
+        img.removeAttribute('sizes');
         img.src = /^https?:\/\//i.test(m[1]) ? m[1] : '/' + m[1];
       }, true);
     </script>
