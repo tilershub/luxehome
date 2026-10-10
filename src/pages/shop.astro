@@ -45,16 +45,16 @@ const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to
         <div class="bs-shop-grid" id="bs-shop-grid">
           {products.map((product) => (
             <article class="bs-shop-card" data-category={product.category}>
-              <div class="bs-shop-photo">
-                <img
-                  src={imageUrl(product.image_url, 700)}
-                  alt={`${product.brand ? product.brand + ' ' : ''}${product.item_name}`}
-                  loading="lazy" decoding="async" width="700" height="600"
-                />
-              </div>
+              {product.slug ? (
+                <a class="bs-shop-photo" href={`/shop/${product.slug}`} aria-label={`View ${product.item_name} details`}>
+                  <img src={product.image_url} alt={`${product.brand ? product.brand + ' ' : ''}${product.item_name}`} loading="lazy" decoding="async" width="700" height="600" />
+                </a>
+              ) : (
+                <div class="bs-shop-photo"><img src={product.image_url} alt={product.item_name} loading="lazy" decoding="async" width="700" height="600" /></div>
+              )}
               <div class="bs-shop-info">
                 <p class="bs-shop-category">{product.category}</p>
-                <h3>{product.item_name}</h3>
+                <h3>{product.slug ? <a href={`/shop/${product.slug}`}>{product.item_name}</a> : product.item_name}</h3>
                 {(product.brand || product.model_code) && (
                   <p class="bs-shop-brand">{[product.brand, product.model_code && `Model ${product.model_code}`].filter(Boolean).join(' · ')}</p>
                 )}
@@ -68,11 +68,10 @@ const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to
                   <span class="bs-shop-availability">{statusName(product.sale_availability)}</span>
                 </div>
                 {product.sale_notes && <p class="bs-shop-notes">{product.sale_notes}</p>}
-                <a class="bs-shop-inquiry"
-                  href={waLink(`Hi BathSpace! I would like to enquire about ${product.item_name}${product.brand ? ' (' + product.brand + ')' : ''}${product.model_code ? ' model ' + product.model_code : ''}. Listed price: LKR ${price(product.sale_price_lkr)} per ${product.sale_unit || 'item'}. Please confirm availability, delivery and installation options.`)}
-                  target="_blank" rel="noopener noreferrer">
-                  Enquire on WhatsApp <span aria-hidden="true">→</span>
-                </a>
+                {product.slug
+                  ? <a class="bs-shop-inquiry" href={`/shop/${product.slug}`}>View options & add to basket →</a>
+                  : <a class="bs-shop-inquiry" href={waLink(`Hi BathSpace! I would like to enquire about ${product.item_name}. Please confirm the specifications and availability.`)} target="_blank" rel="noopener noreferrer">Ask about this product →</a>
+                }
               </div>
             </article>
           ))}
@@ -113,11 +112,11 @@ const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to
   .bs-shop-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1.3rem; align-items: stretch; }
   .bs-shop-card { background: #fff; border: 1px solid var(--cream-deep); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
   .bs-shop-card[hidden] { display: none; }
-  .bs-shop-photo { aspect-ratio: 5 / 4; background: var(--sage-mist); }
+  .bs-shop-photo { display:block; aspect-ratio: 5 / 4; background: var(--sage-mist); }
   .bs-shop-photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
   .bs-shop-info { display: flex; flex: 1; flex-direction: column; padding: 1.25rem; min-width: 0; }
   .bs-shop-category { text-transform: uppercase; color: var(--sage-deep); font-size: .7rem; font-weight: 650; letter-spacing: .09em; }
-  .bs-shop-info h3 { font-family: var(--lx-serif); font-size: 1.55rem; line-height: 1.18; font-weight: 550; margin: .4rem 0 .45rem; }
+  .bs-shop-info h3 a {color:inherit;text-decoration:none}.bs-shop-info h3 a:hover{text-decoration:underline;text-underline-offset:3px}.bs-shop-info h3 { font-family: var(--lx-serif); font-size: 1.55rem; line-height: 1.18; font-weight: 550; margin: .4rem 0 .45rem; }
   .bs-shop-brand { font-weight: 600; font-size: .86rem; }
   .bs-shop-description { line-height: 1.55; color: color-mix(in srgb,var(--ink) 72%,transparent); font-size: .85rem; margin-top: .5rem; }
   .bs-shop-price-row { display: flex; justify-content: space-between; align-items: end; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 1.4rem; }
