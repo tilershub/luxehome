@@ -15,15 +15,20 @@ create index if not exists lx_fixture_library_browse on public.lx_fixture_librar
 alter table public.lx_fixture_library enable row level security;
 grant select on public.lx_fixture_library to anon;
 grant select, insert, update, delete on public.lx_fixture_library to authenticated;
+drop policy if exists "library public visible" on public.lx_fixture_library;
 create policy "library public visible" on public.lx_fixture_library
   for select to anon,authenticated using (active = true);
+drop policy if exists "library admin read" on public.lx_fixture_library;
 create policy "library admin read" on public.lx_fixture_library
   for select to authenticated using ((select private.lx_is_admin()));
+drop policy if exists "library admin insert" on public.lx_fixture_library;
 create policy "library admin insert" on public.lx_fixture_library
   for insert to authenticated with check ((select private.lx_is_admin()));
+drop policy if exists "library admin update" on public.lx_fixture_library;
 create policy "library admin update" on public.lx_fixture_library
   for update to authenticated using ((select private.lx_is_admin()))
   with check ((select private.lx_is_admin()));
+drop policy if exists "library admin delete" on public.lx_fixture_library;
 create policy "library admin delete" on public.lx_fixture_library
   for delete to authenticated using ((select private.lx_is_admin()));
 
