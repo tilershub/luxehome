@@ -7,49 +7,21 @@ export interface PublicInfoPage {
     rendered on both the booking page and the main FAQ page so the website and
     sales team can use one consistent explanation. */
 export const PROJECT_INITIATION_FAQ: Array<{ title: string; copy: string }> = [
-  {
-    title: 'Is the consultation and site visit really free?',
-    copy: 'Yes. There is no fee to apply or for an approved project consultation. For suitable complete-bathroom projects, that consultation includes one site assessment. Applications are reviewed for scope, location, timing and realistic investment before an appointment is confirmed, so submitting the form does not automatically book a free visit.',
-  },
-  {
-    title: 'Why can’t I receive a final quotation first?',
-    copy: 'A dependable final quotation requires actual measurements, site conditions, service changes, a resolved design, selected materials and a defined fixture scope. Before the paid proposal, we can discuss a realistic investment range based on the project type and site conditions. The final construction quotation is one of the deliverables in the detailed design and construction proposal.',
-  },
-  {
-    title: 'Exactly what does LKR 50,000 include?',
-    copy: 'For one bathroom, it includes the personalised layout, five 3D presentation images, 3D walkthrough, fixture, accessory, material and named-brand selections, complete construction scope, assumptions and exclusions, final quotation, project timeline, staged payment plan, quality commitments and applicable warranty schedule. The complimentary consultation and approved site assessment happen before this paid stage.',
-  },
-  {
-    title: 'Is the LKR 50,000 an additional cost?',
-    copy: 'Not when BathSpace by LUXEhome constructs that bathroom. It becomes your first project payment and is credited in full against the construction balance. For example, if the agreed contract value is LKR 1,500,000, the remaining balance is LKR 1,450,000 after the LKR 50,000 already paid.',
-  },
-  {
-    title: 'When will I receive the proposal?',
-    copy: 'The complete proposal is delivered within seven working days after the LKR 50,000 proposal payment and the completed consultation. The design and final quotation are based on the measured room and confirmed site conditions.',
-  },
-  {
-    title: 'What happens if I do not proceed?',
-    copy: 'You still keep the completed proposal. The LKR 50,000 is retained for the professional design, material and brand selection, costing, scoping and proposal documentation already completed. The earlier approved consultation itself has no fee.',
-  },
-  {
-    title: 'What happens if I have several bathrooms?',
-    copy: 'Apply with the first bathroom you want assessed. After consultation, commission one LKR 50,000 proposal and review the complete result before deciding on the others. A separate detailed proposal for another bathroom may require its own LKR 50,000 payment, credited to that related BathSpace construction scope.',
-  },
-  {
-    title: 'How much does a typical bathroom cost?',
-    copy: 'A complete BathSpace bathroom renovation typically starts around LKR 1.5 million. The actual amount depends on room size, existing conditions, plumbing and electrical changes, tiles, fixtures, glass, joinery and the approved scope. This is a qualification guide rather than a fixed package price; the detailed proposal contains the final construction quotation.',
-  },
-  {
-    title: 'How are quality and warranties protected?',
-    copy: 'The proposal records the approved materials, brands, scope, construction process and quality commitments. Critical stages such as plumbing pressure testing, waterproofing, flood testing, tile installation and final inspection are checked before handover. BathSpace by LUXEhome workmanship is covered for 24 months from the documented handover date, with a 30-day snagging review; product and supplier warranties are recorded separately under their own written terms.',
-  },
+  {title:'What is free, and what costs LKR 30,000?',copy:'Your initial phone or WhatsApp conversation is free. The LKR 30,000 package covers one agreed project and includes the site visit, layout plan, 3D images, 3D walkthrough video and a detailed quotation with materials and fixtures. Sending an enquiry does not commit you to payment.'},
+  {title:'What does the package include?',copy:'A site visit and measurements, personalised layout plan, 3D images and walkthrough video, selected materials and fixtures with named brands, and a detailed construction quotation. The proposal also records the agreed scope, assumptions, exclusions, timeline, payment stages and applicable warranties.'},
+  {title:'Can we discuss the budget first?',copy:'Yes. We discuss your requirements and an initial investment range before you commission the package. Complete renovations typically start around LKR 1.5M. The measured design and selected materials determine the final quotation.'},
+  {title:'Is the LKR 30,000 credited toward construction?',copy:'Yes. If BathSpace builds the agreed project, the full LKR 30,000 is credited toward its construction price. For a LKR 1,500,000 contract, LKR 1,470,000 remains after the package payment.'},
+  {title:'When will I receive the proposal?',copy:'Within seven working days after package payment and the completed site visit. We confirm the appointment and agreed project scope with you first.'},
+  {title:'What happens if I do not proceed with construction?',copy:'You keep the completed proposal. The package fee covers the site visit, design, selections, costing and documentation already completed.'},
+  {title:'What if the project has several bathrooms?',copy:'Tell us about the full project when you enquire. The package is LKR 30,000 per project; we agree the included bathrooms and deliverables before payment.'},
+  {title:'How are quality and warranties protected?',copy:'The proposal records materials, brands, scope and applicable warranties. Plumbing pressure testing, waterproofing flood testing and final inspection are checked before handover. BathSpace workmanship is covered for 24 months, with a 30-day snagging review; manufacturer and supplier warranties follow their separate written terms.'},
 ];
 
 export const PUBLIC_INFO_PAGES: PublicInfoPage[] = [
-  { slug:'how-it-works', eyebrow:'From first request to final clean', title:'Six stages. One responsible team.', lead:'Every stage is documented, approved and communicated before the next begins.', cards:[{title:'01 · Consultation application',copy:'Share your WhatsApp number, property location, project type, timing, investment range and the first bathroom you want us to assess. Measurements are optional.'},{title:'02 · Suitability & consultation',copy:'We review the application first. Suitable complete-bathroom projects receive a complimentary consultation including one detailed site assessment; no consultation payment is required.'},{title:'03 · Commission the proposal',copy:'After consultation, commission the detailed design and construction proposal for one bathroom for LKR 50,000.'},{title:'04 · Complete proposal',copy:'Within seven working days after proposal payment and the completed consultation, you receive the design visuals, walkthrough, selections, named brands, scope, timeline, warranties and final construction quotation.'},{title:'05 · Construction',copy:'If you appoint BathSpace by LUXEhome to build, the full LKR 50,000 is shown as an advance and deducted from the construction balance. Verified teams build while progress and quality checks are shared through WhatsApp.'},{title:'06 · Clean & handover',copy:'We test, inspect, clean and hand over the completed space with its warranty record.'}] },
+  { slug:'how-it-works', eyebrow:'From first request to final clean', title:'Six stages. One responsible team.', lead:'Every stage is documented, approved and communicated before the next begins.', cards:[{title:'01 · Tell us about your project',copy:'Share your WhatsApp number, property location, project type, timing, investment range and the bathrooms included in your project. Measurements are optional.'},{title:'02 · Discuss your requirements',copy:'We discuss your requirements and budget by phone or WhatsApp, with no initial conversation fee.'},{title:'03 · Commission the proposal',copy:'Commission the LKR 30,000 package for your agreed project: site visit, layout plan, 3D images, walkthrough video and detailed quotation.'},{title:'04 · Complete proposal',copy:'Within seven working days after package payment and the completed site visit, you receive the design visuals, walkthrough, selections, named brands, scope, timeline, warranties and final construction quotation.'},{title:'05 · Construction',copy:'If you appoint BathSpace by LUXEhome to build, the full LKR 30,000 is shown as an advance and deducted from the construction balance. Verified teams build while progress and quality checks are shared through WhatsApp.'},{title:'06 · Clean & handover',copy:'We test, inspect, clean and hand over the completed space with its warranty record.'}] },
   { slug:'bathroom-renovation', eyebrow:'BathSpace', title:'Complete bathroom renovation.', lead:'One complete wet-area project—planned, coordinated and delivered from the existing room to final handover.', cards:[{title:'Start with the real room',copy:'We assess the existing bathroom, access, services, drainage, layout, timing and realistic investment before resolving the project.'},{title:'Designed for the actual site',copy:'Layouts, drawings, finishes and fixtures are developed around the measured room and approved requirements.'},{title:'One accountable team',copy:'Civil, plumbing, electrical, waterproofing, tiling, ceiling, joinery, glass and finishing are coordinated together.'}] },
   { slug:'materials-brands', eyebrow:'Materials & brands', title:'Known products. Written specifications.', lead:'We specify brands and construction systems openly so clients know what is going into their home.', cards:[{title:'Waterproofing',copy:'Tokyo Super 2K waterproofing with the preparation, application and testing method documented.'},{title:'Tile installation',copy:'Swisstek adhesive and grout selected for the tile, substrate and room condition.'},{title:'Plumbing',copy:'S-lon pipes and accessories with supply, waste and drainage routes documented.'},{title:'Electrical',copy:'ACL wiring and cables with points, circuits and switching resolved before finishes.'},{title:'Finishes',copy:'Swiss Bathware, Rocell, iPanel, tempered glass, Eco Board and 5mm mirrors—with alternatives approved before purchase.'}] },
-  { slug:'pricing-guide', eyebrow:'Investment clarity', title:'Know the range before you spend time.', lead:'BathSpace complete renovations typically begin around LKR 1.5M. That is a qualification guide—not a fixed package or promise.', cards:[{title:'Typical entry point · around LKR 1.5M',copy:'A complete renovation at this level can include coordinated construction, plumbing, electrical work, waterproofing, tiling, fixtures and finishing, subject to the actual room and approved scope.'},{title:'What changes the investment',copy:'Bathroom size, existing damage, plumbing relocation, concealed systems, tile and fixture selection, vanity, mirror, shower glass, access and structural work can materially change the final price.'},{title:'Where the final price comes from',copy:'After the complimentary consultation, the LKR 50,000 detailed proposal records the measured solution, materials, brands, construction scope, timeline, payment stages, exclusions and final construction quotation.'}] },
+  { slug:'pricing-guide', eyebrow:'Investment clarity', title:'Know the range before you spend time.', lead:'BathSpace complete renovations typically begin around LKR 1.5M. Your room, material choices and construction scope determine the final quotation.', cards:[{title:'Typical entry point · around LKR 1.5M',copy:'A complete renovation at this level can include coordinated construction, plumbing, electrical work, waterproofing, tiling, fixtures and finishing, subject to the actual room and approved scope.'},{title:'What changes the investment',copy:'Bathroom size, existing damage, plumbing relocation, concealed systems, tile and fixture selection, vanity, mirror, shower glass, access and structural work can materially change the final price.'},{title:'Where the final price comes from',copy:'After the free initial conversation, the LKR 30,000 detailed proposal records the measured solution, materials, brands, construction scope, timeline, payment stages, exclusions and final construction quotation.'}] },
   {
     slug: 'warranty-aftercare',
     eyebrow: 'Warranty & aftercare',
@@ -87,15 +59,15 @@ export const PUBLIC_INFO_PAGES: PublicInfoPage[] = [
     slug: 'payment-cancellation',
     eyebrow: 'Payment terms',
     title: 'Clear payments, tied to visible progress.',
-    lead: 'The complimentary consultation happens before the LKR 50,000 detailed proposal. If BathSpace by LUXEhome builds, that proposal payment becomes part of the construction amount; the remaining balance follows documented milestones.',
+    lead: 'The free initial phone or WhatsApp conversation happens before the LKR 30,000 detailed proposal. If BathSpace by LUXEhome builds, that proposal payment becomes part of the construction amount; the remaining balance follows documented milestones.',
     cards: [
       {
-        title: 'After consultation · LKR 50,000 proposal',
-        copy: 'The consultation and approved site assessment have no fee. After that consultation, the detailed design and construction proposal can be commissioned for one bathroom. It is delivered within seven working days after proposal payment and the completed consultation. If construction does not proceed, the fee is retained for the completed design, selections, costing and documentation work.',
+        title: 'After consultation · LKR 30,000 proposal',
+        copy: 'The initial phone or WhatsApp conversation is free. The LKR 30,000 package includes a site visit, layout plan, 3D images, walkthrough video and detailed quotation for one agreed project. It is delivered within seven working days after package payment and the completed site visit. If construction does not proceed, the fee is retained for the completed design, selections, costing and documentation work.',
       },
       {
         title: '01 · Construction commencement · 50%',
-        copy: 'The first construction payment is 50% of the final agreed contract value. The LKR 50,000 proposal payment already paid is included within this 50%, not added on top. Once the agreement is signed and the cleared balance of this payment is received, procurement and mobilisation begin. On-site work starts within seven working days, subject to approved selections, site access and the agreed commencement date.',
+        copy: 'The first construction payment is 50% of the final agreed contract value. The LKR 30,000 proposal payment already paid is included within this 50%, not added on top. Once the agreement is signed and the cleared balance of this payment is received, procurement and mobilisation begin. On-site work starts within seven working days, subject to approved selections, site access and the agreed commencement date.',
       },
       {
         title: '02 · Waterproofing milestone · 20%',
@@ -115,11 +87,11 @@ export const PUBLIC_INFO_PAGES: PublicInfoPage[] = [
       },
       {
         title: 'Example · LKR 1,500,000 bathroom',
-        copy: 'The 50% commencement amount is LKR 750,000. Because the LKR 50,000 proposal payment has already been paid, only LKR 700,000 is then due. The remaining payments are LKR 300,000 at waterproofing, followed by LKR 150,000 at tiling, LKR 150,000 at fixtures and LKR 150,000 at final completion. The total remains LKR 1,500,000.',
+        copy: 'The 50% commencement amount is LKR 750,000. Because the LKR 30,000 proposal payment has already been paid, only LKR 720,000 is then due. The remaining payments are LKR 300,000 at waterproofing, followed by LKR 150,000 at tiling, LKR 150,000 at fixtures and LKR 150,000 at final completion. The total remains LKR 1,500,000.',
       },
       {
         title: 'Several bathrooms',
-        copy: 'For multi-bathroom construction, the proposal states how payment milestones apply across the agreed phases. Each paid bathroom proposal is credited only to its related bathroom or construction scope.',
+        copy: 'For multi-bathroom construction, the proposal states how payment milestones apply across the agreed phases. The package fee is credited to the agreed project construction scope.',
       },
       {
         title: 'Changes, cancellation or delay',

@@ -1,3 +1,5 @@
+import { publicProjectStory } from './project-presentation.mjs';
+import { resolveShopPricing } from './shop-pricing.mjs';
 /* ============================================================
    LUXEhome catalogue — typed Supabase data layer
    Build-time fetches; every helper degrades to empty data when
@@ -245,6 +247,8 @@ export async function getProjectBySlug(slug: string): Promise<ProjectFull | null
 
   return {
     ...(project as LuxeProject),
+    story: publicProjectStory(project.story),
+    duration_label: project.duration_label === "Complete bathroom renovation" ? null : project.duration_label,
     specifications: (specifications.data ?? []) as ProjectSpecification[],
     gallery: gallery.data ?? [],
     journey: journey.data ?? [],
@@ -298,7 +302,12 @@ export async function getShopFixtures(): Promise<ShopFixture[]> {
     console.error('Unable to retrieve BathSpace sellable fixtures:', error.message);
     return [];
   }
-  return (data ?? []).filter((item) => Boolean(item.image_url)) as ShopFixture[];
+  const products = (data ?? []).filter(item => Boolean(item.image_url));
+  if (!products.length) return [];
+  const {data: variants, error: variantError} = await c.from('lx_shop_variants')
+    .select('product_id,price_lkr,stock_quantity,availability,active').in('product_id', products.map(p => p.id)).eq('active', true);
+  if (variantError) { console.error('Unable to confirm variant pricing:', variantError.message); return []; }
+  return products.map(product => resolveShopPricing(product, (variants ?? []).filter(v => v.product_id === product.id))) as ShopFixture[];
 }
 
 export interface ShopVariant {
@@ -350,6 +359,7 @@ export async function getShopFixtureBySlug(slug: string): Promise<{
   ]);
   if (variantResult.error) {
     console.error('Could not load shop product variants:', variantResult.error.message);
+    return null;
   }
   if (projectRefsResult.error) {
     console.error('Could not load linked bathroom projects:', projectRefsResult.error.message);
@@ -367,7 +377,7 @@ export async function getShopFixtureBySlug(slug: string): Promise<{
     else usedInProjects = (data ?? []) as ShopProjectProof[];
   }
   return {
-    product: product as ShopFixture,
+    product: resolveShopPricing(product, variantResult.data ?? []) as ShopFixture,
     variants: (variantResult.data ?? []) as ShopVariant[],
     usedInProjects,
   };

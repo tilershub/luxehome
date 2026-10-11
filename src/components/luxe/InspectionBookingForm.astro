@@ -4,10 +4,10 @@
 <div class="ibf-wrap">
   <div class="ibf-success" id="inspection-success" aria-live="polite" hidden>
     <span aria-hidden="true">✓</span>
-    <h2>Application received.</h2>
+    <h2>Enquiry received.</h2>
     <p>
       We will review the project type, location, timing and investment range, then contact you on WhatsApp.
-      Please note that submitting the form does not automatically confirm a site appointment.
+      Your enquiry is saved. You can share photos on WhatsApp below; no payment or appointment has been booked.
     </p>
     <a id="inspection-whatsapp-backup" href="#" target="_blank" rel="noopener noreferrer">
       Continue to WhatsApp
@@ -16,9 +16,9 @@
 
   <form id="inspection-request-form">
     <div class="ibf-heading">
-      <p class="lx-eyebrow">Complimentary consultation application</p>
-      <h2>Tell us about one bathroom.</h2>
-      <p>You do not need drawings or measurements. A few practical details help us decide whether a site consultation will be useful for both sides.</p>
+      <p class="lx-eyebrow">Free initial conversation</p>
+      <h2>Tell us about your project.</h2>
+      <p>You do not need drawings or measurements. A few details help us give you useful advice.</p>
     </div>
 
     <input class="ibf-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
@@ -56,7 +56,7 @@
     <fieldset>
       <legend>Do you know the bathroom size?</legend>
       <div class="ibf-choice-grid ibf-choice-grid--two">
-        <label><input type="radio" name="size_status" value="Please measure during approved site assessment" checked /><span>No — please measure it</span></label>
+        <label><input type="radio" name="size_status" value="Please measure during the package site visit" checked /><span>No — please measure it</span></label>
         <label><input type="radio" name="size_status" value="Approximate size provided" /><span>Yes — approximately</span></label>
       </div>
     </fieldset>
@@ -73,6 +73,7 @@
         <label><input type="radio" name="budget_direction" value="LKR 1.5M–2M" required /><span>LKR 1.5M–2M</span></label>
         <label><input type="radio" name="budget_direction" value="LKR 2M–3M" /><span>LKR 2M–3M</span></label>
         <label><input type="radio" name="budget_direction" value="LKR 3M+" /><span>Above LKR 3M</span></label>
+        <label><input type="radio" name="budget_direction" value="Need budget guidance" /><span>Not sure — help me understand the budget</span></label>
       </div>
     </fieldset>
 
@@ -92,30 +93,15 @@
       <small class="ibf-help">You can attach current bathroom photos and the Reel, project or bathroom style that inspired you after WhatsApp opens.</small>
     </label>
 
-    <div class="ibf-fee">
-      <div>
-        <span>Consultation application</span>
-        <strong>No fee</strong>
-      </div>
-      <ul>
-        <li>Every application is reviewed before a site appointment is offered</li>
-        <li>Approved complete projects include one detailed site assessment</li>
-        <li>The detailed design and construction proposal is a separate LKR 50,000 stage after consultation</li>
-        <li>The proposal fee is credited in full if BathSpace by LUXEhome builds that bathroom</li>
-      </ul>
-    </div>
-
-    <label class="ibf-consent">
-      <input type="checkbox" name="process_acknowledgement" required />
-      <span>I understand this is an application for a complimentary consultation, not an automatically confirmed site visit. If I commission the detailed proposal after consultation, it costs LKR 50,000 for one bathroom and is credited in full if BathSpace by LUXEhome builds it.</span>
-    </label>
-
+    <div class="ibf-fee"><div><span>Optional next step</span><strong>LKR 30,000 / project</strong></div><p>Site visit, layout plan, 3D images, walkthrough video and detailed quotation with materials and fixtures. Fully credited if BathSpace builds your agreed project.</p></div>
+    <label class="ibf-consent"><input type="checkbox" name="process_acknowledgement" required /><span>Please contact me about this project. I understand that sending an enquiry does not book or pay for the design package.</span></label>
+    <a href="https://wa.me/94774503744" target="_blank" rel="noopener noreferrer">Prefer WhatsApp? Discuss your bathroom →</a>
     <p id="inspection-error" class="ibf-error" role="alert" hidden></p>
     <button class="ibf-submit" id="inspection-submit" type="submit">
-      <span>Apply for Consultation</span>
+      <span>Send my enquiry</span>
       <span hidden>Preparing your request…</span>
     </button>
-    <p class="ibf-footnote">Have several bathrooms? Begin the application with the first bathroom you want BathSpace to assess.</p>
+    <p class="ibf-footnote">Have several bathrooms? Tell us about them in the notes. We agree the project scope before payment.</p>
     <p class="ibf-privacy">By submitting, you ask BathSpace by LUXEhome to contact you about this project by WhatsApp and, if provided, email. See our <a href="/privacy-policy">Privacy Policy</a>.</p>
   </form>
 </div>
@@ -175,11 +161,11 @@
       const email = formValue(data, 'email');
       const location = formValue(data, 'location');
       const projectType = formValue(data, 'project_type');
-      const sizeStatus = formValue(data, 'size_status') || 'Please measure during approved site assessment';
+      const sizeStatus = formValue(data, 'size_status') || 'Please measure during the package site visit';
       const approximateSize = formValue(data, 'approximate_size');
       const budgetDirection = formValue(data, 'budget_direction');
       // Only the published budget tiers may enter the consultation pipeline.
-      if (!['LKR 1.5M–2M', 'LKR 2M–3M', 'LKR 3M+'].includes(budgetDirection)) {
+      if (!['LKR 1.5M–2M', 'LKR 2M–3M', 'LKR 3M+', 'Need budget guidance'].includes(budgetDirection)) {
         form.querySelector<HTMLInputElement>('input[name="budget_direction"]')?.focus();
         return;
       }
@@ -197,10 +183,10 @@
         budget_direction: budgetDirection,
         project_timing: projectTiming,
         consultation_fee_lkr: '0',
-        consultation_status: 'Application pending suitability review',
-        detailed_proposal_fee_lkr: '50000',
-        proposal_scope: 'One bathroom',
-        proposal_delivery: 'Within seven working days after proposal payment and the completed consultation',
+        consultation_status: 'Enquiry awaiting initial conversation',
+        detailed_proposal_fee_lkr: '30000',
+        proposal_scope: 'One agreed project, including site visit',
+        proposal_delivery: 'Within seven working days after package payment and the completed site visit',
         construction_credit: '100% credited to the related BathSpace construction balance',
         payment_status: 'No payment requested for consultation application',
       };
@@ -214,11 +200,11 @@
         `Desired start: ${projectTiming}`,
         sourceProject ? `Source project: ${sourceProject}` : '',
         `Measurements: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
-        'Consultation: Complimentary, subject to suitability approval; one site assessment included if approved',
-        'Detailed proposal: LKR 50,000 for one bathroom, commissioned only after consultation',
-        'Proposal: five design images, materials, timeline, quality, warranties, final quotation and 3D video link',
-        'Delivery: within seven working days after proposal payment and completed consultation',
-        'Construction credit: 100% credited if BathSpace by LUXEhome builds this bathroom',
+        'Initial phone or WhatsApp conversation: free',
+        'Package: LKR 30,000 per agreed project, including site visit',
+        'Package: site visit, layout plan, 3D images, walkthrough video, detailed quotation with materials and fixtures',
+        'Delivery: within seven working days after proposal payment and completed site visit',
+        'Construction credit: 100% credited if BathSpace by LUXEhome builds this project',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
 
@@ -297,10 +283,10 @@
         `Desired start: ${projectTiming}`,
         sourceProject ? `Source project: ${sourceProject}` : '',
         `Bathroom size: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
-        'Consultation: No fee; site assessment subject to suitability approval',
-        'Detailed proposal after consultation: LKR 50,000 for one bathroom',
-        'Proposal delivery: within seven working days after payment and completed consultation',
-        'Construction credit: 100% credited if BathSpace by LUXEhome builds this bathroom',
+        'Initial conversation: free; site visit included in the paid package',
+        'Site visit, design and quotation package: LKR 30,000 per agreed project',
+        'Proposal delivery: within seven working days after payment and completed site visit',
+        'Construction credit: 100% credited if BathSpace by LUXEhome builds this project',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
       const whatsappUrl = `https://wa.me/94774503744?text=${encodeURIComponent(message)}`;
@@ -311,6 +297,9 @@
 
       form.hidden = true;
       success.hidden = false;
+      success.setAttribute("tabindex", "-1");
+      success.focus();
+      success.scrollIntoView({behavior: "smooth", block: "start"});
       if (typeof (window as any).gtag === 'function') {
         (window as any).gtag('event', 'consultation_application_submit', {
           event_category: 'Lead',
@@ -336,6 +325,7 @@
   .ibf-heading h2 { margin: .25rem 0 .4rem; font-size: clamp(2rem, 4vw, 2.8rem); }
   .ibf-heading > p:last-child { max-width: 58ch; color: color-mix(in srgb, var(--ink) 67%, transparent); }
   .ibf-wrap form { display: grid; gap: 1rem; }
+  .ibf-wrap form[hidden] { display: none; }
   .ibf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
   .ibf-wrap label > span,
   .ibf-wrap legend { display: block; margin-bottom: .42rem; font-size: .88rem; font-weight: 600; color: var(--ink); }

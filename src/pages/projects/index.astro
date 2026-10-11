@@ -7,13 +7,13 @@ import { waLink, imageUrl } from '../../lib/luxe-config';
 
 const projects = (await getProjects()).filter((project) => project.published);
 const completed = projects
-  .filter((project) => (project.project_status ?? 'completed') === 'completed')
+  .filter((project) => (project.project_status ?? 'completed') === 'completed' && Boolean(project.after_image_url))
   .sort((a, b) =>
     Number(b.slug === 'nawala-complete-bathroom-renovation') - Number(a.slug === 'nawala-complete-bathroom-renovation')
     || Number(b.featured) - Number(a.featured)
   );
 const ongoing = projects
-  .filter((project) => project.project_status === 'in_progress')
+  .filter((project) => project.project_status === 'in_progress' && Boolean(project.after_image_url || project.before_image_url))
   .sort((a, b) => Number(b.slug === 'gampaha-returning-client-two-bathrooms') - Number(a.slug === 'gampaha-returning-client-two-bathrooms'));
 const photoCover = completed.find((project) => project.after_image_url)?.after_image_url;
 ---
@@ -40,7 +40,7 @@ const photoCover = completed.find((project) => project.after_image_url)?.after_i
         <p class="lx-eyebrow">Delivered bathrooms</p>
         <h2 id="pj-completed-title">Completed Projects</h2>
       </div>
-      <p>Real renovation case studies, with handover details, technical work and original project investment where documented. More site photographs are being added from our archive.</p>
+      <p>Real renovation case studies, with handover details, technical work and original project investment where documented. Explore the finished rooms and the details behind them.</p>
     </header>
     {completed.length > 0 ? (
       <div class="pj-grid">
@@ -49,7 +49,7 @@ const photoCover = completed.find((project) => project.after_image_url)?.after_i
     ) : (
       <div class="pj-empty lxr">
         <p>Project stories are being prepared using verified handover and site records.</p>
-        <a href="/book-site-inspection" class="lx-btn-wa">Apply for a complimentary consultation</a>
+        <a href="/book-site-inspection" class="lx-btn-wa">Discuss my bathroom</a>
       </div>
     )}
   </section>
@@ -70,10 +70,10 @@ const photoCover = completed.find((project) => project.after_image_url)?.after_i
   )}
 
   <section class="pj-note" aria-label="How BathSpace presents proposed work">
-    <h2>Proposals are not completed projects.</h2>
-    <p>We keep unstarted villa and new-bathroom proposals in our internal planning archive. They only move into the public project portfolio when there is actual construction progress to share.</p>
+    <h2>Could your bathroom be next?</h2>
+    <p>Share your location, requirements and preferred style. We can discuss the next steps and an initial investment range.</p>
     <div class="pj-note-actions">
-      <a href="/book-site-inspection" class="lx-btn-wa">Apply for a complimentary consultation</a>
+      <a href="/book-site-inspection" class="lx-btn-wa">Discuss my bathroom</a>
       <a href={waLink('Hi BathSpace! I am considering a complete bathroom renovation and would like to share some photographs.')} class="lx-btn-ghost" target="_blank" rel="noopener noreferrer">Send bathroom photos</a>
     </div>
   </section>

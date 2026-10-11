@@ -476,7 +476,7 @@ export function createProposalDraft(): ProposalRecord {
     adjustment_lkr: 0,
     payment_schedule: structuredClone(DEFAULT_PAYMENT_SCHEDULE),
     contract_value_lkr: 0,
-    initiation_credit_lkr: 50_000,
+    initiation_credit_lkr: 30_000,
     validity_days: 14,
     issued_at: issued,
     valid_until: addCalendarDays(issued, 14),

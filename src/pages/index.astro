@@ -30,15 +30,15 @@ const initiationPrice = PROJECT_INITIATION.amount.toLocaleString('en-LK');
 
 const spaFacts = [
   { value: 'From ~LKR 1.5M', label: 'Typical complete renovation entry point' },
-  { value: 'No fee', label: 'Approved project consultation' },
+  { value: 'No fee', label: 'Initial phone / WhatsApp conversation' },
   { value: '01', label: 'Accountable project team' },
   { value: WARRANTY_SCHEDULE[0].period, label: 'Workmanship warranty' },
 ];
 
 const journey = [
-  { n: '01', title: 'Apply', copy: 'Share your location, project type, timing, investment range and bathroom photographs.' },
-  { n: '02', title: 'Consult', copy: 'Suitable projects receive a complimentary consultation with one detailed site assessment.' },
-  { n: '03', title: 'Resolve', copy: 'Commission the LKR 50,000 design and construction proposal after the consultation.' },
+  { n: '01', title: 'Tell us', copy: 'Share your location, project type, timing, investment range and bathroom photographs.' },
+  { n: '02', title: 'Consult', copy: 'Discuss your requirements and investment range by phone or WhatsApp at no charge.' },
+  { n: '03', title: 'Resolve', copy: 'Commission the LKR 30,000 project package: site visit, layout plan, 3D images, video and detailed quotation.' },
   { n: '04', title: 'Build', copy: 'One coordinated team manages construction, specialists, materials, testing and quality.' },
   { n: '05', title: 'Handover', copy: 'Testing, snag correction, cleaning and documented handover complete the bathroom.' },
 ];
@@ -54,14 +54,7 @@ const completeScope = [
   { title: 'Inspection & handover', copy: 'Testing, snag correction, professional cleaning, care guidance and warranty record.' },
 ];
 
-const proposalContents = [
-  'Personalised layout and five 3D presentation images',
-  '3D walkthrough of the proposed bathroom',
-  'Selected fixtures, accessories, materials and named brands',
-  'Complete construction scope, assumptions and exclusions',
-  'Final quotation, timeline and staged payment plan',
-  'Quality commitments and applicable warranty schedule',
-];
+const proposalContents = PROJECT_INITIATION.includes;
 
 const brandSystems = [
   { name: 'Swiss Bathware', role: 'Bathware & tapware', image: '/images/brands/swiss-bathware.webp' },
@@ -118,11 +111,11 @@ const trustPoints = [
           planned and managed as one complete bathroom project.
         </p>
         <div class="spa-hero-actions lxr">
-          <a class="spa-button spa-button--light" href="/book-site-inspection">Apply for a complimentary consultation</a>
+          <a class="spa-button spa-button--light" href="/book-site-inspection">Discuss my bathroom</a>
           <a class="spa-button spa-button--glass" href="/projects">See completed projects</a>
         </div>
         <p class="spa-hero-note lxr">
-          Complete renovations typically from around LKR 1.5M · No payment to apply · Site assessment included for approved projects
+          Complete renovations typically from around LKR 1.5M · Free first conversation · Site visit & design package LKR 30,000
         </p>
       </div>
     </div>
@@ -180,7 +173,7 @@ const trustPoints = [
         </div>
         <p>
           Real bathrooms, real locations and construction scope. Our case studies
-          show verified work, project investment and handover details, with original site photographs added as available.
+          show verified work, project investment and handover details, with photographs of the finished rooms.
         </p>
       </header>
       {nawalaLatest && (
@@ -248,12 +241,12 @@ const trustPoints = [
 
       <div class="spa-inspection lxr">
         <div>
-          <small>Your first step · approved complete-bathroom projects</small>
+          <small>Your first step · tell us what you have in mind</small>
           <strong>{PROJECT_CONSULTATION.title} · {PROJECT_CONSULTATION.price}</strong>
           <p>{PROJECT_CONSULTATION.copy}</p>
           <em>{PROJECT_CONSULTATION.qualification}</em>
         </div>
-        <a class="spa-button spa-button--mist" href="/book-site-inspection">Apply for consultation</a>
+        <a class="spa-button spa-button--mist" href="/book-site-inspection">Discuss my bathroom</a>
       </div>
     </div>
   </section>
@@ -267,7 +260,7 @@ const trustPoints = [
     </div>
     <div class="spa-proposal-card lxr">
       <div class="spa-proposal-price">
-        <span>After the consultation · one bathroom</span>
+        <span>One package · one agreed project</span>
         <strong>LKR {initiationPrice}</strong>
         <small>Detailed design &amp; construction proposal</small>
       </div>
@@ -315,7 +308,7 @@ const trustPoints = [
     <p class="spa-price-note lxr">
       LKR 1.5M is a qualification guide, not a fixed package price. Final investment depends on room size,
       existing conditions, plumbing changes, tile and fixture selections, glass, joinery and the approved scope.
-      Your final quotation is prepared in the paid proposal after the complimentary consultation and site assessment.
+      Your final quotation is prepared in the paid proposal through the LKR 30,000 site visit and design package.
     </p>
   </section>
 
@@ -381,9 +374,9 @@ const trustPoints = [
       <div class="spa-final-copy lxr">
         <p class="spa-eyebrow spa-eyebrow--light">Your bathroom starts with a real conversation</p>
         <h2 id="spa-final-title">Planning a complete renovation?</h2>
-        <p>Send us your location, timing, investment range and bathroom photographs. If the project is a suitable fit, the complimentary consultation includes one detailed site assessment.</p>
+        <p>Send us your location, timing, investment range and bathroom photographs. Start with a free phone or WhatsApp conversation. The site visit, design and quotation package is LKR 30,000 per project.</p>
         <div>
-          <a class="spa-button spa-button--light" href="/book-site-inspection">Apply for consultation</a>
+          <a class="spa-button spa-button--light" href="/book-site-inspection">Discuss my bathroom</a>
           <a class="spa-final-link" href="/projects">See completed projects</a>
         </div>
       </div>
@@ -471,14 +464,14 @@ const trustPoints = [
     width: min(1240px, calc(100% - 64px));
     min-height: min(900px, calc(100svh - 70px));
     margin: 0 auto;
-    padding: clamp(70px, 10vw, 130px) 0;
+    padding: clamp(40px, 6vw, 72px) 0;
   }
   .spa-hero-copy { width: min(820px, 72%); }
   .spa-hero h1 {
-    max-width: 12ch;
+    max-width: 17ch;
     margin: 0;
     color: #FBF8F1;
-    font: 500 clamp(58px, 7.6vw, 106px)/.88 var(--lx-serif);
+    font: 500 clamp(44px, 5.2vw, 72px)/1.02 var(--lx-serif);
     letter-spacing: -.025em;
   }
   .spa-hero h1 em {
@@ -1006,7 +999,7 @@ const trustPoints = [
   }
 
   @media (max-width: 900px) {
-    .spa-hero-inner { width: min(calc(100% - 40px), 700px); align-items: end; padding-bottom: 110px; }
+    .spa-hero-inner { width: min(calc(100% - 40px), 700px); align-items: center; padding-bottom: 65px; }
     .spa-hero-copy { width: 100%; }
     .spa-hero-shade {
       background:
@@ -1042,8 +1035,8 @@ const trustPoints = [
   @media (max-width: 640px) {
     .spa-hero { min-height: calc(100svh - 57px); }
     .spa-hero-image { object-position: 58% center; }
-    .spa-hero-inner { min-height: calc(100svh - 57px); padding: 90px 0 88px; }
-    .spa-hero h1 { font-size: clamp(48px, 15vw, 67px); }
+    .spa-hero-inner { min-height: calc(100svh - 57px); padding: 44px 0 65px; }
+    .spa-hero h1 { font-size: clamp(38px, 10vw, 50px); }
     .spa-hero-lead { margin-top: 22px; font-size: 16px; line-height: 1.6; }
     .spa-hero-actions { display: grid; margin-top: 26px; }
     .spa-button { width: 100%; }
