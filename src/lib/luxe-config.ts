@@ -166,7 +166,7 @@ export const STANDARD_DRAWINGS = [
 export const PROJECT_CONSULTATION = {
   title: 'Free initial conversation',
   copy: 'Talk with us by phone or WhatsApp about your location, requirements, timing and budget. The site visit is included in the LKR 30,000 design and quotation package.',
-  price: 'Free initial conversation',
+  price: 'No fee',
   qualification: 'We confirm the project scope, location and appointment with you before the package begins.',
   includes: ['Your requirements and preferred style', 'Project location and timing', 'An initial investment range', 'The next steps and package scope'],
 } as const;
