@@ -1,0 +1,421 @@
+---
+import AdminShell from '../../components/admin/AdminShell.astro';
+---
+
+<AdminShell title="Bathroom Enquiries" active="enquiries">
+  <p class="enq-intro">Review new enquiries, see when each request arrived, and manage your next customer follow-up. All times are shown in Sri Lanka time.</p>
+  <div class="enq-stats" aria-label="Enquiry summary">
+    <div class="enq-stat"><strong id="enq-total">—</strong><span>Total enquiries</span></div>
+    <div class="enq-stat"><strong id="enq-new">—</strong><span>New enquiries</span></div>
+    <div class="enq-stat"><strong id="enq-due">—</strong><span>Follow-ups due</span></div>
+    <div class="enq-stat"><strong id="enq-active">—</strong><span>In progress</span></div>
+  </div>
+  <section class="enq-panel" aria-label="Customer enquiries">
+    <div class="enq-controls">
+      <label class="enq-search">Search enquiries
+        <input type="search" id="enq-search" placeholder="Name, phone, city or budget" autocomplete="off" />
+      </label>
+      <label>Show
+        <select id="enq-filter">
+          <option value="all">All enquiries</option>
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="due">Follow-ups due</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </label>
+      <label>Order
+        <select id="enq-order">
+          <option value="latest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="followup">Next follow-up first</option>
+        </select>
+      </label>
+      <button type="button" class="enq-refresh" id="enq-refresh">Refresh</button>
+    </div>
+    <div id="enq-message" class="enq-message" aria-live="polite">Checking your admin session…</div>
+    <div id="enq-list" class="enq-list" aria-live="polite"></div>
+    <div id="enq-pagination" class="enq-pagination"></div>
+  </section>
+</AdminShell>
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+  import { LUXE_SUPABASE_KEY, LUXE_SUPABASE_URL } from '../../lib/luxe-supabase';
+
+  type Enquiry = {
+    id: string; name: string; phone: string; email: string | null;
+    location: string | null; notes: string | null; status: string;
+    assigned_to: string | null; internal_notes: string | null;
+    created_at: string; updated_at: string | null;
+    follow_up_on: string | null; source_url: string | null;
+    preferred_date: string | null; preferred_time: string | null;
+  };
+
+  const client = createClient(LUXE_SUPABASE_URL, LUXE_SUPABASE_KEY);
+  const list = document.getElementById('enq-list') as HTMLElement;
+  const message = document.getElementById('enq-message') as HTMLElement;
+  const pagination = document.getElementById('enq-pagination') as HTMLElement;
+  const search = document.getElementById('enq-search') as HTMLInputElement;
+  const filter = document.getElementById('enq-filter') as HTMLSelectElement;
+  const order = document.getElementById('enq-order') as HTMLSelectElement;
+  const refresh = document.getElementById('enq-refresh') as HTMLButtonElement;
+  let enquiries: Enquiry[] = [];
+  let openId: string | null = null;
+  let page = 0;
+  const perPage = 12;
+  const statusLabels: Record<string, string> = {
+    new: 'New', contacted: 'Contacted', scheduled: 'Scheduled',
+    completed: 'Completed', cancelled: 'Cancelled'
+  };
+  const esc = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c] || c));
+
+  function sriLankaDay() {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Colombo', day: '2-digit', month: '2-digit', year: 'numeric'
+    }).formatToParts(new Date());
+    const part = (type: string) => parts.find(p => p.type === type)?.value || '';
+    return part('year') + '-' + part('month') + '-' + part('day');
+  }
+
+  function enquiryDate(value: string | null | undefined) {
+    if (!value) return 'Not recorded';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Not recorded';
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Colombo', day: 'numeric', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    }).format(date);
+  }
+
+  function followUpDate(value: string | null) {
+    if (!value) return 'Not set';
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Colombo', day: 'numeric', month: 'short', year: 'numeric'
+    }).format(new Date(value + 'T12:00:00+05:30'));
+  }
+
+  function isOpen(item: Enquiry) {
+    return !['completed', 'cancelled'].includes(item.status);
+  }
+
+  function isDue(item: Enquiry) {
+    return Boolean(item.follow_up_on && isOpen(item) && item.follow_up_on <= sriLankaDay());
+  }
+
+  function normalizedNotes(value: string | null) {
+    // Historical forms saved literal \n separators; newer forms use line breaks.
+    return String(value || '').replace(/\\n/g, '\n');
+  }
+
+  function noteValue(value: string | null, keys: string[]) {
+    const lines = normalizedNotes(value).split('\n');
+    for (const key of keys) {
+      const found = lines.find(line => line.trim().toLowerCase().startsWith(key.toLowerCase() + ':'));
+      if (found) return found.slice(found.indexOf(':') + 1).trim();
+    }
+    return '';
+  }
+
+  function budgetLabel(value: string) {
+    const labels: Record<string, string> = {
+      'Within typical range': 'Comfortable with LKR 1.5M–2.5M',
+      'Below typical range': 'Considering below typical range',
+      'Need budget guidance': 'Needs budget guidance'
+    };
+    return labels[value] || value || 'Not provided';
+  }
+
+  function localPhone(value: string) {
+    const digits = String(value || '').replace(/\D/g, '');
+    if (digits.startsWith('94') && digits.length === 11) return digits;
+    if (digits.startsWith('0') && digits.length === 10) return '94' + digits.slice(1);
+    if (digits.length === 9) return '94' + digits;
+    return '';
+  }
+
+  function whatsappUrl(item: Enquiry) {
+    const phone = localPhone(item.phone);
+    if (!phone) return '';
+    const text = 'Hello ' + (item.name || '') + ', thank you for your BathSpace bathroom enquiry. We would like to discuss your project requirements with you.';
+    return 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
+  }
+
+  function queryStatus(item: Enquiry) {
+    return statusLabels[item.status] || item.status || 'New';
+  }
+
+  function displayDetails(item: Enquiry) {
+    const source = noteValue(item.notes, ['Source project']);
+    const clientNeeds = noteValue(item.notes, ['Client requirements', 'Notes']);
+    const statuses = Object.keys(statusLabels).map(key =>
+      '<option value="' + esc(key) + '"' + (item.status === key ? ' selected' : '') + '>' + esc(statusLabels[key]) + '</option>'
+    ).join('');
+    const details = [
+      ['Budget expectation', budgetLabel(noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']))],
+      ['Number of bathrooms', noteValue(item.notes, ['Bathrooms']) || 'Not specified'],
+      ['Preferred start', noteValue(item.notes, ['Expected start', 'Desired start']) || 'Not specified'],
+      ['Lead category', noteValue(item.notes, ['Enquiry stage']) || 'Not categorised'],
+      ['Property location', item.location || 'Not provided'],
+      ['Enquiry received', enquiryDate(item.created_at)],
+      ['Last updated', enquiryDate(item.updated_at)],
+      ...(source ? [['Source project', source]] : []),
+      ...(clientNeeds ? [['Customer requirements', clientNeeds]] : [])
+    ].map(pair =>
+      '<div class="enq-info"><span>' + esc(pair[0]) + '</span><strong>' + esc(pair[1]) + '</strong></div>'
+    ).join('');
+    return '<div class="enq-detail">' +
+      '<div class="enq-detail-grid">' + details + '</div>' +
+      '<details class="enq-original"><summary>View original enquiry details</summary><pre>' + esc(normalizedNotes(item.notes)) + '</pre></details>' +
+      '<form data-save-id="' + esc(item.id) + '" class="enq-edit">' +
+        '<label>Status<select name="status">' + statuses + '</select></label>' +
+        '<label>Next follow-up date<input name="follow_up_on" type="date" value="' + esc(item.follow_up_on || '') + '"></label>' +
+        '<label>Assigned to<input name="assigned_to" maxlength="120" placeholder="Team member" value="' + esc(item.assigned_to || '') + '"></label>' +
+        '<label class="enq-full">Internal follow-up notes<textarea name="internal_notes" rows="4" placeholder="Call summary, customer expectations, agreed next step…">' + esc(item.internal_notes || '') + '</textarea></label>' +
+        '<div class="enq-save"><button type="submit">Save follow-up</button><span class="enq-save-message" aria-live="polite"></span></div>' +
+      '</form></div>';
+  }
+
+  function displayCard(item: Enquiry) {
+    const budget = budgetLabel(noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']));
+    const bathrooms = noteValue(item.notes, ['Bathrooms']);
+    const timing = noteValue(item.notes, ['Expected start', 'Desired start']);
+    const stage = noteValue(item.notes, ['Enquiry stage']);
+    const wa = whatsappUrl(item);
+    const tel = localPhone(item.phone);
+    const expanded = openId === item.id;
+    return '<article class="enq-card" data-status="' + esc(item.status) + '">' +
+      '<div class="enq-head"><div><h3>' + esc(item.name || 'Unnamed enquiry') + '</h3><div class="enq-sub">' + esc(item.location || 'Location not provided') + '</div></div>' +
+      '<div class="enq-head-right"><span class="enq-status">' + esc(queryStatus(item)) + '</span>' +
+      '<time datetime="' + esc(item.created_at) + '">Received ' + esc(enquiryDate(item.created_at)) + '</time></div></div>' +
+      '<div class="enq-facts">' +
+        '<span><b>Budget</b>' + esc(budget) + '</span>' +
+        (bathrooms ? '<span><b>Bathrooms</b>' + esc(bathrooms) + '</span>' : '') +
+        (timing ? '<span><b>Start</b>' + esc(timing) + '</span>' : '') +
+        (stage ? '<span><b>Lead</b>' + esc(stage) + '</span>' : '') +
+      '</div>' +
+      '<div class="enq-next' + (isDue(item) ? ' due' : '') + '"><b>Next follow-up:</b> ' + esc(followUpDate(item.follow_up_on)) +
+        (item.assigned_to ? ' · Assigned to ' + esc(item.assigned_to) : '') +
+        (isDue(item) ? ' · Due' : '') + '</div>' +
+      '<div class="enq-actions">' +
+        (wa ? '<a href="' + esc(wa) + '" target="_blank" rel="noopener noreferrer">WhatsApp</a>' : '') +
+        (tel ? '<a href="tel:+' + esc(tel) + '">Call</a>' : '') +
+        '<button type="button" data-toggle-id="' + esc(item.id) + '" aria-expanded="' + expanded + '">' +
+          (expanded ? 'Hide details' : 'Details & follow-up') + '</button>' +
+      '</div>' +
+      (expanded ? displayDetails(item) : '') +
+    '</article>';
+  }
+
+  function updateStats() {
+    const set = (id: string, value: number) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = String(value);
+    };
+    set('enq-total', enquiries.length);
+    set('enq-new', enquiries.filter(x => x.status === 'new').length);
+    set('enq-due', enquiries.filter(isDue).length);
+    set('enq-active', enquiries.filter(x => x.status === 'contacted' || x.status === 'scheduled').length);
+  }
+
+  function filteredEnquiries() {
+    const term = search.value.trim().toLowerCase();
+    const mode = filter.value;
+    const matches = enquiries.filter(item => {
+      if (mode === 'due' && !isDue(item)) return false;
+      if (mode !== 'due' && mode !== 'all' && item.status !== mode) return false;
+      if (!term) return true;
+      return [
+        item.name, item.phone, item.location, item.assigned_to, item.notes,
+        budgetLabel(noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']))
+      ].some(value => String(value || '').toLowerCase().includes(term));
+    });
+    if (order.value === 'oldest') matches.sort((a, b) => a.created_at.localeCompare(b.created_at));
+    else if (order.value === 'followup') matches.sort((a, b) => {
+      if (!a.follow_up_on) return 1;
+      if (!b.follow_up_on) return -1;
+      return a.follow_up_on.localeCompare(b.follow_up_on) || b.created_at.localeCompare(a.created_at);
+    });
+    else matches.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return matches;
+  }
+
+  function render() {
+    updateStats();
+    const matches = filteredEnquiries();
+    const pages = Math.max(1, Math.ceil(matches.length / perPage));
+    page = Math.min(page, pages - 1);
+    const visible = matches.slice(page * perPage, (page + 1) * perPage);
+    message.hidden = true;
+    list.innerHTML = visible.length
+      ? visible.map(displayCard).join('')
+      : '<div class="enq-empty">No enquiries match this view.</div>';
+    pagination.innerHTML =
+      '<span>' + (matches.length ? (page * perPage + 1) : 0) + '–' +
+      Math.min((page + 1) * perPage, matches.length) + ' of ' + matches.length + ' enquiries' +
+      (enquiries.length >= 2000 ? ' (latest 2,000 loaded)' : '') + '</span>' +
+      '<div><button type="button" data-page="prev"' + (page === 0 ? ' disabled' : '') + '>Previous</button>' +
+      '<button type="button" data-page="next"' + (page + 1 >= pages ? ' disabled' : '') + '>Next</button></div>';
+  }
+
+  async function load() {
+    refresh.disabled = true;
+    message.hidden = false;
+    message.textContent = 'Loading enquiries…';
+    try {
+      const { data: auth, error: authError } = await client.auth.getSession();
+      if (authError) throw authError;
+      if (!auth.session) {
+        message.textContent = 'Sign in with your authorised BathSpace admin account to view customer enquiries.';
+        return;
+      }
+      const results: Enquiry[] = [];
+      for (let offset = 0; offset < 2000; offset += 200) {
+        const { data, error } = await client.from('lx_site_inspections')
+          .select('id,name,phone,email,location,notes,status,assigned_to,internal_notes,created_at,updated_at,follow_up_on,source_url,preferred_date,preferred_time')
+          .order('created_at', { ascending: false }).range(offset, offset + 199);
+        if (error) throw error;
+        const batch = (data || []) as Enquiry[];
+        results.push(...batch);
+        if (batch.length < 200) break;
+      }
+      enquiries = results;
+      render();
+    } catch (error) {
+      message.hidden = false;
+      message.textContent = 'Could not load enquiries. Please check your admin permissions or database connection. ' +
+        (error instanceof Error ? error.message : String(error));
+      list.innerHTML = '';
+      pagination.innerHTML = '';
+    } finally {
+      refresh.disabled = false;
+    }
+  }
+
+  for (const control of [search, filter, order]) {
+    control.addEventListener(control === search ? 'input' : 'change', () => {
+      page = 0;
+      render();
+    });
+  }
+  refresh.addEventListener('click', load);
+
+  list.addEventListener('click', event => {
+    const target = event.target as HTMLElement;
+    const toggle = target.closest<HTMLButtonElement>('[data-toggle-id]');
+    if (toggle) {
+      openId = openId === toggle.dataset.toggleId ? null : toggle.dataset.toggleId || null;
+      render();
+      return;
+    }
+    const paginator = target.closest<HTMLButtonElement>('[data-page]');
+    if (paginator && !paginator.disabled) {
+      page += paginator.dataset.page === 'next' ? 1 : -1;
+      render();
+    }
+  });
+  pagination.addEventListener('click', event => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-page]');
+    if (!button || button.disabled) return;
+    page += button.dataset.page === 'next' ? 1 : -1;
+    render();
+  });
+
+  list.addEventListener('submit', async event => {
+    const form = event.target as HTMLFormElement;
+    if (!form.matches('form[data-save-id]')) return;
+    event.preventDefault();
+    const id = form.dataset.saveId;
+    if (!id) return;
+    const values = new FormData(form);
+    const status = String(values.get('status') || '');
+    if (!Object.prototype.hasOwnProperty.call(statusLabels, status)) return;
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const result = form.querySelector<HTMLElement>('.enq-save-message');
+    if (submit) submit.disabled = true;
+    if (result) result.textContent = 'Saving…';
+    try {
+      const payload = {
+        status,
+        follow_up_on: String(values.get('follow_up_on') || '') || null,
+        assigned_to: String(values.get('assigned_to') || '').trim() || null,
+        internal_notes: String(values.get('internal_notes') || '').trim() || null
+      };
+      const { data, error } = await client.from('lx_site_inspections').update(payload)
+        .eq('id', id).select('id,status,follow_up_on,assigned_to,internal_notes,updated_at').single();
+      if (error) throw error;
+      const current = enquiries.find(item => item.id === id);
+      if (current && data) Object.assign(current, data);
+      render();
+      const saved = list.querySelector<HTMLFormElement>('form[data-save-id="' + id + '"]');
+      if (saved) {
+        const feedback = saved.querySelector<HTMLElement>('.enq-save-message');
+        if (feedback) feedback.textContent = 'Follow-up saved.';
+      }
+    } catch (error) {
+      if (result) result.textContent = 'Could not save: ' + (error instanceof Error ? error.message : String(error));
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
+
+  load();
+</script>
+
+<style is:global>
+  .enq-intro{max-width:800px;margin:-7px 0 22px;color:#617062;line-height:1.6}
+  .enq-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:20px}
+  .enq-stat{background:#fff;border:1px solid #e3e5dd;padding:17px 19px;border-radius:12px;display:flex;flex-direction:column;gap:4px}
+  .enq-stat strong{font-size:29px;color:#253029;line-height:1.2;font-weight:600}
+  .enq-stat span{font-size:11px;color:#69746a;letter-spacing:.02em}
+  .enq-panel{border:1px solid #e3e5dd;border-radius:14px;background:#fff;overflow:hidden}
+  .enq-controls{display:grid;grid-template-columns:minmax(180px,2fr) minmax(132px,1fr) minmax(132px,1fr) auto;gap:10px;align-items:end;padding:16px;border-bottom:1px solid #e9e9e4}
+  .enq-controls label,.enq-edit label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#637163;font-weight:600}
+  .enq-controls input,.enq-controls select,.enq-edit input,.enq-edit select,.enq-edit textarea{font:inherit;font-size:14px;width:100%;min-width:0;min-height:42px;border:1px solid #d4dace;background:#fff;border-radius:7px;padding:9px;color:#253029}
+  .enq-controls :is(input,select):focus,.enq-edit :is(input,select,textarea):focus{outline:2px solid #98a991;outline-offset:1px}
+  .enq-refresh,.enq-actions a,.enq-actions button,.enq-pagination button,.enq-save button{border:1px solid #cbd5ca;background:#f3f6f1;color:#253029;border-radius:7px;padding:10px 13px;min-height:42px;text-decoration:none;cursor:pointer;font:600 12px Jost,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center}
+  .enq-refresh:hover,.enq-actions :is(a,button):hover,.enq-pagination button:hover:not(:disabled){background:#e8efe6}
+  .enq-list{display:grid;gap:0}
+  .enq-message,.enq-empty{padding:35px 20px;text-align:center;color:#657065}
+  .enq-card{padding:19px;border-bottom:1px solid #e8ebe6}
+  .enq-card:last-child{border-bottom:0}
+  .enq-head{display:flex;justify-content:space-between;gap:12px;align-items:start}
+  .enq-head h3{font:600 21px/1.25 Jost,system-ui,sans-serif;color:#233127;margin:0 0 4px}
+  .enq-sub{font-size:13px;color:#637263}
+  .enq-head-right{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:end}
+  .enq-head-right time{color:#68726b;font-size:12px}
+  .enq-status{background:#edf0ec;border-radius:999px;color:#536550;padding:4px 10px;font-size:11px;font-weight:700;text-transform:capitalize}
+  .enq-card[data-status="new"] .enq-status{background:#e9edf6;color:#355783}
+  .enq-card[data-status="contacted"] .enq-status{background:#fff3e2;color:#8c6226}
+  .enq-card[data-status="completed"] .enq-status{background:#e6f2e9;color:#326b49}
+  .enq-card[data-status="cancelled"] .enq-status{background:#eff0f0;color:#606b66}
+  .enq-facts{margin:14px 0 12px;display:flex;flex-wrap:wrap;gap:7px}
+  .enq-facts span{font-size:12px;background:#f5f6f2;padding:8px 10px;border-radius:7px;line-height:1.5;color:#334336}
+  .enq-facts b{display:block;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#788478;margin-bottom:1px}
+  .enq-next{font-size:12px;color:#566956}
+  .enq-next.due{color:#a34d2e}
+  .enq-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .enq-actions a:first-child{background:#e6f3e8;border-color:#bcd9c1}
+  .enq-detail{background:#fafbf9;border:1px solid #e0e6df;border-radius:10px;margin-top:18px;padding:17px}
+  .enq-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 20px}
+  .enq-info span{display:block;color:#788478;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .enq-info strong{font-size:13px;color:#2b3a2c;font-weight:500;overflow-wrap:anywhere}
+  .enq-original{margin-top:16px;border-top:1px solid #dde5db;padding-top:14px}
+  .enq-original summary{cursor:pointer;color:#465e4a;font-size:12px;font-weight:600}
+  .enq-original pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.65 Jost,system-ui,sans-serif;color:#59675a;margin:12px 0}
+  .enq-edit{border-top:1px solid #dde5db;margin-top:18px;padding-top:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+  .enq-edit .enq-full,.enq-save{grid-column:1/-1}
+  .enq-edit textarea{min-height:110px;resize:vertical}
+  .enq-save{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .enq-save button{background:#3c6043;color:#fff;border-color:#3c6043;padding-inline:19px}
+  .enq-save button:disabled,.enq-pagination button:disabled{opacity:.5;cursor:not-allowed}
+  .enq-save-message{font-size:12px;color:#547053}
+  .enq-pagination{border-top:1px solid #e8ebe6;padding:12px 17px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#647265}
+  .enq-pagination>div{display:flex;gap:8px}
+  @media(max-width:850px){.enq-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.enq-search{grid-column:1/-1}.enq-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:560px){.enq-controls{grid-template-columns:1fr 1fr}.enq-controls .enq-refresh{grid-column:1/-1}.enq-head{flex-direction:column}.enq-head-right{align-items:flex-start;text-align:left}.enq-facts span{flex:1 1 140px}.enq-detail-grid{grid-template-columns:1fr}.enq-edit{grid-template-columns:1fr}.enq-card{padding:16px}.enq-pagination{align-items:flex-start;flex-direction:column}}
+</style>
