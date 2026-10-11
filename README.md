@@ -66,7 +66,7 @@ there and every page follows:
 | `WHATSAPP_NUMBER` | Every WhatsApp link |
 | `GA_MEASUREMENT_IDS` | GA4 properties tagged on every public page |
 | `WARRANTY_SCHEDULE` | 24-month LUXEhome workmanship warranty, 30-day snag review, and separately identified manufacturer/supplier warranties |
-| `PROJECT_INITIATION` | LKR 30,000 per agreed project · site consultation, detailed design and complete proposal · fully credited to LUXEhome construction |
+| `PROJECT_INITIATION` | LKR 30,000 per bathroom · site visit, separate detailed design and complete proposal for each bathroom · each fee fully credited if LUXEhome constructs that bathroom |
 | `STANDARD_DRAWINGS` | The four technical drawings, shared by every design |
 | `FIXTURE_CATEGORIES` | Bathroom fixture schedule and its display order |
 | `DEFAULT_DESIGN_TIMELINE` | Six-week timeline seeded into a new design |
