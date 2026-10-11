@@ -56,7 +56,6 @@
       <div class="ibf-choice-grid ibf-choice-grid--two" role="group" aria-label="Budget expectations">
         <label><input type="radio" name="budget_direction" value="Within typical range" required /><span>Yes, this range works for me</span></label>
         <label><input type="radio" name="budget_direction" value="Below typical range" /><span>I was considering a lower investment</span></label>
-        <label><input type="radio" name="budget_direction" value="Above typical range" /><span>I'm considering a higher investment</span></label>
         <label><input type="radio" name="budget_direction" value="Need budget guidance" /><span>I'm not sure yet — I'd like guidance</span></label>
       </div>
       <p class="ibf-context-note" id="inspection-budget-below-note" hidden>We can discuss your requirements and whether an adjusted scope is suitable. A complete renovation may need a higher investment.</p>
@@ -148,7 +147,7 @@
       const bathroomScope = formValue(data, 'bathroom_scope');
       const budgetDirection = formValue(data, 'budget_direction');
       // Confirm the submitted expectation is one of the choices on the form.
-      if (!['Within typical range', 'Below typical range', 'Above typical range', 'Need budget guidance'].includes(budgetDirection)) {
+      if (!['Within typical range', 'Below typical range', 'Need budget guidance'].includes(budgetDirection)) {
         form.querySelector<HTMLInputElement>('input[name="budget_direction"]')?.focus();
         return;
       }
@@ -157,7 +156,7 @@
         projectTiming === 'Just researching' ? 'Researching' :
         budgetDirection === 'Below typical range' ? 'Budget discussion needed' :
         projectTiming === 'As soon as possible' &&
-          (budgetDirection === 'Within typical range' || budgetDirection === 'Above typical range')
+          budgetDirection === 'Within typical range'
           ? 'Ready to proceed'
           : 'Considering project';
       if(errorNotice){errorNotice.hidden=true;errorNotice.textContent='';}
