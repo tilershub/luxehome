@@ -18,24 +18,27 @@ const projects = allProjects
     || Number(b.featured) - Number(a.featured)
     || Number(Boolean(b.after_image_url)) - Number(Boolean(a.after_image_url))
   );
-// Only showcase completed bathrooms with authentic finished-room photography.
-// The homepage has a deliberate portfolio order, independent of CMS publish date:
-// Nawala, Avissawella, Kegalle, Matugama, Kotte.
+// Public homepage portfolio order, regardless of project publish date.
+// Gampaha remains clearly labelled in progress; Aluthgama currently has
+// no final image, so its card displays the existing honest placeholder.
 const homepagePortfolioOrder = [
   'nawala-complete-bathroom-renovation',
   'avissawella-bathroom-renovation',
-  'kegalle-bathroom-renovation',
-  'matugama-bathroom-renovation',
   'kotte-bathroom-renovation',
+  'matugama-bathroom-renovation',
+  'gampaha-returning-client-two-bathrooms',
+  'aluthgama-bathroom-renovation',
+  'kegalle-bathroom-renovation',
 ];
-const homepagePortfolioRank = (slug: string) => {
-  const index = homepagePortfolioOrder.indexOf(slug);
-  return index === -1 ? homepagePortfolioOrder.length : index;
-};
-const photographedProjects = projects
-  .filter((project) => Boolean(project.after_image_url))
-  .sort((a, b) => homepagePortfolioRank(a.slug) - homepagePortfolioRank(b.slug));
-const featuredProjects = photographedProjects.slice(0, 5);
+const featuredProjects = allProjects
+  .filter((project) =>
+    project.published &&
+    homepagePortfolioOrder.includes(project.slug) &&
+    ['completed', 'in_progress'].includes(project.project_status ?? 'completed')
+  )
+  .sort((a, b) => homepagePortfolioOrder.indexOf(a.slug) - homepagePortfolioOrder.indexOf(b.slug));
+// Keep the hero based on real photographs of completed bathrooms only.
+const photographedProjects = projects.filter((project) => Boolean(project.after_image_url));
 const nawalaLatest = projects.find((project) => project.slug === 'nawala-complete-bathroom-renovation' && !project.after_image_url) ?? null;
 const heroProject = photographedProjects[0] ?? null;
 const heroCover = heroProject?.after_image_url ?? null;
@@ -182,11 +185,11 @@ const trustPoints = [
       <header class="spa-section-head lxr">
         <div>
           <p class="spa-eyebrow">Real BathSpace projects</p>
-          <h2 id="spa-projects-title">See what we have actually built.</h2>
+          <h2 id="spa-projects-title">Explore our bathroom projects.</h2>
         </div>
         <p>
-          Real bathrooms, real locations and construction scope. Our case studies
-          show verified work, project investment and handover details, with photographs of the finished rooms.
+          Explore completed renovations and work in progress, clearly labelled by project status.
+          Finished-room photographs are shown where available; project stories without final photos are identified honestly.
         </p>
       </header>
       {nawalaLatest && (
@@ -202,7 +205,7 @@ const trustPoints = [
       <div class="spa-project-grid">
         {featuredProjects.map((project) => <ProjectCard project={project} />)}
       </div>
-      <a class="spa-inline-link lxr" href="/projects">Explore all completed projects <span aria-hidden="true">→</span></a>
+      <a class="spa-inline-link lxr" href="/projects">Explore all bathroom projects <span aria-hidden="true">→</span></a>
     </section>
   )}
 
