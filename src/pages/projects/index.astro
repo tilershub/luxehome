@@ -6,15 +6,25 @@ import { getProjects } from '../../lib/luxe';
 import { waLink, imageUrl } from '../../lib/luxe-config';
 
 const projects = (await getProjects()).filter((project) => project.published);
+const portfolioOrder = [
+  'nawala-complete-bathroom-renovation',
+  'avissawella-bathroom-renovation',
+  'kotte-bathroom-renovation',
+  'matugama-bathroom-renovation',
+  'gampaha-returning-client-two-bathrooms',
+  'aluthgama-bathroom-renovation',
+  'kegalle-bathroom-renovation',
+];
+const rank = (slug: string) => {
+  const index = portfolioOrder.indexOf(slug);
+  return index < 0 ? portfolioOrder.length : index;
+};
 const completed = projects
-  .filter((project) => (project.project_status ?? 'completed') === 'completed' && Boolean(project.after_image_url))
-  .sort((a, b) =>
-    Number(b.slug === 'nawala-complete-bathroom-renovation') - Number(a.slug === 'nawala-complete-bathroom-renovation')
-    || Number(b.featured) - Number(a.featured)
-  );
+  .filter((project) => (project.project_status ?? 'completed') === 'completed')
+  .sort((a, b) => rank(a.slug) - rank(b.slug));
 const ongoing = projects
-  .filter((project) => project.project_status === 'in_progress' && Boolean(project.after_image_url || project.before_image_url))
-  .sort((a, b) => Number(b.slug === 'gampaha-returning-client-two-bathrooms') - Number(a.slug === 'gampaha-returning-client-two-bathrooms'));
+  .filter((project) => project.project_status === 'in_progress')
+  .sort((a, b) => rank(a.slug) - rank(b.slug));
 const photoCover = completed.find((project) => project.after_image_url)?.after_image_url;
 ---
 
@@ -40,7 +50,7 @@ const photoCover = completed.find((project) => project.after_image_url)?.after_i
         <p class="lx-eyebrow">Delivered bathrooms</p>
         <h2 id="pj-completed-title">Completed Projects</h2>
       </div>
-      <p>Real renovation case studies, with handover details, technical work and original project investment where documented. Explore the finished rooms and the details behind them.</p>
+      <p>Real renovation case studies, with handover details, technical work and original investment where documented. Finished photographs are shown where available; other completed projects are clearly identified.</p>
     </header>
     {completed.length > 0 ? (
       <div class="pj-grid">
@@ -61,7 +71,7 @@ const photoCover = completed.find((project) => project.after_image_url)?.after_i
           <p class="lx-eyebrow">Work happening now</p>
           <h2 id="pj-ongoing-title">Ongoing Renovations</h2>
         </div>
-        <p>Follow live project stories without confusing site progress with a finished bathroom. Final tests, completion dates and handover photographs are added only once verified.</p>
+        <p>Follow genuine renovation progress without confusing unfinished work with completed bathrooms. Progress images appear when available; finished photos and handover records are added after verification.</p>
       </header>
       <div class="pj-grid">
         {ongoing.map((project) => <ProjectCard project={project} />)}
