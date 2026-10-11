@@ -79,7 +79,7 @@ const { module }=Astro.props as {module:CmsModule};
     }
     root.innerHTML=`<form id="editor" class="panel"><div class="formhead"><div><p class="eyebrow">${fresh?'Create':'Edit'} record</p><h2>${fresh?'New '+esc(cfg.label):esc(row[cfg.titleKey])}</h2></div><button type="button" id="back">Back to list</button></div>${cfg.slug==='media'?'<label class="media-upload">Upload image<input id="media-file" type="file" accept="image/*"></label>':''}<div class="fields">${cfg.fields.map(f=>field(f,row[f.key])).join('')}</div><div class="actions"><button class="save">Save</button>${fresh?'':`<button type="button" class="delete" id="delete">Delete</button>`}</div></form><div id="children"></div>`;
     const editor=document.getElementById('editor');document.getElementById('back').onclick=list;
-    const nameInput=editor.elements.name,titleInput=editor.elements.title,slugInput=editor.elements.slug;
+    const nameInput=editor.elements.name||editor.elements.item_name,titleInput=editor.elements.title,slugInput=editor.elements.slug;
     (nameInput||titleInput)?.addEventListener('blur',()=>{if(slugInput&&!slugInput.value)slugInput.value=slugify((nameInput||titleInput).value)});
     bindImageUploads(editor,cfg.slug);
     document.getElementById('media-file')?.addEventListener('change',async e=>{
@@ -98,6 +98,7 @@ const { module }=Astro.props as {module:CmsModule};
       e.preventDefault();
       const payload=values(editor,cfg.fields);
       if(cfg.slug==='fixture-library' && payload.for_sale){
+        if(!payload.slug && payload.item_name)payload.slug=slugify(String(payload.item_name));
         if(!(Number(payload.sale_price_lkr)>0))return toast('Set a positive fixed selling price.');
         if(!payload.image_url)return toast('Upload the real fixture or product image first.');
         if(!payload.slug || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(String(payload.slug)))
