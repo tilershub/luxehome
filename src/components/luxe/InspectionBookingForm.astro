@@ -177,7 +177,7 @@
         'Initial consultation is free; no payment or appointment requested',
         'Optional design and quotation package: LKR 30,000 per bathroom, fully credited if BathSpace builds the corresponding bathroom',
         notes ? `Client requirements: ${notes}` : '',
-      ].filter(Boolean).join('\\n');
+      ].filter(Boolean).join('\n');
 
       // Only one authoritative record. Do not claim success or fire Lead events
       // until the database has confirmed that the application was accepted.
@@ -256,7 +256,7 @@
         sourceProject ? `Source project: ${sourceProject}` : '',
         notes ? `Requirements: ${notes}` : '',
         'Initial consultation: free, no commitment',
-      ].filter(Boolean).join('\\n');
+      ].filter(Boolean).join('\n');
       const whatsappUrl = `https://wa.me/94774503744?text=${encodeURIComponent(message)}`;
 
       if (backupLink) backupLink.href = whatsappUrl;
