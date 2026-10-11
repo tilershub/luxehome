@@ -175,7 +175,7 @@ export const PROJECT_INITIATION = {
   amount: 30_000,
   title: 'Site visit, design & detailed quotation',
   copy: 'The design and detailed quotation package costs LKR 30,000 per bathroom, payable upfront before the work begins.',
-  credit: '100% of each bathroom's package fee is credited against its agreed construction price if BathSpace is appointed to build that bathroom.',
+  credit: 'The entire LKR 30,000 fee for each bathroom is credited towards its agreed renovation price if you appoint BathSpace to carry out the work.',
   delivery: 'The complete proposal is delivered within seven working days after package payment and the completed site visit.',
   includes: [
     'Site visit and measurements',
@@ -186,7 +186,7 @@ export const PROJECT_INITIATION = {
     'Construction scope, assumptions, exclusions, timeline and payment stages',
     'Quality commitments and applicable warranty schedule',
   ],
-  multipleBathrooms: 'Tell us about all the bathrooms in your enquiry. Each bathroom requires its own LKR 30,000 package with separate layouts, 3D images, walkthrough videos and detailed quotations. Each fee is fully credited if BathSpace builds that bathroom.',
+  multipleBathrooms: 'Tell us about all the bathrooms when you enquire. Each room receives its own measurements, layout, 3D images, walkthrough video and detailed quotation. We confirm the total before payment: two bathrooms cost LKR 60,000; three cost LKR 90,000. If BathSpace renovates them, all corresponding fees are fully credited against the final construction total.',
 } as const;
 
 /** The BathSpace construction system every bathroom follows.
