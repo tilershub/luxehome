@@ -11,7 +11,7 @@ const {product,variants,usedInProjects}=record;
 const photos=[...new Set([product.image_url,...(product.gallery_urls||[])].filter(Boolean))];
 const money=(n:number)=>new Intl.NumberFormat('en-LK',{maximumFractionDigits:0}).format(Number(n));
 const custom=product.product_type==='made_to_measure';
-const unavailable=product.sale_availability==='out_of_stock' && variants.every(v=>v.availability==='out_of_stock'||v.stock_quantity===0);
+const unavailable=variants.length>0?variants.every(v=>v.availability==='out_of_stock'||v.stock_quantity===0):product.sale_availability==='out_of_stock';
 const itemData={
   id:product.id,slug:product.slug,name:product.item_name,image:product.image_url,
   sale_unit:product.sale_unit,price:Number(product.sale_price_lkr),
@@ -39,7 +39,7 @@ const itemData={
     }
   })}></script>
  </Fragment>
- <main class="bd-product">
+ <div class="bd-product">
   <nav class="bd-crumb"><a href="/shop">BathSpace Shop</a> / {product.category} / {product.item_name}</nav>
   <div class="bd-product-grid">
    <div class="bd-product-gallery">
@@ -115,7 +115,7 @@ const itemData={
       </div>
     </section>
   )}
- </main>
+ </div>
 </LuxeLayout>
 <script>
  const photo=document.getElementById('bd-photo') as HTMLImageElement|null;
@@ -149,12 +149,23 @@ const itemData={
   if(select&&!v)return;
   const qty=Number(quantity?.value||0);
   if(!Number.isInteger(qty)||qty<1||qty>100){if(message)message.textContent='Choose a quantity between 1 and 100.';return}
+  if(v && v.availability==='in_stock' && v.stock_quantity!==null && qty>v.stock_quantity){
+    if(message)message.textContent=`Only ${v.stock_quantity} of this variant are currently listed as available. Reduce the quantity or contact BathSpace.`;
+    return;
+  }
   try{
    const key='bathspace-cart-v1';
    const list=JSON.parse(localStorage.getItem(key)||'[]') as Array<{id:string;variant_id:string|null;quantity:number;price:number;name:string;image:string;unit:string;slug:string;selection:string}>;
    const variantId=v?.id||null;
    const found=list.find(item=>item.id===p.id&&item.variant_id===variantId);
-   if(found)found.quantity=Math.min(100,found.quantity+qty);
+   if(found){
+     const combined=Math.min(100,found.quantity+qty);
+     if(v && v.availability==='in_stock' && v.stock_quantity!==null && combined>v.stock_quantity){
+       if(message)message.textContent=`Only ${v.stock_quantity} of this variant are currently listed as available.`;
+       return;
+     }
+     found.quantity=combined;
+   }
    else list.push({id:p.id,variant_id:variantId,quantity:qty,price:Number(v?.price_lkr||p.price),name:p.name,image:p.image,unit:p.sale_unit||'item',slug:p.slug,selection:v?.label||''});
    localStorage.setItem(key,JSON.stringify(list));
    if(message)message.textContent=`Added ${qty} item(s) to your basket. Review the basket to continue.`;

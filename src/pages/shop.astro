@@ -34,17 +34,30 @@ const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to
     </div>
     {products.length > 0 ? (
       <>
-        {categories.length > 1 && (
-          <label class="bs-shop-filter">Filter by category
+        <div class="bs-shop-controls" role="search" aria-label="Find bathroom products">
+          <label class="bs-shop-control">Search products
+            <input id="bs-shop-search" type="search" placeholder="Search showers, vanities, tile sizes or brands" autocomplete="off" />
+          </label>
+          <label class="bs-shop-control">Category
             <select id="bs-shop-filter">
               <option value="">All categories</option>
               {categories.map((category) => <option value={category}>{category}</option>)}
             </select>
           </label>
-        )}
+          <label class="bs-shop-control">Sort by
+            <select id="bs-shop-sort">
+              <option value="featured">Category & name</option>
+              <option value="name">Product name A–Z</option>
+              <option value="price-asc">Price: lowest first</option>
+              <option value="price-desc">Price: highest first</option>
+            </select>
+          </label>
+        </div>
+        <p class="bs-shop-results" id="bs-shop-results" role="status" aria-live="polite">{products.length} products</p>
+        <p class="bs-shop-no-results" id="bs-shop-no-results" hidden>No products match your search. Try another brand or category.</p>
         <div class="bs-shop-grid" id="bs-shop-grid">
           {products.map((product) => (
-            <article class="bs-shop-card" data-category={product.category}>
+            <article class="bs-shop-card" data-category={product.category} data-name={product.item_name.toLowerCase()} data-price={Number(product.sale_price_lkr)} data-search={[product.item_name,product.brand,product.model_code,product.category,product.specification,product.sku].filter(Boolean).join(' ').toLocaleLowerCase()}>
               {product.slug ? (
                 <a class="bs-shop-photo" href={`/shop/${product.slug}`} aria-label={`View ${product.item_name} details`}>
                   <img src={product.image_url} alt={`${product.brand ? product.brand + ' ' : ''}${product.item_name}`} loading="lazy" decoding="async" width="700" height="600" />
@@ -89,12 +102,38 @@ const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to
 </LuxeLayout>
 
 <script>
+  const grid = document.getElementById('bs-shop-grid');
+  const search = document.getElementById('bs-shop-search') as HTMLInputElement | null;
   const filter = document.getElementById('bs-shop-filter') as HTMLSelectElement | null;
-  filter?.addEventListener('change', () => {
-    document.querySelectorAll<HTMLElement>('#bs-shop-grid [data-category]').forEach((card) => {
-      card.hidden = Boolean(filter.value && card.dataset.category !== filter.value);
+  const sort = document.getElementById('bs-shop-sort') as HTMLSelectElement | null;
+  const count = document.getElementById('bs-shop-results');
+  const noResults = document.getElementById('bs-shop-no-results');
+  const cards = Array.from(grid?.querySelectorAll<HTMLElement>('[data-category]') ?? []);
+  function refreshShop() {
+    if (!grid) return;
+    const q = (search?.value ?? '').trim().toLocaleLowerCase();
+    const category = filter?.value ?? '';
+    const visible = cards.filter(card =>
+      (!q || (card.dataset.search ?? '').includes(q)) &&
+      (!category || card.dataset.category === category)
+    );
+    const order = sort?.value ?? 'featured';
+    const ordered = [...cards].sort((a,b) => {
+      if (order === 'price-asc') return Number(a.dataset.price) - Number(b.dataset.price);
+      if (order === 'price-desc') return Number(b.dataset.price) - Number(a.dataset.price);
+      if (order === 'name') return (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '');
+      return (a.dataset.category ?? '').localeCompare(b.dataset.category ?? '') ||
+        (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '');
     });
+    ordered.forEach(card => grid.append(card));
+    cards.forEach(card => { card.hidden = !visible.includes(card); });
+    if (count) count.textContent = `${visible.length} of ${cards.length} products`;
+    if (noResults) noResults.hidden = visible.length !== 0;
+  }
+  [search,filter,sort].forEach(control => {
+    control?.addEventListener(control === search ? 'input' : 'change', refreshShop);
   });
+  refreshShop();
 </script>
 
 <style>
@@ -107,8 +146,13 @@ const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to
   .bs-shop-title { display: flex; justify-content: space-between; gap: 1.4rem; align-items: end; margin-bottom: 1.4rem; }
   .bs-shop-title h2 { font-family: var(--lx-serif); font-size: clamp(1.9rem,4vw,2.7rem); font-weight: 500; }
   .bs-shop-title>span { color: var(--sage-deep); font-size: .84rem; }
-  .bs-shop-filter { display: flex; align-items: center; gap: 12px; font-size: .84rem; font-weight: 600; margin-bottom: 1.4rem; }
-  .bs-shop-filter select { max-width: 300px; width: 100%; padding: .75rem; border: 1px solid var(--cream-deep); border-radius: 7px; background: #fff; color: var(--ink); font: inherit; }
+  .bs-shop-controls { display: grid; grid-template-columns: minmax(220px, 2fr) minmax(140px, 1fr) minmax(150px, 1fr); gap: .8rem; margin-bottom: .7rem; }
+  .bs-shop-control { display: flex; flex-direction: column; gap: .4rem; font-size: .8rem; font-weight: 600; }
+  .bs-shop-control input, .bs-shop-control select { border: 1px solid var(--cream-deep); border-radius: 8px; background: #fff; padding: .8rem; color: var(--ink); font: inherit; min-height: 46px; width: 100%; }
+  .bs-shop-control input:focus-visible, .bs-shop-control select:focus-visible { outline: 2px solid var(--sage-deep); outline-offset: 2px; }
+  .bs-shop-results { margin: 0 0 1rem; font-size: .8rem; color: var(--sage-deep); }
+  .bs-shop-no-results { margin: 1rem 0 1.5rem; padding: 1.3rem; border: 1px solid var(--cream-deep); border-radius: 8px; background: #fff; }
+  .bs-shop-no-results[hidden] { display: none; }
   .bs-shop-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1.3rem; align-items: stretch; }
   .bs-shop-card { background: #fff; border: 1px solid var(--cream-deep); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
   .bs-shop-card[hidden] { display: none; }
@@ -137,8 +181,7 @@ const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to
   @media (max-width: 610px) {
     .bs-shop-grid { grid-template-columns: 1fr; gap: 1rem; }
     .bs-shop-title { align-items: flex-start; }
-    .bs-shop-filter { flex-direction: column; align-items: stretch; gap: .4rem; }
-    .bs-shop-filter select { max-width: none; }
+    .bs-shop-controls { grid-template-columns: 1fr; gap: .7rem; }
     .bs-shop-info { padding: 1.1rem; }
   }
 </style>
