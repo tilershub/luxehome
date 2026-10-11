@@ -9,6 +9,7 @@ export function getStaticPaths() {
 
 const { module } = Astro.props as { module: CmsModule };
 if (module.slug === 'products') return Astro.redirect('/admin/cms/fixture-library',301);
+if (module.slug === 'inspections') return Astro.redirect('/admin/enquiries',302);
 ---
 
 <AdminShell title={module.label} active={module.slug}>
