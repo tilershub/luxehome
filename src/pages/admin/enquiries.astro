@@ -52,6 +52,8 @@ import AdminShell from '../../components/admin/AdminShell.astro';
     created_at: string; updated_at: string | null;
     follow_up_on: string | null; source_url: string | null;
     preferred_date: string | null; preferred_time: string | null;
+    bathroom_scope: string | null; budget_expectation: string | null;
+    project_timing: string | null; lead_stage: string | null;
   };
 
   const client = createClient(LUXE_SUPABASE_URL, LUXE_SUPABASE_KEY);
@@ -156,10 +158,10 @@ import AdminShell from '../../components/admin/AdminShell.astro';
       '<option value="' + esc(key) + '"' + (item.status === key ? ' selected' : '') + '>' + esc(statusLabels[key]) + '</option>'
     ).join('');
     const details = [
-      ['Budget expectation', budgetLabel(noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']))],
-      ['Number of bathrooms', noteValue(item.notes, ['Bathrooms']) || 'Not specified'],
-      ['Preferred start', noteValue(item.notes, ['Expected start', 'Desired start']) || 'Not specified'],
-      ['Lead category', noteValue(item.notes, ['Enquiry stage']) || 'Not categorised'],
+      ['Budget expectation', budgetLabel(item.budget_expectation || noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']))],
+      ['Number of bathrooms', (item.bathroom_scope || noteValue(item.notes, ['Bathrooms'])) || 'Not specified'],
+      ['Preferred start', (item.project_timing || noteValue(item.notes, ['Expected start', 'Desired start'])) || 'Not specified'],
+      ['Lead category', (item.lead_stage || noteValue(item.notes, ['Enquiry stage'])) || 'Not categorised'],
       ['Property location', item.location || 'Not provided'],
       ['Enquiry received', enquiryDate(item.created_at)],
       ['Last updated', enquiryDate(item.updated_at)],
@@ -181,10 +183,10 @@ import AdminShell from '../../components/admin/AdminShell.astro';
   }
 
   function displayCard(item: Enquiry) {
-    const budget = budgetLabel(noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']));
-    const bathrooms = noteValue(item.notes, ['Bathrooms']);
-    const timing = noteValue(item.notes, ['Expected start', 'Desired start']);
-    const stage = noteValue(item.notes, ['Enquiry stage']);
+    const budget = budgetLabel(item.budget_expectation || noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']));
+    const bathrooms = (item.bathroom_scope || noteValue(item.notes, ['Bathrooms']));
+    const timing = (item.project_timing || noteValue(item.notes, ['Expected start', 'Desired start']));
+    const stage = (item.lead_stage || noteValue(item.notes, ['Enquiry stage']));
     const wa = whatsappUrl(item);
     const tel = localPhone(item.phone);
     const expanded = openId === item.id;
@@ -231,7 +233,8 @@ import AdminShell from '../../components/admin/AdminShell.astro';
       if (!term) return true;
       return [
         item.name, item.phone, item.location, item.assigned_to, item.notes,
-        budgetLabel(noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']))
+        item.bathroom_scope, item.budget_expectation, item.project_timing, item.lead_stage,
+        budgetLabel(item.budget_expectation || noteValue(item.notes, ['Budget expectation', 'Budget per bathroom', 'Investment range']))
       ].some(value => String(value || '').toLowerCase().includes(term));
     });
     if (order.value === 'oldest') matches.sort((a, b) => a.created_at.localeCompare(b.created_at));
@@ -276,7 +279,7 @@ import AdminShell from '../../components/admin/AdminShell.astro';
       const results: Enquiry[] = [];
       for (let offset = 0; offset < 2000; offset += 200) {
         const { data, error } = await client.from('lx_site_inspections')
-          .select('id,name,phone,email,location,notes,status,assigned_to,internal_notes,created_at,updated_at,follow_up_on,source_url,preferred_date,preferred_time')
+          .select('id,name,phone,email,location,notes,status,assigned_to,internal_notes,created_at,updated_at,follow_up_on,source_url,preferred_date,preferred_time,bathroom_scope,budget_expectation,project_timing,lead_stage')
           .order('created_at', { ascending: false }).range(offset, offset + 199);
         if (error) throw error;
         const batch = (data || []) as Enquiry[];
