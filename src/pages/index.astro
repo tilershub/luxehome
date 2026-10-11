@@ -52,7 +52,7 @@ const spaFacts = [
 ];
 
 const journey = [
-  { n: '01', title: 'Tell us', copy: 'Share your location, project type, timing, investment range and bathroom photographs.' },
+  { n: '01', title: 'Tell us', copy: 'Share your name, WhatsApp number, project location, how many bathrooms, investment expectations and preferred start. Photos can follow on WhatsApp.' },
   { n: '02', title: 'Consult', copy: 'Discuss your requirements and investment range by phone or WhatsApp at no charge.' },
   { n: '03', title: 'Resolve', copy: 'Commission the LKR 30,000 per-bathroom package: site visit, layout plan, 3D images, video and detailed quotation for each bathroom.' },
   { n: '04', title: 'Build', copy: 'One coordinated team manages construction, specialists, materials, testing and quality.' },
@@ -104,7 +104,10 @@ const trustPoints = [
     {heroCover ? (
       <img
         class="spa-hero-image"
-        src={heroCover}
+        src={imageUrl(heroCover, 1800)}
+        srcset={`${imageUrl(heroCover, 640)} 640w, ${imageUrl(heroCover, 960)} 960w, ${imageUrl(heroCover, 1440)} 1440w, ${imageUrl(heroCover, 1800)} 1800w`}
+        sizes="100vw"
+        decoding="async"
         alt={`${heroProject?.title ?? 'BathSpace'} completed bathroom`}
         width="1800"
         height="1125"
@@ -131,7 +134,7 @@ const trustPoints = [
           <a class="spa-button spa-button--glass" href="/projects">See completed projects</a>
         </div>
         <p class="spa-hero-note lxr">
-          Complete renovations typically from around LKR 1.5M · Free first conversation · Site visit & design package LKR 30,000
+          Typical complete renovations LKR 1.5M–2.5M per bathroom · Free first conversation · Design & quotation LKR 30,000 per bathroom
         </p>
       </div>
     </div>
@@ -381,7 +384,10 @@ const trustPoints = [
   {heroCover && (
     <section class="spa-final" aria-labelledby="spa-final-title">
       <img
-        src={heroCover}
+        src={imageUrl(heroCover, 1200)}
+        srcset={`${imageUrl(heroCover, 640)} 640w, ${imageUrl(heroCover, 960)} 960w, ${imageUrl(heroCover, 1200)} 1200w, ${imageUrl(heroCover, 1600)} 1600w`}
+        sizes="100vw"
+        decoding="async"
         alt={`${heroProject?.title ?? 'BathSpace'} completed bathroom`}
         width="1600"
         height="1000"
@@ -391,7 +397,7 @@ const trustPoints = [
       <div class="spa-final-copy lxr">
         <p class="spa-eyebrow spa-eyebrow--light">Your bathroom starts with a real conversation</p>
         <h2 id="spa-final-title">Planning a complete renovation?</h2>
-        <p>Send us your location, timing, investment range and bathroom photographs. Start with a free phone or WhatsApp conversation. The site visit, design and quotation package is LKR 30,000 per bathroom, fully credited if BathSpace constructs that bathroom.</p>
+        <p>Send us your location, timing and investment expectations. You can share bathroom photographs later through WhatsApp. Start with a free phone or WhatsApp conversation. The site visit, design and quotation package is LKR 30,000 per bathroom, fully credited if BathSpace constructs that bathroom.</p>
         <div>
           <a class="spa-button spa-button--light" href="/book-site-inspection">Discuss my bathroom</a>
           <a class="spa-final-link" href="/projects">See completed projects</a>
