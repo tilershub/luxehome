@@ -19,10 +19,10 @@ export const GET: APIRoute = async () => {
   ]);
 
   // The regular Astro sitemap already owns fixed routes. This sitemap lists
-  // only real, published project case studies and published journal articles.
+  // only genuinely published project case studies, published articles and shop pages.
   const dynamicEntries: Array<{ path: string; lastmod?: string | null }> = [
     ...projects
-      .filter((project) => project.published && project.after_image_url)
+      .filter((project) => project.published && (project.project_status === 'completed' || project.project_status === 'in_progress'))
       .map((project) => ({ path: `/projects/${project.slug}` })),
     ...posts
       .filter((post) => post.include_in_sitemap)
