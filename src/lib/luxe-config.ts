@@ -162,42 +162,31 @@ export const STANDARD_DRAWINGS = [
   { kind: 'electrical',     label: 'Electrical Layout',       tag: 'Points & lighting',  image: '/images/drawings/electrical.webp' },
 ] as const;
 
-/** The low-risk first step. The physical visit is reserved for suitable
-    complete-bathroom projects so the team can offer it without turning the
-    website into an unqualified free-inspection booking service. */
+/** Current enquiry and design package terms, shared by public pages. */
 export const PROJECT_CONSULTATION = {
-  title: 'Complimentary project consultation',
-  copy: 'For suitable complete bathroom projects, the consultation includes one site visit and a detailed review of the room, services, drainage, access, house style, requirements and budget direction.',
-  price: 'No consultation fee',
-  qualification: 'Applications are reviewed for project type, location, timing and realistic investment before a site appointment is confirmed.',
-  includes: [
-    'Project requirements, functional priorities and preferred style direction',
-    'Bathroom measurements, doors, windows and existing layout',
-    'Water supply, drainage, wastewater and site-condition review',
-    'House style, access, construction constraints and budget direction',
-    'A clear explanation of the next design-and-proposal stage',
-  ],
+  title: 'Free initial conversation',
+  copy: 'Talk with us by phone or WhatsApp about your location, requirements, timing and budget. The site visit is included in the LKR 30,000 design and quotation package.',
+  price: 'Free initial conversation',
+  qualification: 'We confirm the project scope, location and appointment with you before the package begins.',
+  includes: ['Your requirements and preferred style', 'Project location and timing', 'An initial investment range', 'The next steps and package scope'],
 } as const;
 
-/** The paid decision file commissioned after the complimentary consultation.
-    It becomes an advance against construction when the client appoints
-    LUXEhome to build that bathroom. */
 export const PROJECT_INITIATION = {
-  amount: 50_000,
-  title: 'Detailed bathroom design & construction proposal',
-  copy: 'After the complimentary consultation, commission the complete design and construction proposal for one bathroom.',
-  credit: '100% credited toward the BathSpace construction balance for that bathroom.',
-  delivery: 'The complete proposal is delivered within seven working days after proposal payment and the completed site consultation.',
+  amount: 30_000,
+  title: 'Site visit, design & detailed quotation',
+  copy: 'One LKR 30,000 package per project, with the scope agreed before payment.',
+  credit: '100% credited toward the construction balance if BathSpace builds the agreed project.',
+  delivery: 'The complete proposal is delivered within seven working days after package payment and the completed site visit.',
   includes: [
-    'Detailed bathroom design with five presentation images',
-    'Material and finish selection, with reference images where useful',
-    'Selected fixtures, accessories, materials and named brands',
-    'Complete construction scope, timeline and payment stages',
-    'Quality commitments and applicable warranties',
-    'Final construction quotation in one proposal PDF',
-    '3D walkthrough video link',
+    'Site visit and measurements',
+    'Personalised layout plan',
+    '3D presentation images',
+    '3D walkthrough video',
+    'Detailed quotation with materials, fixtures and named brands',
+    'Construction scope, assumptions, exclusions, timeline and payment stages',
+    'Quality commitments and applicable warranty schedule',
   ],
-  multipleBathrooms: 'For multiple bathrooms, begin with one. Review its complete proposal before deciding whether to initiate the remaining bathrooms.',
+  multipleBathrooms: 'Tell us about all bathrooms in your project. We confirm the complete package scope with you before payment.',
 } as const;
 
 /** The BathSpace construction system every bathroom follows.

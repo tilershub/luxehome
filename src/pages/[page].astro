@@ -2,19 +2,22 @@
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
 import { PUBLIC_INFO_PAGES, type PublicInfoPage } from '../lib/luxe-pages';
+import { getProjects } from '../lib/luxe';
 import { waLink } from '../lib/luxe-config';
 import { createServerSupabase } from '../lib/supabase';
 const fallbackPage = PUBLIC_INFO_PAGES.find((entry) => entry.slug === Astro.params.page && entry.slug !== 'team') as PublicInfoPage | undefined;
 if (!fallbackPage) return Astro.redirect('/');
 const sb=createServerSupabase(import.meta.env as unknown as Record<string,string>);
 const {data:storedPage}=sb?await sb.from('lx_pages').select('title,eyebrow,lead,seo_title,meta_description,og_image').eq('slug',fallbackPage.slug).eq('published',true).maybeSingle():{data:null};
-const policyControlled = ['warranty-aftercare', 'warranty-terms'].includes(fallbackPage.slug);
+const policyControlled = ['warranty-aftercare', 'warranty-terms', 'pricing-guide', 'payment-cancellation', 'how-it-works', 'faq'].includes(fallbackPage.slug);
 const storedOverrides = Object.fromEntries(Object.entries(storedPage || {}).filter(([key, value]) => value && !(policyControlled && key === 'lead')));
 const page={...fallbackPage,...storedOverrides};
+const examples = page.slug === 'pricing-guide' ? (await getProjects()).filter(p => p.published && p.project_status === 'completed' && p.after_image_url && p.estimate_label).slice(0,4) : [];
 ---
 <LuxeLayout title={storedPage?.seo_title||`${page.title} — BathSpace by LUXEhome`} description={policyControlled ? fallbackPage.lead : storedPage?.meta_description||page.lead} ogImage={storedPage?.og_image||undefined} ogImageAlt={page.title}>
-  <section class="info-hero"><p class="lx-eyebrow">{page.eyebrow}</p><h1>{page.title}</h1><p>{page.lead}</p><div class="actions"><a class="lx-btn-wa" href="/book-site-inspection">Apply for consultation</a><a class="lx-btn-ghost" href="/projects">See completed projects</a></div></section>
+  <section class="info-hero"><p class="lx-eyebrow">{page.eyebrow}</p><h1>{page.title}</h1><p>{page.lead}</p><div class="actions"><a class="lx-btn-wa" href="/book-site-inspection">Discuss my bathroom</a><a class="lx-btn-ghost" href="/projects">See completed projects</a></div></section>
   <section class="info-section"><div class="info-grid">{page.cards.map((card) => <article><h2>{card.title}</h2><p>{card.copy}</p></article>)}</div></section>
+  {examples.length > 0 && <section class="info-section"><h2>Real projects. Recorded investments.</h2><p>These are historical project values, not current fixed-price offers. Compare the scope and finishes in each project story.</p><div class="info-grid">{examples.map(project=><article><h3>{project.title}</h3><p><strong>{project.estimate_label}</strong></p><p>{project.client_requirements}</p><a href={`/projects/${project.slug}`}>See scope, finishes &amp; project story →</a></article>)}</div></section>}
   <section class="info-cta"><div><p class="lx-eyebrow">Start with clarity</p><h2>Ready to discuss your home?</h2></div><a href={waLink(`Hi BathSpace! I am interested in ${page.title}`)} target="_blank" rel="noopener noreferrer">Talk on WhatsApp</a></section>
 </LuxeLayout>
 <style>

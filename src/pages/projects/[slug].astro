@@ -34,7 +34,8 @@ const videoSchema = (primaryVideo && project.after_image_url) ? JSON.stringify({
   regionsAllowed: 'LK',
 }) : null;
 
-const reviewSchema = project.rating ? JSON.stringify({
+const hasReview = Boolean(project.review_text?.trim() && project.review_by?.trim());
+const reviewSchema = hasReview && project.rating ? JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Review',
   itemReviewed: {
@@ -152,6 +153,8 @@ const reviewSchema = project.rating ? JSON.stringify({
     </section>
   )}
 
+  <section class="ps-section"><a class="lx-btn-wa" href={inspectionHref}>Discuss a project like this</a></section>
+
   <!-- Story -->
   {(episode1 || episode2) && projectVideoCover && (
     <section class="ps-section">
@@ -180,6 +183,8 @@ const reviewSchema = project.rating ? JSON.stringify({
       </div>
     </section>
   )}
+
+  <section class="ps-section"><a class="lx-btn-wa" href={inspectionHref}>Discuss a project like this</a></section>
 
   <!-- Story -->
   {project.story && (
@@ -238,7 +243,7 @@ const reviewSchema = project.rating ? JSON.stringify({
                   {item.specification && <p class="ps-spec-note">{item.specification}</p>}
                   {item.catalog_item?.for_sale && Number(item.catalog_item.sale_price_lkr) > 0 && (
                     <div class="ps-spec-sale">
-                      <span>Current individual price: LKR {new Intl.NumberFormat('en-LK').format(Number(item.catalog_item.sale_price_lkr))} / {item.catalog_item.sale_unit || 'item'}</span>
+                      <span>Available finishes and current pricing</span>
                       {item.catalog_item.slug
                         ? <a href={`/shop/${item.catalog_item.slug}`}>See current product options & prices →</a>
                         : item.catalog_item.sale_availability !== 'out_of_stock'
@@ -333,7 +338,7 @@ const reviewSchema = project.rating ? JSON.stringify({
   )}
 
   <!-- Review -->
-  {(project.rating || project.review_text || project.review_screenshot_url) && (
+  {(hasReview || project.review_screenshot_url) && (
     <section class="ps-section">
       <h2 class="lxr">What our client said</h2>
       <div class="ps-review lxr">
@@ -358,15 +363,13 @@ const reviewSchema = project.rating ? JSON.stringify({
   <section class="ps-closing lxr">
     <h2>Planning a bathroom renovation?</h2>
     <p>
-      Start with a complimentary project consultation. For suitable complete-bathroom projects,
-      one detailed site assessment is included before you decide whether to commission the
-      LKR 50,000 design and construction proposal.
+      Start with a free phone or WhatsApp conversation. Our LKR 30,000 package per project includes the site visit, layout plan, 3D images, walkthrough video and detailed quotation with materials and fixtures.
     </p>
     <div class="ps-closing-btns">
-      <a href={inspectionHref} class="lx-btn-wa">Apply for complimentary consultation</a>
+      <a href={inspectionHref} class="lx-btn-wa">Discuss my bathroom</a>
       <a href="/projects" class="lx-btn-ghost">See more completed projects</a>
     </div>
-    <small>No payment to apply. The LKR 50,000 proposal is commissioned only after consultation and is credited in full if BathSpace by LUXEhome builds that bathroom.</small>
+    <small>No payment to enquire. The LKR 30,000 package is credited in full if BathSpace builds your agreed project.</small>
   </section>
 </LuxeLayout>
 
