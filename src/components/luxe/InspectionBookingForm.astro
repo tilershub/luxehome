@@ -93,7 +93,7 @@
       <small class="ibf-help">You can attach current bathroom photos and the Reel, project or bathroom style that inspired you after WhatsApp opens.</small>
     </label>
 
-    <div class="ibf-fee"><div><span>Optional next step</span><strong>LKR 30,000 / project</strong></div><p>Site visit, layout plan, 3D images, walkthrough video and detailed quotation with materials and fixtures. Fully credited if BathSpace builds your agreed project.</p></div>
+    <div class="ibf-fee"><div><span>Optional next step</span><strong>LKR 30,000 / bathroom</strong></div><p>Site visit, layout plan, 3D images, walkthrough video and detailed quotation with materials and fixtures. Each bathroom requires its own package; each fee is fully credited if BathSpace builds that bathroom.</p></div>
     <label class="ibf-consent"><input type="checkbox" name="process_acknowledgement" required /><span>Please contact me about this project. I understand that sending an enquiry does not book or pay for the design package.</span></label>
     <a href="https://wa.me/94774503744" target="_blank" rel="noopener noreferrer">Prefer WhatsApp? Discuss your bathroom →</a>
     <p id="inspection-error" class="ibf-error" role="alert" hidden></p>
@@ -101,7 +101,7 @@
       <span>Send my enquiry</span>
       <span hidden>Preparing your request…</span>
     </button>
-    <p class="ibf-footnote">Have several bathrooms? Tell us about them in the notes. We agree the project scope before payment.</p>
+    <p class="ibf-footnote">Have several bathrooms? Tell us about them in the notes. The design and proposal fee is LKR 30,000 per bathroom, paid upfront before preparing its separate deliverables and fully credited if BathSpace builds that bathroom.</p>
     <p class="ibf-privacy">By submitting, you ask BathSpace by LUXEhome to contact you about this project by WhatsApp and, if provided, email. See our <a href="/privacy-policy">Privacy Policy</a>.</p>
   </form>
 </div>
@@ -185,7 +185,7 @@
         consultation_fee_lkr: '0',
         consultation_status: 'Enquiry awaiting initial conversation',
         detailed_proposal_fee_lkr: '30000',
-        proposal_scope: 'One agreed project, including site visit',
+        proposal_scope: 'LKR 30,000 per bathroom, including site visit and separate design deliverables',
         proposal_delivery: 'Within seven working days after package payment and the completed site visit',
         construction_credit: '100% credited to the related BathSpace construction balance',
         payment_status: 'No payment requested for consultation application',
@@ -201,10 +201,10 @@
         sourceProject ? `Source project: ${sourceProject}` : '',
         `Measurements: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
         'Initial phone or WhatsApp conversation: free',
-        'Package: LKR 30,000 per agreed project, including site visit',
+        'Package: LKR 30,000 per bathroom, payable upfront before preparation, including site visit',
         'Package: site visit, layout plan, 3D images, walkthrough video, detailed quotation with materials and fixtures',
         'Delivery: within seven working days after proposal payment and completed site visit',
-        'Construction credit: 100% credited if BathSpace by LUXEhome builds this project',
+        'Construction credit: 100% of each bathroom proposal fee credited if BathSpace by LUXEhome builds that bathroom',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
 
@@ -284,9 +284,9 @@
         sourceProject ? `Source project: ${sourceProject}` : '',
         `Bathroom size: ${sizeStatus}${approximateSize ? ` — ${approximateSize}` : ''}`,
         'Initial conversation: free; site visit included in the paid package',
-        'Site visit, design and quotation package: LKR 30,000 per agreed project',
+        'Site visit, design and quotation package: LKR 30,000 per bathroom, payable upfront before deliverables',
         'Proposal delivery: within seven working days after payment and completed site visit',
-        'Construction credit: 100% credited if BathSpace by LUXEhome builds this project',
+        'Construction credit: 100% of each bathroom proposal fee credited if BathSpace by LUXEhome builds that bathroom',
         notes ? `Notes: ${notes}` : '',
       ].filter(Boolean).join('\n');
       const whatsappUrl = `https://wa.me/94774503744?text=${encodeURIComponent(message)}`;
