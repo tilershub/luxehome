@@ -18,7 +18,7 @@
     <div class="ibf-heading">
       <p class="lx-eyebrow">Free initial conversation</p>
       <h2>Tell us about your project.</h2>
-      <p>You do not need drawings or measurements. A few details help us give you useful advice.</p>
+      <p>You do not need drawings or measurements. Tell us a little about the bathroom or bathrooms you are planning, and we will discuss the next steps with you.</p>
     </div>
 
     <input class="ibf-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
@@ -54,20 +54,20 @@
     </fieldset>
 
     <fieldset>
-      <legend>Do you know the bathroom size?</legend>
+      <legend>Do you have approximate bathroom measurements?</legend>
       <div class="ibf-choice-grid ibf-choice-grid--two">
-        <label><input type="radio" name="size_status" value="Please measure during the package site visit" checked /><span>No — please measure it</span></label>
-        <label><input type="radio" name="size_status" value="Approximate size provided" /><span>Yes — approximately</span></label>
+        <label><input type="radio" name="size_status" value="Please measure during the package site visit" checked /><span>No — please measure during the site visit</span></label>
+        <label><input type="radio" name="size_status" value="Approximate size provided" /><span>Yes — I have an estimate</span></label>
       </div>
     </fieldset>
 
     <label id="inspection-size-field" hidden>
-      <span>Approximate size <small>(optional)</small></span>
-      <input type="text" name="approximate_size" placeholder="e.g. 2.5 m × 2 m, or about 5 m²" />
+      <span>Approximate size(s) <small>(optional)</small></span>
+      <input type="text" name="approximate_size" placeholder="e.g. 2.5 m × 2 m; for several bathrooms, list each separately" />
     </label>
 
     <fieldset>
-      <legend>What investment range are you considering for this complete bathroom? <b aria-hidden="true">*</b></legend>
+      <legend>What investment range are you considering per bathroom? <b aria-hidden="true">*</b></legend>
       <p class="ibf-field-note">BathSpace complete renovations typically begin around LKR 1.5M, depending on the room and approved scope.</p>
       <div class="ibf-choice-grid">
         <label><input type="radio" name="budget_direction" value="LKR 1.5M–2M" required /><span>LKR 1.5M–2M</span></label>
@@ -88,12 +88,12 @@
     </fieldset>
 
     <label>
-      <span>Anything we should know? <small>(optional)</small></span>
-      <textarea name="notes" rows="4" placeholder="Current problems, access, timeline, style preferences or other details"></textarea>
-      <small class="ibf-help">You can attach current bathroom photos and the Reel, project or bathroom style that inspired you after WhatsApp opens.</small>
+      <span>Tell us more about your requirements <small>(optional)</small></span>
+      <textarea name="notes" rows="4" placeholder="Describe your requirements. For several bathrooms, briefly tell us about each one."></textarea>
+      <small class="ibf-help">If you have several bathrooms, you can describe them together here; we will discuss each one individually. You can also share photos and design references on WhatsApp after submitting.</small>
     </label>
 
-    <div class="ibf-fee"><div><span>Optional next step</span><strong>LKR 30,000 / bathroom</strong></div><p>Site visit, layout plan, 3D images, walkthrough video and detailed quotation with materials and fixtures. Each bathroom requires its own package; each fee is fully credited if BathSpace builds that bathroom.</p></div>
+    <div class="ibf-fee"><div><span>After your free conversation</span><strong>LKR 30,000 / bathroom</strong></div><p>Optional paid design and proposal package. Each bathroom receives separate measurements, a layout plan, 3D images, a walkthrough video and a detailed quotation with materials and fixtures. Pay only when you choose to proceed with the package. The full fee is credited against that bathroom's renovation price if BathSpace carries out the work.</p></div>
     <label class="ibf-consent"><input type="checkbox" name="process_acknowledgement" required /><span>Please contact me about this project. I understand that sending an enquiry does not book or pay for the design package.</span></label>
     <a href="https://wa.me/94774503744" target="_blank" rel="noopener noreferrer">Prefer WhatsApp? Discuss your bathroom →</a>
     <p id="inspection-error" class="ibf-error" role="alert" hidden></p>
@@ -101,7 +101,6 @@
       <span>Send my enquiry</span>
       <span hidden>Preparing your request…</span>
     </button>
-    <p class="ibf-footnote">Have several bathrooms? Tell us about them in the notes. The design and proposal fee is LKR 30,000 per bathroom, paid upfront before preparing its separate deliverables and fully credited if BathSpace builds that bathroom.</p>
     <p class="ibf-privacy">By submitting, you ask BathSpace by LUXEhome to contact you about this project by WhatsApp and, if provided, email. See our <a href="/privacy-policy">Privacy Policy</a>.</p>
   </form>
 </div>
