@@ -7,7 +7,7 @@ import {imageUrl,waLink} from '../../lib/luxe-config';
 const slug=Astro.params.slug || '';
 const record=await getShopFixtureBySlug(slug);
 if(!record) return Astro.redirect('/shop',302);
-const {product,variants}=record;
+const {product,variants,usedInProjects}=record;
 const photos=[...new Set([product.image_url,...(product.gallery_urls||[])].filter(Boolean))];
 const money=(n:number)=>new Intl.NumberFormat('en-LK',{maximumFractionDigits:0}).format(Number(n));
 const custom=product.product_type==='made_to_measure';
@@ -91,6 +91,30 @@ const itemData={
    {product.specification&&<p>{product.specification}</p>}
    <p><a href="/projects">See real completed BathSpace bathrooms →</a></p>
   </div>
+
+  {usedInProjects.length > 0 && (
+    <section class="bd-installed" aria-labelledby="bd-installed-title">
+      <p class="lx-eyebrow">Products behind the projects</p>
+      <h2 id="bd-installed-title">Referenced in real BathSpace projects</h2>
+      <p class="bd-installed-intro">See how this catalogue item appears in our documented renovation specifications. The original project selection and installation are shown separately from today's retail pricing.</p>
+      <div class="bd-installed-grid">
+        {usedInProjects.map((project) => (
+          <a class="bd-installed-card" href={`/projects/${project.slug}`}>
+            {project.after_image_url && (
+              <img src={imageUrl(project.after_image_url, 560)}
+                alt={`${project.title} completed bathroom`}
+                loading="lazy" decoding="async" width="560" height="360" />
+            )}
+            <span class="bd-installed-copy">
+              <small>Completed bathroom · {project.location || 'Sri Lanka'}</small>
+              <strong>{project.title}</strong>
+              <span>Explore the renovation and material schedule →</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
  </main>
 </LuxeLayout>
 <script>
@@ -172,4 +196,16 @@ const itemData={
  .bd-info dt,.bd-info dd{padding:.8rem;border-bottom:1px solid var(--cream-deep);margin:0;font-size:.93rem}
  .bd-info dt{font-weight:600}
  @media(max-width:720px){.bd-product-grid{grid-template-columns:1fr}.bd-product{padding-top:1rem}.bd-main-photo{aspect-ratio:4/5;max-height:none}}
+ .bd-installed{margin:2.4rem auto 0;padding:2.3rem 0 1.1rem;border-top:1px solid var(--cream-deep)}
+ .bd-installed h2{font-family:var(--lx-serif);font-size:clamp(1.9rem,3.5vw,2.65rem);font-weight:500;margin:.4rem 0 .7rem}
+ .bd-installed-intro{max-width:66ch;color:var(--sage-deep);line-height:1.58;margin-bottom:1.3rem}
+ .bd-installed-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+ .bd-installed-card{display:flex;flex-direction:column;background:white;text-decoration:none;color:var(--ink);border:1px solid var(--cream-deep);border-radius:11px;overflow:hidden}
+ .bd-installed-card:hover,.bd-installed-card:focus-visible{border-color:var(--sage-deep)}
+ .bd-installed-card img{width:100%;height:auto;aspect-ratio:14/9;object-fit:cover}
+ .bd-installed-copy{display:grid;gap:.45rem;padding:1.05rem;min-width:0}
+ .bd-installed-copy small{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--sage-deep)}
+ .bd-installed-copy strong{font:500 1.3rem/1.27 var(--lx-serif)}
+ .bd-installed-copy>span{font-size:.8rem;font-weight:650;color:var(--sage-deep)}
+ @media(max-width:720px){.bd-installed-grid{grid-template-columns:1fr}.bd-installed-card img{max-height:210px}}
 </style>
