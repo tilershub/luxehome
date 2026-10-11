@@ -313,22 +313,64 @@ export interface ShopVariant {
   availability: 'in_stock' | 'made_to_order' | 'out_of_stock';
   active: boolean;
 }
-export async function getShopFixtureBySlug(slug: string): Promise<{product:ShopFixture;variants:ShopVariant[]} | null> {
-  const products = await getShopFixtures();
-  const product = products.find((item) => item.slug === slug);
-  if (!product) return null;
+export interface ShopProjectProof {
+  slug: string;
+  title: string;
+  location: string | null;
+  after_image_url: string | null;
+}
+
+/** Look up one public product directly and connect its catalogue reference back to
+ *  genuine published, completed renovation stories. Never show unpublished or
+ *  in-progress construction as a completed product case study.
+ */
+export async function getShopFixtureBySlug(slug: string): Promise<{
+  product: ShopFixture;
+  variants: ShopVariant[];
+  usedInProjects: ShopProjectProof[];
+} | null> {
   const c = sb();
   if (!c) return null;
-  const {data,error} = await c.from('lx_shop_variants')
-    .select('id,product_id,label,sku,size_label,finish_label,price_lkr,stock_quantity,availability,active')
-    .eq('product_id', product.id)
-    .eq('active',true)
-    .order('sort_order');
-  if (error) {
-    console.error('Could not load fixture variations:',error.message);
-    return {product,variants:[]};
+  const { data: product, error: productError } = await c.from('lx_fixture_library')
+    .select('id,slug,sku,section,category,item_name,brand,model_code,specification,description,image_url,gallery_urls,width_mm,height_mm,depth_mm,tile_length_mm,tile_width_mm,coverage_sqm_per_box,pieces_per_box,product_type,delivery_class,warranty_terms,sale_price_lkr,sale_unit,sale_availability,sale_notes')
+    .eq('slug', slug)
+    .eq('active', true)
+    .eq('for_sale', true)
+    .gt('sale_price_lkr', 0)
+    .not('image_url', 'is', null)
+    .maybeSingle();
+  if (productError || !product) return null;
+
+  const [variantResult, projectRefsResult] = await Promise.all([
+    c.from('lx_shop_variants')
+      .select('id,product_id,label,sku,size_label,finish_label,price_lkr,stock_quantity,availability,active')
+      .eq('product_id', product.id).eq('active', true).order('sort_order'),
+    c.from('lx_project_specifications')
+      .select('project_id').eq('catalog_item_id', product.id),
+  ]);
+  if (variantResult.error) {
+    console.error('Could not load shop product variants:', variantResult.error.message);
   }
-  return {product, variants:(data??[]) as ShopVariant[]};
+  if (projectRefsResult.error) {
+    console.error('Could not load linked bathroom projects:', projectRefsResult.error.message);
+  }
+
+  const ids = [...new Set((projectRefsResult.data ?? []).map((x) => x.project_id))];
+  let usedInProjects: ShopProjectProof[] = [];
+  if (ids.length > 0) {
+    const {data, error} = await c.from('lx_projects')
+      .select('slug,title,location,after_image_url')
+      .in('id', ids).eq('published', true).eq('project_status', 'completed')
+      .not('after_image_url', 'is', null)
+      .limit(6);
+    if (error) console.error('Could not load published project cross-links:', error.message);
+    else usedInProjects = (data ?? []) as ShopProjectProof[];
+  }
+  return {
+    product: product as ShopFixture,
+    variants: (variantResult.data ?? []) as ShopVariant[],
+    usedInProjects,
+  };
 }
 
 export async function getTeam(opts: { permanentOnly?: boolean } = {}): Promise<TeamMember[]> {
