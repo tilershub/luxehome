@@ -40,15 +40,6 @@
     </label>
 
     <fieldset>
-      <legend>What are you planning? <b aria-hidden="true">*</b></legend>
-      <div class="ibf-choice-grid">
-        <label><input type="radio" name="project_type" value="Bathroom renovation" required /><span>Renovating an existing bathroom</span></label>
-        <label><input type="radio" name="project_type" value="New bathroom" /><span>Creating a new bathroom</span></label>
-        <label><input type="radio" name="project_type" value="Not sure yet" /><span>Not sure yet</span></label>
-      </div>
-    </fieldset>
-
-    <fieldset>
       <legend>Does your project involve one or several bathrooms? <b aria-hidden="true">*</b></legend>
       <div class="ibf-choice-grid ibf-choice-grid--two">
         <label><input type="radio" name="bathroom_scope" value="One bathroom" required /><span>One bathroom</span></label>
@@ -58,14 +49,18 @@
     </fieldset>
 
     <fieldset>
-      <legend>What investment are you considering per bathroom? <b aria-hidden="true">*</b></legend>
-      <p class="ibf-field-note">Complete renovations typically begin around LKR 1.5M per bathroom. An approximate range is enough for now.</p>
-      <div class="ibf-choice-grid ibf-choice-grid--two">
-        <label><input type="radio" name="budget_direction" value="LKR 1.5M–2M" required /><span>LKR 1.5M–2M</span></label>
-        <label><input type="radio" name="budget_direction" value="LKR 2M–3M" /><span>LKR 2M–3M</span></label>
-        <label><input type="radio" name="budget_direction" value="LKR 3M+" /><span>Above LKR 3M</span></label>
-        <label><input type="radio" name="budget_direction" value="Need budget guidance" /><span>I'd like some budget guidance</span></label>
+      <legend>Your bathroom investment</legend>
+      <p class="ibf-field-note">Most complete BathSpace bathroom renovations fall within <strong>LKR 1.5M–2.5M per bathroom</strong>, depending on the size, construction requirements, materials and selected fixtures.</p>
+      <p class="ibf-field-note">Depending on the project, a complete renovation can include design, plumbing, waterproofing, tiling, bathware, vanity, lighting and finishing. Larger bathrooms, bathtubs or additional custom work may require a higher investment.</p>
+      <p class="ibf-budget-question">Does this investment range align with your expectations? <b aria-hidden="true">*</b></p>
+      <div class="ibf-choice-grid ibf-choice-grid--two" role="group" aria-label="Budget expectations">
+        <label><input type="radio" name="budget_direction" value="Within typical range" required /><span>Yes, this range works for me</span></label>
+        <label><input type="radio" name="budget_direction" value="Below typical range" /><span>I was considering a lower investment</span></label>
+        <label><input type="radio" name="budget_direction" value="Above typical range" /><span>I'm considering a higher investment</span></label>
+        <label><input type="radio" name="budget_direction" value="Need budget guidance" /><span>I'm not sure yet — I'd like guidance</span></label>
       </div>
+      <p class="ibf-context-note" id="inspection-budget-below-note" hidden>We can discuss your requirements and whether an adjusted scope is suitable. A complete renovation may need a higher investment.</p>
+      <p class="ibf-context-note" id="inspection-budget-unsure-note" hidden>That's fine. We can explain what affects bathroom renovation costs during your free conversation.</p>
     </fieldset>
 
     <fieldset>
@@ -110,6 +105,8 @@
   const multipleNote = document.getElementById('inspection-multiple-note') as HTMLElement | null;
   const researchNote = document.getElementById('inspection-research-note') as HTMLElement | null;
   const readyNote = document.getElementById('inspection-ready-note') as HTMLElement | null;
+  const budgetBelowNote = document.getElementById('inspection-budget-below-note') as HTMLElement | null;
+  const budgetUnsureNote = document.getElementById('inspection-budget-unsure-note') as HTMLElement | null;
   const successMessage = document.getElementById('inspection-success-message') as HTMLParagraphElement | null;
   const backupLink = document.getElementById('inspection-whatsapp-backup') as HTMLAnchorElement | null;
   const errorNotice = document.getElementById('inspection-error') as HTMLElement | null;
@@ -122,28 +119,19 @@
     if (!form) return;
     const scope = form.querySelector<HTMLInputElement>('input[name="bathroom_scope"]:checked')?.value;
     const timing = form.querySelector<HTMLInputElement>('input[name="project_timing"]:checked')?.value;
+    const budget = form.querySelector<HTMLInputElement>('input[name="budget_direction"]:checked')?.value;
     if (multipleNote) multipleNote.hidden = scope !== 'Several bathrooms';
     if (researchNote) researchNote.hidden = timing !== 'Just researching';
     if (readyNote) readyNote.hidden = timing !== 'As soon as possible';
+    if (budgetBelowNote) budgetBelowNote.hidden = budget !== 'Below typical range';
+    if (budgetUnsureNote) budgetUnsureNote.hidden = budget !== 'Need budget guidance';
   }
 
   if (form) {
     const params = new URLSearchParams(window.location.search);
-    const project = params.get('project');
     const sourceProject = params.get('source_project') || '';
 
-    const projectValues: Record<string, string> = {
-      renovation: 'Bathroom renovation',
-      new: 'New bathroom',
-      unsure: 'Not sure yet',
-    };
-    const projectValue = project ? projectValues[project.toLowerCase()] : '';
-    if (projectValue) {
-      const option = form.querySelector<HTMLInputElement>(`input[name="project_type"][value="${projectValue}"]`);
-      if (option) option.checked = true;
-    }
-
-    form.querySelectorAll<HTMLInputElement>('input[name="bathroom_scope"], input[name="project_timing"]').forEach((radio) => {
+    form.querySelectorAll<HTMLInputElement>('input[name="bathroom_scope"], input[name="project_timing"], input[name="budget_direction"]').forEach((radio) => {
       radio.addEventListener('change', updateContextNotes);
     });
     updateContextNotes();
@@ -157,20 +145,21 @@
       const name = formValue(data, 'name');
       const phone = formValue(data, 'phone');
       const location = formValue(data, 'location');
-      const projectType = formValue(data, 'project_type');
       const bathroomScope = formValue(data, 'bathroom_scope');
       const budgetDirection = formValue(data, 'budget_direction');
-      // Only the published budget tiers may enter the consultation pipeline.
-      if (!['LKR 1.5M–2M', 'LKR 2M–3M', 'LKR 3M+', 'Need budget guidance'].includes(budgetDirection)) {
+      // Confirm the submitted expectation is one of the choices on the form.
+      if (!['Within typical range', 'Below typical range', 'Above typical range', 'Need budget guidance'].includes(budgetDirection)) {
         form.querySelector<HTMLInputElement>('input[name="budget_direction"]')?.focus();
         return;
       }
       const projectTiming = formValue(data, 'project_timing');
       const leadStage =
         projectTiming === 'Just researching' ? 'Researching' :
-        projectTiming === 'As soon as possible' && budgetDirection !== 'Need budget guidance'
+        budgetDirection === 'Below typical range' ? 'Budget discussion needed' :
+        projectTiming === 'As soon as possible' &&
+          (budgetDirection === 'Within typical range' || budgetDirection === 'Above typical range')
           ? 'Ready to proceed'
-          : 'Considering renovation';
+          : 'Considering project';
       if(errorNotice){errorNotice.hidden=true;errorNotice.textContent='';}
       const notes = formValue(data, 'notes');
 
@@ -179,9 +168,9 @@
       submit.children[1]?.removeAttribute('hidden');
 
       const queueNotes = [
-        `Project type: ${projectType}`,
         `Bathrooms: ${bathroomScope}`,
-        `Budget per bathroom: ${budgetDirection}`,
+        'Typical complete renovation investment: LKR 1.5M–2.5M per bathroom',
+        `Budget expectation: ${budgetDirection}`,
         `Expected start: ${projectTiming}`,
         `Enquiry stage: ${leadStage}`,
         sourceProject ? `Source project: ${sourceProject}` : '',
@@ -233,7 +222,7 @@
          the last thing the visitor does before WhatsApp takes over. */
       const leadParams = {
         content_name: 'Bathroom Project Consultation Application',
-        content_category: projectType,
+        content_category: 'Bathroom enquiry',
       };
       const track = (window as any).luxeTrack;
       if (typeof track === 'function') {
@@ -259,9 +248,9 @@
         `Name: ${name}`,
         `Phone: ${phone}`,
         `Location: ${location}`,
-        `Project: ${projectType}`,
         `Bathrooms: ${bathroomScope}`,
-        `Budget per bathroom: ${budgetDirection}`,
+        'Typical complete renovation: LKR 1.5M–2.5M per bathroom',
+        `Budget expectation: ${budgetDirection}`,
         `Expected start: ${projectTiming}`,
         `Enquiry stage: ${leadStage}`,
         sourceProject ? `Source project: ${sourceProject}` : '',
@@ -336,7 +325,9 @@
   .ibf-wrap select:focus,
   .ibf-wrap textarea:focus { outline: 2px solid color-mix(in srgb, var(--gold) 55%, transparent); outline-offset: 1px; border-color: var(--gold); }
   .ibf-wrap fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
-  .ibf-field-note { margin: -.12rem 0 .55rem; color: color-mix(in srgb, var(--ink) 66%, transparent); font-size: .8rem; line-height: 1.5; }
+  .ibf-field-note { margin: -.12rem 0 .55rem; color: color-mix(in srgb, var(--ink) 66%, transparent); font-size: .85rem; line-height: 1.6; }
+  .ibf-budget-question { margin: .9rem 0 .55rem; font-size: .9rem; font-weight: 600; color: var(--ink); }
+  .ibf-budget-question b { color: #9b493d; }
   .ibf-context-note { margin: .6rem 0 .2rem; padding: .85rem 1rem; border-left: 2px solid var(--sage-deep); background: color-mix(in srgb, var(--cream) 65%, white); color: var(--ink); font-size: .86rem; line-height: 1.6; }
   .ibf-context-note[hidden] { display: none; }
   .ibf-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
