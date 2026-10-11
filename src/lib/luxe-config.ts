@@ -186,7 +186,7 @@ export const PROJECT_INITIATION = {
     'Construction scope, assumptions, exclusions, timeline and payment stages',
     'Quality commitments and applicable warranty schedule',
   ],
-  multipleBathrooms: 'Tell us about all the bathrooms when you enquire. Each room receives its own measurements, layout, 3D images, walkthrough video and detailed quotation. We confirm the total before payment: two bathrooms cost LKR 60,000; three cost LKR 90,000. If BathSpace renovates them, all corresponding fees are fully credited against the final construction total.',
+  multipleBathrooms: 'Tell us about all the bathrooms when you enquire. Each bathroom requires its own measurements, layout, 3D images, walkthrough video and detailed quotation. The design and proposal package costs LKR 30,000 per bathroom, with the total confirmed before payment. If BathSpace renovates the bathrooms, all corresponding fees are fully credited against the final construction total.',
 } as const;
 
 /** The BathSpace construction system every bathroom follows.
