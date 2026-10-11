@@ -18,11 +18,24 @@ const projects = allProjects
     || Number(b.featured) - Number(a.featured)
     || Number(Boolean(b.after_image_url)) - Number(Boolean(a.after_image_url))
   );
-// Lead with completed bathrooms that already have authentic photography.
-// Text-only case studies remain available in /projects, but do not displace
-// photo-backed project proof on this conversion-critical homepage.
-const photographedProjects = projects.filter((project) => Boolean(project.after_image_url));
-const featuredProjects = photographedProjects.slice(0, 4);
+// Only showcase completed bathrooms with authentic finished-room photography.
+// The homepage has a deliberate portfolio order, independent of CMS publish date:
+// Nawala, Avissawella, Kegalle, Matugama, Kotte.
+const homepagePortfolioOrder = [
+  'nawala-complete-bathroom-renovation',
+  'avissawella-bathroom-renovation',
+  'kegalle-bathroom-renovation',
+  'matugama-bathroom-renovation',
+  'kotte-bathroom-renovation',
+];
+const homepagePortfolioRank = (slug: string) => {
+  const index = homepagePortfolioOrder.indexOf(slug);
+  return index === -1 ? homepagePortfolioOrder.length : index;
+};
+const photographedProjects = projects
+  .filter((project) => Boolean(project.after_image_url))
+  .sort((a, b) => homepagePortfolioRank(a.slug) - homepagePortfolioRank(b.slug));
+const featuredProjects = photographedProjects.slice(0, 5);
 const nawalaLatest = projects.find((project) => project.slug === 'nawala-complete-bathroom-renovation' && !project.after_image_url) ?? null;
 const heroProject = photographedProjects[0] ?? null;
 const heroCover = heroProject?.after_image_url ?? null;
