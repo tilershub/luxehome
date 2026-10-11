@@ -5,10 +5,10 @@ import InspectionBookingForm from '../components/luxe/InspectionBookingForm.astr
 import { PROJECT_INITIATION } from '../lib/luxe-config';
 import { PROJECT_INITIATION_FAQ } from '../lib/luxe-pages';
 ---
-<LuxeLayout title="Discuss your bathroom | BathSpace by LUXEhome" description="Start with a free conversation. Our LKR 30,000 project package includes a site visit, layout plan, 3D images, walkthrough video and detailed quotation.">
+<LuxeLayout title="Discuss your bathroom | BathSpace by LUXEhome" description="Start with a free conversation. Our LKR 30,000 per-bathroom package includes a site visit, layout plan, 3D images, walkthrough video and detailed quotation.">
   <section class="enquiry-intro"><p class="lx-eyebrow">Your bathroom starts here</p><h1>Let’s plan your bathroom.</h1><p>Tell us what you have in mind. Your first conversation is free, and you do not need measurements or drawings.</p></section>
   <section class="enquiry-form"><InspectionBookingForm /></section>
-  <section class="enquiry-package"><p class="lx-eyebrow">One package · one agreed project</p><h2>Site visit, design &amp; quotation · LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')}</h2><ul>{PROJECT_INITIATION.includes.map(item=><li>{item}</li>)}</ul><p>{PROJECT_INITIATION.credit}</p><p>{PROJECT_INITIATION.delivery}</p></section>
+  <section class="enquiry-package"><p class="lx-eyebrow">One package · one bathroom</p><h2>Site visit, design &amp; quotation · LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')}</h2><ul>{PROJECT_INITIATION.includes.map(item=><li>{item}</li>)}</ul><p>{PROJECT_INITIATION.credit}</p><p>{PROJECT_INITIATION.delivery}</p></section>
   <section class="enquiry-faq"><h2>Questions before you start</h2>{PROJECT_INITIATION_FAQ.map(item=><details><summary>{item.title}</summary><p>{item.copy}</p></details>)}</section>
 </LuxeLayout>
 <style>
