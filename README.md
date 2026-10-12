@@ -130,3 +130,7 @@ project referenced in `src/lib/luxe-supabase.ts`.
 - WhatsApp: +94 77 450 3744
 - Email: luxehome@gmail.com
 - Site: https://luxehome.lk
+
+### Public image delivery
+
+Images use their original URLs by default. Set `PUBLIC_CF_IMAGE_TRANSFORMS=true` at build time only after Cloudflare image resizing is enabled and the source origins are allowed. The browser retains its original-image fallback if a configured transformation fails. Project and shop cards provide responsive width candidates when resizing is enabled.

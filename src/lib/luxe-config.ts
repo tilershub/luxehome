@@ -68,6 +68,10 @@ export function imageUrl(
   if (!url) return '';
   // No width means the caller wants the original untouched.
   if (!width) return url;
+  // The live zone currently rejects image transforms. Do not make visitors
+  // wait for a failed request before the browser falls back to the source.
+  // Enable only after Cloudflare image resizing and allowed origins are ready.
+  if (import.meta.env.PUBLIC_CF_IMAGE_TRANSFORMS !== 'true') return url;
   // Already transformed, or a source Cloudflare cannot fetch (data:/blob:
   // previews in the admin, bare filenames).
   if (url.includes('/cdn-cgi/image/') || !/^(https?:\/\/|\/)/i.test(url)) return url;
