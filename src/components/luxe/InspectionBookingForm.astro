@@ -14,7 +14,8 @@
     </a>
   </div>
 
-  <form id="inspection-request-form">
+  <noscript><p class="ibf-fallback">The enquiry form needs JavaScript. <a href="https://wa.me/94774503744">Discuss your bathroom on WhatsApp instead →</a></p></noscript>
+  <form id="inspection-request-form" method="post" onsubmit="event.preventDefault()">
     <div class="ibf-heading">
       <p class="lx-eyebrow">Free initial conversation</p>
       <h2>Let's discuss your bathroom project.</h2>
@@ -83,7 +84,7 @@
     <label class="ibf-consent"><input type="checkbox" name="process_acknowledgement" required /><span>Please contact me about this enquiry by phone or WhatsApp. I understand the initial conversation is free and no paid package is booked.</span></label>
     <a href="https://wa.me/94774503744" target="_blank" rel="noopener noreferrer">Prefer WhatsApp? Discuss your bathroom →</a>
     <p id="inspection-error" class="ibf-error" role="alert" hidden></p>
-    <button class="ibf-submit" id="inspection-submit" type="submit">
+    <button class="ibf-submit" id="inspection-submit" type="submit" disabled>
       <span>Request my free consultation</span>
       <span hidden>Preparing your request…</span>
     </button>
@@ -138,7 +139,7 @@
       event.preventDefault();
       const data = new FormData(form);
       if (formValue(data, 'website')) return;
-      if (!form.reportValidity() || !submit || !success) return;
+      if (!submit || submit.disabled || !success || !form.reportValidity()) return;
 
       const name = formValue(data, 'name');
       const phone = formValue(data, 'phone');
@@ -162,6 +163,7 @@
       const notes = formValue(data, 'notes');
 
       submit.disabled = true;
+      form.setAttribute('aria-busy', 'true');
       submit.children[0]?.setAttribute('hidden', '');
       submit.children[1]?.removeAttribute('hidden');
 
@@ -209,40 +211,16 @@
       } catch (error) {
         console.error('[BathSpace] Consultation submission failed:', error);
         if(errorNotice){
-          errorNotice.textContent='We could not save your application. Please check your connection and try again, or contact us through WhatsApp. No consultation is confirmed yet.';
+          errorNotice.textContent='We could not save your enquiry. Please check your connection and try again, or contact us through WhatsApp. No consultation is confirmed yet.';
           errorNotice.hidden=false;
           errorNotice.scrollIntoView({behavior:'smooth',block:'center'});
         }
+        form.removeAttribute('aria-busy');
         submit.disabled=false;
         submit.children[1]?.setAttribute('hidden','');
         submit.children[0]?.removeAttribute('hidden');
         return;
       }
-
-      /* luxeTrack loads fbevents.js before firing. Plain fbq would only queue
-         the conversion when the deferred load has not run yet, and this is
-         the last thing the visitor does before WhatsApp takes over. */
-      const leadParams = {
-        content_name: 'Bathroom Project Consultation Application',
-        content_category: 'Bathroom enquiry',
-      };
-      const track = (window as any).luxeTrack;
-      if (typeof track === 'function') {
-        track('Lead', leadParams, { eventID: metaEventId });
-      } else if (typeof (window as any).fbq === 'function') {
-        (window as any).fbq('track', 'Lead', leadParams, { eventID: metaEventId });
-      }
-      fetch('/api/meta-capi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event_id: metaEventId,
-          event_source_url: window.location.href,
-          phone,
-          name,
-          service: 'Bathroom Project Consultation',
-        }),
-      }).catch(() => {});
 
       const message = [
         'Bathroom Enquiry — BATHSPACE BY LUXEHOME',
@@ -265,6 +243,7 @@
       // Popups can be blocked after an asynchronous save; the visible
       // success link is the reliable way to continue to WhatsApp.
 
+      form.removeAttribute('aria-busy');
       form.hidden = true;
       success.hidden = false;
       if (successMessage) {
@@ -275,13 +254,45 @@
       success.setAttribute("tabindex", "-1");
       success.focus();
       success.scrollIntoView({behavior: "smooth", block: "start"});
-      if (typeof (window as any).gtag === 'function') {
-        (window as any).gtag('event', 'consultation_application_submit', {
-          event_category: 'Lead',
-          event_label: 'Bathroom Project Consultation',
-        });
+      // Analytics are best-effort; they must never undo the saved confirmation.
+      try {
+        /* luxeTrack loads fbevents.js before firing. Plain fbq would only queue
+           the conversion when the deferred load has not run yet, and this is
+           the last thing the visitor does before WhatsApp takes over. */
+        const leadParams = {
+          content_name: 'Bathroom Project Consultation Application',
+          content_category: 'Bathroom enquiry',
+        };
+        const track = (window as any).luxeTrack;
+        if (typeof track === 'function') {
+          track('Lead', leadParams, { eventID: metaEventId });
+        } else if (typeof (window as any).fbq === 'function') {
+          (window as any).fbq('track', 'Lead', leadParams, { eventID: metaEventId });
+        }
+        fetch('/api/meta-capi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_id: metaEventId,
+            event_source_url: window.location.href,
+            phone,
+            name,
+            service: 'Bathroom Project Consultation',
+          }),
+        }).catch(() => {});
+
+        if (typeof (window as any).gtag === 'function') {
+          (window as any).gtag('event', 'consultation_application_submit', {
+            event_category: 'Lead',
+            event_label: 'Bathroom Project Consultation',
+          });
+        }
+      } catch (error) {
+        console.warn('[BathSpace] Enquiry saved; analytics unavailable.');
       }
     });
+    // Enable only after the submit handler is installed.
+    if (submit) submit.disabled = false;
   }
 </script>
 
@@ -293,6 +304,9 @@
     background: #fff;
     box-shadow: 0 18px 50px rgba(43,50,42,.08);
   }
+  .ibf-fallback { padding: 1.25rem; }
+  .ibf-fallback a { color: var(--sage-deep); }
+  .ibf-choice-grid label:has(input:checked) { border-color: var(--sage-deep); background: var(--sage-mist); }
   .ibf-error { background: #fff2ee; border: 1px solid #bd6047; color: #833c30; padding: .85rem 1rem; border-radius: 8px; line-height: 1.45; }
   .ibf-wrap form,
   .ibf-success { padding: clamp(1.35rem, 4vw, 2.4rem); }
@@ -370,7 +384,7 @@
     width: 100%;
     border: 0;
     border-radius: 999px;
-    background: var(--gold);
+    background: var(--sage-deep);
     color: #fff;
     min-height: 50px;
     padding: .9rem 1.2rem;
@@ -387,7 +401,7 @@
   .ibf-success > span { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--sage-deep); color: #fff; font-size: 1.3rem; }
   .ibf-success h2 { margin: .8rem 0 .4rem; font-size: 2.3rem; }
   .ibf-success p { max-width: 52ch; color: color-mix(in srgb, var(--ink) 68%, transparent); }
-  .ibf-success a { display: inline-flex; align-items: center; min-height: 48px; margin-top: 1rem; border-radius: 999px; padding: .75rem 1rem; background: var(--gold); color: #fff; text-decoration: none; font-size: .9rem; font-weight: 600; }
+  .ibf-success a { display: inline-flex; align-items: center; min-height: 48px; margin-top: 1rem; border-radius: 999px; padding: .75rem 1rem; background: var(--sage-deep); color: #fff; text-decoration: none; font-size: .9rem; font-weight: 600; }
 
   @media (max-width: 640px) {
     .ibf-grid,
