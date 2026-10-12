@@ -20,7 +20,7 @@ const imageDescription = status === 'completed' ? 'completed bathroom' : 'bathro
 <a href={`/projects/${project.slug}`} class:list={['lp-card', { 'lp-card--compact': compact }]}>
   <div class="lp-cover">
     {cover
-      ? <img src={imageUrl(cover, 800)} alt={`${project.title} — ${imageDescription} by BathSpace`} loading="lazy" width="800" height="560" />
+      ? <img src={imageUrl(cover, 800)} srcset={`${imageUrl(cover, 400)} 400w, ${imageUrl(cover, 640)} 640w, ${imageUrl(cover, 800)} 800w, ${imageUrl(cover, 1200)} 1200w`} sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 1280px) 46vw, 600px" decoding="async" alt={`${project.title} — ${imageDescription} by BathSpace`} loading="lazy" width="800" height="560" />
       : <div class="lp-placeholder"><strong>Bath<em>Space</em></strong><small>Project photographs being prepared</small></div>}
     <span class="lp-badge">{badge}</span>
   </div>

@@ -215,6 +215,7 @@ Astro.response.headers.set(
     </script>
   </head>
   <body class="luxe-body">
+    <a class="lx-skip-link" href="#main-content">Skip to content</a>
     {!bare && (
       <header class="lx-nav">
         <a href="/" class="lx-wordmark" aria-label="BathSpace by LUXEhome — Home"><strong>Bath</strong><em>Space</em><small>by LUXEhome</small></a>
@@ -235,11 +236,11 @@ Astro.response.headers.set(
           class="lx-nav-wa"
         >Discuss my bathroom</a>
         <a href="/book-site-inspection" class="lx-nav-apply" aria-label="Discuss my bathroom">Enquire</a>
-        <button class="lx-nav-burger" id="lx-burger" aria-label="Open menu" aria-expanded="false">
+        <button class="lx-nav-burger" id="lx-burger" type="button" aria-label="Open menu" aria-controls="lx-mobile-menu" aria-expanded="false">
           <span></span><span></span>
         </button>
       </header>
-      <div class="lx-mobile-menu" id="lx-mobile-menu" hidden>
+      <nav class="lx-mobile-menu" id="lx-mobile-menu" aria-label="Mobile navigation" hidden>
         <a href="/">Home</a>
         <a href="/projects">Bathroom projects</a>
         <a href="/how-it-works">How it works</a>
@@ -253,10 +254,10 @@ Astro.response.headers.set(
           href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi BathSpace! I would like to talk about a bathroom project.')}`}
           class="lx-mobile-wa" target="_blank" rel="noopener noreferrer"
         >WhatsApp Us</a>
-      </div>
+      </nav>
     )}
 
-    <main id="main-content">
+    <main id="main-content" tabindex="-1">
       <slot />
     </main>
 
@@ -321,11 +322,37 @@ Astro.response.headers.set(
         var burger = document.getElementById('lx-burger');
         var menu = document.getElementById('lx-mobile-menu');
         if (!burger || !menu) return;
+        var header = burger.closest('header');
+        function closeMenu(restoreFocus) {
+          menu.hidden = true;
+          burger.setAttribute('aria-expanded', 'false');
+          burger.setAttribute('aria-label', 'Open menu');
+          burger.classList.remove('is-open');
+          if (restoreFocus) burger.focus();
+        }
+        function updateMenuPosition() {
+          if (header) menu.style.setProperty('--nav-height', header.getBoundingClientRect().height + 'px');
+        }
         burger.addEventListener('click', function () {
-          var open = !menu.hidden;
-          menu.hidden = open;
-          burger.setAttribute('aria-expanded', String(!open));
-          burger.classList.toggle('is-open', !open);
+          if (!menu.hidden) { closeMenu(false); return; }
+          updateMenuPosition();
+          menu.hidden = false;
+          burger.setAttribute('aria-expanded', 'true');
+          burger.setAttribute('aria-label', 'Close menu');
+          burger.classList.add('is-open');
+        });
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape' && !menu.hidden) closeMenu(true);
+        });
+        document.addEventListener('click', function (event) {
+          if (!menu.hidden && !menu.contains(event.target) && !header.contains(event.target)) closeMenu(false);
+        });
+        menu.addEventListener('click', function (event) {
+          if (event.target.closest('a')) closeMenu(false);
+        });
+        window.addEventListener('resize', function () {
+          if (window.matchMedia('(min-width: 1121px)').matches) closeMenu(false);
+          else updateMenuPosition();
         });
       })();
     </script>
@@ -385,6 +412,10 @@ Astro.response.headers.set(
     outline-offset: 3px;
   }
 
+  .lx-skip-link { position: fixed; top: .5rem; left: 1rem; z-index: 500; padding: .7rem 1rem; background: var(--ink); color: white; transform: translateY(-200%); }
+  .lx-skip-link:focus { transform: none; }
+  #main-content:focus { outline: none; }
+
   /* ── Wordmark ── */
   .lx-wordmark {
     font-family: var(--lx-sans);
@@ -439,7 +470,7 @@ Astro.response.headers.set(
     display: none;
     align-items: center;
     justify-content: center;
-    min-height: 38px;
+    min-height: 44px;
     padding: .5rem 1rem;
     border-radius: 999px;
     background: var(--sage-deep);
@@ -451,7 +482,7 @@ Astro.response.headers.set(
     text-transform: uppercase;
   }
 
-  .lx-nav-burger { display: none; background: none; border: none; cursor: pointer; padding: .5rem; }
+  .lx-nav-burger { min-width: 44px; min-height: 44px; display: none; background: none; border: none; cursor: pointer; padding: .5rem; }
   .lx-nav-burger span { display: block; width: 24px; height: 2px; background: var(--ink); margin: 5px 0; transition: transform .25s; }
   .lx-nav-burger.is-open span:first-child { transform: translateY(3.5px) rotate(45deg); }
   .lx-nav-burger.is-open span:last-child  { transform: translateY(-3.5px) rotate(-45deg); }
@@ -459,8 +490,13 @@ Astro.response.headers.set(
   .lx-mobile-menu[hidden] { display: none; }
 
   .lx-mobile-menu {
-    position: sticky;
-    top: 61px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--nav-height, 80px);
+    max-height: calc(100dvh - var(--nav-height, 80px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
     z-index: 290;
     background: var(--cream);
     border-bottom: 1px solid var(--cream-deep);
@@ -569,9 +605,6 @@ Astro.response.headers.set(
     .lx-nav { gap: .75rem; padding-block: .8rem; }
     .lx-wordmark { font-size: 1.35rem; }
     .lx-mobile-menu {
-      top: 57px;
-      max-height: calc(100dvh - 57px);
-      overflow-y: auto;
       padding-bottom: calc(1rem + env(safe-area-inset-bottom));
     }
     .lx-footer { padding-top: 3rem; padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }

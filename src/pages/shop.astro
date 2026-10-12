@@ -60,10 +60,10 @@ const statusName = (s: string) => s === 'in_stock' ? 'In stock' : s === 'made_to
             <article class="bs-shop-card" data-category={product.category} data-name={product.item_name.toLowerCase()} data-price={Number(product.sale_price_lkr)} data-search={[product.item_name,product.brand,product.model_code,product.category,product.specification,product.sku].filter(Boolean).join(' ').toLocaleLowerCase()}>
               {product.slug ? (
                 <a class="bs-shop-photo" href={`/shop/${product.slug}`} aria-label={`View ${product.item_name} details`}>
-                  <img src={product.image_url} alt={`${product.brand ? product.brand + ' ' : ''}${product.item_name}`} loading="lazy" decoding="async" width="700" height="600" />
+                  <img src={imageUrl(product.image_url, 700)} srcset={`${imageUrl(product.image_url, 400)} 400w, ${imageUrl(product.image_url, 700)} 700w, ${imageUrl(product.image_url, 1000)} 1000w`} sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 1050px) 45vw, 360px" alt={`${product.brand ? product.brand + ' ' : ''}${product.item_name}`} loading="lazy" decoding="async" width="700" height="600" />
                 </a>
               ) : (
-                <div class="bs-shop-photo"><img src={product.image_url} alt={product.item_name} loading="lazy" decoding="async" width="700" height="600" /></div>
+                <div class="bs-shop-photo"><img src={imageUrl(product.image_url, 700)} srcset={`${imageUrl(product.image_url, 400)} 400w, ${imageUrl(product.image_url, 700)} 700w, ${imageUrl(product.image_url, 1000)} 1000w`} sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 1050px) 45vw, 360px" alt={product.item_name} loading="lazy" decoding="async" width="700" height="600" /></div>
               )}
               <div class="bs-shop-info">
                 <p class="bs-shop-category">{product.category}</p>
