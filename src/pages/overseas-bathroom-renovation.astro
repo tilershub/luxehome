@@ -1,0 +1,107 @@
+---
+export const prerender = false;
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+import { PROJECT_INITIATION } from '../lib/luxe-config';
+
+const steps = [
+  { number: '01', title: 'Start with a conversation', copy: 'Tell us where your property is located, what you want to change and your expected investment. The initial phone or WhatsApp conversation is free.' },
+  { number: '02', title: 'Arrange site access', copy: 'Agree on an appointment and arrange access through a trusted local representative where needed. The site visit forms part of the paid design and quotation package.' },
+  { number: '03', title: 'Review the proposed bathroom', copy: 'Receive a measured layout, 3D presentation images, walkthrough video and detailed construction quotation, including named materials and fixtures.' },
+  { number: '04', title: 'Approve the scope and build', copy: 'Agree on selections, construction stages, payments and communication before work begins. Our team coordinates the bathroom trades and quality checks.' },
+  { number: '05', title: 'Inspect and hand over', copy: 'Completed work is checked, documented and handed over according to the contract, with the applicable warranties and care information.' },
+];
+---
+<LuxeLayout
+  title="Bathroom Renovation in Sri Lanka for Overseas Homeowners | BathSpace"
+  description="Live abroad and planning to renovate your bathroom in Sri Lanka? BathSpace by LUXEhome provides complete, design-led bathroom renovations with clear scope, agreed communication and documented handover."
+>
+  <div class="remote-page">
+    <section class="remote-hero" aria-labelledby="remote-title">
+      <div class="remote-inner">
+        <p class="remote-kicker">BathSpace by LUXEhome · Renovations for Sri Lankan homeowners abroad</p>
+        <h1 id="remote-title">Renovate your bathroom in Sri Lanka. <em>Even when you live abroad.</em></h1>
+        <p class="remote-lead">Your home deserves a carefully planned renovation, without you having to coordinate separate plumbers, tilers, suppliers and installers from another country. BathSpace manages complete bathroom transformations with one accountable project team.</p>
+        <div class="remote-actions">
+          <a class="remote-primary" href="/book-site-inspection?utm_source=website&utm_medium=internal&utm_campaign=overseas_homeowners">Discuss your bathroom</a>
+          <a class="remote-secondary" href="/projects">View real renovation projects</a>
+        </div>
+        <p class="remote-price">Typical complete renovations: LKR 1.5M–2.5M per bathroom · First conversation: free</p>
+      </div>
+    </section>
+
+    <section class="remote-section remote-value" aria-labelledby="remote-value-title">
+      <div class="remote-inner">
+        <p class="remote-kicker">Clear decisions, even from a distance</p>
+        <h2 id="remote-value-title">One team for the entire renovation.</h2>
+        <p>Renovating from overseas raises practical questions: Who will assess the existing bathroom? Who coordinates the trades? How are materials approved? What happens before work is covered up?</p>
+        <div class="remote-grid">
+          <article><h3>A defined design and quotation</h3><p>Measurements, proposed layout, 3D visuals, fixture selections, construction scope and payment stages are agreed before construction.</p></article>
+          <article><h3>One accountable project team</h3><p>We coordinate demolition, plumbing, electrical work, waterproofing, tiling and finishing within the agreed contract.</p></article>
+          <article><h3>Agreed communication</h3><p>Set a practical WhatsApp communication and approval process for progress, decisions and site matters before work starts.</p></article>
+          <article><h3>Quality checks and handover</h3><p>Plumbing, waterproofing and final-stage checks are included in our process, with handover documentation and applicable warranties.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="remote-section remote-process" aria-labelledby="remote-process-title">
+      <div class="remote-inner">
+        <p class="remote-kicker">Your renovation journey</p>
+        <h2 id="remote-process-title">A practical process for overseas homeowners.</h2>
+        <ol>
+          {steps.map(step => <li><span>{step.number}</span><div><h3>{step.title}</h3><p>{step.copy}</p></div></li>)}
+        </ol>
+      </div>
+    </section>
+
+    <section class="remote-section remote-proof" aria-labelledby="remote-proof-title">
+      <div class="remote-inner">
+        <p class="remote-kicker">Completed work, not just concepts</p>
+        <h2 id="remote-proof-title">See what we have actually renovated.</h2>
+        <p>Explore our documented bathroom projects, including the completed Nawala renovation. Each project has its own site conditions, scope, selections and final investment.</p>
+        <div class="remote-actions"><a class="remote-primary" href="/projects/nawala-complete-bathroom-renovation">See the Nawala renovation</a><a class="remote-secondary" href="/projects">Explore all projects</a></div>
+      </div>
+    </section>
+
+    <section class="remote-section remote-investment" aria-labelledby="remote-investment-title">
+      <div class="remote-inner">
+        <p class="remote-kicker">Your investment, explained clearly</p>
+        <h2 id="remote-investment-title">Know the scope before construction begins.</h2>
+        <p>A complete bathroom renovation typically falls within <strong>LKR 1.5M–2.5M per bathroom</strong>, depending on the size, existing conditions, technical changes and chosen finishes. Larger bathrooms and custom features can cost more.</p>
+        <p>After your free first conversation, the <strong>LKR {PROJECT_INITIATION.amount.toLocaleString('en-LK')} design and quotation package is charged per bathroom</strong>. It includes a site visit, layout plan, 3D images, a 3D walkthrough video and a detailed quotation with named materials and fixtures. The proposal is delivered within seven working days after payment and the completed site visit.</p>
+        <p>{PROJECT_INITIATION.credit} If your home has several bathrooms, discuss all of them in one initial enquiry; the paid package scope and fee are confirmed for each room before payment.</p>
+        <div class="remote-actions"><a class="remote-primary" href="/book-site-inspection?utm_source=website&utm_medium=internal&utm_campaign=overseas_homeowners">Request a free first conversation</a></div>
+        <p class="remote-fine">Construction is subject to agreed scope, property access, service location and team availability. Remote updates and local representation arrangements are agreed with the homeowner before the project starts.</p>
+      </div>
+    </section>
+  </div>
+</LuxeLayout>
+
+<style>
+.remote-page{background:#f9f8f4;color:#26322b}
+.remote-inner{width:min(1120px,calc(100% - 40px));margin:0 auto}
+.remote-hero{padding:clamp(78px,11vw,150px) 0 95px;background:linear-gradient(125deg,#20382f,#344a3a);color:#f8f7f0}
+.remote-kicker{font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;font-weight:700;margin:0 0 20px;color:inherit;opacity:.82}
+.remote-hero h1{font-size:clamp(2.6rem,6vw,5.8rem);max-width:1050px;line-height:1.06;letter-spacing:-.045em;font-weight:500;margin:0 0 27px}
+.remote-hero h1 em{font-weight:400;color:#dfd3b3}
+.remote-lead{max-width:770px;font-size:clamp(1.05rem,2vw,1.24rem);line-height:1.75}
+.remote-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.remote-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 22px;border-radius:4px;font-size:.91rem;font-weight:700;text-decoration:none}
+.remote-primary{background:#dfd3b3;color:#20382f}
+.remote-secondary{border:1px solid currentColor;color:inherit}
+.remote-price{margin-top:23px;font-size:.83rem;opacity:.85}
+.remote-section{padding:clamp(65px,8vw,100px) 0}
+.remote-section h2{font-size:clamp(2rem,4.5vw,3.7rem);font-weight:500;letter-spacing:-.04em;line-height:1.14;max-width:850px;margin:0 0 25px}
+.remote-section .remote-inner>p:not(.remote-kicker):not(.remote-fine){max-width:850px;line-height:1.75}
+.remote-grid{margin-top:32px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.remote-grid article{padding:28px;background:#fff;border:1px solid #d9ded5}
+.remote-grid h3,.remote-process h3{font-size:1.13rem;margin:0 0 12px}
+.remote-grid p,.remote-process p{line-height:1.7;color:#4c5e52;margin:0}
+.remote-process{background:#e7ede6}
+.remote-process ol{list-style:none;padding:0;margin:36px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:25px 38px}
+.remote-process li{display:flex;gap:20px;padding:22px 0;border-top:1px solid #a4b5a8}
+.remote-process li>span{font-weight:700;color:#496b56}
+.remote-proof{background:#283a30;color:#fff}
+.remote-investment{background:#fff}
+.remote-fine{margin-top:20px;font-size:.81rem;line-height:1.6;color:#56675a}
+@media(max-width:700px){.remote-hero{padding:72px 0}.remote-inner{width:min(100% - 32px,1120px)}.remote-grid,.remote-process ol{grid-template-columns:1fr}.remote-actions{flex-direction:column}.remote-actions a{width:100%;text-align:center}.remote-grid article{padding:24px}.remote-section{padding:65px 0}}
+</style>
