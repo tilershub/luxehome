@@ -17,8 +17,22 @@
   if(!url||!key){status.textContent='Supabase is not configured.'}
   else{
     const sb=createClient(url,key);
-    const {data:{session}}=await sb.auth.getSession();
-    if(session) gate.remove();
+    const {data:{user},error:identityError}=await sb.auth.getUser();
+    if(user&&!identityError){
+      // Match the private allowlist enforced by the CMS row-level policies.
+      // A Supabase session alone does not mean this user is an administrator.
+      const {data:allowed,error:accessError}=await sb.rpc('lx_admin_access');
+      if(!accessError&&allowed===true) gate.remove();
+      else{
+        form.querySelector('h1').textContent=accessError?'Admin access check unavailable.':'This account is not authorised.';
+        form.querySelector('label').hidden=true;
+        form.querySelector('button[type="submit"]').hidden=true;
+        status.textContent=accessError?'The Admin 2.0 database migration must be applied before this version can be used.':'Your account is signed in but is not on the LUXEhome administrator allowlist.';
+        const logout=document.createElement('button');logout.type='button';logout.textContent='Sign out and switch account';
+        logout.addEventListener('click',async()=>{await sb.auth.signOut();location.assign('/admin');});
+        form.append(logout);
+      }
+    }
     else form.addEventListener('submit',async(event)=>{
       event.preventDefault();const email=emailInput.value.trim().toLowerCase();const button=form.querySelector('button');
       if(!email){status.textContent='Enter your authorised email address.';return}

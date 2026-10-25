@@ -51,7 +51,7 @@ const projectChildren:CmsChild[]=[
   {label:'Project crew',table:'lx_project_crew',foreignKey:'project_id',titleKey:'name',fields:[{key:'name',label:'Name',required:true},{key:'role',label:'Role'},{key:'photo_url',label:'Photo',type:'image'},{key:'tilershub_verified',label:'TILERSHUB verified',type:'checkbox'},{key:'sort_order',label:'Sort order',type:'number'}]},
 ];
 
-export const CMS_MODULES:CmsModule[]=[
+const CMS_MODULES_WITH_LEGACY_DESIGNS:CmsModule[]=[
   {slug:'fixture-library',label:'Fixture & Material Library',table:'lx_fixture_library',titleKey:'item_name',fields:[
     {key:'section',label:'Section',type:'select',options:['finishes','construction'],required:true},
     {key:'category',label:'Category',required:true},
@@ -103,3 +103,7 @@ export const CMS_MODULES:CmsModule[]=[
   {slug:'settings',label:'Global Settings',table:'lx_settings',titleKey:'business_name',fields:[{key:'business_name',label:'Business name'},{key:'whatsapp_number',label:'WhatsApp number'},{key:'public_email',label:'Public email'},{key:'business_address',label:'Business address',type:'textarea'},{key:'inspection_fee_lkr',label:'Project initiation deposit LKR',type:'number'},{key:'warranty_label',label:'Warranty label'},{key:'cloudinary_cloud_name',label:'Cloudinary cloud name'},{key:'integration_notes',label:'HubSpot / Make.com notes',type:'textarea'},{key:'default_seo_title',label:'Default SEO title'},{key:'default_meta_description',label:'Meta description',type:'textarea'}]},
 ];
 import { ALL_COLLECTION_KEYS } from './bathroom-taxonomy';
+
+// Retired design collections remain in the database for historical project references.
+// Do not expose them as editable CMS modules in Admin 2.0.
+export const CMS_MODULES: CmsModule[] = CMS_MODULES_WITH_LEGACY_DESIGNS.filter(module => module.slug !== 'designs');

@@ -1,3 +1,4 @@
 ---
-return Astro.redirect('/admin/luxehome?tab=team&action=new');
+// Legacy catalogue screen retired. Keep the URL alive for existing bookmarks.
+return Astro.redirect('/admin/cms/team?new=1', 302);
 ---
