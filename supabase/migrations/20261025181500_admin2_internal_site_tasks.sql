@@ -27,7 +27,7 @@ grant execute on function public.lx_admin_access() to authenticated;
 -- into lx_projects or lx_project_journey: published records are public-facing.
 create table public.lx_site_tasks (
   id uuid primary key default gen_random_uuid(),
-  project_id uuid not null references public.lx_projects(id) on delete cascade,
+  project_id uuid not null references public.lx_projects(id) on delete restrict,
   stage_key text not null check (stage_key in (
     'survey', 'demolition', 'plumbing', 'electrical', 'civil',
     'waterproofing', 'tiling', 'ceiling_lighting', 'bathware', 'handover', 'other'
