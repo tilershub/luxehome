@@ -1,0 +1,267 @@
+---
+import AdminShell from '../../../components/admin/AdminShell.astro';
+---
+<AdminShell title="Site Tasks & Quality Checks" active="operations">
+  <a class="back" href="/admin/operations">← Back to project operations</a>
+  <p class="intro">Plan construction stages, assign team members, and record internal quality checks. Nothing entered here is published on the website.</p>
+  <section class="panel">
+    <label class="project-label" for="site-project">Project</label>
+    <select id="site-project" disabled><option value="">Loading projects…</option></select>
+    <p id="site-message" role="status" aria-live="polite">Checking administrator access…</p>
+  </section>
+  <div id="site-workspace" hidden>
+    <section class="panel">
+      <h2 id="edit-heading">Add a construction task</h2>
+      <form id="site-task-form">
+        <div class="form-grid">
+          <label>Construction stage
+            <select id="task-stage" required>
+              <option value="survey">Survey &amp; planning</option>
+              <option value="demolition">Demolition</option>
+              <option value="plumbing">Plumbing &amp; pressure test</option>
+              <option value="electrical">Electrical</option>
+              <option value="civil">Civil work</option>
+              <option value="waterproofing">Waterproofing &amp; flood test</option>
+              <option value="tiling">Tiling</option>
+              <option value="ceiling_lighting">Ceiling &amp; lighting</option>
+              <option value="bathware">Bathware, vanity &amp; glass</option>
+              <option value="handover">Final inspection &amp; handover</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+          <label>Task description
+            <input id="task-title" required minlength="1" maxlength="180" placeholder="e.g. Complete 24-hour waterproofing flood test" />
+          </label>
+          <label>Start date<input id="task-start" type="date" /></label>
+          <label>Due date<input id="task-due" type="date" /></label>
+          <label>Assigned team member<select id="task-worker"><option value="">Unassigned</option></select></label>
+          <label>Progress
+            <select id="task-status"><option value="not_started">Not started</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="completed">Completed</option></select>
+          </label>
+          <label>Quality check
+            <select id="task-qa"><option value="not_required">Not required</option><option value="pending">Pending</option><option value="passed">Passed</option><option value="failed">Failed — needs correction</option></select>
+          </label>
+          <label>QA findings<textarea id="task-qa-notes" rows="2" maxlength="2000" placeholder="Test method, result, corrective actions"></textarea></label>
+          <label class="span-all">Internal site notes<textarea id="task-notes" rows="2" maxlength="3000" placeholder="Materials, blockers, instructions"></textarea></label>
+        </div>
+        <div class="actions"><button type="submit" id="save-task">Add task</button><button type="button" id="cancel-edit" class="secondary" hidden>Cancel edit</button></div>
+        <p class="form-status" id="task-form-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <section class="panel">
+      <div class="section-head"><h2>Project task board</h2><span id="task-summary"></span></div>
+      <div id="site-task-list" class="task-list"></div>
+    </section>
+  </div>
+</AdminShell>
+<script>
+  import { createClient } from '@supabase/supabase-js';
+  import { LUXE_SUPABASE_KEY, LUXE_SUPABASE_URL } from '../../../lib/luxe-supabase';
+
+  type Project = { id: string; title: string; project_ref: string | null };
+  type TeamMember = { id: string; name: string; role: string | null };
+  type SiteTask = {
+    id: string; project_id: string; stage_key: string; title: string;
+    status: string; planned_start_date: string | null; due_date: string | null;
+    completed_at: string | null; assigned_team_member_id: string | null;
+    qa_result: string; qa_notes: string | null; internal_notes: string | null;
+    created_at: string;
+  };
+  const stageLabels: Record<string,string> = {
+    survey: 'Survey & planning', demolition: 'Demolition',
+    plumbing: 'Plumbing & pressure test', electrical: 'Electrical',
+    civil: 'Civil work', waterproofing: 'Waterproofing & flood test',
+    tiling: 'Tiling', ceiling_lighting: 'Ceiling & lighting',
+    bathware: 'Bathware, vanity & glass', handover: 'Final inspection & handover',
+    other: 'Other'
+  };
+  const progressLabels: Record<string,string> = {not_started:'Not started',in_progress:'In progress',blocked:'Blocked',completed:'Completed'};
+  const qaLabels: Record<string,string> = {not_required:'No check required',pending:'QA pending',passed:'QA passed',failed:'QA failed'};
+
+  const sb = createClient(LUXE_SUPABASE_URL, LUXE_SUPABASE_KEY);
+  const projectSelect = document.getElementById('site-project') as HTMLSelectElement;
+  const workerSelect = document.getElementById('task-worker') as HTMLSelectElement;
+  const message = document.getElementById('site-message')!;
+  const workspace = document.getElementById('site-workspace')!;
+  const form = document.getElementById('site-task-form') as HTMLFormElement;
+  const formMessage = document.getElementById('task-form-message')!;
+  const list = document.getElementById('site-task-list')!;
+  const summary = document.getElementById('task-summary')!;
+  const heading = document.getElementById('edit-heading')!;
+  const save = document.getElementById('save-task') as HTMLButtonElement;
+  const cancel = document.getElementById('cancel-edit') as HTMLButtonElement;
+  const field = (id:string) => document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+  let projects:Project[] = [];
+  let team:TeamMember[] = [];
+  let tasks:SiteTask[] = [];
+  let editingId:string|null = null;
+  let loadNumber = 0;
+
+  function resetEditor(){
+    editingId = null; form.reset();
+    heading.textContent = 'Add a construction task';
+    save.textContent = 'Add task';
+    cancel.hidden = true;
+    formMessage.textContent = '';
+  }
+  function startEdit(task: SiteTask){
+    editingId = task.id;
+    field('task-stage').value = task.stage_key;
+    field('task-title').value = task.title;
+    field('task-start').value = task.planned_start_date || '';
+    field('task-due').value = task.due_date || '';
+    workerSelect.value = task.assigned_team_member_id || '';
+    field('task-status').value = task.status;
+    field('task-qa').value = task.qa_result;
+    field('task-qa-notes').value = task.qa_notes || '';
+    field('task-notes').value = task.internal_notes || '';
+    heading.textContent = 'Edit construction task';
+    save.textContent = 'Save changes';
+    cancel.hidden = false;
+    formMessage.textContent = '';
+    heading.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function makeText(tag:string, value:string, className?:string){
+    const el=document.createElement(tag);el.textContent=value;
+    if(className)el.className=className;
+    return el;
+  }
+  function renderTasks(){
+    list.replaceChildren();
+    const total=tasks.length, done=tasks.filter(t=>t.status==='completed').length;
+    const failed=tasks.filter(t=>t.qa_result==='failed').length;
+    summary.textContent=total+' tasks · '+done+' completed'+(failed?' · '+failed+' QA failed':'');
+    if(!total){list.append(makeText('p','No internal tasks recorded for this project yet. Use the form above to add the first stage.','empty'));return;}
+    for(const task of tasks){
+      const card=document.createElement('article');card.className='task';
+      const top=document.createElement('div');top.className='task-top';
+      const names=document.createElement('div');
+      names.append(makeText('span',stageLabels[task.stage_key] || task.stage_key,'stage-name'),makeText('h3',task.title));
+      const edit=document.createElement('button');edit.type='button';edit.className='edit-button';edit.textContent='Edit';
+      edit.addEventListener('click',()=>startEdit(task));
+      top.append(names,edit);
+      const bits=document.createElement('div');bits.className='task-meta';
+      bits.append(makeText('span',progressLabels[task.status] || task.status,'pill'));
+      const qa=makeText('span',qaLabels[task.qa_result] || task.qa_result,'pill');
+      if(task.qa_result==='failed')qa.classList.add('attention');
+      if(task.qa_result==='passed')qa.classList.add('passed');
+      bits.append(qa);
+      if(task.due_date)bits.append(makeText('span','Due '+task.due_date));
+      const person=team.find(t=>t.id===task.assigned_team_member_id);
+      if(person)bits.append(makeText('span',person.name+(person.role?' · '+person.role:'')));
+      card.append(top,bits);
+      if(task.internal_notes)card.append(makeText('p',task.internal_notes,'notes'));
+      if(task.qa_notes)card.append(makeText('p','QA: '+task.qa_notes,'notes'));
+      list.append(card);
+    }
+  }
+  async function loadTasks(){
+    const projectId=projectSelect.value;
+    const sequence=++loadNumber;
+    tasks=[];renderTasks();resetEditor();
+    if(!projectId){workspace.hidden=true;message.textContent='Choose a project.';return;}
+    workspace.hidden=false;
+    message.textContent='Loading internal site tasks…';
+    const {data,error}=await sb.from('lx_site_tasks').select('id,project_id,stage_key,title,status,planned_start_date,due_date,completed_at,assigned_team_member_id,qa_result,qa_notes,internal_notes,created_at').eq('project_id',projectId).order('due_date',{ascending:true,nullsFirst:false}).order('created_at',{ascending:true});
+    if(sequence!==loadNumber)return;
+    if(error){workspace.hidden=true;message.textContent='Internal task records are unavailable. Apply the Admin 2.0 database migration and verify admin permissions before using this page.';console.error(error);return;}
+    tasks=(data||[]) as SiteTask[];
+    message.textContent='Editing private task records for '+(projects.find(p=>p.id===projectId)?.title||'the selected project')+'.';
+    renderTasks();
+  }
+  async function initialize(){
+    const {data:{user},error:identityError}=await sb.auth.getUser();
+    if(identityError||!user){message.textContent='Sign in as an administrator to use this page.';return;}
+    const {data:allowed,error:accessError}=await sb.rpc('lx_admin_access');
+    if(accessError||allowed!==true){message.textContent=accessError?'Administrator permission check is not yet available. Apply the Admin 2.0 migration first.':'This account does not have administrator access.';return;}
+    const [projectResult,teamResult]=await Promise.all([
+      sb.from('lx_projects').select('id,title,project_ref').order('title'),
+      sb.from('lx_team_members').select('id,name,role').order('name')
+    ]);
+    if(projectResult.error){message.textContent='Projects could not be loaded. Please retry.';console.error(projectResult.error);return;}
+    projects=(projectResult.data||[]) as Project[];
+    team=teamResult.error?[]:(teamResult.data||[]) as TeamMember[];
+    if(teamResult.error)console.warn('Team list could not be loaded',teamResult.error);
+    projectSelect.replaceChildren(new Option('Select project',''));
+    for(const p of projects)projectSelect.add(new Option(p.title+(p.project_ref?' · '+p.project_ref:''),p.id));
+    workerSelect.replaceChildren(new Option('Unassigned',''));
+    for(const member of team)workerSelect.add(new Option(member.name+(member.role?' · '+member.role:''),member.id));
+    projectSelect.disabled=false;
+    const requested=new URLSearchParams(location.search).get('project');
+    if(requested&&projects.some(p=>p.id===requested))projectSelect.value=requested;
+    await loadTasks();
+  }
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const projectId=projectSelect.value;
+    if(!projectId){formMessage.textContent='Choose a project first.';return;}
+    const start=field('task-start').value||null;
+    const due=field('task-due').value||null;
+    if(start&&due&&due<start){formMessage.textContent='Due date cannot be before the start date.';return;}
+    const taskStatus=field('task-status').value;
+    const previous=tasks.find(t=>t.id===editingId);
+    const payload={
+      project_id:projectId,
+      stage_key:field('task-stage').value,
+      title:field('task-title').value.trim(),
+      planned_start_date:start,
+      due_date:due,
+      assigned_team_member_id:workerSelect.value||null,
+      status:taskStatus,
+      qa_result:field('task-qa').value,
+      qa_notes:field('task-qa-notes').value.trim()||null,
+      internal_notes:field('task-notes').value.trim()||null,
+      completed_at:taskStatus==='completed'?(previous?.completed_at||new Date().toISOString()):null,
+      updated_at:new Date().toISOString()
+    };
+    if(!payload.title){formMessage.textContent='Enter a task description.';return;}
+    save.disabled=true;formMessage.textContent='Saving internal task…';
+    try{
+      const result=editingId
+        ? await sb.from('lx_site_tasks').update(payload).eq('id',editingId).eq('project_id',projectId).select('id').single()
+        : await sb.from('lx_site_tasks').insert(payload).select('id').single();
+      if(result.error)throw result.error;
+      resetEditor();await loadTasks();
+      formMessage.textContent='Task saved.';
+    }catch(error){console.error(error);formMessage.textContent='Could not save the task. Check permissions and field values.';}
+    finally{save.disabled=false;}
+  });
+  cancel.addEventListener('click',resetEditor);
+  projectSelect.addEventListener('change',()=>{
+    const url=new URL(location.href);
+    if(projectSelect.value)url.searchParams.set('project',projectSelect.value);
+    else url.searchParams.delete('project');
+    history.replaceState(null,'',url);
+    void loadTasks();
+  });
+  void initialize();
+</script>
+<style>
+  .back{display:inline-block;margin-bottom:8px;color:#45604b;text-decoration:none;font-weight:600}
+  .intro{color:#667064;max-width:740px;margin:8px 0 20px}
+  .panel{background:white;border:1px solid #2b322a18;border-radius:12px;padding:22px;margin-bottom:16px}
+  .panel h2{margin:0 0 16px;font:500 30px 'Cormorant Garamond',serif}
+  .project-label{font-size:12px;font-weight:600;display:block;margin-bottom:7px}
+  #site-project{width:100%;max-width:540px;padding:12px;border:1px solid #2b322a30;border-radius:8px;min-height:45px;background:#fff}
+  #site-message{color:#667064;margin:12px 0 0}
+  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .form-grid label{display:grid;gap:6px;font-size:12px;font-weight:600;min-width:0}
+  .form-grid input,.form-grid select,.form-grid textarea{width:100%;min-height:44px;border:1px solid #2b322a30;border-radius:7px;padding:10px;font:14px Jost,system-ui,sans-serif;background:#fff}
+  .form-grid textarea{resize:vertical}.span-all{grid-column:1/-1}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .actions button,.edit-button{min-height:44px;padding:10px 18px;border:0;border-radius:7px;cursor:pointer;font:600 13px Jost,system-ui,sans-serif;background:#355b47;color:#fff}
+  .actions .secondary{background:#e8ece7;color:#253029}
+  .actions button:disabled{opacity:.6}.form-status{color:#355b47;min-height:20px}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .section-head span{font-size:12px;color:#667064}.task-list{display:grid;gap:10px}
+  .task{border:1px solid #2b322a20;border-radius:9px;padding:15px}
+  .task-top{display:flex;justify-content:space-between;align-items:start;gap:14px}
+  .task h3{font-size:17px;margin:5px 0}.stage-name{font-size:11px;color:#667064;text-transform:uppercase;letter-spacing:.06em}
+  .edit-button{background:#e8ece7;color:#253029;flex-shrink:0}
+  .task-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:#667064;font-size:12px}
+  .pill{border-radius:999px;background:#e8ece7;color:#253029;padding:4px 9px}
+  .pill.attention{background:#fae5e1;color:#8c332a}.pill.passed{background:#e3f1e5;color:#285638}
+  .notes{margin:10px 0 0;font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .empty{color:#667064}
+  @media(max-width:660px){.panel{padding:16px}.form-grid{grid-template-columns:1fr}.span-all{grid-column:auto}}
+</style>
