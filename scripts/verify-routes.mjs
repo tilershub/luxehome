@@ -4,7 +4,8 @@ import { join } from 'node:path';
 // Prerendered routes must exist as files in dist/.
 const staticRoutes = [
   '/about', '/thank-you', '/cart',
-  '/admin', '/admin/cms', '/admin/cms/designs', '/admin/cms/projects',
+  '/admin', '/admin/cms', '/admin/cms/projects',
+  '/admin/operations', '/admin/operations/tasks',
   '/admin/cms/blog', '/admin/cms/pages', '/admin/cms/products', '/admin/cms/categories',
   '/admin/cms/inspections', '/admin/cms/team', '/admin/cms/media', '/admin/cms/settings',
   '/admin/luxehome', '/admin/blog', '/admin/shop', '/admin/projects', '/admin/crm',
@@ -50,6 +51,11 @@ if (existsSync(routesManifest)) {
     console.error(`These SSR routes are shadowed by static assets:\n${shadowed.join('\n')}`);
     process.exit(1);
   }
+}
+
+if (existsSync(join('dist', 'admin', 'cms', 'designs', 'index.html'))) {
+  console.error('Retired /admin/cms/designs editor was unexpectedly generated.');
+  process.exit(1);
 }
 
 if (existsSync(join('dist', 'services'))) {
