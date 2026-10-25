@@ -43,7 +43,7 @@ create table public.lx_site_tasks (
     check (qa_result in ('not_required','pending','passed','failed')),
   qa_notes text,
   internal_notes text,
-  created_by uuid default (select auth.uid()) references auth.users(id) on delete set null,
+  created_by uuid default auth.uid() references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint lx_site_task_dates_valid
