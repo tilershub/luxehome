@@ -1,0 +1,63 @@
+---
+import AdminShell from '../../../components/admin/AdminShell.astro';
+---
+<AdminShell title="Project Operations" active="operations">
+  <p class="intro">Internal project overview using existing LUXEhome project records. Financial and staff workflows will be added after role permissions are in place.</p>
+  <div class="stats" aria-label="Project status totals">
+    <div><strong id="count-all">—</strong><span>All projects</span></div>
+    <div><strong id="count-progress">—</strong><span>In progress</span></div>
+    <div><strong id="count-complete">—</strong><span>Completed</span></div>
+    <div><strong id="count-proposed">—</strong><span>Proposed</span></div>
+  </div>
+  <section class="panel">
+    <div class="controls"><label>Find a project<input id="project-search" type="search" placeholder="Project name, reference or location" /></label><label>Status<select id="project-status"><option value="all">All statuses</option><option value="in_progress">In progress</option><option value="proposed">Proposed</option><option value="completed">Completed</option></select></label><button type="button" id="project-refresh">Refresh</button></div>
+    <p id="project-message" role="status">Checking admin access…</p>
+    <div id="project-list" class="list"></div>
+  </section>
+</AdminShell>
+<script>
+  import { createClient } from '@supabase/supabase-js';
+  import { LUXE_SUPABASE_KEY, LUXE_SUPABASE_URL } from '../../../lib/luxe-supabase';
+  type Project = { id:string; title:string; project_ref:string|null; location:string|null; project_status:string|null; created_at:string|null; };
+  const sb=createClient(LUXE_SUPABASE_URL,LUXE_SUPABASE_KEY);
+  const list=document.getElementById('project-list')!;
+  const message=document.getElementById('project-message')!;
+  const search=document.getElementById('project-search') as HTMLInputElement;
+  const status=document.getElementById('project-status') as HTMLSelectElement;
+  const refresh=document.getElementById('project-refresh') as HTMLButtonElement;
+  let projects:Project[]=[];
+  const statuses:Record<string,string>={in_progress:'In progress',completed:'Completed',proposed:'Proposed'};
+  function render(){
+    const term=search.value.trim().toLowerCase();
+    const filtered=projects.filter(p=>(status.value==='all'||p.project_status===status.value)&&[p.title,p.project_ref,p.location].some(v=>v?.toLowerCase().includes(term)));
+    list.replaceChildren();
+    for(const p of filtered){
+      const article=document.createElement('article');
+      const name=document.createElement('h3');name.textContent=p.title;
+      const meta=document.createElement('p');meta.textContent=[p.project_ref,p.location].filter(Boolean).join(' · ')||'No reference or location';
+      const badge=document.createElement('span');badge.className='status';badge.textContent=statuses[p.project_status||'']||'Unspecified';
+      const link=document.createElement('a');link.href='/admin/cms/projects';link.textContent='Open project editor';
+      article.append(name,meta,badge,link);list.append(article);
+    }
+    message.textContent=filtered.length? `Showing ${filtered.length} of ${projects.length} projects`:'No projects match your filters.';
+  }
+  async function load(){
+    refresh.disabled=true;message.textContent='Loading projects…';list.replaceChildren();
+    try{
+      const {data:{user},error:authError}=await sb.auth.getUser();
+      if(authError||!user){message.textContent='Sign in to access project operations.';return;}
+      const {data:admin,error:adminError}=await sb.from('admin_users').select('email').eq('email',user.email||'').maybeSingle();
+      if(adminError||!admin){message.textContent='Your account is not authorised for project operations.';return;}
+      const {data,error}=await sb.from('lx_projects').select('id,title,project_ref,location,project_status,created_at').order('created_at',{ascending:false});
+      if(error)throw error;
+      projects=(data||[]) as Project[];
+      for(const [id,count] of [['count-all',projects.length],['count-progress',projects.filter(p=>p.project_status==='in_progress').length],['count-complete',projects.filter(p=>p.project_status==='completed').length],['count-proposed',projects.filter(p=>p.project_status==='proposed').length]] as const){document.getElementById(id)!.textContent=String(count);}
+      render();
+    }catch(e){message.textContent='Unable to load project records. Check your access and try again.';console.error('Project operations load failed',e);}
+    finally{refresh.disabled=false;}
+  }
+  search.addEventListener('input',render);status.addEventListener('change',render);refresh.addEventListener('click',load);void load();
+</script>
+<style>
+.intro{color:#667064;max-width:780px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.stats>div,.panel{background:#fff;border:1px solid #2b322a18;border-radius:12px;padding:18px}.stats strong{display:block;font-size:30px}.stats span{color:#667064;font-size:12px}.controls{display:flex;align-items:end;gap:12px;flex-wrap:wrap}.controls label{display:grid;gap:6px;flex:1;min-width:180px;font-size:12px}.controls input,.controls select,.controls button{min-height:44px;border:1px solid #2b322a33;border-radius:7px;padding:10px;font:inherit}.controls button{background:#253029;color:white;cursor:pointer}.controls button:disabled{opacity:.6}#project-message{color:#667064}.list{display:grid;gap:10px}.list article{border:1px solid #2b322a1c;border-radius:9px;padding:15px;display:grid;grid-template-columns:1fr auto;gap:5px 12px}.list h3{margin:0;font-size:17px}.list p{margin:0;color:#667064;grid-column:1}.status{grid-column:2;grid-row:1;align-self:start;background:#e8ece7;padding:4px 9px;border-radius:20px;font-size:11px}.list a{grid-column:1/-1;color:#355b47;font-weight:600;margin-top:5px}@media(max-width:680px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:14px}.controls label{flex-basis:100%}}
+</style>
