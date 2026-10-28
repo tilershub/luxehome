@@ -4,6 +4,8 @@ import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   adapter: cloudflare(),
+  // Allow the managed development preview host; production is unaffected.
+  vite: { server: { allowedHosts: ['terminal.local'] } },
   site: 'https://luxehome.lk',
   // Keep one URL shape everywhere. Internal links already use paths without a
   // trailing slash, and on-demand routes will permanently redirect slash
