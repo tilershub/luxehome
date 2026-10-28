@@ -1,88 +1,113 @@
 ---
-const base = '/images/designs/pichcha/pichcha-';
 const scenes = [
-  {name:'Enter', file:'cover', title:'A little more calm. Every day.', copy:'Imagine opening the door to a bathroom made around you.', details:'Explore a bathroom design concept. Your layout, finishes and fittings are selected for your own space.', position:'50% 50%'},
-  {name:'Vanity', file:'long-vanity', title:'Your morning, beautifully considered.', copy:'A generous basin. A comfortable mixer. Everything within reach.', details:'Basin, wall-mounted mixers, vanity storage and mirror lighting: planned together for everyday use.', position:'40% 50%'},
-  {name:'Shower', file:'shower-cubicle', title:'Leave the day at the door.', copy:'Glass, warm surfaces and a shower space that feels open.', details:'Shower head, hand shower, controls and glass enclosure. A shower panel can be considered to suit your preferred layout.', position:'60% 50%'},
-  {name:'Details', file:'water-closet-focus', title:'Small details. A complete feeling.', copy:'The WC, tapware and accessories belong to the same story.', details:'WC, hand spray, brushware, towel accessories and drain cover: selected for comfort, cleaning and a consistent finish.', position:'55% 50%'},
+  {name:'Enter', file:'cover', title:'A little more calm. Every day.', copy:'Imagine opening the door to a bathroom made around you.', details:'Explore a bathroom design concept. Your layout, finishes and fittings are selected for your own space.', position:'50% 50%',mobile:'50% 50%'},
+  {name:'Vanity', file:'long-vanity', title:'Your morning, beautifully considered.', copy:'A generous basin. A comfortable mixer. Everything within reach.', details:'Basin, wall-mounted mixers, vanity storage and mirror lighting: planned together for everyday use.', position:'40% 50%',mobile:'38% 52%'},
+  {name:'Shower', file:'shower-cubicle', title:'Leave the day at the door.', copy:'Glass, warm surfaces and a shower space that feels open.', details:'Shower head, hand shower, controls and glass enclosure. A shower panel can be considered to suit your preferred layout.', position:'60% 50%',mobile:'66% 42%'},
+  {name:'Details', file:'water-closet-focus', title:'Small details. A complete feeling.', copy:'The WC, tapware and accessories belong to the same story.', details:'WC, hand spray, brushware, towel accessories and drain cover: selected for comfort, cleaning and a consistent finish.', position:'55% 50%',mobile:'60% 62%'},
 ];
+const posters=scenes.map(scene=>({
+  src:`/images/bathroom-tour/${scene.file}-1024.webp`,
+  srcset:[640,1024,1440].map(width=>`/images/bathroom-tour/${scene.file}-${width}.webp ${width}w`).join(', '),
+}));
 ---
 <section class="bathroom-tour" aria-label="Explore a bathroom design" data-bathroom-tour>
   <div class="tour-stage">
+    <div class="tour-room" data-room aria-hidden="true"></div>
     <div class="tour-scenes">
-      {scenes.map((scene,i) => <article class:list={['tour-scene', {'is-active': i===0}]} data-scene>
-        <img src={`${base}${scene.file}-v2.webp`} alt={`Bathroom design concept — ${scene.name.toLowerCase()} view`} width="1586" height="992" loading={i===0 ? 'eager':'lazy'} fetchpriority={i===0 ? 'high':'auto'} style={`object-position:${scene.position}`} />
+      {scenes.map((scene,i)=><article class:list={['tour-scene',{'is-active':i===0}]} data-scene style={`--poster-position:${scene.position};--poster-mobile:${scene.mobile}`}>
+        <img class="tour-poster" data-poster data-src={posters[i].src} data-srcset={posters[i].srcset} src={i===0?posters[i].src:undefined} srcset={i===0?posters[i].srcset:undefined} sizes="100vw" width="1586" height="992" alt={`Bathroom design concept — ${scene.name.toLowerCase()} view`} decoding="async" fetchpriority={i===0?'high':'low'} />
+        {i>0&&<noscript><img class="tour-poster" src={posters[i].src} srcset={posters[i].srcset} sizes="100vw" width="1586" height="992" loading="lazy" alt={`Bathroom design concept — ${scene.name.toLowerCase()} view`}/></noscript>}
         <div class="tour-shade"></div>
         <div class="tour-copy"><p class="tour-eyebrow">BathSpace by LUXEhome · Sri Lanka</p>
-          {i===0 ? <h1>{scene.title}</h1> : <h2>{scene.title}</h2>}
+          {i===0?<h1>{scene.title}</h1>:<h2>{scene.title}</h2>}
           <p>{scene.copy}</p>
-          <details><summary>＋ {i===0 ? 'About this space' : `Explore ${scene.name.toLowerCase()}`}</summary><p>{scene.details}</p></details>
+          <details><summary>{i===0?'About this space':`Explore ${scene.name.toLowerCase()}`} <span aria-hidden="true">＋</span></summary><p>{scene.details}</p></details>
         </div>
       </article>)}
     </div>
-    <div class="tour-top"><span>Bathroom design concept</span><a href="#home-projects">Skip to real projects ↓</a></div>
+    <div class="tour-top"><span>Bathroom design concept</span><a href="#home-projects" data-skip-tour>Skip to real projects ↓</a></div>
     <div class="tour-bottom">
-      <nav aria-label="Bathroom views">{scenes.map((s,i)=><button type="button" data-scene-button={i} aria-current={i===0 ? 'step' : undefined}><span>0{i+1}</span> {s.name}</button>)}</nav>
+      <nav aria-label="Bathroom views">{scenes.map((scene,i)=><button type="button" data-scene-button={i} aria-current={i===0?'step':undefined}><span>0{i+1}</span> {scene.name}</button>)}</nav>
       <div class="tour-controls"><button type="button" data-motion aria-pressed="false">Pause motion</button><a href="/book-site-inspection">Discuss my bathroom ↗</a></div>
-      <p class="tour-hint">Scroll to explore the room</p>
+      <div class="tour-meta"><span data-tour-hint>Scroll to explore the room</span><button type="button" data-room-toggle hidden>Use still views</button></div>
     </div>
+    <p class="sr-only" data-tour-status role="status"></p>
   </div>
 </section>
 <script>
-const tour = document.querySelector<HTMLElement>('[data-bathroom-tour]');
-if (tour) {
-  const scenes = [...tour.querySelectorAll<HTMLElement>('[data-scene]')];
-  const buttons = [...tour.querySelectorAll<HTMLButtonElement>('[data-scene-button]')];
-  const motion = tour.querySelector<HTMLButtonElement>('[data-motion]')!;
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  let paused = reduced.matches;
-  let active = 0;
-  let scheduled = false;
-  const show = (index:number, progress = 0) => {
-    active = index;
-    scenes.forEach((scene,i) => {
-      scene.classList.toggle('is-active', i===index);
-      scene.setAttribute('aria-hidden', String(i!==index));
-      scene.inert = i!==index;
-      const img = scene.querySelector('img')!;
-      img.style.transform = paused ? 'none' : `scale(${1 + Math.min(progress,1)*.085})`;
-      if (i!==index) scene.querySelector('details')!.open = false;
-    });
-    buttons.forEach((button,i)=> i===index ? button.setAttribute('aria-current','step') : button.removeAttribute('aria-current'));
-  };
-  const update = () => {
-    scheduled = false;
-    if (paused) return;
-    const rect = tour.getBoundingClientRect();
-    const distance = Math.max(1,tour.offsetHeight - tour.querySelector<HTMLElement>('.tour-stage')!.offsetHeight);
-    const progress = Math.max(0,Math.min(.99999, -rect.top / distance));
-    const position = progress * scenes.length;
-    const index = Math.floor(position);
-    // Do not hide a detail the visitor is reading or a control they are using.
-    if (scenes[active].querySelector('details[open]') || scenes[active].contains(document.activeElement)) return;
-    show(index,position-index);
-  };
-  const setMotion = () => {
-    tour.classList.toggle('is-paused',paused);
-    motion.textContent = paused ? 'Enable motion' : 'Pause motion';
-    motion.setAttribute('aria-pressed',String(paused));
-    if(paused) show(active); else update();
-  };
-  buttons.forEach((button,i)=>button.addEventListener('click',()=> {
-    if(paused) {show(i);return;}
-    scenes.forEach(scene=>scene.querySelector('details')!.open=false);
-    const distance = tour.offsetHeight-tour.querySelector<HTMLElement>('.tour-stage')!.offsetHeight;
-    window.scrollTo({top:window.scrollY+tour.getBoundingClientRect().top+distance*(i+.1)/scenes.length,behavior:'instant'});
-    show(i);
-  }));
-  motion.addEventListener('click',()=>{paused=!paused;setMotion();});
-  reduced.addEventListener('change',()=>{paused=reduced.matches;setMotion();});
-  window.addEventListener('scroll',()=>{if(!scheduled){scheduled=true;requestAnimationFrame(update);}},{passive:true});
-  window.addEventListener('resize',update);
-  tour.classList.add('is-enhanced');
-  setMotion();
-}
+  import { initBathroomJourney } from '../../lib/bathroom/controller';
+  document.querySelectorAll<HTMLElement>('[data-bathroom-tour]').forEach(initBathroomJourney);
 </script>
 <style>
-.bathroom-tour{background:#242c25;color:#fff}.tour-stage{position:relative}.tour-scene{position:relative;min-height:760px}.tour-scene img{position:absolute;width:100%;height:100%;object-fit:cover}.tour-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,22,18,.88),transparent 85%),linear-gradient(90deg,rgba(15,22,18,.4),transparent 70%)}.tour-copy{position:relative;max-width:660px;padding:260px 6vw 160px}.tour-copy h1,.tour-copy h2{font:500 clamp(44px,5.8vw,84px)/1.02 var(--lx-serif);letter-spacing:-.035em;color:#fff;margin:16px 0}.tour-copy>p:not(.tour-eyebrow){font-size:17px;line-height:1.6;max-width:37ch;color:#f2f0e9}.tour-eyebrow{text-transform:uppercase;font-size:10px;letter-spacing:.16em;color:#e3dfd3}.tour-copy details{margin-top:20px;max-width:440px}.tour-copy summary{cursor:pointer;font-size:13px;width:fit-content;border-bottom:1px solid #a6ab9f;padding:8px 0;list-style:none}.tour-copy details p{font-size:14px;line-height:1.6;background:#263027ed;padding:16px;border:1px solid #697365;margin-top:10px}.tour-top{position:absolute;top:85px;left:6vw;right:6vw;display:flex;justify-content:space-between;font-size:11px;gap:20px}.tour-top a{color:white}.tour-top>span{background:#243027c9;padding:5px 9px}.tour-bottom{display:none}.is-enhanced{height:380svh}.is-enhanced .tour-stage{position:sticky;top:0;height:100svh;min-height:620px;overflow:hidden}.is-enhanced .tour-scenes{position:absolute;inset:0}.is-enhanced .tour-scene{position:absolute;inset:0;min-height:0;opacity:0;visibility:hidden;transition:opacity .65s ease,visibility .65s;pointer-events:none}.is-enhanced .tour-scene.is-active{opacity:1;visibility:visible;pointer-events:auto}.is-enhanced .tour-copy{position:absolute;bottom:145px;left:6vw;padding:0;max-width:600px;right:6vw}.is-enhanced .tour-bottom{display:block;position:absolute;bottom:20px;left:6vw;right:6vw}.tour-bottom nav{display:flex;gap:22px;max-width:580px;border-top:1px solid #ffffff60;padding-top:15px}.tour-bottom button{font:inherit;color:#fff;background:none;border:0;cursor:pointer;padding:10px 0;font-size:13px}.tour-bottom nav button{opacity:.65;border-top:2px solid transparent}.tour-bottom nav button[aria-current]{opacity:1;border-color:#e9d7ae}.tour-bottom nav span{font-size:10px;color:#dfceb0;margin-right:7px}.tour-controls{position:absolute;right:0;top:14px;display:flex;gap:22px;align-items:center}.tour-controls a{padding:13px 18px;background:#eee9db;color:#263027;text-decoration:none;font-size:13px}.tour-hint{font-size:10px;color:#d7dace;letter-spacing:.12em;text-transform:uppercase;margin:15px 0 0}.is-paused{height:auto}.is-paused .tour-stage{position:relative}.is-paused .tour-scene{transition:none}.is-paused .tour-hint{visibility:hidden}@media(max-width:900px){.tour-controls{position:static;justify-content:space-between;margin-top:8px}.is-enhanced .tour-copy{bottom:200px}.tour-top{top:78px}.tour-copy h1,.tour-copy h2{font-size:clamp(40px,8vw,64px)}.tour-bottom nav{justify-content:space-between;gap:8px}.tour-bottom nav span{display:none}.tour-hint{display:none}.is-enhanced .tour-stage{min-height:700px}.tour-copy>p:not(.tour-eyebrow){font-size:15px}.tour-copy details p{font-size:13px}.is-enhanced{height:330svh}.is-enhanced.is-paused{height:auto}}@media(prefers-reduced-motion:reduce){.tour-scene,.tour-scene img{transition:none!important;transform:none!important}}
+  .bathroom-tour{--nav-height:76px;background:#242c25;color:#fff;position:relative}
+  .tour-stage{position:relative;isolation:isolate}
+  .tour-room{display:none}
+  .tour-scene{position:relative;min-height:680px;overflow:hidden}
+  .tour-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--poster-position)}
+  .tour-poster:not([src]){display:none}
+  .tour-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,22,18,.94),transparent 85%),linear-gradient(90deg,rgba(15,22,18,.35),transparent 75%)}
+  .tour-copy{position:relative;max-width:660px;padding:240px 6vw 80px}
+  .tour-copy h1,.tour-copy h2{font:500 clamp(42px,5.2vw,76px)/1.03 var(--lx-serif);letter-spacing:-.035em;color:#fff;margin:12px 0}
+  .tour-copy>p:not(.tour-eyebrow){font-size:16px;line-height:1.6;max-width:37ch;color:#f2f0e9}
+  .tour-eyebrow{text-transform:uppercase;font-size:10px;letter-spacing:.14em;color:#e3dfd3}
+  .tour-copy details{margin-top:14px;max-width:440px}
+  .tour-copy summary{cursor:pointer;font-size:13px;width:fit-content;padding:10px 0;list-style:none;text-underline-offset:5px;text-decoration:underline}
+  .tour-copy summary::-webkit-details-marker{display:none}
+  .tour-copy summary span{margin-left:12px}
+  .tour-copy details p{font-size:14px;line-height:1.65;background:#263027f5;padding:16px;border:1px solid #697365;margin-top:4px;max-height:145px;overflow:auto;overscroll-behavior:contain}
+  .tour-top{position:absolute;top:20px;left:5vw;right:5vw;display:flex;justify-content:space-between;align-items:center;font-size:11px;gap:15px;z-index:4}
+  .tour-top a{color:white;padding:12px;background:#243027b8;text-underline-offset:3px}
+  .tour-top>span{background:#243027c9;padding:7px 10px}
+  .tour-bottom{display:none}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .is-enhanced{height:calc(360svh - var(--nav-height))}
+  .is-enhanced .tour-stage{position:sticky;top:var(--nav-height);height:calc(100svh - var(--nav-height));min-height:550px;overflow:hidden}
+  .is-enhanced .tour-room{display:block;position:absolute;inset:0;opacity:0;transition:opacity .7s ease}
+  .is-enhanced.has-room .tour-room{opacity:1}
+  .is-enhanced .tour-scenes{position:absolute;inset:0;pointer-events:none}
+  .is-enhanced .tour-scene{position:absolute;inset:0;min-height:0;opacity:0;visibility:hidden;transition:opacity .4s ease,visibility .4s}
+  .is-enhanced .tour-scene.is-active{opacity:1;visibility:visible}
+  .is-enhanced.has-room .tour-poster{opacity:0}
+  .is-enhanced .tour-copy{position:absolute;bottom:145px;left:5vw;padding:0;max-width:540px;right:5vw;pointer-events:auto}
+  .is-enhanced .tour-bottom{display:block;position:absolute;bottom:16px;left:5vw;right:5vw;z-index:5}
+  .tour-bottom nav{display:flex;gap:24px;max-width:520px;border-top:1px solid #ffffff60;padding-top:8px}
+  .tour-bottom button{font:inherit;color:#fff;background:none;border:0;cursor:pointer;padding:12px 0;font-size:13px;min-height:44px}
+  .tour-bottom nav button{color:#dedfd7;border-top:2px solid transparent;min-width:66px}
+  .tour-bottom nav button[aria-current]{color:#fff;border-color:#e9d7ae}
+  .tour-bottom nav span{font-size:10px;color:#dfceb0;margin-right:7px}
+  .tour-controls{position:absolute;right:0;top:8px;display:flex;gap:22px;align-items:center}
+  .tour-controls a{padding:14px 18px;background:#eee9db;color:#263027;text-decoration:none;font-size:13px;min-height:44px;display:flex;align-items:center}
+  .tour-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#e1e2d9;letter-spacing:.1em;text-transform:uppercase;min-height:34px}
+  .tour-meta button{font-size:11px;min-height:34px;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+  .tour-meta button[hidden]{display:none}
+  .is-paused{height:auto!important}
+  .is-paused .tour-stage{position:relative;top:0}
+  .is-paused .tour-scene{transition:none}
+  .is-paused [data-tour-hint]{visibility:hidden}
+  @media(min-width:1051px){
+    .is-enhanced[data-chapter="1"] .tour-copy{left:auto;width:min(38vw,490px)}
+    .is-enhanced[data-chapter="1"] .tour-shade{background:linear-gradient(0deg,rgba(15,22,18,.94),transparent 85%),linear-gradient(270deg,rgba(15,22,18,.45),transparent 75%)}
+  }
+  @media(max-width:1050px){.tour-controls{position:static;justify-content:space-between;margin-top:3px}.is-enhanced .tour-copy{bottom:190px}.tour-bottom nav{max-width:none;justify-content:space-between}.tour-bottom nav span{display:none}}
+  @media(max-width:760px){
+    .is-enhanced{height:calc(270svh - var(--nav-height))}
+    .is-enhanced .tour-stage{min-height:610px}
+    .is-enhanced .tour-room{bottom:260px}
+    .is-enhanced .tour-poster{height:calc(100% - 260px);object-position:var(--poster-mobile)}
+    .is-enhanced .tour-shade{background:linear-gradient(to bottom,transparent 20%,rgba(24,33,26,.12) 44%,#242c25 67%)}
+    .is-enhanced .tour-copy{bottom:153px;left:20px;right:20px;max-width:none}
+    .tour-copy h1,.tour-copy h2{font-size:clamp(29px,6.4vw,42px);max-width:24ch;margin:5px 0 8px}
+    .tour-copy>p:not(.tour-eyebrow){font-size:13px;line-height:1.5;max-width:48ch}
+    .tour-eyebrow{display:none}.tour-copy details{margin-top:0}
+    .tour-copy summary{padding:8px 0;min-height:36px}.tour-copy details p{max-height:130px;font-size:13px}
+    .tour-copy:has(details[open]){background:#263027f7;padding:12px;border:1px solid #697365;left:8px;right:8px}
+    .tour-copy:has(details[open]) details p{padding:8px 0 0;border:0;background:none}
+    .tour-top{left:14px;right:14px;top:12px;font-size:9px}.tour-top a{padding:10px 8px}.tour-top>span{padding:7px}
+    .is-enhanced .tour-bottom{left:20px;right:20px;bottom:8px}
+    .tour-bottom nav{gap:0;padding-top:3px}.tour-bottom nav button{min-width:60px;font-size:12px}
+    .tour-controls{gap:10px}.tour-controls a{padding:10px 14px;font-size:12px}.tour-controls button{font-size:12px}
+    .tour-meta{font-size:8px;letter-spacing:.04em;min-height:30px}.tour-meta button{font-size:10px}
+  }
+  @media(max-height:570px) and (min-width:761px){.is-enhanced .tour-stage{min-height:490px}.tour-copy h1,.tour-copy h2{font-size:38px}.tour-copy>p:not(.tour-eyebrow){font-size:13px}.is-enhanced .tour-copy{bottom:145px}.tour-eyebrow{display:none}}
+  @media(prefers-reduced-motion:reduce){.tour-room,.tour-scene{transition:none!important}}
 </style>

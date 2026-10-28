@@ -7,8 +7,10 @@
     "build": "astro build",
     "verify:routes": "node scripts/verify-routes.mjs",
     "preview": "astro preview",
-    "deploy": "astro build && wrangler deploy",
-    "postinstall": "astro build"
+    "deploy": "npm run build && wrangler deploy",
+    "postinstall": "npm run build",
+    "prebuild": "node scripts/prepare-bathroom-assets.mjs",
+    "predev": "node scripts/prepare-bathroom-assets.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.13",
@@ -19,6 +21,10 @@
     "astro": "^5.17.3",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
-    "marked": "^18.0.5"
+    "marked": "^18.0.5",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }
