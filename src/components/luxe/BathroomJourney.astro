@@ -1,0 +1,88 @@
+---
+const base = '/images/designs/pichcha/pichcha-';
+const scenes = [
+  {name:'Enter', file:'cover', title:'A little more calm. Every day.', copy:'Imagine opening the door to a bathroom made around you.', details:'Explore a bathroom design concept. Your layout, finishes and fittings are selected for your own space.', position:'50% 50%'},
+  {name:'Vanity', file:'long-vanity', title:'Your morning, beautifully considered.', copy:'A generous basin. A comfortable mixer. Everything within reach.', details:'Basin, wall-mounted mixers, vanity storage and mirror lighting: planned together for everyday use.', position:'40% 50%'},
+  {name:'Shower', file:'shower-cubicle', title:'Leave the day at the door.', copy:'Glass, warm surfaces and a shower space that feels open.', details:'Shower head, hand shower, controls and glass enclosure. A shower panel can be considered to suit your preferred layout.', position:'60% 50%'},
+  {name:'Details', file:'water-closet-focus', title:'Small details. A complete feeling.', copy:'The WC, tapware and accessories belong to the same story.', details:'WC, hand spray, brushware, towel accessories and drain cover: selected for comfort, cleaning and a consistent finish.', position:'55% 50%'},
+];
+---
+<section class="bathroom-tour" aria-label="Explore a bathroom design" data-bathroom-tour>
+  <div class="tour-stage">
+    <div class="tour-scenes">
+      {scenes.map((scene,i) => <article class:list={['tour-scene', {'is-active': i===0}]} data-scene>
+        <img src={`${base}${scene.file}-v2.webp`} alt={`Bathroom design concept — ${scene.name.toLowerCase()} view`} width="1586" height="992" loading={i===0 ? 'eager':'lazy'} fetchpriority={i===0 ? 'high':'auto'} style={`object-position:${scene.position}`} />
+        <div class="tour-shade"></div>
+        <div class="tour-copy"><p class="tour-eyebrow">BathSpace by LUXEhome · Sri Lanka</p>
+          {i===0 ? <h1>{scene.title}</h1> : <h2>{scene.title}</h2>}
+          <p>{scene.copy}</p>
+          <details><summary>＋ {i===0 ? 'About this space' : `Explore ${scene.name.toLowerCase()}`}</summary><p>{scene.details}</p></details>
+        </div>
+      </article>)}
+    </div>
+    <div class="tour-top"><span>Bathroom design concept</span><a href="#home-projects">Skip to real projects ↓</a></div>
+    <div class="tour-bottom">
+      <nav aria-label="Bathroom views">{scenes.map((s,i)=><button type="button" data-scene-button={i} aria-current={i===0 ? 'step' : undefined}><span>0{i+1}</span> {s.name}</button>)}</nav>
+      <div class="tour-controls"><button type="button" data-motion aria-pressed="false">Pause motion</button><a href="/book-site-inspection">Discuss my bathroom ↗</a></div>
+      <p class="tour-hint">Scroll to explore the room</p>
+    </div>
+  </div>
+</section>
+<script>
+const tour = document.querySelector<HTMLElement>('[data-bathroom-tour]');
+if (tour) {
+  const scenes = [...tour.querySelectorAll<HTMLElement>('[data-scene]')];
+  const buttons = [...tour.querySelectorAll<HTMLButtonElement>('[data-scene-button]')];
+  const motion = tour.querySelector<HTMLButtonElement>('[data-motion]')!;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let paused = reduced.matches;
+  let active = 0;
+  let scheduled = false;
+  const show = (index:number, progress = 0) => {
+    active = index;
+    scenes.forEach((scene,i) => {
+      scene.classList.toggle('is-active', i===index);
+      scene.setAttribute('aria-hidden', String(i!==index));
+      scene.inert = i!==index;
+      const img = scene.querySelector('img')!;
+      img.style.transform = paused ? 'none' : `scale(${1 + Math.min(progress,1)*.085})`;
+      if (i!==index) scene.querySelector('details')!.open = false;
+    });
+    buttons.forEach((button,i)=> i===index ? button.setAttribute('aria-current','step') : button.removeAttribute('aria-current'));
+  };
+  const update = () => {
+    scheduled = false;
+    if (paused) return;
+    const rect = tour.getBoundingClientRect();
+    const distance = Math.max(1,tour.offsetHeight - tour.querySelector<HTMLElement>('.tour-stage')!.offsetHeight);
+    const progress = Math.max(0,Math.min(.99999, -rect.top / distance));
+    const position = progress * scenes.length;
+    const index = Math.floor(position);
+    // Do not hide a detail the visitor is reading or a control they are using.
+    if (scenes[active].querySelector('details[open]') || scenes[active].contains(document.activeElement)) return;
+    show(index,position-index);
+  };
+  const setMotion = () => {
+    tour.classList.toggle('is-paused',paused);
+    motion.textContent = paused ? 'Enable motion' : 'Pause motion';
+    motion.setAttribute('aria-pressed',String(paused));
+    if(paused) show(active); else update();
+  };
+  buttons.forEach((button,i)=>button.addEventListener('click',()=> {
+    if(paused) {show(i);return;}
+    scenes.forEach(scene=>scene.querySelector('details')!.open=false);
+    const distance = tour.offsetHeight-tour.querySelector<HTMLElement>('.tour-stage')!.offsetHeight;
+    window.scrollTo({top:window.scrollY+tour.getBoundingClientRect().top+distance*(i+.1)/scenes.length,behavior:'instant'});
+    show(i);
+  }));
+  motion.addEventListener('click',()=>{paused=!paused;setMotion();});
+  reduced.addEventListener('change',()=>{paused=reduced.matches;setMotion();});
+  window.addEventListener('scroll',()=>{if(!scheduled){scheduled=true;requestAnimationFrame(update);}},{passive:true});
+  window.addEventListener('resize',update);
+  tour.classList.add('is-enhanced');
+  setMotion();
+}
+</script>
+<style>
+.bathroom-tour{background:#242c25;color:#fff}.tour-stage{position:relative}.tour-scene{position:relative;min-height:760px}.tour-scene img{position:absolute;width:100%;height:100%;object-fit:cover}.tour-shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,22,18,.88),transparent 85%),linear-gradient(90deg,rgba(15,22,18,.4),transparent 70%)}.tour-copy{position:relative;max-width:660px;padding:260px 6vw 160px}.tour-copy h1,.tour-copy h2{font:500 clamp(44px,5.8vw,84px)/1.02 var(--lx-serif);letter-spacing:-.035em;color:#fff;margin:16px 0}.tour-copy>p:not(.tour-eyebrow){font-size:17px;line-height:1.6;max-width:37ch;color:#f2f0e9}.tour-eyebrow{text-transform:uppercase;font-size:10px;letter-spacing:.16em;color:#e3dfd3}.tour-copy details{margin-top:20px;max-width:440px}.tour-copy summary{cursor:pointer;font-size:13px;width:fit-content;border-bottom:1px solid #a6ab9f;padding:8px 0;list-style:none}.tour-copy details p{font-size:14px;line-height:1.6;background:#263027ed;padding:16px;border:1px solid #697365;margin-top:10px}.tour-top{position:absolute;top:85px;left:6vw;right:6vw;display:flex;justify-content:space-between;font-size:11px;gap:20px}.tour-top a{color:white}.tour-top>span{background:#243027c9;padding:5px 9px}.tour-bottom{display:none}.is-enhanced{height:380svh}.is-enhanced .tour-stage{position:sticky;top:0;height:100svh;min-height:620px;overflow:hidden}.is-enhanced .tour-scenes{position:absolute;inset:0}.is-enhanced .tour-scene{position:absolute;inset:0;min-height:0;opacity:0;visibility:hidden;transition:opacity .65s ease,visibility .65s;pointer-events:none}.is-enhanced .tour-scene.is-active{opacity:1;visibility:visible;pointer-events:auto}.is-enhanced .tour-copy{position:absolute;bottom:145px;left:6vw;padding:0;max-width:600px;right:6vw}.is-enhanced .tour-bottom{display:block;position:absolute;bottom:20px;left:6vw;right:6vw}.tour-bottom nav{display:flex;gap:22px;max-width:580px;border-top:1px solid #ffffff60;padding-top:15px}.tour-bottom button{font:inherit;color:#fff;background:none;border:0;cursor:pointer;padding:10px 0;font-size:13px}.tour-bottom nav button{opacity:.65;border-top:2px solid transparent}.tour-bottom nav button[aria-current]{opacity:1;border-color:#e9d7ae}.tour-bottom nav span{font-size:10px;color:#dfceb0;margin-right:7px}.tour-controls{position:absolute;right:0;top:14px;display:flex;gap:22px;align-items:center}.tour-controls a{padding:13px 18px;background:#eee9db;color:#263027;text-decoration:none;font-size:13px}.tour-hint{font-size:10px;color:#d7dace;letter-spacing:.12em;text-transform:uppercase;margin:15px 0 0}.is-paused{height:auto}.is-paused .tour-stage{position:relative}.is-paused .tour-scene{transition:none}.is-paused .tour-hint{visibility:hidden}@media(max-width:900px){.tour-controls{position:static;justify-content:space-between;margin-top:8px}.is-enhanced .tour-copy{bottom:200px}.tour-top{top:78px}.tour-copy h1,.tour-copy h2{font-size:clamp(40px,8vw,64px)}.tour-bottom nav{justify-content:space-between;gap:8px}.tour-bottom nav span{display:none}.tour-hint{display:none}.is-enhanced .tour-stage{min-height:700px}.tour-copy>p:not(.tour-eyebrow){font-size:15px}.tour-copy details p{font-size:13px}.is-enhanced{height:330svh}.is-enhanced.is-paused{height:auto}}@media(prefers-reduced-motion:reduce){.tour-scene,.tour-scene img{transition:none!important;transform:none!important}}
+</style>
