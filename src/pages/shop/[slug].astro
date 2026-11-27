@@ -6,7 +6,7 @@ import {imageUrl,waLink} from '../../lib/luxe-config';
 
 const slug=Astro.params.slug || '';
 const record=await getShopFixtureBySlug(slug);
-if(!record) return Astro.redirect('/shop',302);
+if(!record) return new Response(null, { status: 404 });
 const {product,variants,usedInProjects}=record;
 const photos=[...new Set([product.image_url,...(product.gallery_urls||[])].filter(Boolean))];
 const money=(n:number)=>new Intl.NumberFormat('en-LK',{maximumFractionDigits:0}).format(Number(n));

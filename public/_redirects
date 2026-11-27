@@ -64,3 +64,7 @@
 # Retired estimator page
 /estimator /pricing-guide 301
 /estimator/ /pricing-guide 301
+
+# Duplicate pricing URL (was redirecting to the homepage)
+/pricing /pricing-guide 301
+/pricing/ /pricing-guide 301

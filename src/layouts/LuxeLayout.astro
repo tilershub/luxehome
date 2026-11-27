@@ -3,6 +3,7 @@
    cream/sage/gold palette · Cormorant Garamond + Jost + Noto Sans Sinhala.
    Keeps the site's Meta Pixel, Contact-event tracking, and SEO plumbing. */
 import { WHATSAPP_NUMBER, GA_MEASUREMENT_IDS, absoluteUrl } from '../lib/luxe-config';
+import { businessSchema, websiteSchema, jsonLd } from '../lib/seo';
 
 interface Props {
   title?: string;
@@ -11,6 +12,8 @@ interface Props {
   ogImage?: string;
   /** Describes the share image for screen readers and some crawlers. */
   ogImageAlt?: string;
+  /** Keep this page out of search results (404, utility pages). */
+  noindex?: boolean;
   /** Hide site nav/footer chrome (used by /start). */
   bare?: boolean;
   /* Fires ViewContent for this page. Design pages pass their own catalogue
@@ -32,8 +35,11 @@ const {
   ogImage = 'https://luxehome.lk/og-bathroom.jpg',
   ogImageAlt,
   bare = false,
+  noindex = false,
   viewContent,
 } = Astro.props;
+
+const siteSchema = jsonLd(businessSchema, websiteSchema);
 
 /* An unpublished price arrives as undefined, and Meta reads a literal `null`
    as a real parameter value, so empty keys are dropped rather than sent. */
@@ -95,7 +101,9 @@ Astro.response.headers.set(
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
+    {noindex
+      ? <meta name="robots" content="noindex, follow" />
+      : <link rel="canonical" href={canonicalURL} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
@@ -131,6 +139,7 @@ Astro.response.headers.set(
       />
     </noscript>
 
+    <script is:inline type="application/ld+json" set:html={siteSchema}></script>
     <slot name="head" />
 
     <!-- Meta Pixel (same install as the rest of the site): stub + PageView

@@ -5,16 +5,43 @@ import { PUBLIC_INFO_PAGES, type PublicInfoPage } from '../lib/luxe-pages';
 import { getProjects } from '../lib/luxe';
 import { waLink } from '../lib/luxe-config';
 import { createServerSupabase } from '../lib/supabase';
+import { faqSchema, breadcrumbSchema, renovationServiceSchema, jsonLd } from '../lib/seo';
+
+/* Search titles and descriptions. Headlines on these pages are brand copy
+   ("Before design. Before construction."), which tells Google and AI answer
+   engines nothing about the topic, so each page gets a keyword-led title
+   (<= 60 chars) and a factual description (<= 155 chars). */
+const SEO: Record<string, { title: string; description: string; crumb: string }> = {
+  'how-it-works': { crumb: 'How it works', title: 'How Bathroom Renovation Works in Sri Lanka | BathSpace', description: 'Six documented stages from a free WhatsApp chat and LKR 30,000 design package to construction, testing and handover by one accountable team.' },
+  'bathroom-renovation': { crumb: 'Bathroom renovation', title: 'Complete Bathroom Renovation in Sri Lanka | BathSpace', description: 'Design-led bathroom renovation in Sri Lanka: plumbing, electrical, waterproofing, tiling, fixtures and handover by one accountable team.' },
+  'materials-brands': { crumb: 'Materials & brands', title: 'Bathroom Materials & Brands We Use | BathSpace Sri Lanka', description: 'Swiss Bathware, Rocell, Swisstek, Tokyo Super 2K, S-lon and ACL: the named brands and systems specified in every BathSpace bathroom.' },
+  'pricing-guide': { crumb: 'Pricing guide', title: 'Bathroom Renovation Cost in Sri Lanka (2026) | BathSpace', description: 'Most complete bathroom renovations in Sri Lanka cost LKR 1.5M–2.5M per bathroom. See what changes the price and real recorded project values.' },
+  'warranty-aftercare': { crumb: 'Warranty & aftercare', title: 'Bathroom Renovation Warranty & Aftercare | BathSpace', description: '24-month workmanship warranty from documented handover, a 30-day handover review and manufacturer product cover on every BathSpace bathroom.' },
+  'faq': { crumb: 'FAQ', title: 'Bathroom Renovation FAQ — Cost, Timeline & Warranty', description: 'Answers on bathroom renovation cost in Sri Lanka, the LKR 30,000 design package, timelines, warranties, multiple bathrooms and working outside Colombo.' },
+  'terms': { crumb: 'Terms', title: 'Terms & Conditions | BathSpace by LUXEhome', description: 'Terms governing BathSpace quotations, approvals, variations, construction and handover.' },
+  'warranty-terms': { crumb: 'Warranty terms', title: 'Warranty Terms | BathSpace by LUXEhome', description: 'BathSpace workmanship warranty terms: 24 months from documented handover, what is covered, what is not, and how to report a defect.' },
+  'payment-cancellation': { crumb: 'Payments', title: 'Payment Stages & Cancellation | BathSpace by LUXEhome', description: 'How BathSpace bathroom renovation payments work: LKR 30,000 proposal, 50% on commencement, then stage payments tied to visible progress.' },
+};
 const fallbackPage = PUBLIC_INFO_PAGES.find((entry) => entry.slug === Astro.params.page && entry.slug !== 'team') as PublicInfoPage | undefined;
-if (!fallbackPage) return Astro.redirect('/');
+// Unknown slugs return a real 404 (Astro renders src/pages/404.astro).
+// Redirecting them to the homepage created soft 404s and duplicate content.
+if (!fallbackPage) return new Response(null, { status: 404 });
 const sb=createServerSupabase(import.meta.env as unknown as Record<string,string>);
 const {data:storedPage}=sb?await sb.from('lx_pages').select('title,eyebrow,lead,seo_title,meta_description,og_image').eq('slug',fallbackPage.slug).eq('published',true).maybeSingle():{data:null};
 const policyControlled = ['warranty-aftercare', 'warranty-terms', 'pricing-guide', 'payment-cancellation', 'how-it-works', 'faq'].includes(fallbackPage.slug);
 const storedOverrides = Object.fromEntries(Object.entries(storedPage || {}).filter(([key, value]) => value && !(policyControlled && key === 'lead')));
 const page={...fallbackPage,...storedOverrides};
+const seo = SEO[page.slug];
+const seoTitle = (policyControlled ? seo?.title : storedPage?.seo_title || seo?.title) || `${page.title} — BathSpace by LUXEhome`;
+const seoDescription = (policyControlled ? seo?.description : storedPage?.meta_description || seo?.description) || page.lead;
+const schemaNodes: object[] = [breadcrumbSchema([{ name: 'Home', path: '/' }, { name: seo?.crumb ?? page.title, path: `/${page.slug}` }])];
+if (page.slug === 'faq') schemaNodes.push(faqSchema(page.cards.map((card) => ({ q: card.title, a: card.copy }))));
+if (page.slug === 'pricing-guide' || page.slug === 'bathroom-renovation') schemaNodes.push(renovationServiceSchema);
+const pageSchema = jsonLd(...schemaNodes);
 const examples = page.slug === 'pricing-guide' ? (await getProjects()).filter(p => p.published && p.project_status === 'completed' && p.after_image_url && p.estimate_label).slice(0,4) : [];
 ---
-<LuxeLayout title={storedPage?.seo_title||`${page.title} — BathSpace by LUXEhome`} description={policyControlled ? fallbackPage.lead : storedPage?.meta_description||page.lead} ogImage={storedPage?.og_image||undefined} ogImageAlt={page.title}>
+<LuxeLayout title={seoTitle} description={seoDescription} ogImage={storedPage?.og_image||undefined} ogImageAlt={page.title}>
+  <script is:inline type="application/ld+json" set:html={pageSchema} slot="head"></script>
   <section class="info-hero"><p class="lx-eyebrow">{page.eyebrow}</p><h1>{page.title}</h1><p>{page.lead}</p><div class="actions"><a class="lx-btn-wa" href="/book-site-inspection">Discuss my bathroom</a><a class="lx-btn-ghost" href="/projects">See completed projects</a></div></section>
   <section class="info-section"><div class="info-grid">{page.cards.map((card) => <article><h2>{card.title}</h2><p>{card.copy}</p></article>)}</div></section>
   {examples.length > 0 && <section class="info-section"><h2>Real projects. Recorded investments.</h2><p>These are historical project values, not current fixed-price offers. Compare the scope and finishes in each project story.</p><div class="info-grid">{examples.map(project=><article><h3>{project.title}</h3><p><strong>{project.estimate_label}</strong></p><p>{project.client_requirements}</p><a href={`/projects/${project.slug}`}>See scope, finishes &amp; project story →</a></article>)}</div></section>}
