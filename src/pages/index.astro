@@ -1,6 +1,8 @@
 ---
 export const prerender = false;
 import LuxeLayout from '../layouts/LuxeLayout.astro';
+import { renovationServiceSchema, jsonLd } from '../lib/seo';
+const homeSchema = jsonLd(renovationServiceSchema);
 import BathroomJourney from '../components/luxe/BathroomJourney.astro';
 import ProjectCard from '../components/luxe/ProjectCard.astro';
 import { getProjects } from '../lib/luxe';
@@ -54,7 +56,8 @@ const brandSystems = [
 ];
 
 ---
-<LuxeLayout title="Premium Bathroom Renovations in Sri Lanka | BathSpace by LUXEhome" description="Imagine your next bathroom. Explore the details, see real BathSpace renovations and plan your complete renovation with LUXEhome in Sri Lanka." ogImage={heroCover || undefined} viewContent={{content_name:'BathSpace complete bathroom renovation service',content_category:'Premium bathroom renovation',content_type:'service'}}>
+<LuxeLayout title="Bathroom Renovation in Sri Lanka | BathSpace by LUXEhome" description="Complete bathroom renovations in Sri Lanka from LKR 1.5M–2.5M. One team for design, waterproofing, tiling and fixtures, with a 24-month warranty." ogImage={heroCover || undefined} viewContent={{content_name:'BathSpace complete bathroom renovation service',content_category:'Premium bathroom renovation',content_type:'service'}}>
+  <script is:inline type="application/ld+json" set:html={homeSchema} slot="head"></script>
   <BathroomJourney />
   <section class="home-intro wrap">
     <p class="eyebrow">Complete bathroom renovations</p>
@@ -74,7 +77,7 @@ const brandSystems = [
     </div></div>
   </section>
   <section class="wrap section investment">
-    <div><p class="eyebrow">Plan your renovation</p><h2>Clarity before<br /><em>construction.</em></h2><p class="price">Typically LKR 1.5M–2.5M <small>per complete bathroom renovation</small></p><p>Final investment depends on room size, existing conditions, layout changes and your selected finishes. This is a guide, not a fixed package.</p><a href="/pricing">Explore pricing and scope →</a><p class="overseas">Living abroad? <a href="/overseas-bathroom-renovation">Plan your Sri Lankan renovation remotely ↗</a></p></div>
+    <div><p class="eyebrow">Plan your renovation</p><h2>Clarity before<br /><em>construction.</em></h2><p class="price">Typically LKR 1.5M–2.5M <small>per complete bathroom renovation</small></p><p>Final investment depends on room size, existing conditions, layout changes and your selected finishes. This is a guide, not a fixed package.</p><a href="/pricing-guide">Explore pricing and scope →</a><p class="overseas">Living abroad? <a href="/overseas-bathroom-renovation">Plan your Sri Lankan renovation remotely ↗</a></p></div>
     <div class="proposal"><p class="eyebrow">Your design &amp; quotation package</p><h3>LKR {initiationPrice} <small>per bathroom · payable upfront</small></h3><ul>{PROJECT_INITIATION.includes.map(item=><li>{item}</li>)}</ul><p>The full package fee is credited towards that bathroom’s agreed renovation price when you appoint BathSpace to build. You keep the proposal if you choose not to proceed.</p><p>{PROJECT_INITIATION.delivery}</p><details><summary>Planning several bathrooms?</summary><p>Each bathroom needs its own measurements, design and quotation package. We confirm the total before payment.</p></details></div>
   </section>
   <section class="wrap section assurance"><header><div><p class="eyebrow">Selected with care</p><h2>Quality you can name.</h2></div><p>Your proposal specifies the brands and materials. Alternatives are approved before purchase.</p></header><div class="brands">{brandSystems.map(brand=><div><img src={brand.image} width="160" height="64" loading="lazy" alt={brand.name}/><span>{brand.role}</span></div>)}</div><div class="warranty"><p><strong>{WARRANTY_SCHEDULE[0].period} workmanship warranty</strong><br/>Product warranties follow manufacturer terms.</p><a href="/warranty-aftercare">Warranty &amp; aftercare details →</a></div></section>

@@ -1,17 +1,18 @@
 ---
 /* LUXEhome Journal article — server-rendered so CMS edits and new
    articles go live immediately. Unknown or unpublished slugs
-   return to the journal index. */
+   return a real 404. */
 export const prerender = false;
 
 import { marked } from 'marked';
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import { getPublishedPost, getPublishedPosts, readingTime, excerptOf, formatPostDate } from '../../lib/luxe-blog';
 import { imageUrl } from '../../lib/luxe-config';
+import { breadcrumbSchema, ORG_ID } from '../../lib/seo';
 
 const { slug } = Astro.params;
 const post = slug ? await getPublishedPost(slug) : null;
-if (!post) return Astro.redirect('/blog', 302);
+if (!post) return new Response(null, { status: 404 });
 
 const bodyHtml = await marked(post.content ?? '');
 const description = post.meta_description || excerptOf(post);
@@ -23,6 +24,7 @@ const related = (await getPublishedPosts())
   .slice(0, 3);
 
 const canonical = new URL(`/blog/${post.slug}`, Astro.site);
+const crumbLd = JSON.stringify({ '@context': 'https://schema.org', ...breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Journal', path: '/blog' }, { name: post.title, path: `/blog/${post.slug}` }]) });
 const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
@@ -32,7 +34,7 @@ const jsonLd = JSON.stringify({
   datePublished: post.pub_date,
   dateModified: post.updated_at,
   ...(post.cover_image ? { image: post.cover_image } : {}),
-  publisher: { '@type': 'Organization', name: 'BathSpace by LUXEhome', url: 'https://luxehome.lk' },
+  publisher: { '@id': ORG_ID },
   mainEntityOfPage: canonical.href,
 });
 ---
@@ -43,6 +45,7 @@ const jsonLd = JSON.stringify({
   ogImage={ogImage}
 >
   <script type="application/ld+json" set:html={jsonLd} slot="head" />
+  <script type="application/ld+json" set:html={crumbLd} slot="head" />
 
   <article class="post">
     <div class="post-progress" aria-hidden="true"><span></span></div>

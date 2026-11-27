@@ -1,0 +1,25 @@
+---
+/* Real "not found" page. Without it, unknown URLs were redirected to the
+   homepage, which Google reports as soft 404s and treats as duplicate content. */
+import LuxeLayout from '../layouts/LuxeLayout.astro';
+---
+<LuxeLayout title="Page not found — BathSpace by LUXEhome" description="This page could not be found. Explore completed bathroom renovations or start planning your own with BathSpace by LUXEhome." noindex>
+  <section class="nf">
+    <p class="lx-eyebrow">404 · Page not found</p>
+    <h1>This room doesn’t exist.</h1>
+    <p>The page may have moved. These are the most useful places to continue.</p>
+    <ul>
+      <li><a href="/projects">Completed bathroom renovations</a></li>
+      <li><a href="/pricing-guide">Bathroom renovation pricing guide</a></li>
+      <li><a href="/how-it-works">How a BathSpace renovation works</a></li>
+      <li><a href="/faq">Frequently asked questions</a></li>
+      <li><a href="/book-site-inspection">Discuss my bathroom</a></li>
+    </ul>
+  </section>
+</LuxeLayout>
+<style>
+  .nf{width:min(900px,calc(100% - 34px));margin:auto;padding:clamp(3.5rem,8vw,6rem) 0 5rem}
+  .nf h1{font-size:clamp(3rem,7vw,5rem);margin:.7rem 0 1rem}
+  .nf ul{list-style:none;padding:0;margin:1.6rem 0 0;display:grid;gap:.7rem}
+  .nf a{color:var(--sage-deep);font-size:1.1rem}
+</style>

@@ -4,11 +4,12 @@ import LuxeLayout from '../../layouts/LuxeLayout.astro';
 import VideoCard from '../../components/luxe/VideoCard.astro';
 import { getProjectBySlug, youtubeEmbed, isYouTubeShort, type ProjectFull } from '../../lib/luxe';
 import { imageUrl, absoluteUrl, waLink } from '../../lib/luxe-config';
+import { breadcrumbSchema, jsonLd } from '../../lib/seo';
 
 const { slug } = Astro.params;
 const storedProject = await getProjectBySlug(slug!);
 const project: ProjectFull | null = storedProject;
-if (!project || !project.published || project.project_status === 'proposed') return Astro.redirect('/projects');
+if (!project || !project.published || project.project_status === 'proposed') return new Response(null, { status: 404 });
 const status = project.project_status ?? 'completed';
 const ongoing = status === 'in_progress';
 
@@ -21,6 +22,7 @@ const projectVideoCover = project.after_image_url || project.before_image_url;
 
 const inspectionHref = `/book-site-inspection?source_project=${encodeURIComponent(project.slug)}`;
 
+const crumbSchema = jsonLd(breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Projects', path: '/projects' }, { name: project.title, path: `/projects/${project.slug}` }]));
 const primaryVideo = video || episode2 || episode1;
 const videoSchema = (primaryVideo && project.after_image_url) ? JSON.stringify({
   '@context': 'https://schema.org',
@@ -51,11 +53,12 @@ const reviewSchema = hasReview && project.rating ? JSON.stringify({
 
 <LuxeLayout
   title={`${project.title} — BathSpace Project Story | LUXEhome`}
-  description={`${project.title}${project.location ? `, ${project.location}` : ''} — a real BathSpace ${ongoing ? 'ongoing renovation' : 'completed bathroom renovation'} with clear scope, project stage and investment.`}
+  description={`${ongoing ? 'Ongoing' : 'Completed'} bathroom renovation${project.location ? ` in ${project.location}` : ''}, Sri Lanka${project.estimate_label ? ` · ${project.estimate_label}` : ''}. See the brief, materials, brands, stage-by-stage journey and photos.`}
   ogImage={project.after_image_url || undefined}
   ogImageAlt={`${project.title} — ${ongoing ? 'renovation progress' : 'completed BathSpace bathroom'}${project.location ? `, ${project.location}` : ''}`}
 >
   <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={crumbSchema}></script>
     {reviewSchema && <script is:inline type="application/ld+json" set:html={reviewSchema}></script>}
     {videoSchema && <script is:inline type="application/ld+json" set:html={videoSchema}></script>}
   </Fragment>
@@ -95,7 +98,7 @@ const reviewSchema = hasReview && project.rating ? JSON.stringify({
             <figure class="ps-carousel-slide">
               <img src={url}
                 sizes="(max-width: 720px) calc(100vw - 32px), 1000px"
-                alt={`${project.title} — ${ongoing ? 'progress' : 'finished bathroom'} photo ${i + 1}`}
+                alt={`${ongoing ? 'Bathroom renovation in progress' : 'Completed bathroom renovation'}${project.location ? ` in ${project.location}` : ''} by BathSpace — ${project.title}, view ${i + 1} of ${heroImages.length}`}
                 loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
                 width="1200" height="900" />
             </figure>
