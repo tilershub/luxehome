@@ -6,9 +6,9 @@ export const prerender = false;
 
 import { marked } from 'marked';
 import LuxeLayout from '../../layouts/LuxeLayout.astro';
-import { getPublishedPost, getPublishedPosts, readingTime, excerptOf, formatPostDate } from '../../lib/luxe-blog';
+import { getPublishedPost, getPublishedPosts, readingTime, excerptOf, formatPostDate, faqItemsOf } from '../../lib/luxe-blog';
 import { imageUrl } from '../../lib/luxe-config';
-import { breadcrumbSchema, ORG_ID } from '../../lib/seo';
+import { breadcrumbSchema, faqSchema, ORG_ID } from '../../lib/seo';
 
 const { slug } = Astro.params;
 const post = slug ? await getPublishedPost(slug) : null;
@@ -30,13 +30,18 @@ const jsonLd = JSON.stringify({
   '@type': 'BlogPosting',
   headline: post.title,
   description,
-  author: { '@type': 'Organization', name: post.author },
+  // A named person byline is stronger E-E-A-T signal than the team label.
+  author: /team$/i.test(post.author.trim())
+    ? { '@type': 'Organization', name: post.author }
+    : { '@type': 'Person', name: post.author, worksFor: { '@id': ORG_ID } },
   datePublished: post.pub_date,
   dateModified: post.updated_at,
-  ...(post.cover_image ? { image: post.cover_image } : {}),
+  ...(post.cover_image ? { image: new URL(post.cover_image, Astro.site).href } : {}),
   publisher: { '@id': ORG_ID },
   mainEntityOfPage: canonical.href,
 });
+const faqItems = faqItemsOf(post);
+const faqLd = faqItems.length ? JSON.stringify({ '@context': 'https://schema.org', ...faqSchema(faqItems) }) : null;
 ---
 
 <LuxeLayout
@@ -46,6 +51,7 @@ const jsonLd = JSON.stringify({
 >
   <script type="application/ld+json" set:html={jsonLd} slot="head" />
   <script type="application/ld+json" set:html={crumbLd} slot="head" />
+  {faqLd && <script type="application/ld+json" set:html={faqLd} slot="head" />}
 
   <article class="post">
     <div class="post-progress" aria-hidden="true"><span></span></div>
