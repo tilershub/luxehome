@@ -89,6 +89,39 @@ export function excerptOf(post: Pick<JournalPost, 'excerpt' | 'content'>): strin
   return text.length > 160 ? `${text.slice(0, 157)}…` : text;
 }
 
+/** Strip Markdown to plain text for structured data. */
+function plainText(markdown: string): string {
+  return markdown
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[*_`>#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Question/answer pairs for FAQPage schema. Reads the article's
+ * "## Frequently asked questions" (or "## FAQ") section, where each
+ * question is an H3 and the answer is the text beneath it, so editors
+ * get FAQ rich results simply by following that convention in the CMS.
+ */
+export function faqItemsOf(post: Pick<JournalPost, 'content'>): Array<{ q: string; a: string }> {
+  const content = (post.content ?? '').replace(/\r\n/g, '\n');
+  const start = content.search(/^##\s+(frequently asked questions|faqs?)\b.*$/im);
+  if (start < 0) return [];
+  const afterHeading = content.slice(start).replace(/^.*\n/, '');
+  const end = afterHeading.search(/^(##\s|---\s*$)/m);
+  const section = end < 0 ? afterHeading : afterHeading.slice(0, end);
+  return section
+    .split(/^###\s+/m)
+    .slice(1)
+    .map((block) => {
+      const [first, ...rest] = block.split('\n');
+      return { q: plainText(first), a: plainText(rest.join(' ')) };
+    })
+    .filter((item) => item.q && item.a);
+}
+
 export function formatPostDate(value: string): string {
   return new Date(value).toLocaleDateString('en-LK', {
     year: 'numeric',
